@@ -140,8 +140,6 @@ export const CommandeForm = ({ onClose, onSave }: { onClose: () => void, onSave:
 
       const newCommande: Omit<Commande, 'id' | 'date_creation' | 'statut_commande'> = {
         client_id: finalClientId,
-        nom_client: clientRecherche.nom_complet,
-        telephone_client: clientRecherche.telephone,
         source_commande: source,
         montant_total: totalMontant,
         mode_paiement: modePaiement,
