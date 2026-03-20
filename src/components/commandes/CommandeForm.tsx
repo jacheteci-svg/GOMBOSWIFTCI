@@ -58,20 +58,35 @@ export const CommandeForm = ({ onClose, onSave }: { onClose: () => void, onSave:
     const newLignes = [...lignes];
     if (field === 'produit_id') {
       const prod = catalogue.find(p => p.id === value);
+      if (!prod) return;
+
+      let prixActif = Number(prod.prix_vente) || 0;
       
-      let prixActif = Number(prod?.prix_vente) || Number((prod as any)?.prix) || 0;
-      if (prod?.prix_promo) {
+      // Check for active promotion
+      if (prod.prix_promo !== undefined && prod.prix_promo !== null) {
         const now = new Date().getTime();
         const debut = prod.promo_debut ? new Date(prod.promo_debut).getTime() : 0;
         const fin = prod.promo_fin ? new Date(prod.promo_fin).getTime() : Infinity;
         if (now >= debut && now <= fin) {
-          prixActif = prod.prix_promo;
+          prixActif = Number(prod.prix_promo);
         }
       }
 
-      newLignes[index] = { ...newLignes[index], produit_id: value, nom_produit: prod?.nom, prix_unitaire: prixActif, montant_ligne: prixActif * (newLignes[index].quantite || 1) };
+      newLignes[index] = { 
+        ...newLignes[index], 
+        produit_id: value, 
+        nom_produit: prod.nom, 
+        prix_unitaire: prixActif, 
+        montant_ligne: prixActif * (newLignes[index].quantite || 1) 
+      };
     } else if (field === 'quantite') {
-      newLignes[index] = { ...newLignes[index], quantite: value, montant_ligne: (newLignes[index].prix_unitaire || 0) * value };
+      const qte = Math.max(1, Number(value));
+      const prix = Number(newLignes[index].prix_unitaire) || 0;
+      newLignes[index] = { 
+        ...newLignes[index], 
+        quantite: qte, 
+        montant_ligne: prix * qte 
+      };
     }
     setLignes(newLignes);
   };
@@ -81,6 +96,7 @@ export const CommandeForm = ({ onClose, onSave }: { onClose: () => void, onSave:
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!clientRecherche.nom_complet) return showToast("Le nom du client est obligatoire.", "error");
+    if (totalMontant <= 0) return showToast("Le montant total de la commande ne peut pas être 0 CFA. Vérifiez le prix des produits.", "error");
     if (lignes.length === 0) return showToast("Ajoutez au moins un produit.", "error");
     if (!lignes.every(l => l.produit_id && l.quantite)) return showToast("Veuillez remplir correctement les produits.", "error");
 
