@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createClient } from '@insforge/sdk';
 import { User, Commune } from '../types';
 import { getAdminUsers, createAdminUser, updateAdminUser, getCommunes, createCommune, updateCommune, deleteCommune } from '../services/adminService';
 import { Plus, Trash2, Users, Map } from 'lucide-react';
@@ -82,17 +83,37 @@ const UsersManager = ({ showToast }: { showToast: any }) => {
     setLoading(true);
     try {
       if (editingId === 'new') {
+        let authId = '';
         const { data: authData, error } = await insforge.auth.signUp({ 
           email: email as string, 
           password: password as string
         });
+
         if (error) {
           if (error.message.includes('already registered')) {
-            throw new Error("Ce numéro de téléphone est déjà utilisé par un autre livreur.");
+            // SYNC REPAIR: If user already exists in Auth, try to get their ID to repair the DB entry
+            try {
+              const tempClient = createClient({
+                baseUrl: import.meta.env.VITE_INSFORGE_URL || '',
+                anonKey: import.meta.env.VITE_INSFORGE_ANON_KEY || ''
+              });
+              const { data: signInData, error: signInError } = await tempClient.auth.signInWithPassword({
+                email: email as string,
+                password: password as string
+              });
+              if (signInError) throw new Error("Ce numéro est déjà utilisé et nous n'avons pas pu synchroniser le compte (mot de passe différent).");
+              authId = signInData?.user?.id || '';
+            } catch (repairErr: any) {
+              throw new Error(repairErr.message || "Erreur lors de la tentative de récupération du compte existant.");
+            }
+          } else {
+            throw error;
           }
-          throw error;
+        } else {
+          authId = authData?.user?.id || '';
         }
-        if (!authData?.user?.id) throw new Error("Erreur lors de la création du compte Auth.");
+
+        if (!authId) throw new Error("Erreur lors de la création ou récupération du compte Auth.");
         
         await createAdminUser({
           nom_complet: form.nom_complet || '',
@@ -100,7 +121,7 @@ const UsersManager = ({ showToast }: { showToast: any }) => {
           role: form.role as any,
           telephone: sanitizedTel,
           actif: true
-        }, authData.user.id);
+        }, authId);
       } else if (editingId) {
         await updateAdminUser(editingId, { ...form, telephone: sanitizedTel });
       }
