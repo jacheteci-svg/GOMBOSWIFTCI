@@ -118,7 +118,11 @@ const UsersManager = ({ showToast }: { showToast: any }) => {
               });
               if (signInError) {
                 console.error('Erreur SignIn Repair:', signInError);
-                throw new Error(`Le compte Auth existe déjà mais le mot de passe ne correspond pas. (Erreur: ${signInError.message})`);
+                const msg = signInError.message.toLowerCase();
+                if (msg.includes('confirm') || msg.includes('vérif') || msg.includes('verification')) {
+                   throw new Error("L'email n'est pas confirmé. IMPORTANT: Vous devez DÉSACTIVER l'option 'Confirm Email' dans les réglages Auth de votre tableau de bord InsForge (Supabase) pour que les comptes livreurs (@livreur.com) puissent fonctionner.");
+                }
+                throw new Error(`Le compte Auth existe déjà mais nous n'avons pas pu le synchroniser. (Détail: ${signInError.message})`);
               }
               authId = signInData?.user?.id || '';
               console.log('Récupération ID réussie:', authId);
