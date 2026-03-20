@@ -32,7 +32,6 @@ export const CentreAppel = () => {
         ) : (
           <CommandeList 
             commandes={commandes} 
-            onRefresh={() => {}}
             onActionClick={setSelectedCommande}
             actionIcon="PhoneCall"
             actionLabel="Appeler"
