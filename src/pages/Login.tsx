@@ -16,10 +16,9 @@ export const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const { data, error } = await insforge.auth.verifyOtp({
+      const { data, error } = await insforge.auth.verifyEmail({
         email: identifier,
-        token: verificationCode,
-        type: 'signup'
+        token: verificationCode
       });
 
       if (error) throw error;
