@@ -11,7 +11,7 @@ export const getUtilisateurs = async (): Promise<User[]> => {
   return data || [];
 };
 
-export const createUtilisateurProfile = async (user: Omit<User, 'id'>, id: string): Promise<void> => {
+export const creerUtilisateur = async (user: Omit<User, 'id'>, id: string = crypto.randomUUID()): Promise<void> => {
   const { error } = await insforge.database
     .from('users')
     .insert([{ ...user, id }]);

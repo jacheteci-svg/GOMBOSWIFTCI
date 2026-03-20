@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getUtilisateurs, creerUtilisateurMock } from '../services/utilisateurService';
+import { getUtilisateurs, creerUtilisateur } from '../services/utilisateurService';
 import type { User, Role } from '../types';
 import { Users, Plus, X } from 'lucide-react';
 
@@ -33,7 +33,7 @@ export const Utilisateurs = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await creerUtilisateurMock({
+      await creerUtilisateur({
         nom_complet: nom,
         email: email,
         role: role,
