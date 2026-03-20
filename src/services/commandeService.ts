@@ -5,11 +5,16 @@ import { addMouvementStock } from './produitService';
 export const getCommandes = async (): Promise<Commande[]> => {
   const { data, error } = await insforge.database
     .from('commandes')
-    .select('*')
+    .select('*, clients(nom_complet, telephone)')
     .order('date_creation', { ascending: false });
   
   if (error) throw error;
-  return data || [];
+  
+  return (data || []).map((c: any) => ({
+    ...c,
+    nom_client: c.clients?.nom_complet,
+    telephone_client: c.clients?.telephone
+  }));
 };
 
 export const subscribeToCommandes = (callback: (commandes: Commande[]) => void) => {
@@ -21,12 +26,17 @@ export const subscribeToCommandes = (callback: (commandes: Commande[]) => void) 
 export const getCommandesByStatus = async (statusList: string[]): Promise<Commande[]> => {
   const { data, error } = await insforge.database
     .from('commandes')
-    .select('*')
+    .select('*, clients(nom_complet, telephone)')
     .in('statut_commande', statusList)
     .order('date_creation', { ascending: false });
 
   if (error) throw error;
-  return data || [];
+  
+  return (data || []).map((c: any) => ({
+    ...c,
+    nom_client: c.clients?.nom_complet,
+    telephone_client: c.clients?.telephone
+  }));
 };
 
 export const subscribeToCommandesByStatus = (statusList: string[], callback: (commandes: Commande[]) => void) => {

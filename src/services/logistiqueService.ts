@@ -15,13 +15,19 @@ export const getAvailableLivreurs = async (): Promise<User[]> => {
 export const creerFeuilleRoute = async (livreurId: string, commandeIds: string[]): Promise<string> => {
   const { data: cmdData, error: cmdFetchError } = await insforge.database
     .from('commandes')
-    .select('*')
+    .select('*, clients(nom_complet, telephone)')
     .in('id', commandeIds);
 
   if (cmdFetchError) throw cmdFetchError;
   
-  const total_montant = cmdData.reduce((acc, c) => acc + (Number(c.montant_total) || 0), 0);
-  const communes = Array.from(new Set(cmdData.map(c => c.commune_livraison)));
+  const mappedCmds = (cmdData || []).map((c: any) => ({
+    ...c,
+    nom_client: c.clients?.nom_complet,
+    telephone_client: c.clients?.telephone
+  }));
+  
+  const total_montant = mappedCmds.reduce((acc, c) => acc + (Number(c.montant_total) || 0), 0);
+  const communes = Array.from(new Set(mappedCmds.map(c => c.commune_livraison)));
 
   const { data: frData, error: frError } = await insforge.database
     .from('feuilles_route')
@@ -67,9 +73,14 @@ export const getFeuillesRoute = async () => {
 export const getCommandesByFeuille = async (feuilleId: string): Promise<Commande[]> => {
   const { data, error } = await insforge.database
     .from('commandes')
-    .select('*')
+    .select('*, clients(nom_complet, telephone)')
     .eq('feuille_route_id', feuilleId);
 
   if (error) throw error;
-  return data || [];
+  
+  return (data || []).map((c: any) => ({
+    ...c,
+    nom_client: c.clients?.nom_complet,
+    telephone_client: c.clients?.telephone
+  }));
 };

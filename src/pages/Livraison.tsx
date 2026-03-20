@@ -84,9 +84,16 @@ export const Livraison = () => {
             <div key={c.id} className="card" style={{ opacity: isDone ? 0.6 : 1, display: 'flex', flexDirection: 'column' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
                 <span style={{ fontWeight: 600, fontSize: '1.125rem' }}>{Number(c.montant_total).toLocaleString()} CFA</span>
-                {c.statut_commande === 'livree' && <span className="badge badge-success">Livrée</span>}
-                {c.statut_commande === 'retour_livreur' && <span className="badge badge-danger">Retour</span>}
-                {c.statut_commande === 'en_cours_livraison' && <span className="badge badge-info">En cours</span>}
+                <div style={{ textAlign: 'right' }}>
+                  {c.statut_commande === 'livree' && <span className="badge badge-success">Livrée</span>}
+                  {c.statut_commande === 'retour_livreur' && <span className="badge badge-danger">Retour</span>}
+                  {c.statut_commande === 'en_cours_livraison' && <span className="badge badge-info">En cours</span>}
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '1rem' }}>
+                 <div style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: '0.25rem' }}>{c.nom_client || 'Client Inconnu'}</div>
+                 <div style={{ color: 'var(--primary-color)', fontWeight: 600, fontSize: '1rem', marginBottom: '0.75rem' }}>{c.telephone_client || 'Pas de numéro'}</div>
               </div>
 
               <div style={{ marginBottom: '1rem', flex: 1 }}>
