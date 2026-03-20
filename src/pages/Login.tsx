@@ -18,13 +18,13 @@ export const Login = () => {
     try {
       const { data, error } = await insforge.auth.verifyEmail({
         email: identifier,
-        token: verificationCode
+        otp: verificationCode
       });
 
       if (error) throw error;
 
-      // After verification, create profile and promote to admin if it's the first user or matches specific email
-      const userId = data.user?.id;
+      // After verification, create profile and promote to admin
+      const userId = data?.user?.id;
       if (userId) {
         await insforge.database.from('users').insert([{
           id: userId,
