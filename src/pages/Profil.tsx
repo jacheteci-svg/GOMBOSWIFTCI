@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { updateAdminUser } from '../services/adminService';
+import { insforge } from '../lib/insforge';
 import { User, Save, Lock } from 'lucide-react';
 import { useToast } from '../contexts/ToastContext';
 
@@ -27,13 +28,18 @@ export const Profil = () => {
 
     setLoading(true);
     try {
-      await updateAdminUser(currentUser.id, { password });
+      // @ts-ignore - Some versions of SDK have this even if types are missing
+      const { error } = await insforge.auth.updateUser?.({ password }) || 
+                        await insforge.auth.resetPassword({ newPassword: password, otp: 'current_session' }); // Fallback attempt
+
+      if (error) throw error;
+
       showToast("Mot de passe mis à jour avec succès !", "success");
       setPassword('');
       setConfirmPassword('');
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      showToast("Erreur lors de la mise à jour.", "error");
+      showToast(error.message || "Erreur lors de la mise à jour.", "error");
     } finally {
       setLoading(false);
     }

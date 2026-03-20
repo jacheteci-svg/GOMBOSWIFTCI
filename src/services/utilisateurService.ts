@@ -18,3 +18,21 @@ export const creerUtilisateur = async (user: Omit<User, 'id'>, id: string = cryp
   
   if (error) throw error;
 };
+
+export const updateUtilisateur = async (id: string, user: Partial<User>): Promise<void> => {
+  const { error } = await insforge.database
+    .from('users')
+    .update(user)
+    .eq('id', id);
+  
+  if (error) throw error;
+};
+
+export const supprimerUtilisateur = async (id: string): Promise<void> => {
+  const { error } = await insforge.database
+    .from('users')
+    .update({ actif: false })
+    .eq('id', id);
+  
+  if (error) throw error;
+};
