@@ -37,7 +37,7 @@ export const Login = () => {
       }
 
       showToast('Compte vérifié avec succès !', 'success');
-      window.location.href = '/dashboard';
+      window.location.href = '/';
     } catch (err: any) {
       showToast(err.message || 'Code incorrect', 'error');
     } finally {
@@ -98,7 +98,7 @@ export const Login = () => {
         if (error) {
           showToast('Identifiant ou mot de passe incorrect.', 'error');
         } else {
-          window.location.href = '/dashboard';
+          window.location.href = '/';
         }
       }
     } catch (err: any) {

@@ -26,11 +26,27 @@ const ProtectedRoute = ({ children, requiredPermission }: { children: React.Reac
   return <>{children}</>;
 };
 
+const HomeRedirect = () => {
+  const { hasPermission } = useAuth();
+  if (hasPermission('ADMIN')) return <Navigate to="/dashboard" replace />;
+  if (hasPermission('FINANCE')) return <Navigate to="/rapport-financier" replace />;
+  if (hasPermission('DASHBOARD')) return <Navigate to="/dashboard" replace />;
+  if (hasPermission('CAISSE')) return <Navigate to="/caisse" replace />;
+  if (hasPermission('CENTRE_APPEL')) return <Navigate to="/centre-appel" replace />;
+  if (hasPermission('LIVREUR')) return <Navigate to="/livraison" replace />;
+  if (hasPermission('PRODUITS')) return <Navigate to="/produits" replace />;
+  if (hasPermission('COMMANDES')) return <Navigate to="/commandes" replace />;
+  if (hasPermission('LOGISTIQUE')) return <Navigate to="/logistique" replace />;
+  if (hasPermission('HISTORIQUE')) return <Navigate to="/historique" replace />;
+  if (hasPermission('CLIENTS')) return <Navigate to="/clients" replace />;
+  return <Navigate to="/profil" replace />;
+};
+
 const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<HomeRedirect />} />
         
         {/* Admin Page */}
         <Route path="/admin" element={
