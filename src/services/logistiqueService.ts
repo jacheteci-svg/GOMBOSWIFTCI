@@ -84,3 +84,32 @@ export const getCommandesByFeuille = async (feuilleId: string): Promise<Commande
     telephone_client: c.clients?.telephone
   }));
 };
+
+export const supprimerFeuilleRoute = async (feuilleId: string): Promise<void> => {
+  // 1. Reset orders that were still 'en_cours_livraison' back to 'validee'
+  await insforge.database
+    .from('commandes')
+    .update({ 
+      statut_commande: 'validee', 
+      livreur_id: null, 
+      feuille_route_id: null 
+    })
+    .eq('feuille_route_id', feuilleId)
+    .eq('statut_commande', 'en_cours_livraison');
+
+  // 2. Clear feuille_route_id for any other orders
+  await insforge.database
+    .from('commandes')
+    .update({ 
+      feuille_route_id: null 
+    })
+    .eq('feuille_route_id', feuilleId);
+
+  // 3. Delete the sheet
+  const { error } = await insforge.database
+    .from('feuilles_route')
+    .delete()
+    .eq('id', feuilleId);
+
+  if (error) throw error;
+};

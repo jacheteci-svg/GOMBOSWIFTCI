@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
-import { getAvailableLivreurs, getFeuillesRoute, getCommandesByFeuille } from '../services/logistiqueService';
-import { updateCommandeStatus } from '../services/commandeService';
+import { getAvailableLivreurs, getFeuillesRoute, getCommandesByFeuille, supprimerFeuilleRoute } from '../services/logistiqueService';
 import type { Commande, User, FeuilleRoute } from '../types';
 import { History, Printer, Lock, Calendar, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '../contexts/ToastContext';
+import { useAuth } from '../contexts/AuthContext';
 
 export const Historique = () => {
   const { showToast } = useToast();
+  const { hasPermission } = useAuth();
+  const isAdmin = hasPermission('ADMIN');
   const [loading, setLoading] = useState(true);
   const [livreurs, setLivreurs] = useState<User[]>([]);
   const [feuilles, setFeuilles] = useState<FeuilleRoute[]>([]);
@@ -52,11 +54,10 @@ export const Historique = () => {
       return;
     }
     
-    if (window.confirm("Êtes-vous sûr de vouloir supprimer définitivement cette feuille de route en cours ?")) {
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer définitivement cette feuille de route ? Les colis non-livrés repasseront en 'Validé' pour ré-affectation.")) {
       try {
-        await updateCommandeStatus(feuille.id, 'annulee'); 
-        // Note: Check if you need to update feuille_route_id in orders or just the status
-        showToast("Feuille de route annulée.", "success");
+        await supprimerFeuilleRoute(feuille.id);
+        showToast("Feuille de route supprimée et colis libérés.", "success");
         fetchData();
       } catch (e) {
         showToast("Erreur lors de la suppression.", "error");
@@ -107,7 +108,7 @@ export const Historique = () => {
               {feuillesEnCours.map(h => {
                 const livreur = livreurs.find(l => l.id === h.livreur_id);
                 return (
-                  <tr key={h.id}>
+                   <tr key={h.id}>
                     <td>
                        <div style={{ fontWeight: 700 }}>{format(new Date(h.date), 'dd MMM yyyy')}</div>
                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{format(new Date(h.date), 'HH:mm')}</div>
@@ -119,15 +120,17 @@ export const Historique = () => {
                     <td>
                       <span className="badge badge-warning" style={{ fontWeight: 800 }}>{h.total_commandes} commandes</span>
                     </td>
-                    <td style={{ fontWeight: 900, color: 'var(--text-main)', fontSize: '1.05rem' }}>{Number(h.total_montant_theorique).toLocaleString()} <span style={{ fontSize: '0.7rem' }}>CFA</span></td>
+                    <td style={{ fontWeight: 900, color: 'var(--text-main)', fontSize: '1.05rem' }}>{Number(h.total_montant_theorique).toLocaleString()} <span style={{ fontSize: '0.75rem' }}>CFA</span></td>
                     <td style={{ textAlign: 'right' }}>
                       <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
                         <button className="btn btn-outline" style={{ padding: '0.5rem', borderRadius: '10px', height: '40px', width: '40px' }} title="Imprimer pour le livreur" onClick={() => handlePrint(h)}>
                           <Printer size={18} strokeWidth={2.5} />
                         </button>
-                        <button className="btn btn-outline" style={{ padding: '0.5rem', borderRadius: '10px', height: '40px', width: '40px', color: '#ef4444', borderColor: '#fee2e2' }} title="Annuler la feuille" onClick={() => handleDeleteFeuille(h)}>
-                          <Trash2 size={18} strokeWidth={2.5} />
-                        </button>
+                        {isAdmin && (
+                          <button className="btn btn-outline" style={{ padding: '0.5rem', borderRadius: '10px', height: '40px', width: '40px', color: '#ef4444', borderColor: '#fee2e2' }} title="Supprimer la feuille (Admin)" onClick={() => handleDeleteFeuille(h)}>
+                            <Trash2 size={18} strokeWidth={2.5} />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
