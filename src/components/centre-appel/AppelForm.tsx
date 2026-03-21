@@ -66,7 +66,9 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
         payload.adresse_livraison = adresseLocal;
         if (typeof fraisLivraison === 'number') {
           payload.frais_livraison = fraisLivraison;
-          payload.montant_total = Number(commande.montant_total) + fraisLivraison;
+          // IMPORTANT: Calculate subtotal by removing old fee to avoid doubling
+          const subtotal = Number(commande.montant_total) - (Number(commande.frais_livraison) || 0);
+          payload.montant_total = subtotal + fraisLivraison;
         }
       }
 
@@ -78,6 +80,9 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
       setLoading(false);
     }
   };
+
+  const currentSubtotal = Number(commande.montant_total) - (Number(commande.frais_livraison) || 0);
+
   return (
     <div style={{ 
       position: 'fixed', 
@@ -197,7 +202,7 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
               <div style={{ padding: '1.25rem', background: 'white', borderRadius: '16px', border: '1px solid #f0abfc' }}>
                  <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Montant total à encaisser</div>
                  <div className="brand-glow" style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--primary)' }}>
-                   {(Number(commande.montant_total) + (Number(fraisLivraison) || 0)).toLocaleString()} <span style={{ fontSize: '0.8rem' }}>CFA</span>
+                   {(currentSubtotal + (Number(fraisLivraison) || 0)).toLocaleString()} <span style={{ fontSize: '0.8rem' }}>CFA</span>
                  </div>
               </div>
             </div>
