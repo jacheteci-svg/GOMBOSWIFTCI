@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Commande, LigneCommande } from '../types';
@@ -67,7 +67,7 @@ export const generateInvoicePDF = (commande: Commande & { lignes: LigneCommande[
     `${(l.montant_ligne || 0).toLocaleString()} CFA`
   ]);
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: 100,
     head: [['#', 'Désignation', 'Qté', 'Prix Unitaire', 'Total']],
     body: tableRows,
@@ -183,7 +183,7 @@ export const generateDeliverySlipPDF = (feuilleRoute: any, commandes: Commande[]
     ];
   });
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: 75,
     head: [['N°', 'Référence / Client', 'Zone / Adresse', 'Articles (Détails)', 'À Encaisser']],
     body: tableRows,
@@ -213,98 +213,117 @@ export const generateDeliverySlipPDF = (feuilleRoute: any, commandes: Commande[]
 };
 
 export const generateAnalyticalReportPDF = (data: any, dateString: string) => {
-  const doc = new jsPDF() as jsPDFWithPlugin;
-  const pageWidth = doc.internal.pageSize.width;
+  try {
+    const doc = new jsPDF() as jsPDFWithPlugin;
+    const pageWidth = doc.internal.pageSize.width;
 
-  // Header Branding
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(22);
-  doc.setTextColor(99, 102, 255);
-  doc.text("GomboSwift Analysis", 20, 25);
-  
-  doc.setFontSize(12);
-  doc.setTextColor(100, 116, 139);
-  doc.setFont("helvetica", "normal");
-  doc.text(`Rapport Analytique Business du ${format(new Date(dateString), 'dd MMMM yyyy', { locale: fr })}`, 20, 32);
-
-  // Financial Summary
-  const getFrais = (c: any) => {
-    if (c.frais_livraison !== undefined && c.frais_livraison !== null) return Number(c.frais_livraison);
-    if (['terminee', 'livree'].includes(c.statut_commande)) return 1000;
-    return 0;
-  };
-
-  const succesCmds = (data.commandes || []).filter((c: any) => c.statut_commande === 'terminee' || c.statut_commande === 'livree');
-  const failureCmds = (data.commandes || []).filter((c: any) => !['terminee', 'livree', 'en_cours_livraison'].includes(c.statut_commande));
-  
-  const totalEncaisseBrut = (data.retours || []).reduce((acc: number, r: any) => acc + (r.montant_remis_par_livreur || 0), 0);
-  const totalFraisLivraison = succesCmds.reduce((acc: number, c: any) => acc + getFrais(c), 0);
-  const totalNetProduits = totalEncaisseBrut - totalFraisLivraison;
-  
-  const successRate = (data.commandes || []).length > 0 ? (succesCmds.length / data.commandes.length) * 100 : 0;
-
-  doc.setDrawColor(241, 245, 249);
-  doc.setFillColor(248, 250, 252);
-  doc.rect(20, 45, pageWidth - 40, 40, 'F');
-  
-  doc.setFontSize(10);
-  doc.setTextColor(100, 116, 139);
-  doc.text("RÉSUMÉ FINANCIER (CFA)", 25, 53);
-  
-  doc.setFontSize(14);
-  doc.setTextColor(30, 41, 59);
-  doc.setFont("helvetica", "bold");
-  doc.text(`CA Produits Net: ${totalNetProduits.toLocaleString()}`, 25, 63);
-  doc.text(`Logistique: ${totalFraisLivraison.toLocaleString()}`, 25, 73);
-  doc.text(`Total Encaissé: ${totalEncaisseBrut.toLocaleString()}`, pageWidth - 25, 63, { align: 'right' });
-  doc.text(`Taux de Succès: ${successRate.toFixed(1)}%`, pageWidth - 25, 73, { align: 'right' });
-
-  // Detailed Table
-  doc.setFontSize(11);
-  doc.text("Détails des Opérations de Caisse", 20, 100);
-
-  const tableRows = (data.retours || []).map((r: any) => [
-    r.feuille_route_id ? `#${r.feuille_route_id.substring(0, 8).toUpperCase()}` : "N/A",
-    r.montant_remis_par_livreur?.toLocaleString() || "0",
-    r.montant_attendu?.toLocaleString() || "0",
-    r.ecart?.toLocaleString() || "0",
-    r.commentaire || "-"
-  ]);
-
-  doc.autoTable({
-    startY: 105,
-    head: [['Bordereau', 'Reçu (Cash)', 'Théorique', 'Écart', 'Observations']],
-    body: tableRows,
-    theme: 'striped',
-    headStyles: { fillColor: [99, 102, 255] },
-    columnStyles: {
-      1: { halign: 'right' },
-      2: { halign: 'right' },
-      3: { halign: 'right' }
+    if (!data || !data.commandes) {
+      throw new Error("Données de rapport incomplètes");
     }
-  });
 
-  // Anomalies / Failures
-  const nextY = (doc as any).lastAutoTable?.finalY || 150;
-  if (failureCmds.length > 0) {
-    doc.setFontSize(14);
-    doc.text("Anomalies & Echecs du Jour", 20, nextY + 15);
+    // Header Branding
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.setTextColor(99, 102, 255);
+    doc.text("GomboSwift Analysis", 20, 25);
     
-    const failureRows = failureCmds.map((c: any) => [
-      c.id.substring(0, 8).toUpperCase(),
-      c.nom_client || "Client",
-      c.statut_commande,
-      c.commentaire_agent || "-"
-    ]);
+    doc.setFontSize(12);
+    doc.setTextColor(100, 116, 139);
+    doc.setFont("helvetica", "normal");
+    
+    const formattedDate = dateString ? format(new Date(dateString), 'dd MMMM yyyy', { locale: fr }) : "Date inconnue";
+    doc.text(`Rapport Analytique Business du ${formattedDate}`, 20, 32);
 
-    doc.autoTable({
-      startY: nextY + 20,
-      head: [['Réf Cmd', 'Client', 'Statut Critique', 'Motif / Note Agent']],
-      body: failureRows,
-      theme: 'grid',
-      headStyles: { fillColor: [239, 68, 68] }
+    // Financial Summary
+    const getFrais = (c: any) => {
+      if (c.frais_livraison !== undefined && c.frais_livraison !== null) return Number(c.frais_livraison);
+      if (['terminee', 'livree'].includes(c.statut_commande)) return 1000;
+      return 0;
+    };
+
+    const succesCmds = (data.commandes || []).filter((c: any) => c.statut_commande === 'terminee' || c.statut_commande === 'livree');
+    const failureCmds = (data.commandes || []).filter((c: any) => !['terminee', 'livree', 'en_cours_livraison'].includes(c.statut_commande));
+    
+    const totalEncaisseBrut = (data.retours || []).reduce((acc: number, r: any) => acc + (r.montant_remis_par_livreur || 0), 0);
+    const totalFraisLivraison = succesCmds.reduce((acc: number, c: any) => acc + getFrais(c), 0);
+    const totalNetProduits = totalEncaisseBrut - totalFraisLivraison;
+    
+    const countTotal = (data.commandes || []).length;
+    const successRate = countTotal > 0 ? (succesCmds.length / countTotal) * 100 : 0;
+
+    doc.setDrawColor(241, 245, 249);
+    doc.setFillColor(248, 250, 252);
+    doc.rect(20, 45, pageWidth - 40, 40, 'F');
+    
+    doc.setFontSize(10);
+    doc.setTextColor(100, 116, 139);
+    doc.text("RÉSUMÉ FINANCIER (CFA)", 25, 53);
+    
+    doc.setFontSize(14);
+    doc.setTextColor(30, 41, 59);
+    doc.setFont("helvetica", "bold");
+    doc.text(`CA Produits Net: ${totalNetProduits.toLocaleString()}`, 25, 63);
+    doc.text(`Logistique: ${totalFraisLivraison.toLocaleString()}`, 25, 73);
+    doc.text(`Total Encaissé: ${totalEncaisseBrut.toLocaleString()}`, pageWidth - 25, 63, { align: 'right' });
+    doc.text(`Taux de Succès: ${successRate.toFixed(1)}%`, pageWidth - 25, 73, { align: 'right' });
+
+    // Detailed Table
+    doc.setFontSize(11);
+    doc.text("Détails des Opérations de Caisse", 20, 100);
+
+    const tableRows = (data.retours || []).map((r: any) => {
+      const frId = String(r.feuille_route_id || "");
+      return [
+        frId ? `#${frId.substring(0, 8).toUpperCase()}` : "N/A",
+        r.montant_remis_par_livreur?.toLocaleString() || "0",
+        r.montant_attendu?.toLocaleString() || "0",
+        r.ecart?.toLocaleString() || "0",
+        r.commentaire || "-"
+      ];
     });
-  }
 
-  doc.save(`Rapport_Analytique_${dateString}_GomboSwift.pdf`);
+    autoTable(doc, {
+      startY: 105,
+      head: [['Bordereau', 'Reçu (Cash)', 'Théorique', 'Écart', 'Observations']],
+      body: tableRows,
+      theme: 'striped',
+      headStyles: { fillColor: [99, 102, 255] },
+      columnStyles: {
+        1: { halign: 'right' },
+        2: { halign: 'right' },
+        3: { halign: 'right' }
+      }
+    });
+
+    // Anomalies / Failures
+    const nextY = (doc as any).lastAutoTable?.finalY || 150;
+    if (failureCmds.length > 0) {
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.text("Anomalies & Echecs du Jour", 20, nextY + 15);
+      
+      const failureRows = failureCmds.map((c: any) => {
+        const cId = String(c.id || "");
+        return [
+          cId ? cId.substring(0, 8).toUpperCase() : "N/A",
+          c.nom_client || "Client",
+          c.statut_commande || "Inconnu",
+          c.commentaire_agent || "-"
+        ];
+      });
+
+      autoTable(doc, {
+        startY: nextY + 20,
+        head: [['Réf Cmd', 'Client', 'Statut Critique', 'Motif / Note Agent']],
+        body: failureRows,
+        theme: 'grid',
+        headStyles: { fillColor: [239, 68, 68] }
+      });
+    }
+
+    doc.save(`Rapport_Analytique_${dateString || 'journee'}_GomboSwift.pdf`);
+  } catch (err) {
+    console.error("Critical error inside generateAnalyticalReportPDF:", err);
+    throw err;
+  }
 };
