@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { subscribeToCommandes, getTopSellingProducts } from '../services/commandeService';
 import type { Commande } from '../types';
 import { AlertCircle, Activity, Percent, DollarSign, MapPin, TrendingUp } from 'lucide-react';
@@ -23,45 +23,31 @@ export const Dashboard = () => {
     return () => unsubscribe();
   }, []);
 
-  const getStats = () => {
+  const memoizedAnalytics = useMemo(() => {
     const today = new Date();
     today.setHours(0,0,0,0);
 
-    const caGlobal = commandes.filter(c => c.statut_commande === 'livree' || c.statut_commande === 'terminee')
-                              .reduce((acc, c) => acc + (c.montant_encaisse || c.montant_total), 0);
-    
-    const caPotentiel = commandes.filter(c => ['validee', 'en_cours_livraison'].includes(c.statut_commande))
-                                 .reduce((acc, c) => acc + c.montant_total, 0);
-
-    const pending = commandes.filter(c => ['en_attente_appel', 'a_rappeler'].includes(c.statut_commande));
+    // 1. Stats and KPIs
     const succes = commandes.filter(c => c.statut_commande === 'livree' || c.statut_commande === 'terminee');
     const echecs = commandes.filter(c => c.statut_commande === 'echouee' || c.statut_commande === 'retour_stock');
-    
+    const caGlobal = succes.reduce((acc, c) => acc + (c.montant_encaisse || c.montant_total), 0);
+    const caPotentiel = commandes.filter(c => ['validee', 'en_cours_livraison'].includes(c.statut_commande))
+                                 .reduce((acc, c) => acc + c.montant_total, 0);
+    const pending = commandes.filter(c => ['en_attente_appel', 'a_rappeler'].includes(c.statut_commande));
     const totalTraitees = succes.length + echecs.length;
     const tauxLivraison = totalTraitees > 0 ? Math.round((succes.length / totalTraitees) * 100) : 0;
     const cmdJour = commandes.filter(c => new Date(c.date_creation).getTime() >= today.getTime());
 
-    return { 
-      total: commandes.length, 
-      pending: pending.length, 
-      succes: succes.length,
-      echecs: echecs.length,
-      tauxLivraison,
-      caGlobal,
-      caPotentiel,
-      cmdJour: cmdJour.length
-    };
-  };
+    // 2. Status Distribution (Pie)
+    const statusData = [
+      { name: 'Attente', value: commandes.filter(c => c.statut_commande === 'en_attente_appel').length },
+      { name: 'Appels', value: commandes.filter(c => c.statut_commande === 'validee' || c.statut_commande === 'a_rappeler').length },
+      { name: 'Expédition', value: commandes.filter(c => c.statut_commande === 'en_cours_livraison').length },
+      { name: 'Livrées', value: succes.length },
+      { name: 'Echecs', value: echecs.length },
+    ];
 
-  const getStatusData = () => [
-    { name: 'Attente', value: commandes.filter(c => c.statut_commande === 'en_attente_appel').length },
-    { name: 'Appels', value: commandes.filter(c => c.statut_commande === 'validee' || c.statut_commande === 'a_rappeler').length },
-    { name: 'Expédition', value: commandes.filter(c => c.statut_commande === 'en_cours_livraison').length },
-    { name: 'Livrées', value: commandes.filter(c => c.statut_commande === 'livree' || c.statut_commande === 'terminee').length },
-    { name: 'Echecs', value: commandes.filter(c => c.statut_commande === 'echouee' || c.statut_commande === 'retour_stock').length },
-  ];
-
-  const getRecentHistoryData = () => {
+    // 3. History Data (Area)
     const last7Days = Array.from({length: 7}, (_, i) => {
       const d = new Date();
       d.setDate(d.getDate() - (6 - i));
@@ -79,25 +65,26 @@ export const Dashboard = () => {
       }
     });
 
-    return last7Days.map(d => ({
+    const historyData = last7Days.map(d => ({
       jour: d.date.slice(-5).replace('-', '/'),
       Commandes: d.count,
       CA: d.revenue
     }));
-  };
 
-  const getCommuneStats = () => {
+    // 4. Commune Stats (Bar)
     const counts: Record<string, number> = {};
     commandes.forEach(c => {
       if (c.commune_livraison) {
         counts[c.commune_livraison] = (counts[c.commune_livraison] || 0) + 1;
       }
     });
-    return Object.entries(counts)
+    const communeData = Object.entries(counts)
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value)
       .slice(0, 5);
-  };
+
+    return { stats: { total: commandes.length, pending: pending.length, succes: succes.length, echecs: echecs.length, tauxLivraison, caGlobal, caPotentiel, cmdJour: cmdJour.length }, statusData, historyData, communeData };
+  }, [commandes]);
 
   if (loading) {
     return <div style={{ padding: '6rem', textAlign: 'center' }}>
@@ -106,10 +93,7 @@ export const Dashboard = () => {
     </div>;
   }
 
-  const stats = getStats();
-  const statusData = getStatusData();
-  const historyData = getRecentHistoryData();
-  const communeData = getCommuneStats();
+  const { stats, statusData, historyData, communeData } = memoizedAnalytics;
   const PIE_COLORS = ['#fbbf24', '#3b82f6', '#8b5cf6', '#10b981', '#ef4444'];
 
   return (
@@ -134,7 +118,7 @@ export const Dashboard = () => {
         <div className="card glass-effect" style={{ border: '1px solid rgba(16, 185, 129, 0.1)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <p className="text-muted-premium">REVENU GLOBAL</p>
+              <p style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>REVENU GLOBAL</p>
               <h3 style={{ fontSize: '2rem', fontWeight: 900, margin: '0.5rem 0', color: '#10b981' }}>
                 {stats.caGlobal.toLocaleString()} <span style={{ fontSize: '0.9rem' }}>CFA</span>
               </h3>
@@ -143,7 +127,7 @@ export const Dashboard = () => {
                 <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>+ {stats.caPotentiel.toLocaleString()} Potentiel</span>
               </div>
             </div>
-            <div className="icon-box" style={{ background: 'rgba(16, 185, 129, 0.1)' }}>
+            <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '0.75rem', borderRadius: '12px' }}>
               <DollarSign size={28} color="#10b981" />
             </div>
           </div>
@@ -152,14 +136,14 @@ export const Dashboard = () => {
         <div className="card glass-effect" style={{ border: '1px solid rgba(59, 130, 246, 0.1)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <p className="text-muted-premium">TAUX DE SUCCÈS</p>
+              <p style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>TAUX DE SUCCÈS</p>
               <h3 style={{ fontSize: '2rem', fontWeight: 900, margin: '0.5rem 0' }}>{stats.tauxLivraison}%</h3>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <span className="badge badge-info" style={{ borderRadius: '6px' }}>Performance</span>
                 <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>{stats.succes} livrées</span>
               </div>
             </div>
-            <div className="icon-box" style={{ background: 'rgba(59, 130, 246, 0.1)' }}>
+            <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '0.75rem', borderRadius: '12px' }}>
               <Percent size={28} color="#3b82f6" />
             </div>
           </div>
@@ -168,14 +152,14 @@ export const Dashboard = () => {
         <div className="card glass-effect" style={{ border: '1px solid rgba(245, 158, 11, 0.1)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <p className="text-muted-premium">A TRAITER (URGENT)</p>
+              <p style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>A TRAITER (URGENT)</p>
               <h3 style={{ fontSize: '2rem', fontWeight: 900, margin: '0.5rem 0', color: '#f59e0b' }}>{stats.pending}</h3>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <AlertCircle size={14} color="#f59e0b" />
                 <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>Files Call-Center</span>
               </div>
             </div>
-            <div className="icon-box" style={{ background: 'rgba(245, 158, 11, 0.1)' }}>
+            <div style={{ background: 'rgba(245, 158, 11, 0.1)', padding: '0.75rem', borderRadius: '12px' }}>
               <Activity size={28} color="#f59e0b" />
             </div>
           </div>
@@ -183,7 +167,7 @@ export const Dashboard = () => {
       </div>
 
       {/* Primary Analytics Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem', marginBottom: '3rem' }} className="responsive-flex">
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem', marginBottom: '3rem' }}>
         
         <div className="card glass-effect" style={{ minHeight: '450px', display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
@@ -203,7 +187,7 @@ export const Dashboard = () => {
                 <XAxis dataKey="jour" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--text-muted)', fontWeight: 700 }} />
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--text-muted)', fontWeight: 700 }} />
                 <Tooltip 
-                  contentStyle={{ borderRadius: '16px', background: 'rgba(15, 23, 42, 0.9)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.3)' }}
+                  contentStyle={{ borderRadius: '16px', background: 'rgba(15, 23, 42, 0.9)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
                   formatter={(value: any) => [`${Number(value).toLocaleString()} CFA`, 'CA Encaissé']}
                 />
                 <Area type="monotone" dataKey="CA" stroke="#10b981" strokeWidth={4} fillOpacity={1} fill="url(#colorCa)" />
@@ -225,7 +209,7 @@ export const Dashboard = () => {
             </ResponsiveContainer>
             <div style={{ marginTop: '2rem' }}>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600, marginBottom: '1rem' }}>TOP 5 COMMUNES</p>
-              {communeData.map((c) => (
+              {communeData.map((c: any) => (
                 <div key={c.name} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', fontSize: '0.9rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <MapPin size={14} color="var(--primary)" />
@@ -247,7 +231,7 @@ export const Dashboard = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             {topProducts.map((p, i) => (
               <div key={p.nom} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.02)' }}>
-                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', fontWeight: 900 }}>
+                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(99, 102, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', fontWeight: 900 }}>
                   {i + 1}
                 </div>
                 <div style={{ flex: 1 }}>
@@ -279,7 +263,7 @@ export const Dashboard = () => {
                   dataKey="value"
                   stroke="none"
                 >
-                  {statusData.map((_, index) => (
+                  {statusData.map((_: any, index: number) => (
                     <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                   ))}
                 </Pie>
@@ -288,7 +272,7 @@ export const Dashboard = () => {
             </ResponsiveContainer>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '2.5rem' }}>
-            {statusData.map((entry, index) => (
+            {statusData.map((entry: any, index: number) => (
               <div key={entry.name} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)' }}>
                 <div style={{ width: '12px', height: '12px', borderRadius: '4px', backgroundColor: PIE_COLORS[index % PIE_COLORS.length] }} />
                 <span>{entry.name}: {entry.value}</span>

@@ -60,8 +60,15 @@ export const getClientsWithIntelligence = async (): Promise<(Client & ClientFide
 
   const orders = allOrdersResult.data || [];
 
+  // Group orders by client_id once (O(N) instead of O(N*M))
+  const ordersByClient: Record<string, Commande[]> = {};
+  orders.forEach(o => {
+    if (!ordersByClient[o.client_id]) ordersByClient[o.client_id] = [];
+    ordersByClient[o.client_id].push(o);
+  });
+
   return clients.map(client => {
-    const clientOrders = orders.filter(o => o.client_id === client.id);
+    const clientOrders = ordersByClient[client.id] || [];
     const total_brut = clientOrders.reduce((acc, o) => acc + (Number(o.montant_total) || 0), 0);
     const settledOrders = clientOrders.filter(o => ['livree', 'terminee'].includes(o.statut_commande));
     const total_encaisse = settledOrders.reduce((acc, o) => acc + (Number(o.montant_total) || 0), 0);

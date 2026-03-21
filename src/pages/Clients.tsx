@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import { 
   Users, Search, MessageCircle, Phone, MapPin, 
-  X, ShoppingBag, TrendingUp, DollarSign
+  X
 } from 'lucide-react';
 import { getClientsWithIntelligence, getClientCommandes, ClientFidelityStats } from '../services/clientService';
 import type { Client, Commande } from '../types';
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
 
 export const Clients = () => {
   const [clients, setClients] = useState<(Client & ClientFidelityStats)[]>([]);
@@ -120,7 +119,7 @@ export const Clients = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredClients.map(client => (
+              {filteredClients.map((client: Client & ClientFidelityStats) => (
                 <tr key={client.id} onClick={() => openClientDetails(client)} className="hover-card">
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -264,7 +263,7 @@ export const Clients = () => {
             
             <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
               <h4 style={{ fontWeight: 800, marginBottom: '1rem' }}>Historique des Commandes</h4>
-              {selectedClient.commandes.map(cmd => (
+              {selectedClient.commandes.map((cmd: Commande) => (
                 <div key={cmd.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem', background: 'white', borderRadius: '12px', border: '1px solid #f1f5f9', marginBottom: '0.5rem' }}>
                   <div>
                     <div style={{ fontWeight: 700 }}>#{cmd.id.slice(0,8).toUpperCase()} - {format(new Date(cmd.date_creation), 'dd/MM/yyyy')}</div>

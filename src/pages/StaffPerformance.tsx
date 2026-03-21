@@ -34,11 +34,17 @@ export const StaffPerformance = () => {
         ]);
 
         const now = new Date();
+        
+        // Group orders by livreur_id once (O(N) vs O(N*M))
+        const ordersByLivreur: Record<string, Commande[]> = {};
+        allCmds.forEach((c: Commande) => {
+          if (!c.livreur_id) return;
+          if (!ordersByLivreur[c.livreur_id]) ordersByLivreur[c.livreur_id] = [];
+          ordersByLivreur[c.livreur_id].push(c);
+        });
+
         const staffStats: StaffStats[] = livreurs.map((livreur: User) => {
-          const livreurCmds = allCmds.filter((c: Commande) => {
-            const isLivreur = c.livreur_id === livreur.id;
-            if (!isLivreur) return false;
-            
+          const livreurCmds = (ordersByLivreur[livreur.id] || []).filter((c: Commande) => {
             const cmdDate = c.date_creation?.toDate ? c.date_creation.toDate() : new Date(c.date_creation);
             
             if (timeFilter === 'today') return isAfter(cmdDate, startOfDay(now));

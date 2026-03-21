@@ -49,6 +49,13 @@ h1, h2, h3, .brand {
   border: 1px solid var(--glass-border);
 }
 
+@media (max-width: 768px) {
+  .glass-effect {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+}
+
 /* --- MODERN LAYOUT --- */
 .app-container {
   display: flex;
@@ -350,6 +357,18 @@ tr:hover td {
   backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.05);
   box-shadow: 0 40px 100px -20px rgba(0,0,0,0.5);
+}
+
+@media (max-width: 768px) {
+  .login-glass {
+    backdrop-filter: blur(8px);
+    padding: 2rem;
+  }
+  
+  .glass-card-futuristic::before {
+    animation: none; /* Disable rotating glow on mobile to save CPU */
+    background: rgba(99, 102, 255, 0.1);
+  }
 }
 
 /* --- FUTURISTIC & NEON ADDITIONS --- */
