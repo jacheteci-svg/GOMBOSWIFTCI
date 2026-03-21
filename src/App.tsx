@@ -16,12 +16,11 @@ import { Admin } from './pages/Admin';
 import { Profil } from './pages/Profil';
 import { Login } from './pages/Login';
 
-const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles: string[] }) => {
-  const { currentUser, hasRole } = useAuth();
+const ProtectedRoute = ({ children, requiredPermission }: { children: React.ReactNode, requiredPermission: string }) => {
+  const { currentUser, hasPermission } = useAuth();
   
   if (!currentUser) return <Navigate to="/login" replace />;
-  // @ts-ignore
-  if (!hasRole(allowedRoles)) return <Navigate to="/" replace />;
+  if (!hasPermission(requiredPermission)) return <Navigate to="/" replace />;
   
   return <>{children}</>;
 };
@@ -34,57 +33,57 @@ const AppRoutes = () => {
         
         {/* Admin Page */}
         <Route path="/admin" element={
-          <ProtectedRoute allowedRoles={['ADMIN']}><Admin /></ProtectedRoute>
+          <ProtectedRoute requiredPermission="ADMIN"><Admin /></ProtectedRoute>
         } />
 
         {/* Admin Dashboard */}
         <Route path="/dashboard" element={
-          <ProtectedRoute allowedRoles={['ADMIN']}><Dashboard /></ProtectedRoute>
+          <ProtectedRoute requiredPermission="DASHBOARD"><Dashboard /></ProtectedRoute>
         } />
         
         {/* Module 1: Produits */}
         <Route path="produits" element={
-          <ProtectedRoute allowedRoles={['ADMIN', 'GESTIONNAIRE']}><Produits /></ProtectedRoute>
+          <ProtectedRoute requiredPermission="PRODUITS"><Produits /></ProtectedRoute>
         } />
         
         {/* Module 2: Commandes */}
         <Route path="commandes" element={
-          <ProtectedRoute allowedRoles={['ADMIN', 'GESTIONNAIRE', 'AGENT_APPEL', 'LOGISTIQUE']}><Commandes /></ProtectedRoute>
+          <ProtectedRoute requiredPermission="COMMANDES"><Commandes /></ProtectedRoute>
         } />
         
         {/* Module 3: Centre d'Appel */}
         <Route path="centre-appel" element={
-          <ProtectedRoute allowedRoles={['ADMIN', 'AGENT_APPEL']}><CentreAppel /></ProtectedRoute>
+          <ProtectedRoute requiredPermission="CENTRE_APPEL"><CentreAppel /></ProtectedRoute>
         } />
         
         {/* Module 4: Logistique */}
         <Route path="logistique" element={
-          <ProtectedRoute allowedRoles={['ADMIN', 'LOGISTIQUE']}><Logistique /></ProtectedRoute>
+          <ProtectedRoute requiredPermission="LOGISTIQUE"><Logistique /></ProtectedRoute>
         } />
         
         {/* Module 5: Livraison */}
         <Route path="livraison" element={
-          <ProtectedRoute allowedRoles={['ADMIN', 'LIVREUR']}><Livraison /></ProtectedRoute>
+          <ProtectedRoute requiredPermission="LIVREUR"><Livraison /></ProtectedRoute>
         } />
         
         {/* Module 6: Caisse */}
         <Route path="caisse" element={
-          <ProtectedRoute allowedRoles={['ADMIN', 'CAISSIERE']}><Caisse /></ProtectedRoute>
+          <ProtectedRoute requiredPermission="CAISSE"><Caisse /></ProtectedRoute>
         } />
 
         {/* Historique et Impression */}
         <Route path="historique" element={
-          <ProtectedRoute allowedRoles={['ADMIN']}><Historique /></ProtectedRoute>
+          <ProtectedRoute requiredPermission="HISTORIQUE"><Historique /></ProtectedRoute>
         } />
 
         {/* CRM Web - Clients */}
         <Route path="clients" element={
-          <ProtectedRoute allowedRoles={['ADMIN', 'GESTIONNAIRE', 'AGENT_APPEL']}><Clients /></ProtectedRoute>
+          <ProtectedRoute requiredPermission="CLIENTS"><Clients /></ProtectedRoute>
         } />
 
         {/* Profil Route */}
         <Route path="profil" element={
-          <ProtectedRoute allowedRoles={['ADMIN', 'GESTIONNAIRE', 'AGENT_APPEL', 'LOGISTIQUE', 'LIVREUR', 'CAISSIERE']}><Profil /></ProtectedRoute>
+          <ProtectedRoute requiredPermission="PROFIL"><Profil /></ProtectedRoute>
         } />
       </Route>
 

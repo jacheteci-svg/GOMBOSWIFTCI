@@ -5,10 +5,11 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE users (
   id UUID REFERENCES auth.users(id) PRIMARY KEY,
   email TEXT NOT NULL,
-  role TEXT NOT NULL CHECK (role IN ('ADMIN', 'GESTIONNAIRE', 'AGENT_APPEL', 'LOGISTIQUE', 'LIVREUR', 'CAISSIERE')),
+  role TEXT NOT NULL, -- Relaxed constraint for AGENT_MIXTE
   nom_complet TEXT NOT NULL,
   telephone TEXT,
   communes_servies TEXT[], -- For livreur
+  permissions TEXT[] DEFAULT '{}', -- Granular access control
   actif BOOLEAN DEFAULT true,
   created_at TIMESTAMPTZ DEFAULT now()
 );

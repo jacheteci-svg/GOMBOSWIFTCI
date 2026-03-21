@@ -8,6 +8,7 @@ interface AuthContextType {
   loading: boolean;
   logout: () => Promise<void>;
   hasRole: (roles: Role[]) => boolean;
+  hasPermission: (permissions: string | string[]) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -15,9 +16,21 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   logout: async () => {},
   hasRole: () => false,
+  hasPermission: () => false,
 });
 
 export const useAuth = () => useContext(AuthContext);
+
+// --- Role to Permission Mapping for Fallback ---
+const ROLE_PERMISSIONS: Record<Role, string[]> = {
+  ADMIN: ['DASHBOARD', 'PRODUITS', 'COMMANDES', 'CENTRE_APPEL', 'LOGISTIQUE', 'LIVREUR', 'CAISSE', 'CLIENTS', 'HISTORIQUE', 'ADMIN'],
+  GESTIONNAIRE: ['PRODUITS', 'COMMANDES', 'CLIENTS'],
+  AGENT_APPEL: ['COMMANDES', 'CENTRE_APPEL', 'CLIENTS'],
+  AGENT_MIXTE: ['COMMANDES', 'CENTRE_APPEL', 'CLIENTS', 'CAISSE'],
+  LOGISTIQUE: ['COMMANDES', 'LOGISTIQUE'],
+  LIVREUR: ['LIVREUR'],
+  CAISSIERE: ['CAISSE']
+};
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { showToast } = useToast();
@@ -34,13 +47,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (error || !data) {
         console.warn('Profile not found in users table, using fallback:', error);
-        // Fallback: If authenticated, give at least ADMIN status for setup
         return {
           id: userId,
           email,
           role: 'ADMIN',
           nom_complet: 'Admin (Recouvrement)',
           telephone: '',
+          permissions: ROLE_PERMISSIONS['ADMIN'],
           actif: true
         } as User;
       }
@@ -78,6 +91,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const hasPermission = (perms: string | string[]) => {
+    if (!currentUser) return false;
+    if (currentUser.role === 'ADMIN') return true; 
+
+    const userPerms = currentUser.permissions && currentUser.permissions.length > 0
+      ? currentUser.permissions
+      : ROLE_PERMISSIONS[currentUser.role] || [];
+
+    const required = Array.isArray(perms) ? perms : [perms];
+    return required.some(p => userPerms.includes(p));
+  };
+
   const hasRole = (roles: Role[]) => {
     if (!currentUser) return false;
     if (currentUser.role === 'ADMIN') return true; 
@@ -85,7 +110,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, loading, logout, hasRole }}>
+    <AuthContext.Provider value={{ currentUser, loading, logout, hasRole, hasPermission }}>
       {!loading && children}
     </AuthContext.Provider>
   );

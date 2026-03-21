@@ -1,4 +1,17 @@
-export type Role = 'ADMIN' | 'GESTIONNAIRE' | 'AGENT_APPEL' | 'LOGISTIQUE' | 'LIVREUR' | 'CAISSIERE';
+export type Role = 'ADMIN' | 'GESTIONNAIRE' | 'AGENT_APPEL' | 'LOGISTIQUE' | 'LIVREUR' | 'CAISSIERE' | 'AGENT_MIXTE';
+
+export type Permission = 
+  | 'DASHBOARD'
+  | 'PRODUITS'
+  | 'COMMANDES'
+  | 'CENTRE_APPEL'
+  | 'LOGISTIQUE'
+  | 'LIVREUR'
+  | 'CAISSE'
+  | 'CLIENTS'
+  | 'HISTORIQUE'
+  | 'ADMIN'
+  | 'PROFIL';
 
 export interface User {
   id: string;
@@ -7,8 +20,9 @@ export interface User {
   nom_complet: string;
   telephone?: string;
   password?: string;
-  communes_servies?: string[]; // Only for livreur
-  actif?: boolean; // Only for livreur or other accounts
+  communes_servies?: string[]; 
+  permissions?: string[]; // Dynamic permissions
+  actif?: boolean;
 }
 
 export interface Produit {

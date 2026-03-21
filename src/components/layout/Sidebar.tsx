@@ -7,31 +7,30 @@ import {
   ShoppingCart,
   Headset,
   Truck,
-  Map,
   Users,
   LogOut,
   Settings,
   Calculator,
   History,
-  User
+  User as UserIcon
 } from 'lucide-react';
 
 export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
-  const { currentUser, logout, hasRole } = useAuth();
+  const { currentUser, logout, hasPermission } = useAuth();
   const location = useLocation();
 
   const navItems = [
-    { path: '/', label: 'Tableau de bord', icon: LayoutDashboard, roles: ['ADMIN'] },
-    { path: '/produits', label: 'Produits & Stock', icon: Package, roles: ['ADMIN', 'GESTIONNAIRE'] },
-    { path: '/commandes', label: 'Commandes', icon: ShoppingCart, roles: ['ADMIN', 'GESTIONNAIRE', 'AGENT_APPEL', 'LOGISTIQUE'] },
-    { path: '/centre-appel', label: 'Centre d\'Appel', icon: Headset, roles: ['ADMIN', 'AGENT_APPEL'] },
-    { path: '/clients', label: 'CRM & Clients', icon: Users, roles: ['ADMIN', 'GESTIONNAIRE', 'AGENT_APPEL'] },
-    { path: '/logistique', label: 'Logistique', icon: Truck, roles: ['ADMIN', 'LOGISTIQUE'] },
-    { path: '/livraison', label: 'Mes Livraisons', icon: Map, roles: ['ADMIN', 'LIVREUR'] },
-    { path: '/caisse', icon: Calculator, label: 'Caisse / Retour', roles: ['ADMIN', 'CAISSIERE'] },
-    { path: '/historique', icon: History, label: 'Historique & Impression', roles: ['ADMIN'] }, // New item
-    { path: '/admin', icon: Settings, label: 'Administration', roles: ['ADMIN'] }, // New item
-    { path: '/profil', icon: User, label: 'Mon Profil', roles: ['ADMIN', 'GESTIONNAIRE', 'AGENT_APPEL', 'LOGISTIQUE', 'LIVREUR', 'CAISSIERE'] }, // New item
+    { path: '/', label: 'Tableau de bord', icon: LayoutDashboard, permission: 'DASHBOARD' },
+    { path: '/produits', label: 'Produits & Stock', icon: Package, permission: 'PRODUITS' },
+    { path: '/commandes', label: 'Commandes', icon: ShoppingCart, permission: 'COMMANDES' },
+    { path: '/centre-appel', label: 'Centre d\'Appel', icon: Headset, permission: 'CENTRE_APPEL' },
+    { path: '/clients', label: 'CRM & Clients', icon: Users, permission: 'CLIENTS' },
+    { path: '/logistique', label: 'Logistique', icon: Truck, permission: 'LOGISTIQUE' },
+    { path: '/livraison', label: 'Mes Livraisons', icon: UserIcon, permission: 'LIVREUR' },
+    { path: '/caisse', icon: Calculator, label: 'Caisse / Retour', permission: 'CAISSE' },
+    { path: '/historique', icon: History, label: 'Historique & Impression', permission: 'HISTORIQUE' },
+    { path: '/admin', icon: Settings, label: 'Administration', permission: 'ADMIN' },
+    { path: '/profil', icon: UserIcon, label: 'Mon Profil', permission: 'PROFIL' },
   ];
 
   return (
@@ -47,7 +46,7 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
 
       <nav style={{ flex: 1, padding: '1rem 0', overflowY: 'auto' }}>
         <ul style={{ listStyle: 'none' }}>
-          {navItems.filter(item => hasRole(item.roles as any)).map(item => (
+          {navItems.filter(item => hasPermission(item.permission)).map(item => (
             <li key={item.path}>
               <Link 
                 to={item.path} 
