@@ -373,15 +373,15 @@ const CommunesManager = ({ showToast }: { showToast: any }) => {
             )}
 
             {communes.map((c: Commune) => {
+              if (!c?.id) return null;
               const isEditing = editingId === c.id;
-              if (!c) return null;
 
               return isEditing ? (
                 <tr key={c.id} style={{ backgroundColor: 'rgba(79, 70, 229, 0.05)' }}>
                   <td>
                     <input 
                       className="form-input" 
-                      value={form?.nom || ''} 
+                      value={String(form?.nom || '')} 
                       onChange={e => setForm({ ...form, nom: e.target.value })} 
                     />
                   </td>
@@ -400,9 +400,9 @@ const CommunesManager = ({ showToast }: { showToast: any }) => {
                 </tr>
               ) : (
                 <tr key={c.id}>
-                  <td style={{ fontWeight: 600 }}>{c.nom || 'Sans nom'}</td>
+                  <td style={{ fontWeight: 600 }}>{String(c.nom || 'Sans nom')}</td>
                   <td style={{ color: 'var(--primary-color)', fontWeight: 700 }}>
-                    {typeof c.tarif_livraison === 'number' ? c.tarif_livraison.toLocaleString() : c.tarif_livraison} CFA
+                    {typeof c.tarif_livraison === 'number' ? c.tarif_livraison.toLocaleString() : String(c.tarif_livraison || 0)} CFA
                   </td>
                   <td style={{ textAlign: 'right' }}>
                     <button 
