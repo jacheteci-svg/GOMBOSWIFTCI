@@ -7,18 +7,20 @@ import {
   Tooltip
 } from 'recharts';
 
-type Period = 'today' | '7d' | '30d' | 'all';
+type Period = 'today' | '7d' | '30d' | 'all' | 'custom';
 
 export const Dashboard = () => {
   const [commandes, setCommandes] = useState<Commande[]>([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<Period>('7d');
+  const [startDate, setStartDate] = useState(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+  const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
   const [topProducts, setTopProducts] = useState<any[]>([]);
 
-  const fetchTop = useCallback(async (p: Period) => {
+  const fetchTop = useCallback(async (p: Period, start?: string, end?: string) => {
     try {
       const days = p === 'today' ? 1 : p === '7d' ? 7 : p === '30d' ? 30 : 0;
-      const top = await getTopSellingProducts(10, days);
+      const top = await getTopSellingProducts(10, days, start, end);
       setTopProducts(top);
     } catch (e) { console.error(e); }
   }, []);
@@ -33,14 +35,30 @@ export const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    fetchTop(period);
-    const interval = setInterval(() => fetchTop(period), 60000);
+    if (period === 'custom') {
+      fetchTop('custom', new Date(startDate).toISOString(), new Date(endDate + 'T23:59:59').toISOString());
+    } else {
+      fetchTop(period);
+    }
+    const interval = setInterval(() => {
+      if (period === 'custom') fetchTop('custom', new Date(startDate).toISOString(), new Date(endDate + 'T23:59:59').toISOString());
+      else fetchTop(period);
+    }, 60000);
     return () => clearInterval(interval);
-  }, [period, fetchTop]);
+  }, [period, fetchTop, startDate, endDate]);
 
   const filteredCommandes = useMemo(() => {
     const now = new Date();
     if (period === 'all') return commandes;
+
+    if (period === 'custom') {
+      const start = new Date(startDate);
+      const end = new Date(endDate + 'T23:59:59');
+      return commandes.filter(c => {
+        const d = new Date(c.date_creation);
+        return d >= start && d <= end;
+      });
+    }
 
     const start = new Date();
     if (period === 'today') start.setHours(0, 0, 0, 0);
@@ -48,7 +66,7 @@ export const Dashboard = () => {
     else if (period === '30d') start.setDate(now.getDate() - 30);
 
     return commandes.filter(c => new Date(c.date_creation).getTime() >= start.getTime());
-  }, [commandes, period]);
+  }, [commandes, period, startDate, endDate]);
 
   const memoizedAnalytics = useMemo(() => {
     const getFrais = (c: Commande) => {
@@ -127,8 +145,8 @@ export const Dashboard = () => {
         </div>
         
         {/* Period Selector */}
-        <div style={{ display: 'flex', background: 'rgba(99, 102, 255, 0.05)', padding: '0.4rem', borderRadius: '16px', border: '1px solid #e2e8f0', gap: '0.25rem' }}>
-          {(['today', '7d', '30d', 'all'] as Period[]).map((p) => (
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', background: 'rgba(99, 102, 255, 0.05)', padding: '0.4rem', borderRadius: '16px', border: '1px solid #e2e8f0', gap: '0.5rem' }}>
+          {(['today', '7d', '30d', 'all', 'custom'] as Period[]).map((p) => (
             <button
               key={p}
               onClick={() => setPeriod(p)}
@@ -144,9 +162,27 @@ export const Dashboard = () => {
                 textTransform: 'uppercase'
               }}
             >
-              {p === 'today' ? "Aujourd'hui" : p === '7d' ? '7 Jours' : p === '30d' ? '30 Jours' : 'Tout'}
+              {p === 'today' ? "Aujourd'hui" : p === '7d' ? '7 Jours' : p === '30d' ? '30 Jours' : p === 'custom' ? 'Personnalisé' : 'Tout'}
             </button>
           ))}
+          
+          {period === 'custom' && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginLeft: '0.5rem', borderLeft: '1px solid #e2e8f0', paddingLeft: '0.8rem' }}>
+              <input 
+                type="date" 
+                value={startDate} 
+                onChange={(e) => setStartDate(e.target.value)}
+                style={{ background: 'white', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '0.2rem 0.5rem', fontSize: '0.75rem', fontWeight: 700 }}
+              />
+              <span style={{ fontSize: '0.75rem', fontWeight: 800 }}>à</span>
+              <input 
+                type="date" 
+                value={endDate} 
+                onChange={(e) => setEndDate(e.target.value)}
+                style={{ background: 'white', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '0.2rem 0.5rem', fontSize: '0.75rem', fontWeight: 700 }}
+              />
+            </div>
+          )}
         </div>
       </div>
 

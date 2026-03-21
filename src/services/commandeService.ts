@@ -167,7 +167,7 @@ export const updateCommandeStatus = async (id: string, status: string, additiona
   }
 };
 
-export const getTopSellingProducts = async (limit = 10, days?: number): Promise<{ nom: string, nb_ventes: number, total_ca: number, total_sorties: number, taux_succes: number }[]> => {
+export const getTopSellingProducts = async (limit = 10, days?: number, start?: string, end?: string): Promise<{ nom: string, nb_ventes: number, total_ca: number, total_sorties: number, taux_succes: number }[]> => {
   let query = insforge.database
     .from('lignes_commandes')
     .select('*, commandes!inner(statut_commande, date_creation)');
@@ -176,6 +176,8 @@ export const getTopSellingProducts = async (limit = 10, days?: number): Promise<
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
     query = query.gte('commandes.date_creation', startDate.toISOString());
+  } else if (start && end) {
+    query = query.gte('commandes.date_creation', start).lte('commandes.date_creation', end);
   }
 
   const { data: lines, error: linesError } = await query;
