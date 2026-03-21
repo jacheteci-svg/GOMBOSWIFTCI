@@ -174,21 +174,26 @@ export const getTopSellingProducts = async (limit = 10): Promise<{ nom: string, 
   
   if (linesError) throw linesError;
   
-  const aggregates: Record<string, { nb: number, ca: number, sorties: number, livrees: number }> = {};
+  const aggregates: Record<string, { nb: number, ca: number, sorties: number, livrees: number, echecs: number }> = {};
   
   (lines || []).forEach((l: any) => {
     if (!aggregates[l.nom_produit]) {
-      aggregates[l.nom_produit] = { nb: 0, ca: 0, sorties: 0, livrees: 0 };
+      aggregates[l.nom_produit] = { nb: 0, ca: 0, sorties: 0, livrees: 0, echecs: 0 };
     }
     
     const status = l.commandes?.statut_commande;
-    const isSortie = ['en_cours_livraison', 'livree', 'echouee', 'retour_stock', 'retour_livreur'].includes(status);
+    const isSortie = ['en_cours_livraison', 'livree', 'terminee', 'echouee', 'retour_stock', 'retour_livreur'].includes(status);
     const isLivree = ['livree', 'terminee'].includes(status);
+    const isEchec = ['echouee', 'retour_stock', 'retour_livreur'].includes(status);
     
     if (isLivree) {
       aggregates[l.nom_produit].nb += l.quantite;
       aggregates[l.nom_produit].ca += l.montant_ligne;
       aggregates[l.nom_produit].livrees += l.quantite;
+    }
+    
+    if (isEchec) {
+      aggregates[l.nom_produit].echecs += l.quantite;
     }
     
     if (isSortie) {
@@ -197,13 +202,16 @@ export const getTopSellingProducts = async (limit = 10): Promise<{ nom: string, 
   });
 
   return Object.entries(aggregates)
-    .map(([nom, stats]) => ({ 
-      nom, 
-      nb_ventes: stats.livrees, 
-      total_ca: stats.ca,
-      total_sorties: stats.sorties,
-      taux_succes: stats.sorties > 0 ? Math.round((stats.livrees / stats.sorties) * 100) : 0
-    }))
+    .map(([nom, stats]) => {
+      const finishedAttempts = stats.livrees + stats.echecs;
+      return { 
+        nom, 
+        nb_ventes: stats.livrees, 
+        total_ca: stats.ca,
+        total_sorties: stats.sorties,
+        taux_succes: finishedAttempts > 0 ? Math.round((stats.livrees / finishedAttempts) * 100) : 0
+      };
+    })
     .sort((a, b) => b.nb_ventes - a.nb_ventes)
     .slice(0, limit);
 };
