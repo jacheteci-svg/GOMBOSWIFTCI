@@ -13,88 +13,109 @@ interface CommandeListProps {
 
 const getStatusBadge = (status: StatutCommande) => {
   switch (status) {
-    case 'en_attente_appel': return <span className="badge badge-warning">À appeler</span>;
-    case 'a_rappeler': return <span className="badge badge-warning" style={{ backgroundColor: 'rgba(245, 158, 11, 0.2)' }}>À rappeler</span>;
-    case 'validee': return <span className="badge badge-info">Validée</span>;
-    case 'en_cours_livraison': return <span className="badge" style={{ backgroundColor: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6' }}>En livraison</span>;
-    case 'livree': return <span className="badge badge-success">Livrée</span>;
-    case 'retour_livreur': return <span className="badge badge-danger">Retour Livreur</span>;
-    case 'retour_stock': return <span className="badge badge-danger" style={{ backgroundColor: 'rgba(239, 68, 68, 0.2)' }}>Retour Stock</span>;
-    case 'annulee': return <span className="badge badge-danger">Annulée</span>;
-    default: return <span className="badge">{status}</span>;
+    case 'en_attente_appel': return <span className="badge badge-warning">En attente appel</span>;
+    case 'a_rappeler': return <span className="badge badge-warning" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#d97706' }}>À rappeler</span>;
+    case 'validee': return <span className="badge badge-success" style={{ background: 'rgba(5, 150, 105, 0.15)', color: '#059669' }}>Validée</span>;
+    case 'en_cours_livraison': return <span className="badge brand-glow" style={{ background: 'rgba(99, 102, 255, 0.15)', color: 'var(--primary)', fontWeight: 800 }}>En livraison</span>;
+    case 'livree': return <span className="badge badge-success" style={{ background: '#10b981', color: 'white', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)' }}>Livrée</span>;
+    case 'echouee': return <span className="badge badge-danger">Échouée</span>;
+    case 'retour_livreur': return <span className="badge badge-danger" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#dc2626' }}>Retour livr.</span>;
+    case 'retour_stock': return <span className="badge badge-danger" style={{ background: '#ef4444', color: 'white' }}>En Stock (Retour)</span>;
+    case 'annulee': return <span className="badge" style={{ background: '#f1f5f9', color: '#94a3b8' }}>Annulée</span>;
+    default: return <span className="badge">{status.replace(/_/g, ' ')}</span>;
   }
 };
 
 const getIconComponent = (iconName: string) => {
   switch (iconName) {
-    case 'PhoneCall': return <PhoneCall size={16} />;
-    case 'Truck': return <Truck size={16} />;
-    default: return <Eye size={16} />;
+    case 'PhoneCall': return <PhoneCall size={18} strokeWidth={2.5} />;
+    case 'Truck': return <Truck size={18} strokeWidth={2.5} />;
+    default: return <Eye size={18} strokeWidth={2.5} />;
   }
 };
 
 export const CommandeList = ({ commandes, onActionClick, onDelete, actionIcon = 'Eye', actionLabel = 'Voir détails' }: CommandeListProps) => {
   if (commandes.length === 0) {
     return (
-      <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-secondary)' }}>
-        <p>Aucune commande trouvée.</p>
+      <div className="card" style={{ textAlign: 'center', padding: '5rem 0', color: 'var(--text-muted)', background: 'transparent', boxShadow: 'none' }}>
+        <p style={{ fontSize: '1.2rem', fontWeight: 600 }}>Aucune commande dans cette catégorie.</p>
+        <p style={{ fontSize: '0.9rem', marginTop: '0.5rem' }}>Les nouveaux flux apparaîtront ici en temps réel.</p>
       </div>
     );
   }
 
   return (
-    <div className="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Client</th>
-            <th>Commune</th>
-            <th>Montant</th>
-            <th>Source</th>
-            <th>Statut</th>
-            <th style={{ textAlign: 'right' }}>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {commandes.map((c) => {
-            const dateStr = c.date_creation?.toDate ? format(c.date_creation.toDate(), 'dd MMM yyyy HH:mm', { locale: fr }) : 'N/A';
-            return (
-              <tr key={c.id}>
-                <td style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{dateStr}</td>
-                <td>
-                   <div style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{c.nom_client || `Client #${c.client_id.slice(0,5)}`}</div>
-                   {c.telephone_client && <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{c.telephone_client}</div>}
-                </td>
-                <td>{c.commune_livraison}</td>
-                <td style={{ fontWeight: 600 }}>{Number(c.montant_total).toLocaleString()} CFA</td>
-                <td style={{ textTransform: 'capitalize', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{c.source_commande}</td>
-                <td>{getStatusBadge(c.statut_commande)}</td>
-                <td style={{ textAlign: 'right', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-                  <button 
-                    className="btn btn-outline" 
-                    style={{ padding: '0.25rem 0.5rem' }} 
-                    title={actionLabel}
-                    onClick={() => onActionClick && onActionClick(c)}
-                  >
-                    {getIconComponent(actionIcon)}
-                  </button>
-                  {onDelete && (
-                    <button 
-                      className="btn btn-outline" 
-                      style={{ padding: '0.25rem 0.5rem', color: 'var(--danger-color)', borderColor: 'var(--danger-color)' }} 
-                      title="Supprimer"
-                      onClick={() => { if(window.confirm('Supprimer cette commande définituvement ?')) onDelete(c); }}
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  )}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+    <div className="card table-responsive-cards" style={{ padding: '0', background: 'transparent', boxShadow: 'none' }}>
+      <div className="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Date / ID</th>
+              <th>Client & Contact</th>
+              <th>Zone de Livraison</th>
+              <th>Montant Total</th>
+              <th>Source</th>
+              <th>État Actuel</th>
+              <th style={{ textAlign: 'right' }}>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {commandes.map((c) => {
+              const dateRaw = c.date_creation?.toDate ? c.date_creation.toDate() : (c.date_creation || new Date());
+              const dateStr = format(dateRaw, 'dd MMM yyyy', { locale: fr });
+              const timeStr = format(dateRaw, 'HH:mm', { locale: fr });
+              
+              return (
+                <tr key={c.id}>
+                  <td data-label="Date / ID">
+                    <div style={{ fontWeight: 700, color: 'var(--text-main)' }}>{dateStr}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{timeStr} • #{c.id.slice(0, 8).toUpperCase()}</div>
+                  </td>
+                  <td data-label="Client & Contact">
+                     <div style={{ fontWeight: 800, color: 'var(--primary)', marginBottom: '0.2rem' }}>{c.nom_client || `Client #${c.client_id.slice(0,5)}`}</div>
+                     {c.telephone_client && <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-main)' }}>{c.telephone_client}</div>}
+                  </td>
+                  <td data-label="Zone">
+                    <div style={{ fontWeight: 600 }}>{c.commune_livraison}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>{c.adresse_livraison?.slice(0, 30)}...</div>
+                  </td>
+                  <td data-label="Montant" style={{ fontWeight: 800, fontSize: '1.1rem' }}>
+                    {Number(c.montant_total).toLocaleString()} <span style={{ fontSize: '0.75rem' }}>CFA</span>
+                  </td>
+                  <td data-label="Source">
+                    <span className="badge" style={{ background: '#f8fafc', color: '#64748b', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      {c.source_commande}
+                    </span>
+                  </td>
+                  <td data-label="État Actuel">{getStatusBadge(c.statut_commande)}</td>
+                  <td style={{ textAlign: 'right' }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+                      <button 
+                        className="btn btn-outline" 
+                        style={{ padding: '0.6rem', borderRadius: '12px' }} 
+                        title={actionLabel}
+                        onClick={() => onActionClick && onActionClick(c)}
+                      >
+                        {getIconComponent(actionIcon)}
+                      </button>
+                      {onDelete && (
+                        <button 
+                          className="btn btn-outline" 
+                          style={{ padding: '0.6rem', borderRadius: '12px', color: '#ef4444', borderColor: 'transparent' }} 
+                          title="Supprimer"
+                          onClick={() => { if(window.confirm('Supprimer cette commande définituvement ?')) onDelete(c); }}
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

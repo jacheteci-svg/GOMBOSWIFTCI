@@ -10,38 +10,40 @@ export const Admin = () => {
   const [activeTab, setActiveTab] = useState<'utilisateurs' | 'communes'>('utilisateurs');
 
   return (
-    <div className="container">
+    <div style={{ animation: 'pageEnter 0.6s ease' }}>
       <div style={{ marginBottom: '2.5rem' }}>
-        <h2 style={{ fontSize: '1.75rem', fontWeight: 800, margin: 0 }}>Administration</h2>
-        <p style={{ color: 'var(--text-secondary)', margin: '0.5rem 0 0' }}>Gestion globale du système.</p>
+        <h1 className="text-premium" style={{ fontSize: '2.2rem', fontWeight: 800, margin: 0 }}>Administration</h1>
+        <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', marginTop: '0.4rem', fontWeight: 500 }}>Gestion globale du système et des accès.</p>
       </div>
 
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem', padding: '0.25rem', backgroundColor: 'rgba(0,0,0,0.05)', borderRadius: '12px', width: 'fit-content' }}>
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2.5rem', padding: '0.4rem', background: '#f1f5f9', borderRadius: '16px', width: 'fit-content' }}>
         <button 
-          className={`btn ${activeTab === 'utilisateurs' ? 'btn-primary' : ''}`}
+          className="btn"
           onClick={() => setActiveTab('utilisateurs')}
           style={{ 
-            backgroundColor: activeTab === 'utilisateurs' ? 'var(--primary-color)' : 'transparent',
-            color: activeTab === 'utilisateurs' ? '#fff' : 'var(--text-secondary)',
-            border: 'none', padding: '0.6rem 1.25rem', borderRadius: '10px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem'
+            background: activeTab === 'utilisateurs' ? 'white' : 'transparent',
+            color: activeTab === 'utilisateurs' ? 'var(--primary)' : 'var(--text-muted)',
+            boxShadow: activeTab === 'utilisateurs' ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
+            border: 'none', padding: '0.7rem 1.5rem', borderRadius: '12px', fontWeight: 700, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem'
           }}
         >
-          <UsersIcon size={18} /> Utilisateurs
+          <UsersIcon size={18} strokeWidth={activeTab === 'utilisateurs' ? 2.5 : 2} /> Utilisateurs
         </button>
         <button 
-          className={`btn ${activeTab === 'communes' ? 'btn-primary' : ''}`}
+          className="btn"
           onClick={() => setActiveTab('communes')}
           style={{ 
-            backgroundColor: activeTab === 'communes' ? 'var(--primary-color)' : 'transparent',
-            color: activeTab === 'communes' ? '#fff' : 'var(--text-secondary)',
-            border: 'none', padding: '0.6rem 1.25rem', borderRadius: '10px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem'
+            background: activeTab === 'communes' ? 'white' : 'transparent',
+            color: activeTab === 'communes' ? 'var(--primary)' : 'var(--text-muted)',
+            boxShadow: activeTab === 'communes' ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
+            border: 'none', padding: '0.7rem 1.5rem', borderRadius: '12px', fontWeight: 700, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem'
           }}
         >
-          <MapIcon size={18} /> Communes
+          <MapIcon size={18} strokeWidth={activeTab === 'communes' ? 2.5 : 2} /> Zones & Tarifs
         </button>
       </div>
 
-      <div className="card" style={{ padding: '0' }}>
+      <div>
         {activeTab === 'utilisateurs' ? <UsersManager showToast={showToast} /> : <CommunesManager showToast={showToast} />}
       </div>
     </div>
@@ -103,23 +105,11 @@ const UsersManager = ({ showToast }: { showToast: any }) => {
     setLoading(true);
     try {
       if (editingId === 'new') {
-        let authId = '';
         const { data: authData, error } = await insforge.auth.signUp({ 
           email: email as string, 
           password: password as string
         });
-
-        if (error) {
-          if (error.message.toLowerCase().includes('already') || error.message.toLowerCase().includes('existe')) {
-             // Logic to recover existing authId omitted for brevity but should be here
-          } else {
-            throw error;
-          }
-        } else {
-          authId = authData?.user?.id || '';
-        }
-
-        if (!authId) throw new Error("Impossible de déterminer l'ID Auth.");
+        if (error) throw error;
         
         await createAdminUser({
           nom_complet: form.nom_complet || '',
@@ -128,7 +118,7 @@ const UsersManager = ({ showToast }: { showToast: any }) => {
           telephone: sanitizedTel,
           permissions: form.permissions || [],
           actif: true
-        }, authId);
+        }, authData?.user?.id || '');
       } else if (editingId) {
         await updateAdminUser(editingId, { ...form, telephone: sanitizedTel });
       }
@@ -142,11 +132,15 @@ const UsersManager = ({ showToast }: { showToast: any }) => {
   };
 
   return (
-    <div style={{ padding: '1rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-        <h3 style={{ margin: 0 }}>Gestion des Accès Utilisateurs</h3>
-        <button className="btn btn-primary btn-sm" onClick={() => { setEditingId('new'); setForm({ role: 'AGENT_APPEL', actif: true, permissions: ['PROFIL'] }); }}>
-          <Plus size={16} /> Nouvel Utilisateur
+    <div className="card table-responsive-cards" style={{ padding: '2rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+        <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>Liste des Utilisateurs</h3>
+        <button 
+          className="btn btn-primary" 
+          onClick={() => { setEditingId('new'); setForm({ role: 'AGENT_APPEL', permissions: ['DASHBOARD', 'PRODUITS', 'COMMANDES', 'CENTRE_APPEL'] }); }}
+          disabled={loading}
+        >
+          <Plus size={18} /> Nouvel Utilisateur
         </button>
       </div>
 
@@ -154,102 +148,83 @@ const UsersManager = ({ showToast }: { showToast: any }) => {
         <table>
           <thead>
             <tr>
-              <th style={{ width: '200px' }}>Utilisateur</th>
-              <th style={{ width: '150px' }}>Contact</th>
-              <th style={{ width: '120px' }}>Rôle Principal</th>
-              <th>Permissions / Accès</th>
-              <th style={{ textAlign: 'right', width: '100px' }}>Actions</th>
+              <th>Nom & Tel</th>
+              <th>Rôle / Email</th>
+              <th>Permissions</th>
+              <th style={{ textAlign: 'right', width: '120px' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {(editingId === 'new') && (
-              <tr style={{ backgroundColor: 'rgba(79, 70, 229, 0.05)' }}>
-                <td>
-                  <input className="form-input" placeholder="Nom Complet *" value={form?.nom_complet || ''} onChange={e => setForm({...form, nom_complet: e.target.value})} />
-                  <select className="form-select" style={{ marginTop: '0.5rem' }} value={form?.role || 'AGENT_APPEL'} onChange={e => setForm({...form, role: e.target.value as any})}>
-                    <option value="ADMIN">ADMIN</option>
-                    <option value="GESTIONNAIRE">GESTIONNAIRE</option>
-                    <option value="AGENT_APPEL">AGENT APPEL</option>
-                    <option value="LOGISTIQUE">LOGISTIQUE</option>
-                    <option value="LIVREUR">LIVREUR</option>
-                    <option value="CAISSIERE">CAISSIÈRE</option>
-                    <option value="AGENT_MIXTE">AGENT MIXTE</option>
-                  </select>
-                </td>
-                <td>
-                   <input className="form-input" placeholder="Email *" value={form?.email || ''} onChange={e => setForm({...form, email: e.target.value})} />
-                   <input className="form-input" placeholder="Tel" style={{ marginTop: '0.25rem' }} value={form?.telephone || ''} onChange={e => setForm({...form, telephone: e.target.value})} />
-                </td>
-                <td colSpan={2}>
-                   <div style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.5rem' }}>Modules autorisés :</div>
-                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
-                    {PERMISSIONS_LIST.map(p => (
-                      <label key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem', cursor: 'pointer' }}>
-                        <input type="checkbox" checked={form.permissions?.includes(p.id)} onChange={() => togglePermission(p.id)} />
-                        {p.label}
-                      </label>
-                    ))}
-                   </div>
-                </td>
-                <td style={{ textAlign: 'right' }}>
-                  <button className="btn btn-primary btn-sm" disabled={loading} onClick={handleSave}>Créer</button>
-                  <button className="btn btn-outline btn-sm" style={{ marginTop: '0.5rem' }} onClick={() => setEditingId(null)}>Annuler</button>
+            {(editingId === 'new' || (editingId && users.find(u => u.id === editingId))) && (
+              <tr style={{ background: '#f8fafc' }}>
+                <td colSpan={4}>
+                  <div style={{ padding: '2rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
+                    <div className="form-group">
+                      <label className="form-label">Nom Complet</label>
+                      <input className="form-input" value={form.nom_complet || ''} onChange={e => setForm({...form, nom_complet: e.target.value})} />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Téléphone</label>
+                      <input className="form-input" value={form.telephone || ''} onChange={e => setForm({...form, telephone: e.target.value})} />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Rôle</label>
+                      <select className="form-select" value={form.role || ''} onChange={e => setForm({...form, role: e.target.value as any})}>
+                        <option value="ADMIN">Administrateur</option>
+                        <option value="GESTIONNAIRE">Gestionnaire</option>
+                        <option value="AGENT_APPEL">Call Center (Appels)</option>
+                        <option value="LOGISTIQUE">Logistique</option>
+                        <option value="LIVREUR">Livreur</option>
+                        <option value="CAISSIERE">Caissière</option>
+                        <option value="AGENT_MIXTE">Agent Mixte (Caisse + Call)</option>
+                      </select>
+                    </div>
+                    {form.role !== 'LIVREUR' && (
+                      <div className="form-group">
+                        <label className="form-label">Email</label>
+                        <input className="form-input" value={form.email || ''} onChange={e => setForm({...form, email: e.target.value})} />
+                      </div>
+                    )}
+                    <div style={{ gridColumn: '1 / -1' }}>
+                      <label className="form-label">Permissions d'Accès</label>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', marginTop: '0.75rem', background: 'white', padding: '1.5rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                        {PERMISSIONS_LIST.map(p => (
+                          <label key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 500 }}>
+                            <input type="checkbox" checked={form.permissions?.includes(p.id)} onChange={() => togglePermission(p.id)} style={{ width: '18px', height: '18px' }} />
+                            {p.label}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                    <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
+                      <button className="btn btn-outline" onClick={() => setEditingId(null)}>Annuler</button>
+                      <button className="btn btn-primary" onClick={handleSave} disabled={loading}>
+                        {loading ? 'Sauvegarde...' : 'Enregistrer'}
+                      </button>
+                    </div>
+                  </div>
                 </td>
               </tr>
             )}
-            {users.map((u: User) => editingId === u.id ? (
-              <tr key={u.id} style={{ backgroundColor: 'rgba(79, 70, 229, 0.05)' }}>
-                <td>
-                  <input className="form-input" value={form?.nom_complet || ''} onChange={e => setForm({...form, nom_complet: e.target.value})} />
-                  <select className="form-select" style={{ marginTop: '0.5rem' }} value={form?.role || 'AGENT_APPEL'} onChange={e => setForm({...form, role: e.target.value as any})}>
-                    <option value="ADMIN">ADMIN</option>
-                    <option value="GESTIONNAIRE">GESTIONNAIRE</option>
-                    <option value="AGENT_APPEL">AGENT APPEL</option>
-                    <option value="LOGISTIQUE">LOGISTIQUE</option>
-                    <option value="LIVREUR">LIVREUR</option>
-                    <option value="CAISSIERE">CAISSIÈRE</option>
-                    <option value="AGENT_MIXTE">AGENT MIXTE</option>
-                  </select>
-                </td>
-                <td>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{u.email}</div>
-                  <input className="form-input" placeholder="Tel" style={{ marginTop: '0.25rem' }} value={form?.telephone || ''} onChange={e => setForm({...form, telephone: e.target.value})} />
-                </td>
-                <td colSpan={2}>
-                   <div style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.5rem' }}>Modifier les accès :</div>
-                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem' }}>
-                    {PERMISSIONS_LIST.map(p => (
-                      <label key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem', cursor: 'pointer' }}>
-                        <input type="checkbox" checked={form.permissions?.includes(p.id)} onChange={() => togglePermission(p.id)} />
-                        {p.label}
-                      </label>
-                    ))}
-                   </div>
-                </td>
-                <td style={{ textAlign: 'right' }}>
-                  <button className="btn btn-primary btn-sm" disabled={loading} onClick={handleSave}>Sauver</button>
-                  <button className="btn btn-outline btn-sm" style={{ marginTop: '0.5rem' }} onClick={() => setEditingId(null)}>Annuler</button>
-                </td>
-              </tr>
-            ) : (
+
+            {users.map(u => (
               <tr key={u.id}>
-                <td>
-                  <div style={{ fontWeight: 600 }}>{u.nom_complet}</div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>ID: {u.id.substring(0,8)}</div>
+                <td data-label="Nom & Tel">
+                  <div>
+                    <p style={{ fontWeight: 700, color: 'var(--text-main)' }}>{u.nom_complet}</p>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{u.telephone || 'N/A'}</p>
+                  </div>
                 </td>
-                <td>
-                  <div style={{ fontSize: '0.8rem' }}>{u.email}</div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{u.telephone}</div>
+                <td data-label="Rôle / Email">
+                  <span className={`badge ${u.role === 'ADMIN' ? 'badge-danger' : 'badge-info'}`} style={{ marginBottom: '0.25rem', display: 'inline-block' }}>{u.role}</span>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{u.email}</p>
                 </td>
-                <td><span className="badge badge-info">{u.role}</span></td>
-                <td>
+                <td data-label="Permissions">
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
-                    {(u.permissions || []).map((p: string) => (
-                      <span key={p} className="badge" style={{ fontSize: '0.65rem', backgroundColor: 'rgba(0,0,0,0.05)', color: 'var(--text-secondary)' }}>{p}</span>
+                    {u.permissions?.slice(0, 3).map(p => (
+                      <span key={p} style={{ fontSize: '0.7rem', padding: '0.1rem 0.4rem', background: '#f1f5f9', borderRadius: '4px', color: 'var(--text-muted)', fontWeight: 600 }}>{p}</span>
                     ))}
-                    {(!u.permissions || u.permissions.length === 0) && (
-                      <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>Profil par défaut</span>
-                    )}
+                    {(u.permissions?.length || 0) > 3 && <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>+{(u.permissions?.length || 0) - 3}</span>}
                   </div>
                 </td>
                 <td style={{ textAlign: 'right' }}>
@@ -277,7 +252,7 @@ const CommunesManager = ({ showToast }: { showToast: any }) => {
       const data = await getCommunes();
       setCommunes(data || []);
     } catch (e) {
-      if (showToast) showToast("Erreur lors du chargement des zones.", "error");
+      showToast("Erreur chargement.", "error");
     } finally {
       setLoading(false);
     }
@@ -290,8 +265,7 @@ const CommunesManager = ({ showToast }: { showToast: any }) => {
     const tarif = Number(form?.tarif_livraison);
 
     if (!nom || isNaN(tarif)) {
-      if (showToast) showToast("Veuillez saisir un nom et un tarif valide.", "error");
-      return;
+      showToast("Champs requis.", "error"); return;
     }
 
     setLoading(true);
@@ -301,39 +275,37 @@ const CommunesManager = ({ showToast }: { showToast: any }) => {
       } else if (editingId) {
         await updateCommune(editingId, { nom, tarif_livraison: tarif });
       }
-      if (showToast) showToast("Zone enregistrée avec succès.", "success");
-      setEditingId(null);
-      setForm({});
-      loadCommunes();
+      showToast("Enregistré.", "success");
+      setEditingId(null); setForm({}); loadCommunes();
     } catch (e: any) {
-      if (showToast) showToast(e.message || "Erreur de sauvegarde.", "error");
+      showToast(e.message || "Erreur.", "error");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm("Voulez-vous vraiment supprimer cette zone ?")) {
+    if (window.confirm("Supprimer cette zone ?")) {
       try {
         await deleteCommune(id);
-        if (showToast) showToast("Zone supprimée.");
+        showToast("Zone supprimée.");
         loadCommunes();
       } catch (e) {
-        if (showToast) showToast("Erreur lors de la suppression.", "error");
+        showToast("Erreur.", "error");
       }
     }
   };
 
   return (
-    <div style={{ padding: '1rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', alignItems: 'center' }}>
-        <h3 style={{ margin: 0 }}>Zones & Tarifs de Livraison</h3>
+    <div className="card table-responsive-cards" style={{ padding: '2rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+        <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>Zones & Tarifs</h3>
         <button 
-          className="btn btn-primary btn-sm" 
+          className="btn btn-primary" 
           onClick={() => { setEditingId('new'); setForm({ tarif_livraison: 1500 }); }}
           disabled={loading}
         >
-          <Plus size={16} /> Ajouter une zone
+          <Plus size={18} /> Ajouter une zone
         </button>
       </div>
 
@@ -343,93 +315,43 @@ const CommunesManager = ({ showToast }: { showToast: any }) => {
             <tr>
               <th>Zone / Commune</th>
               <th>Tarif (CFA)</th>
-              <th style={{ textAlign: 'right', width: '120px' }}>Actions</th>
+              <th style={{ textAlign: 'right', width: '150px' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {editingId === 'new' && (
-              <tr style={{ backgroundColor: 'rgba(79, 70, 229, 0.05)' }}>
-                <td>
-                  <input 
-                    className="form-input" 
-                    placeholder="Nom de la zone" 
-                    value={form?.nom || ''} 
-                    onChange={e => setForm({ ...form, nom: e.target.value })} 
-                  />
-                </td>
-                <td>
-                  <input 
-                    className="form-input" 
-                    type="number" 
-                    value={form?.tarif_livraison ?? ''} 
-                    onChange={e => setForm({ ...form, tarif_livraison: e.target.value === '' ? '' : Number(e.target.value) } as any)} 
-                  />
-                </td>
+            {(editingId === 'new' || communes.some(c => c.id === editingId)) && editingId !== null && (
+               <tr style={{ background: '#f8fafc' }}>
+                 <td colSpan={3}>
+                    <div style={{ padding: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+                      <div className="form-group" style={{ flex: 2, minWidth: '200px' }}>
+                        <label className="form-label">Nom de la Zone</label>
+                        <input className="form-input" value={form.nom || ''} onChange={e => setForm({...form, nom: e.target.value})} />
+                      </div>
+                      <div className="form-group" style={{ flex: 1, minWidth: '150px' }}>
+                        <label className="form-label">Tarif de Livraison</label>
+                        <input className="form-input" type="number" value={form.tarif_livraison ?? ''} onChange={e => setForm({...form, tarif_livraison: Number(e.target.value)})} />
+                      </div>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button className="btn btn-primary" onClick={handleSave} disabled={loading}>OK</button>
+                        <button className="btn btn-outline" onClick={() => setEditingId(null)}>Annuler</button>
+                      </div>
+                    </div>
+                 </td>
+               </tr>
+            )}
+
+            {communes.filter(c => c.id !== editingId).map(c => (
+              <tr key={c.id}>
+                <td data-label="Zone" style={{ fontWeight: 700 }}>{c.nom}</td>
+                <td data-label="Tarif" style={{ color: 'var(--primary)', fontWeight: 800 }}>{c.tarif_livraison?.toLocaleString()} CFA</td>
                 <td style={{ textAlign: 'right' }}>
-                  <button className="btn btn-primary btn-sm" disabled={loading} onClick={handleSave}>OK</button>
-                  <button className="btn btn-outline btn-sm" style={{ marginLeft: '0.25rem' }} onClick={() => setEditingId(null)}>X</button>
+                  <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                    <button className="btn btn-outline btn-sm" onClick={() => {setEditingId(c.id); setForm(c);}}>Modifier</button>
+                    <button className="btn btn-outline btn-sm" style={{ color: '#ef4444' }} onClick={() => handleDelete(c.id)}><Trash2 size={16} /></button>
+                  </div>
                 </td>
               </tr>
-            )}
-
-            {communes.map((c: Commune) => {
-              if (!c?.id) return null;
-              const isEditing = editingId === c.id;
-
-              return isEditing ? (
-                <tr key={c.id} style={{ backgroundColor: 'rgba(79, 70, 229, 0.05)' }}>
-                  <td>
-                    <input 
-                      className="form-input" 
-                      value={String(form?.nom || '')} 
-                      onChange={e => setForm({ ...form, nom: e.target.value })} 
-                    />
-                  </td>
-                  <td>
-                    <input 
-                      className="form-input" 
-                      type="number" 
-                      value={form?.tarif_livraison ?? ''} 
-                      onChange={e => setForm({ ...form, tarif_livraison: e.target.value === '' ? '' : Number(e.target.value) } as any)} 
-                    />
-                  </td>
-                  <td style={{ textAlign: 'right' }}>
-                    <button className="btn btn-primary btn-sm" disabled={loading} onClick={handleSave}>Sauver</button>
-                    <button className="btn btn-outline btn-sm" style={{ marginLeft: '0.25rem' }} onClick={() => setEditingId(null)}>X</button>
-                  </td>
-                </tr>
-              ) : (
-                <tr key={c.id}>
-                  <td style={{ fontWeight: 600 }}>{String(c.nom || 'Sans nom')}</td>
-                  <td style={{ color: 'var(--primary-color)', fontWeight: 700 }}>
-                    {typeof c.tarif_livraison === 'number' ? c.tarif_livraison.toLocaleString() : String(c.tarif_livraison || 0)} CFA
-                  </td>
-                  <td style={{ textAlign: 'right' }}>
-                    <button 
-                      className="btn btn-outline btn-sm" 
-                      onClick={() => { setEditingId(c.id); setForm({ ...c }); }}
-                    >
-                      Modifier
-                    </button>
-                    <button 
-                      className="btn btn-outline btn-sm" 
-                      style={{ color: 'var(--danger-color)', marginLeft: '0.5rem' }} 
-                      onClick={() => handleDelete(c.id)}
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-
-            {communes.length === 0 && editingId !== 'new' && (
-              <tr>
-                <td colSpan={3} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
-                  Aucune zone configurée.
-                </td>
-              </tr>
-            )}
+            ))}
           </tbody>
         </table>
       </div>

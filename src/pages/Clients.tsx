@@ -65,28 +65,31 @@ export const Clients = () => {
   );
 
   if (loading) return <div style={{ padding: '2rem', textAlign: 'center' }}>Chargement...</div>;
-
   return (
-    <div className="container">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h1 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Users size={28} style={{ color: 'var(--primary-color)' }} />
-          CRM Clients
-        </h1>
-        <div style={{ color: 'var(--text-secondary)' }}>
-          Total : <strong style={{ color: 'var(--text-primary)' }}>{clients.length}</strong> clients
+    <div style={{ animation: 'pageEnter 0.6s ease' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+        <div>
+          <h1 className="text-premium" style={{ fontSize: '2.2rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <Users size={36} strokeWidth={2.5} />
+            Espace CRM Clients
+          </h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', marginTop: '0.4rem', fontWeight: 500 }}>Gérez votre base client et lancez des campagnes WhatsApp ciblées.</p>
+        </div>
+        <div style={{ background: 'var(--glass)', padding: '0.75rem 1.5rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', textAlign: 'right' }}>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase' }}>Audience Totale</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--primary)' }}>{clients.length} <span style={{ fontSize: '0.9rem' }}>leads</span></div>
         </div>
       </div>
 
-      {/* Barre de recherche */}
-      <div className="card" style={{ marginBottom: '2rem', padding: '1rem' }}>
-        <div className="form-group" style={{ marginBottom: 0, position: 'relative' }}>
-          <Search size={20} style={{ position: 'absolute', top: '50%', left: '1rem', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+      {/* Barre de recherche Premium */}
+      <div className="card glass-effect" style={{ marginBottom: '2.5rem', padding: '1.25rem', border: '1px solid rgba(255,255,255,0.1)' }}>
+        <div style={{ position: 'relative', maxWidth: '500px' }}>
+          <Search size={22} strokeWidth={2.5} style={{ position: 'absolute', top: '50%', left: '1.25rem', transform: 'translateY(-50%)', color: 'var(--primary)' }} />
           <input 
             type="text" 
             className="form-input" 
-            placeholder="Rechercher par nom ou numéro..." 
-            style={{ paddingLeft: '3rem', maxWidth: '400px' }}
+            placeholder="Rechercher un client (Nom, Mobile...)" 
+            style={{ paddingLeft: '3.5rem', height: '56px', fontSize: '1.05rem', fontWeight: 600, borderRadius: '18px', border: '2px solid #f1f5f9' }}
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
           />
@@ -94,48 +97,59 @@ export const Clients = () => {
       </div>
 
       {/* Liste des clients */}
-      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-        <div className="table-container" style={{ margin: 0, overflowX: 'auto' }}>
-          <table className="table" style={{ margin: 0 }}>
-            <thead style={{ backgroundColor: 'var(--bg-color)' }}>
+      <div className="card" style={{ padding: 0, overflow: 'hidden', border: '1px solid #f1f5f9' }}>
+        <div className="table-container">
+          <table>
+            <thead>
               <tr>
-                <th>Nom & Contact</th>
-                <th>Localisation</th>
-                <th>Remarques</th>
+                <th>Identité & Contact</th>
+                <th>Zone Géographique</th>
+                <th>Remarques de l'Agent</th>
                 <th style={{ textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredClients.map(client => (
-                <tr key={client.id} style={{ borderBottom: '1px solid var(--border-color)', cursor: 'pointer' }} onClick={() => openClientDetails(client)} className="hoverable-row">
+                <tr key={client.id} style={{ cursor: 'pointer', transition: 'all 0.2s ease' }} onClick={() => openClientDetails(client)} className="hover-card">
                   <td>
-                    <div style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{client.nom_complet}</div>
-                    <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <Phone size={12} /> {client.telephone}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                       <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '1.1rem' }}>
+                         {client.nom_complet.charAt(0).toUpperCase()}
+                       </div>
+                       <div>
+                         <div style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: '1.05rem' }}>{client.nom_complet}</div>
+                         <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
+                           <Phone size={12} strokeWidth={2.5} /> {client.telephone}
+                         </div>
+                       </div>
                     </div>
                   </td>
                   <td>
                     {client.commune || client.ville ? (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-                        <MapPin size={14} /> {client.commune} {client.ville ? `(${client.ville})` : ''}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>
+                        <MapPin size={16} strokeWidth={2.5} color="var(--primary)" /> {client.commune} {client.ville ? `(${client.ville})` : ''}
                       </div>
-                    ) : '-'}
+                    ) : <span style={{ color: '#cbd5e1' }}>Non renseigné</span>}
                   </td>
                   <td>
-                    <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', display: 'inline-block', maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500, display: 'inline-block', maxWidth: '250px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {client.remarques || '-'}
                     </span>
                   </td>
                   <td style={{ textAlign: 'right' }}>
-                    <button className="btn btn-outline btn-sm" onClick={(e) => { e.stopPropagation(); openClientDetails(client); }}>
-                      <ExternalLink size={16} /> Fiche
+                    <button className="btn btn-outline" style={{ borderRadius: '12px', height: '40px', fontWeight: 700 }} onClick={(e) => { e.stopPropagation(); openClientDetails(client); }}>
+                      <ExternalLink size={16} strokeWidth={2.5} style={{ marginRight: '0.4rem' }} /> Dossier
                     </button>
                   </td>
                 </tr>
               ))}
               {filteredClients.length === 0 && (
                 <tr>
-                  <td colSpan={4} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>Aucun client trouvé.</td>
+                  <td colSpan={4} style={{ textAlign: 'center', padding: '5rem', color: 'var(--text-muted)' }}>
+                    <Users size={48} style={{ opacity: 0.2, marginBottom: '1rem' }} />
+                    <p style={{ fontWeight: 700, fontSize: '1.1rem' }}>Aucun client dans les radars.</p>
+                    <p style={{ fontSize: '0.9rem' }}>Ajustez vos filtres de recherche.</p>
+                  </td>
                 </tr>
               )}
             </tbody>
@@ -143,81 +157,102 @@ export const Clients = () => {
         </div>
       </div>
 
-      {/* Client Details Modal */}
+      {/* Client Details Modal Premium */}
       {selectedClient && (
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '1rem' }}>
-          <div className="card" style={{ width: '100%', maxWidth: '800px', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
-            <button onClick={() => setSelectedClient(null)} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
-              <X size={24} />
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '1rem' }} onClick={() => setSelectedClient(null)}>
+          <div className="card glass-effect" style={{ width: '100%', maxWidth: '900px', maxHeight: '90vh', overflowY: 'auto', position: 'relative', padding: '3rem', border: '1px solid rgba(255,255,255,0.2)' }} onClick={e => e.stopPropagation()}>
+            <button onClick={() => setSelectedClient(null)} style={{ position: 'absolute', top: '2rem', right: '2rem', background: 'rgba(0,0,0,0.05)', border: 'none', borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s ease' }} className="hover-card">
+              <X size={22} fill="currentColor" />
             </button>
             
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start', borderBottom: '1px solid var(--border-color)', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
-               <div style={{ width: '64px', height: '64px', backgroundColor: 'var(--primary-color)', color: 'white', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: 'bold' }}>
+            <div style={{ display: 'flex', gap: '2rem', alignItems: 'center', marginBottom: '2.5rem' }}>
+               <div style={{ width: '100px', height: '100px', background: 'linear-gradient(135deg, var(--primary) 0%, #818cf8 100%)', color: 'white', borderRadius: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem', fontWeight: 900, boxShadow: '0 20px 25px -5px rgba(99, 102, 255, 0.3)' }}>
                  {selectedClient.client.nom_complet.charAt(0).toUpperCase()}
                </div>
-               <div>
-                 <h2 style={{ margin: 0, fontSize: '1.5rem' }}>{selectedClient.client.nom_complet}</h2>
-                 <p style={{ margin: '0.25rem 0 0', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                   <Phone size={16} /> {selectedClient.client.telephone}
-                   {selectedClient.client.email && <>&nbsp;•&nbsp; {selectedClient.client.email}</>}
-                 </p>
-                 {(selectedClient.client.commune || selectedClient.client.adresse) && (
-                   <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                     <MapPin size={16} /> {selectedClient.client.commune} - {selectedClient.client.adresse}
-                   </p>
-                 )}
+               <div style={{ flex: 1 }}>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                    <h2 style={{ margin: 0, fontSize: '2.4rem', fontWeight: 900, letterSpacing: '-0.02em', color: 'var(--text-main)' }}>{selectedClient.client.nom_complet}</h2>
+                    <span style={{ padding: '0.4rem 1rem', background: '#dcfce7', color: '#166534', borderRadius: '30px', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase' }}>Client Actif</span>
+                 </div>
+                 <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                      <Phone size={18} strokeWidth={2.5} color="var(--primary)" /> {selectedClient.client.telephone}
+                    </div>
+                    {selectedClient.client.commune && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                        <MapPin size={18} strokeWidth={2.5} color="var(--primary)" /> {selectedClient.client.commune}
+                      </div>
+                    )}
+                 </div>
                </div>
             </div>
 
-            {/* Actions de Fidélisation WhatsApp */}
-            <div style={{ marginBottom: '2rem' }}>
-              <h3 style={{ fontSize: '1.125rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary-color)' }}>
-                <MessageCircle size={20} /> Fidélisation & Marketing WhatsApp
-              </h3>
-              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                <button className="btn" style={{ backgroundColor: '#25D366', color: 'white', display: 'flex', gap: '0.5rem', alignItems: 'center', border: 'none' }} onClick={() => sendWhatsApp(selectedClient.client, 'friendly')}>
-                  Salut Amical 👋
+            {/* FIDÉLISATION WHATSAPP - SECTEUR STRATÉGIQUE */}
+            <div style={{ background: '#f0fdf4', padding: '2rem', borderRadius: '24px', border: '1px solid #bbf7d0', marginBottom: '3rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 900, margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#166534' }}>
+                  <MessageCircle size={24} strokeWidth={2.5} />
+                  Actions de Fidélisation Directe
+                </h3>
+                <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#15803d', background: 'rgba(22, 101, 52, 0.1)', padding: '0.3rem 0.75rem', borderRadius: '8px' }}>VIA WHATSAPP BUSINESS</span>
+              </div>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+                <button className="btn" style={{ height: '60px', borderRadius: '16px', backgroundColor: '#25D366', color: 'white', fontWeight: 800, display: 'flex', gap: '0.75rem', alignItems: 'center', justifyContent: 'center', border: 'none', boxShadow: '0 10px 15px -3px rgba(37, 211, 102, 0.3)' }} onClick={() => sendWhatsApp(selectedClient.client, 'friendly')}>
+                  Message Amical 👋
                 </button>
-                <button className="btn" style={{ backgroundColor: '#25D366', color: 'white', display: 'flex', gap: '0.5rem', alignItems: 'center', border: 'none' }} onClick={() => sendWhatsApp(selectedClient.client, 'promo')}>
-                  <Gift size={18} /> Offrir Remise / Promo
+                <button className="btn" style={{ height: '60px', borderRadius: '16px', backgroundColor: '#128C7E', color: 'white', fontWeight: 800, display: 'flex', gap: '0.75rem', alignItems: 'center', justifyContent: 'center', border: 'none', boxShadow: '0 10px 15px -3px rgba(18, 140, 126, 0.3)' }} onClick={() => sendWhatsApp(selectedClient.client, 'promo')}>
+                  <Gift size={20} strokeWidth={2.5} /> Offrir une Remise
                 </button>
-                <button className="btn" style={{ backgroundColor: '#128C7E', color: 'white', display: 'flex', gap: '0.5rem', alignItems: 'center', border: 'none' }} onClick={() => sendWhatsApp(selectedClient.client, 'reminder', selectedClient.commandes)} disabled={selectedClient.commandes.length === 0}>
-                   Relance Anciens Achats
+                <button className="btn" style={{ height: '60px', borderRadius: '16px', backgroundColor: '#075E54', color: 'white', fontWeight: 800, display: 'flex', gap: '0.75rem', alignItems: 'center', justifyContent: 'center', border: 'none', boxShadow: '0 10px 15px -3px rgba(7, 94, 84, 0.3)' }} onClick={() => sendWhatsApp(selectedClient.client, 'reminder', selectedClient.commandes)} disabled={selectedClient.commandes.length === 0}>
+                   Relancer (Historique)
                 </button>
               </div>
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
-                * Ces boutons ouvriront directement WhatsApp ou WhatsApp Web avec un message pré-écrit ultra-ciblé.
+              <p style={{ fontSize: '0.8rem', color: '#166534', marginTop: '1rem', fontWeight: 600, opacity: 0.8 }}>
+                * Messages pré-formatés pour maximiser le taux de conversion et la satisfaction client.
               </p>
             </div>
 
-            {/* Historique des Achats */}
+            {/* HISTORIQUE DES ACHATS PREMIUM */}
             <div>
-              <h3 style={{ fontSize: '1.125rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Calendar size={20} /> Historique des Commandes ({selectedClient.commandes.length})
-              </h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 900, margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <Calendar size={22} strokeWidth={2.5} />
+                  Journal des Commandes
+                </h3>
+                <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--primary)' }}>{selectedClient.commandes.length} achats</span>
+              </div>
               
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '1.25rem' }}>
                 {selectedClient.commandes.length === 0 ? (
-                  <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)', gridColumn: '1 / -1', border: '1px dashed var(--border-color)', borderRadius: 'var(--radius-md)' }}>
-                    Aucune commande enregistrée pour ce client.
+                  <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)', gridColumn: '1 / -1', background: '#f8fafc', borderRadius: '24px', border: '2px dashed #e2e8f0' }}>
+                    <p style={{ fontWeight: 700, margin: 0 }}>Ardoise vierge.</p>
+                    <p style={{ fontSize: '0.85rem' }}>Ce prospect n'a pas encore validé de commande.</p>
                   </div>
                 ) : (
                   selectedClient.commandes.map(cmd => (
-                    <div key={cmd.id} style={{ border: '1px solid var(--border-color)', padding: '1rem', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--bg-color)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                        <span style={{ fontWeight: 600 }}>#{cmd.id.slice(0,6)}</span>
-                        <span className={`badge badge-${cmd.statut_commande === 'livree' ? 'success' : cmd.statut_commande.includes('retour') || cmd.statut_commande === 'annulee' ? 'danger' : 'info'}`}>
-                          {cmd.statut_commande}
+                    <div key={cmd.id} style={{ padding: '1.5rem', borderRadius: '20px', backgroundColor: 'white', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.03)', transition: 'transform 0.2s ease' }} className="hover-card">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', alignItems: 'flex-start' }}>
+                        <div>
+                          <span style={{ fontWeight: 900, fontSize: '1.1rem', color: 'var(--text-main)' }}>#{cmd.id.slice(0, 8).toUpperCase()}</span>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700, marginTop: '0.2rem' }}>
+                            {format(new Date(cmd.date_creation), 'dd MMMM yyyy')}
+                          </div>
+                        </div>
+                        <span className={`badge badge-${cmd.statut_commande === 'livree' ? 'success' : cmd.statut_commande.includes('retour') || cmd.statut_commande === 'annulee' ? 'danger' : 'info'}`} style={{ fontWeight: 800, padding: '0.4rem 0.8rem', borderRadius: '10px' }}>
+                          {cmd.statut_commande.replace('_', ' ').toUpperCase()}
                         </span>
                       </div>
-                      <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
-                        {format(new Date(cmd.date_creation), 'dd MMMM yyyy HH:mm')}
-                      </div>
-                      <div style={{ fontWeight: 700, fontSize: '1.125rem', color: 'var(--primary-color)' }}>
-                        {Number(cmd.montant_total).toLocaleString()} CFA
-                      </div>
-                      <div style={{ fontSize: '0.875rem', marginTop: '0.5rem', color: 'var(--text-secondary)' }}>
-                        Source : {cmd.source_commande}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '1.5rem' }}>
+                        <div>
+                           <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase' }}>Volume Transaction</div>
+                           <div style={{ fontWeight: 900, fontSize: '1.4rem', color: 'var(--primary)' }}>
+                             {Number(cmd.montant_total).toLocaleString()} <span style={{ fontSize: '0.8rem' }}>CFA</span>
+                           </div>
+                        </div>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                          Source: {cmd.source_commande}
+                        </div>
                       </div>
                     </div>
                   ))
@@ -230,8 +265,10 @@ export const Clients = () => {
       )}
 
       <style>{`
-        .hoverable-row:hover td {
-          background-color: var(--bg-color);
+        .hover-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1) !important;
+          background-color: rgba(99, 102, 255, 0.02) !important;
         }
       `}</style>
     </div>

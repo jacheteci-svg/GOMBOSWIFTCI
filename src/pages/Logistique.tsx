@@ -63,113 +63,147 @@ export const Logistique = () => {
   if (loading) return <div style={{ padding: '2rem', textAlign: 'center' }}>Chargement...</div>;
 
   return (
-    <div className="container">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }} className="no-print">
-        <h1 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Truck size={28} style={{ color: 'var(--primary-color)' }} />
+    <div style={{ animation: 'pageEnter 0.6s ease' }}>
+      <div style={{ marginBottom: '2.5rem' }}>
+        <h1 className="text-premium" style={{ fontSize: '2.2rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <Truck size={36} strokeWidth={2.5} />
           Logistique & Affectation
         </h1>
+        <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', marginTop: '0.4rem', fontWeight: 500 }}>Optimisez vos tournées et affectez vos colis aux livreurs disponibles.</p>
       </div>
 
-      <div className="no-print" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) 350px', gap: '2rem', alignItems: 'start' }} className="responsive-grid">
         
-        <div className="card">
-          <h3 style={{ marginBottom: '1rem', fontSize: '1.125rem', display: 'flex', justifyContent: 'space-between' }}>
-            <span>Commandes à livrer ({commandes.length})</span>
-            <span style={{ fontSize: '0.875rem', fontWeight: 'normal', color: 'var(--text-secondary)' }}>
+        {/* LISTE DES COMMANDES */}
+        <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
+          <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
+            <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800 }}>
+              Commandes Disponibles
+              <span style={{ marginLeft: '1rem', padding: '0.2rem 0.6rem', background: 'rgba(99, 102, 255, 0.1)', borderRadius: '8px', fontSize: '0.8rem', color: 'var(--primary)' }}>
+                {commandes.length} flux
+              </span>
+            </h3>
+            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary)' }}>
               {selectedCommands.size} sélectionnée(s)
-            </span>
-          </h3>
+            </div>
+          </div>
 
           <div className="table-container">
             <table>
               <thead>
                 <tr>
-                  <th style={{ width: 40 }}>
-                    <input 
-                      type="checkbox" 
-                      onChange={(e) => {
-                        if (e.target.checked) setSelectedCommands(new Set(commandes.map(c => c.id)));
-                        else setSelectedCommands(new Set());
-                      }}
-                      checked={selectedCommands.size === commandes.length && commandes.length > 0}
-                    />
+                  <th style={{ width: 60 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <input 
+                        type="checkbox" 
+                        style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                        onChange={(e) => {
+                          if (e.target.checked) setSelectedCommands(new Set(commandes.map(c => c.id)));
+                          else setSelectedCommands(new Set());
+                        }}
+                        checked={selectedCommands.size === commandes.length && commandes.length > 0}
+                      />
+                    </div>
                   </th>
-                  <th>Client / Contact</th>
-                  <th>Commune / Adresse</th>
-                  <th style={{ textAlign: 'right' }}>Montant</th>
+                  <th>Client / Destination</th>
+                  <th>Zone</th>
+                  <th style={{ textAlign: 'right' }}>Valeur</th>
                 </tr>
               </thead>
               <tbody>
                 {commandes.map(c => (
-                  <tr key={c.id} onClick={() => toggleCommand(c.id)} style={{ cursor: 'pointer', backgroundColor: selectedCommands.has(c.id) ? 'rgba(79, 70, 229, 0.05)' : 'transparent' }}>
+                  <tr 
+                    key={c.id} 
+                    onClick={() => toggleCommand(c.id)} 
+                    style={{ 
+                      cursor: 'pointer', 
+                      transition: 'all 0.2s ease',
+                      backgroundColor: selectedCommands.has(c.id) ? 'rgba(99, 102, 255, 0.03)' : 'transparent' 
+                    }}
+                  >
                     <td>
-                      <input 
-                        type="checkbox" 
-                        checked={selectedCommands.has(c.id)}
-                        onChange={() => toggleCommand(c.id)}
-                        onClick={e => e.stopPropagation()}
-                      />
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <input 
+                          type="checkbox" 
+                          style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                          checked={selectedCommands.has(c.id)}
+                          onChange={() => toggleCommand(c.id)}
+                          onClick={e => e.stopPropagation()}
+                        />
+                      </div>
                     </td>
                     <td>
-                      <div style={{ fontWeight: 500 }}>{c.nom_client || `Client #${c.client_id.slice(0,5)}`}</div>
-                      <div style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>{c.telephone_client || 'Sans numéro'}</div>
+                      <div style={{ fontWeight: 700, color: 'var(--text-main)' }}>{c.nom_client || `Client #${c.client_id.slice(0,5)}`}</div>
+                      <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 500 }}>{c.telephone_client}</div>
                     </td>
                     <td>
-                      <span className="badge badge-info">{c.commune_livraison}</span>
+                      <span className="badge badge-info" style={{ fontWeight: 700, padding: '0.3rem 0.7rem' }}>{c.commune_livraison}</span>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem', fontStyle: 'italic' }}>{c.adresse_livraison?.slice(0, 40)}</div>
                     </td>
                     <td style={{ textAlign: 'right' }}>
-                      <div style={{ fontWeight: 600 }}>{Number(c.montant_total).toLocaleString()} CFA</div>
-                      {c.frais_livraison !== undefined && <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>(Inc. {c.frais_livraison} CFA de liv.)</div>}
+                      <div style={{ fontWeight: 800, fontSize: '1.05rem' }}>{Number(c.montant_total).toLocaleString()} <span style={{ fontSize: '0.7rem' }}>CFA</span></div>
+                      {c.frais_livraison !== undefined && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Liv: {c.frais_livraison}</div>}
                     </td>
                   </tr>
                 ))}
                 {commandes.length === 0 && (
-                  <tr><td colSpan={4} style={{ textAlign: 'center', padding: '2rem' }}>Aucune commande à livrer.</td></tr>
+                  <tr>
+                    <td colSpan={4} style={{ textAlign: 'center', padding: '5rem', color: 'var(--text-muted)' }}>
+                      <p style={{ fontWeight: 600, fontSize: '1.1rem' }}>Tout est à jour !</p>
+                      <p style={{ fontSize: '0.9rem' }}>Aucune commande en attente d'affectation.</p>
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </table>
           </div>
         </div>
 
-        <div className="card" style={{ height: 'max-content' }}>
-          <h3 style={{ marginBottom: '1rem', fontSize: '1.125rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Truck size={20} color="var(--primary-color)"/>
-            Créer Feuille de Route
+        {/* PANNEAU DE CONTRÔLE AFFECTATION */}
+        <div className="card glass-effect" style={{ height: 'max-content', padding: '2rem', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+          <h3 style={{ marginBottom: '1.5rem', fontSize: '1.2rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Printer size={16} strokeWidth={2.5} />
+            </div>
+            Affectation Livreur
           </h3>
           
           <div className="form-group">
-            <label className="form-label">Sélectionner un livreur</label>
-            <select className="form-select" value={selectedLivreur} onChange={e => setSelectedLivreur(e.target.value)}>
-              <option value="">-- Choisir --</option>
+            <label className="form-label" style={{ fontWeight: 700 }}>Choisir un agent de livraison</label>
+            <select className="form-select" style={{ height: '48px', fontWeight: 600 }} value={selectedLivreur} onChange={e => setSelectedLivreur(e.target.value)}>
+              <option value="">Sélectionner un livreur...</option>
               {livreurs.map(l => (
-                <option key={l.id} value={l.id}>{l.nom_complet}</option>
+                <option key={l.id} value={l.id}>{l.nom_complet} (Actif)</option>
               ))}
             </select>
           </div>
 
-          <div style={{ marginTop: '1.5rem', padding: '1rem', backgroundColor: 'var(--bg-color)', borderRadius: 'var(--radius-md)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-              <span style={{ color: 'var(--text-secondary)' }}>Colis :</span>
-              <span style={{ fontWeight: 600 }}>{selectedCommands.size}</span>
+          <div style={{ marginTop: '2rem', padding: '1.5rem', background: '#f8fafc', borderRadius: '18px', border: '1px solid #e2e8f0' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+              <span style={{ color: 'var(--text-muted)', fontWeight: 600, fontSize: '0.9rem' }}>Colis à charger :</span>
+              <span style={{ fontWeight: 800, color: 'var(--text-main)' }}>{selectedCommands.size}</span>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-              <span style={{ color: 'var(--text-secondary)' }}>Valeur totale des colis :</span>
-              <span style={{ fontWeight: 700, fontSize: '1.25rem', color: 'var(--primary-color)' }}>
-                {commandes.filter(c => selectedCommands.has(c.id)).reduce((a,c)=>a+Number(c.montant_total), 0).toLocaleString()} CFA
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ color: 'var(--text-muted)', fontWeight: 600, fontSize: '0.9rem' }}>Valeur Marchande :</span>
+              <span className="brand-glow" style={{ fontWeight: 900, fontSize: '1.3rem', color: 'var(--primary)' }}>
+                {commandes.filter(c => selectedCommands.has(c.id)).reduce((a,c)=>a+Number(c.montant_total), 0).toLocaleString()} <span style={{ fontSize: '0.75rem' }}>CFA</span>
               </span>
             </div>
           </div>
 
           <button 
             className="btn btn-primary" 
-            style={{ width: '100%', marginTop: '1.5rem', height: '44px' }}
+            style={{ width: '100%', marginTop: '2rem', height: '56px', borderRadius: '16px', fontWeight: 800, fontSize: '1rem', boxShadow: '0 10px 15px -3px rgba(99, 102, 255, 0.3)' }}
             disabled={loading || selectedCommands.size === 0 || !selectedLivreur}
             onClick={handleGenerateFeuille}
           >
-            <Printer size={18} />
-            Générer / Assigner
+            <Printer size={20} strokeWidth={2.5} style={{ marginRight: '0.5rem' }} />
+            Générer Feuille de Route
           </button>
+          
+          <p style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+            L'affectation notifiera instantanément le livreur sur son application mobile.
+          </p>
         </div>
 
       </div>

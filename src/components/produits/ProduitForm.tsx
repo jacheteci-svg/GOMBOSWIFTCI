@@ -69,44 +69,63 @@ export const ProduitForm = ({ produit, onClose, onSave }: ProduitFormProps) => {
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-      <div className="card" style={{ width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
-        <button onClick={onClose} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
-          <X size={20} />
+    <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '1.5rem', animation: 'fadeIn 0.3s ease' }} onClick={onClose}>
+      <div className="card glass-effect" style={{ width: '100%', maxWidth: '750px', maxHeight: '90vh', overflowY: 'auto', position: 'relative', padding: '3rem', border: '1px solid rgba(255,255,255,0.2)', animation: 'modalEnter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)' }} onClick={e => e.stopPropagation()}>
+        <button onClick={onClose} style={{ position: 'absolute', top: '2rem', right: '2rem', background: 'rgba(0,0,0,0.05)', border: 'none', borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s ease' }} className="hover-card">
+          <X size={22} strokeWidth={2.5} />
         </button>
         
-        <h2 style={{ marginBottom: '1.5rem' }}>{produit ? 'Modifier le produit' : 'Nouveau produit'}</h2>
+        <div style={{ marginBottom: '2.5rem' }}>
+          <h2 style={{ fontSize: '2rem', fontWeight: 900, margin: 0, letterSpacing: '-0.02em', color: 'var(--text-main)' }}>
+            {produit ? 'Configuration Article' : 'Référencement Produit'}
+          </h2>
+          <p style={{ color: 'var(--text-muted)', fontWeight: 600, marginTop: '0.4rem' }}>
+            {produit ? `Édition de la fiche technique pour #${produit.sku || produit.id.slice(0, 8)}` : 'Enregistrez un nouvel article dans le catalogue universel.'}
+          </p>
+        </div>
         
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label className="form-label">Nom du produit *</label>
-            <input type="text" className="form-input" required value={formData.nom} onChange={e => setFormData({...formData, nom: e.target.value})} />
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Référence (SKU) *</label>
-              <input type="text" className="form-input" required value={formData.sku} onChange={e => setFormData({...formData, sku: e.target.value})} />
+          {/* SECTION 1: IDENTITE */}
+          <div style={{ marginBottom: '2.5rem' }}>
+            <h3 style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'currentColor' }}></div>
+              Identité de l'article
+            </h3>
+            <div className="form-group">
+              <label className="form-label" style={{ fontWeight: 700 }}>Désignation commerciale *</label>
+              <input type="text" className="form-input" required placeholder="Ex: iPhone 15 Pro Max - 256GB" style={{ height: '52px', borderRadius: '14px', fontSize: '1.05rem', fontWeight: 600 }} value={formData.nom} onChange={e => setFormData({...formData, nom: e.target.value})} />
             </div>
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Image URL</label>
-              <input type="url" className="form-input" placeholder="https://..." value={formData.image_url || ''} onChange={e => setFormData({...formData, image_url: e.target.value})} />
-            </div>
-          </div>
 
-          <fieldset style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '1rem', marginBottom: '1.5rem' }}>
-            <legend style={{ padding: '0 0.5rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Tarification</legend>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '1.5rem', marginTop: '1.5rem' }}>
               <div className="form-group">
-                <label className="form-label">Prix d'Achat *</label>
-                <input type="number" className="form-input" required min="0" value={formData.prix_achat} onChange={e => setFormData({...formData, prix_achat: Number(e.target.value)})} />
+                <label className="form-label" style={{ fontWeight: 700 }}>Référence SKU (Unique) *</label>
+                <input type="text" className="form-input" required placeholder="PROD-001" style={{ height: '52px', borderRadius: '14px', fontWeight: 700, letterSpacing: '0.05em' }} value={formData.sku} onChange={e => setFormData({...formData, sku: e.target.value})} />
+              </div>
+              <div className="form-group">
+                <label className="form-label" style={{ fontWeight: 700 }}>Lien Image Haute Définition</label>
+                <input type="url" className="form-input" placeholder="https://cdn.example.com/photo.jpg" style={{ height: '52px', borderRadius: '14px' }} value={formData.image_url || ''} onChange={e => setFormData({...formData, image_url: e.target.value})} />
+              </div>
+            </div>
+          </div>
+
+          {/* SECTION 2: ECONOMIE */}
+          <div style={{ marginBottom: '2.5rem', padding: '2rem', background: 'rgba(99, 102, 255, 0.03)', borderRadius: '24px', border: '1px solid rgba(99, 102, 255, 0.1)' }}>
+            <h3 style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'currentColor' }}></div>
+              Modèle Économique & Prix
+            </h3>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+              <div className="form-group">
+                <label className="form-label" style={{ fontWeight: 700 }}>Coût d'Achat (Unit.) *</label>
+                <input type="number" className="form-input" required min="0" style={{ height: '52px', borderRadius: '14px', fontWeight: 700 }} value={formData.prix_achat} onChange={e => setFormData({...formData, prix_achat: Number(e.target.value)})} />
               </div>
               
               <div className="form-group">
-                <label className="form-label">Prix de Vente *</label>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <input type="number" className="form-input" required min="0" value={formData.prix_vente} onChange={e => setFormData({...formData, prix_vente: Number(e.target.value)})} />
-                  <select className="form-select" style={{ width: '90px' }} value={formData.devise} onChange={e => setFormData({...formData, devise: e.target.value})}>
+                <label className="form-label" style={{ fontWeight: 700 }}>Prix de Vente Public *</label>
+                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                  <input type="number" className="form-input" required min="0" style={{ height: '52px', borderRadius: '14px', fontWeight: 900, color: 'var(--primary)', fontSize: '1.2rem' }} value={formData.prix_vente} onChange={e => setFormData({...formData, prix_vente: Number(e.target.value)})} />
+                  <select className="form-select" style={{ width: '100px', height: '52px', borderRadius: '14px', fontWeight: 800 }} value={formData.devise} onChange={e => setFormData({...formData, devise: e.target.value})}>
                     <option value="CFA">CFA</option>
                     <option value="EUR">€</option>
                   </select>
@@ -114,56 +133,63 @@ export const ProduitForm = ({ produit, onClose, onSave }: ProduitFormProps) => {
               </div>
             </div>
 
-            <div className="form-group" style={{ marginTop: '0.5rem' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontWeight: 500 }}>
-                <input type="checkbox" checked={hasPromo} onChange={e => setHasPromo(e.target.checked)} />
-                Activer un prix promotionnel
+            <div style={{ marginTop: '1rem', padding: '1.25rem', background: hasPromo ? '#f0fdf4' : 'white', borderRadius: '18px', border: `2px solid ${hasPromo ? '#22c55e' : '#f1f5f9'}`, transition: 'all 0.3s ease' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontWeight: 800, color: hasPromo ? '#166534' : 'var(--text-muted)' }}>
+                <input type="checkbox" style={{ width: '20px', height: '20px', accentColor: '#22c55e' }} checked={hasPromo} onChange={e => setHasPromo(e.target.checked)} />
+                Appliquer un tarif promotionnel temporaire
               </label>
-            </div>
-
-            {hasPromo && (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', padding: '1rem', backgroundColor: 'rgba(79, 70, 229, 0.05)', borderRadius: 'var(--radius-md)' }}>
-                <div className="form-group" style={{ marginBottom: 0 }}>
-                  <label className="form-label">Prix Spécial (Promo) *</label>
-                  <input type="number" className="form-input" required min="0" value={formData.prix_promo || ''} onChange={e => setFormData({...formData, prix_promo: Number(e.target.value)})} />
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+              
+              {hasPromo && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1.25rem', marginTop: '1.5rem', animation: 'pageEnter 0.3s ease' }}>
                   <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label">Début</label>
-                    <input type="datetime-local" className="form-input" value={formData.promo_debut || ''} onChange={e => setFormData({...formData, promo_debut: e.target.value})} />
+                    <label className="form-label" style={{ fontWeight: 700, color: '#166534' }}>Prix Promo *</label>
+                    <input type="number" className="form-input" required min="0" style={{ height: '48px', borderRadius: '12px', borderColor: '#bbf7d0', fontWeight: 900, color: '#16a34a' }} value={formData.prix_promo || ''} onChange={e => setFormData({...formData, prix_promo: Number(e.target.value)})} />
                   </div>
-                  <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label">Fin</label>
-                    <input type="datetime-local" className="form-input" value={formData.promo_fin || ''} onChange={e => setFormData({...formData, promo_fin: e.target.value})} />
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontWeight: 700, color: '#166534' }}>Début</label>
+                      <input type="datetime-local" className="form-input" style={{ height: '48px', borderRadius: '12px', borderColor: '#bbf7d0', fontSize: '0.8rem' }} value={formData.promo_debut || ''} onChange={e => setFormData({...formData, promo_debut: e.target.value})} />
+                    </div>
+                    <div className="form-group" style={{ marginBottom: 0 }}>
+                      <label className="form-label" style={{ fontWeight: 700, color: '#166534' }}>Fin</label>
+                      <input type="datetime-local" className="form-input" style={{ height: '48px', borderRadius: '12px', borderColor: '#bbf7d0', fontSize: '0.8rem' }} value={formData.promo_fin || ''} onChange={e => setFormData({...formData, promo_fin: e.target.value})} />
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </fieldset>
+              )}
+            </div>
+          </div>
 
-          <fieldset style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '1rem', marginBottom: '1.5rem' }}>
-            <legend style={{ padding: '0 0.5rem', fontWeight: 600, color: 'var(--text-secondary)' }}>Stock & Visibilité</legend>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          {/* SECTION 3: STOCK & LOGISTIQUE */}
+          <div style={{ marginBottom: '3rem' }}>
+            <h3 style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'currentColor' }}></div>
+              Stock & Logistique
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
               <div className="form-group">
-                <label className="form-label">Stock initial {produit && '(Non modifiable)'}</label>
-                <input type="number" className="form-input" min="0" value={formData.stock_actuel} disabled={!!produit} onChange={e => setFormData({...formData, stock_actuel: Number(e.target.value)})} />
+                <label className="form-label" style={{ fontWeight: 700 }}>Inventaire initial {produit && '(Scellé)'}</label>
+                <input type="number" className="form-input" min="0" style={{ height: '52px', borderRadius: '14px', fontWeight: 800, background: produit ? '#f8fafc' : 'white' }} value={formData.stock_actuel} disabled={!!produit} onChange={e => setFormData({...formData, stock_actuel: Number(e.target.value)})} />
               </div>
               <div className="form-group">
-                <label className="form-label">Stock Minimum (Alerte) *</label>
-                <input type="number" className="form-input" required min="0" value={formData.stock_minimum} onChange={e => setFormData({...formData, stock_minimum: Number(e.target.value)})} />
+                <label className="form-label" style={{ fontWeight: 700 }}>Seuil d'alerte critique *</label>
+                <input type="number" className="form-input" required min="1" style={{ height: '52px', borderRadius: '14px', fontWeight: 800, color: '#ef4444', borderColor: '#fee2e2' }} value={formData.stock_minimum} onChange={e => setFormData({...formData, stock_minimum: Number(e.target.value)})} />
               </div>
             </div>
 
-            <div className="form-group" style={{ marginBottom: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <input type="checkbox" id="actif" checked={formData.actif} onChange={e => setFormData({...formData, actif: e.target.checked})} />
-              <label htmlFor="actif">Produit actif (visible pour la vente)</label>
-            </div>
-          </fieldset>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', marginTop: '1rem', padding: '1.25rem', borderRadius: '18px', background: formData.actif ? 'rgba(16, 185, 129, 0.05)' : '#f8fafc', border: `1px solid ${formData.actif ? '#10b981' : '#e2e8f0'}`, transition: 'all 0.3s ease' }}>
+              <input type="checkbox" style={{ width: '22px', height: '22px', accentColor: '#10b981' }} checked={formData.actif} onChange={e => setFormData({...formData, actif: e.target.checked})} />
+              <div>
+                <div style={{ fontWeight: 900, color: formData.actif ? '#059669' : 'var(--text-muted)' }}>Produit Actif / En Vente</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Si décoché, l'article sera masqué des formulaires de commande.</div>
+              </div>
+            </label>
+          </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
-            <button type="button" className="btn btn-outline" onClick={onClose} disabled={loading}>Annuler</button>
-            <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'Enregistrement...' : 'Enregistrer'}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '2rem', borderTop: '2px solid #f1f5f9', paddingTop: '2rem' }}>
+            <button type="button" className="btn btn-outline" style={{ height: '56px', padding: '0 2rem', borderRadius: '16px', fontWeight: 800 }} onClick={onClose} disabled={loading}>Annuler</button>
+            <button type="submit" className="btn btn-primary" style={{ height: '56px', padding: '0 3rem', borderRadius: '16px', fontWeight: 900, fontSize: '1.1rem', boxShadow: '0 10px 15px -3px rgba(99, 102, 255, 0.4)' }} disabled={loading}>
+              {loading ? 'SYNCHRONISATION...' : 'VALIDER LA FICHE'}
             </button>
           </div>
         </form>

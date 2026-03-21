@@ -47,61 +47,96 @@ export const ProduitList = ({ produits, onEdit, onStock }: ProduitListProps) => 
       <table>
         <thead>
           <tr>
-            <th style={{ width: '48px' }}>Image</th>
-            <th>SKU</th>
-            <th>Article</th>
-            <th>Vente (Achat)</th>
-            <th>Stock</th>
-            <th>Statut</th>
+            <th style={{ width: '80px' }}>Visuel</th>
+            <th>ID / SKU</th>
+            <th>Désignation Article</th>
+            <th>Modèle Économique</th>
+            <th>Niveau Stock</th>
+            <th>Visibilité</th>
             <th style={{ textAlign: 'right' }}>Actions</th>
           </tr>
         </thead>
         <tbody>
           {produits.map((produit) => (
-            <tr key={produit.id} style={{ opacity: produit.actif ? 1 : 0.6 }}>
+            <tr key={produit.id} style={{ opacity: produit.actif ? 1 : 0.55, transition: 'all 0.3s ease' }} className="hover-card">
               <td>
-                {produit.image_url ? (
-                  <img src={produit.image_url} alt={produit.nom} style={{ width: '32px', height: '32px', borderRadius: '4px', objectFit: 'cover' }} />
-                ) : (
-                  <div style={{ width: '32px', height: '32px', borderRadius: '4px', backgroundColor: 'var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <ImageIcon size={16} color="var(--text-secondary)" />
-                  </div>
+                <div style={{ position: 'relative', width: '56px', height: '56px', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 10px rgba(0,0,0,0.1)', border: '2px solid white' }}>
+                  {produit.image_url ? (
+                    <img src={produit.image_url} alt={produit.nom} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <ImageIcon size={20} color="#94a3b8" />
+                    </div>
+                  )}
+                </div>
+              </td>
+              <td>
+                <div style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '0.85rem', color: 'var(--primary)' }}>#{produit.sku || produit.id.slice(0, 8).toUpperCase()}</div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>REF-IND-01</div>
+              </td>
+              <td>
+                <div style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: '1.05rem' }}>{produit.nom}</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Catégorie Générale</div>
+              </td>
+              <td>
+                <div style={{ fontWeight: 900, color: 'var(--text-main)' }}>{getPrixActif(produit)}</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, marginTop: '0.2rem' }}>
+                  Coût Achat: <span style={{ color: '#64748b' }}>{produit.prix_achat?.toLocaleString()} CFA</span>
+                </div>
+              </td>
+              <td>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '0.4rem 0.8rem', background: produit.stock_actuel <= (produit.stock_minimum || 5) ? '#fee2e2' : '#dcfce7', borderRadius: '10px', transition: 'all 0.2s ease' }}>
+                   <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: produit.stock_actuel <= (produit.stock_minimum || 5) ? '#ef4444' : '#10b981' }}></div>
+                   <span style={{ fontWeight: 800, fontSize: '0.85rem', color: produit.stock_actuel <= (produit.stock_minimum || 5) ? '#991b1b' : '#166534' }}>{produit.stock_actuel} PCS</span>
+                </div>
+                {produit.stock_actuel <= (produit.stock_minimum || 5) && (
+                   <div style={{ fontSize: '0.7rem', color: '#ef4444', fontWeight: 700, marginTop: '0.3rem', textTransform: 'uppercase' }}>Réappro. Urgent</div>
                 )}
               </td>
-              <td style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>{produit.sku}</td>
-              <td style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{produit.nom}</td>
               <td>
-                {getPrixActif(produit)}
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Achat: {produit.prix_achat?.toLocaleString()}</div>
-              </td>
-              <td>
-                <span className={`badge ${produit.stock_actuel <= produit.stock_minimum ? 'badge-danger' : 'badge-success'}`}>
-                  {produit.stock_actuel} en stock
-                </span>
-              </td>
-              <td>
-                <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', gap: '0.5rem' }}>
-                  <input type="checkbox" checked={produit.actif} onChange={() => toggleActive(produit)} />
-                  <span style={{ fontSize: '0.875rem' }}>{produit.actif ? 'Actif' : 'Caché'}</span>
-                </label>
-              </td>
-              <td style={{ textAlign: 'right', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-                <button 
-                  className="btn btn-outline" 
-                  style={{ padding: '0.25rem 0.5rem', color: 'var(--primary-color)', borderColor: 'var(--primary-color)' }}
-                  onClick={() => onStock(produit)}
-                  title="Mouvement de stock"
+                <div 
+                  onClick={() => toggleActive(produit)}
+                  style={{ 
+                    width: '50px', 
+                    height: '26px', 
+                    background: produit.actif ? 'var(--primary)' : '#e2e8f0', 
+                    borderRadius: '30px', 
+                    padding: '3px', 
+                    cursor: 'pointer',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    position: 'relative'
+                  }}
                 >
-                  <PackagePlus size={16} />
-                </button>
-                <button 
-                  className="btn btn-outline" 
-                  style={{ padding: '0.25rem 0.5rem' }}
-                  onClick={() => onEdit(produit)}
-                  title="Modifier"
-                >
-                  <Edit size={16} />
-                </button>
+                  <div style={{ 
+                    width: '20px', 
+                    height: '20px', 
+                    background: 'white', 
+                    borderRadius: '50%', 
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                    transform: produit.actif ? 'translateX(24px)' : 'translateX(0)',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                  }}></div>
+                </div>
+              </td>
+              <td style={{ textAlign: 'right' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                  <button 
+                    className="btn btn-outline" 
+                    style={{ padding: '0.5rem', borderRadius: '12px', height: '42px', width: '42px', borderColor: '#e2e8f0' }}
+                    onClick={() => onStock(produit)}
+                    title="Mouvement de stock"
+                  >
+                    <PackagePlus size={18} strokeWidth={2.5} color="var(--primary)" />
+                  </button>
+                  <button 
+                    className="btn btn-outline" 
+                    style={{ padding: '0.5rem', borderRadius: '12px', height: '42px', width: '42px', borderColor: '#e2e8f0' }}
+                    onClick={() => onEdit(produit)}
+                    title="Modifier l'article"
+                  >
+                    <Edit size={18} strokeWidth={2.5} color="#64748b" />
+                  </button>
+                </div>
               </td>
             </tr>
           ))}

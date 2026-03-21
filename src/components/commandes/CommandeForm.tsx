@@ -188,133 +188,220 @@ export const CommandeForm = ({ onClose, onSave }: { onClose: () => void, onSave:
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-      <div className="card" style={{ width: '100%', maxWidth: '800px', maxHeight: '90vh', overflowY: 'auto', position: 'relative' }}>
-        <button onClick={onClose} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
-          <X size={20} />
+    <div style={{ 
+      position: 'fixed', 
+      inset: 0, 
+      backgroundColor: 'rgba(15, 23, 42, 0.7)', 
+      backdropFilter: 'blur(8px)',
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      zIndex: 1000,
+      padding: '1.5rem',
+      animation: 'pageEnter 0.4s ease-out'
+    }}>
+      <div className="card" style={{ 
+        width: '100%', 
+        maxWidth: '900px', 
+        maxHeight: 'min(900px, 95vh)', 
+        overflowY: 'auto', 
+        position: 'relative',
+        padding: '2.5rem',
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+        border: '1px solid rgba(255, 255, 255, 0.1)'
+      }}>
+        <button 
+          onClick={onClose} 
+          className="btn-outline"
+          style={{ 
+            position: 'absolute', 
+            top: '1.5rem', 
+            right: '1.5rem', 
+            background: '#f1f5f9', 
+            border: 'none', 
+            borderRadius: '12px',
+            width: '40px',
+            height: '40px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer', 
+            color: 'var(--text-muted)',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          <X size={20} strokeWidth={2.5} />
         </button>
         
-        <h2 style={{ marginBottom: '1.5rem' }}>Nouvelle Commande</h2>
+        <div style={{ marginBottom: '2.5rem' }}>
+          <h2 className="text-premium" style={{ fontSize: '1.8rem', fontWeight: 800, margin: 0 }}>Nouvelle Commande</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginTop: '0.4rem', fontWeight: 500 }}>Veuillez renseigner les détails du client et la composition de la commande.</p>
+        </div>
         
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '2rem' }}>
           
-          <div style={{ padding: '1.5rem', backgroundColor: 'var(--bg-color)', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem' }}>
-            <h3 style={{ fontSize: '1rem', marginBottom: '1rem', color: 'var(--primary-color)' }}>1. Client</h3>
-            <div className="form-group" style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end' }}>
-              <div style={{ flex: 1 }}>
-                <label className="form-label">Téléphone *</label>
+          {/* SECTION 1: CLIENT */}
+          <div style={{ padding: '2rem', background: '#f8fafc', borderRadius: '20px', border: '1px solid #e2e8f0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+              <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.9rem' }}>1</div>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>Informations Client</h3>
+            </div>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
+              <div className="form-group">
+                <label className="form-label" style={{ fontWeight: 700 }}>Téléphone Mobile *</label>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <input type="text" className="form-input" placeholder="Ex: 0102030405" required value={clientRecherche.telephone} onChange={e => { setClientRecherche({...clientRecherche, telephone: e.target.value}); setClientId(null); }} />
-                  <button type="button" className="btn btn-outline" onClick={handleSearchClient} title="Rechercher si le client existe">
-                    <Search size={16} />
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    style={{ background: 'white', height: '48px', fontWeight: 600 }}
+                    placeholder="Ex: 0707070707" 
+                    required 
+                    value={clientRecherche.telephone} 
+                    onChange={e => { setClientRecherche({...clientRecherche, telephone: e.target.value}); setClientId(null); }} 
+                  />
+                  <button 
+                    type="button" 
+                    className="btn btn-primary" 
+                    style={{ width: '48px', padding: 0, borderRadius: '12px' }}
+                    onClick={handleSearchClient} 
+                    title="Vérifier l'existence"
+                  >
+                    <Search size={20} strokeWidth={2.5} />
                   </button>
                 </div>
               </div>
-            </div>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              
               <div className="form-group">
-                <label className="form-label">Nom complet *</label>
-                <input type="text" className="form-input" required value={clientRecherche.nom_complet} onChange={e => setClientRecherche({...clientRecherche, nom_complet: e.target.value})} />
+                <label className="form-label" style={{ fontWeight: 700 }}>Nom Complet *</label>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  style={{ background: 'white', height: '48px' }}
+                  required 
+                  value={clientRecherche.nom_complet} 
+                  onChange={e => setClientRecherche({...clientRecherche, nom_complet: e.target.value})} 
+                />
               </div>
+
               <div className="form-group">
-                <label className="form-label">Email (Optionnel)</label>
-                <input type="email" className="form-input" value={clientRecherche.email} onChange={e => setClientRecherche({...clientRecherche, email: e.target.value})} />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Commune (Optionnel, affiné à l'appel)</label>
-                 <select className="form-select" value={clientRecherche.commune || ''} onChange={e => setClientRecherche({...clientRecherche, commune: e.target.value})}>
-                  <option value="">Sélectionner une commune...</option>
-                  {communesDb.map(c => <option key={c.id} value={c.nom}>{c.nom} ({c.tarif_livraison} CFA)</option>)}
-                  <option value="Autre">Autre</option>
+                <label className="form-label" style={{ fontWeight: 700 }}>Zone / Commune de Livraison</label>
+                 <select 
+                   className="form-select" 
+                   style={{ background: 'white', height: '48px' }}
+                   value={clientRecherche.commune || ''} 
+                   onChange={e => setClientRecherche({...clientRecherche, commune: e.target.value})}
+                 >
+                  <option value="">Sélectionner une zone...</option>
+                  {communesDb.map(c => <option key={c.id} value={c.nom}>{c.nom} ({c.tarif_livraison.toLocaleString()} CFA)</option>)}
+                  <option value="Autre">Autre (Hors zone)</option>
                 </select>
               </div>
+
               <div className="form-group">
-                <label className="form-label">Adresse détaillée (Optionnel)</label>
-                <input type="text" className="form-input" value={clientRecherche.adresse} onChange={e => setClientRecherche({...clientRecherche, adresse: e.target.value})} />
+                <label className="form-label" style={{ fontWeight: 700 }}>Adresse Détaillée</label>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  style={{ background: 'white', height: '48px' }}
+                  placeholder="Quartier, rue, bâtiment..."
+                  value={clientRecherche.adresse} 
+                  onChange={e => setClientRecherche({...clientRecherche, adresse: e.target.value})} 
+                />
               </div>
             </div>
           </div>
 
-          <div style={{ padding: '1.5rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h3 style={{ fontSize: '1rem', color: 'var(--primary-color)', margin: 0 }}>2. Produits</h3>
-              <button type="button" className="btn btn-outline" onClick={addLigne} style={{ padding: '0.25rem 0.75rem', fontSize: '0.75rem' }}>
-                <Plus size={14} /> Ajouter produit
+          {/* SECTION 2: PRODUITS */}
+          <div style={{ padding: '2rem', border: '2px solid #f1f5f9', borderRadius: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.9rem' }}>2</div>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>Panier Commande</h3>
+              </div>
+              <button 
+                type="button" 
+                className="btn btn-outline" 
+                onClick={addLigne} 
+                style={{ padding: '0.6rem 1.25rem', fontSize: '0.85rem', fontWeight: 700, borderRadius: '12px' }}
+              >
+                <Plus size={16} strokeWidth={2.5} /> Ajouter un article
               </button>
             </div>
             
-            {lignes.map((l, idx) => (
-              <div key={idx} style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', alignItems: 'center' }}>
-                <div style={{ flex: 2 }}>
-                  <select className="form-select" required value={l.produit_id} onChange={(e) => updateLigne(idx, 'produit_id', e.target.value)}>
-                    <option value="">Sélectionner un produit</option>
-                    {catalogue.filter(p => p.actif).map(p => {
-                      const prixActif = parsePrice(p);
-                      return <option key={p.id} value={p.id}>{p.nom} - {prixActif.toLocaleString()} {p.devise || 'CFA'} (Stock: {p.stock_actuel})</option>;
-                    })}
-                  </select>
+            <div style={{ display: 'grid', gap: '1rem' }}>
+              {lignes.map((l, idx) => (
+                <div key={idx} className="glass-effect" style={{ display: 'flex', gap: '1.5rem', padding: '1.25rem', borderRadius: '18px', alignItems: 'center', flexWrap: 'wrap', background: 'rgba(241, 245, 249, 0.5)' }}>
+                  <div style={{ flex: '2', minWidth: '240px' }}>
+                    <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>Article</label>
+                    <select className="form-select" required value={l.produit_id} onChange={(e) => updateLigne(idx, 'produit_id', e.target.value)} style={{ background: 'white' }}>
+                      <option value="">Choisir un produit...</option>
+                      {catalogue.map(p => (
+                        <option key={p.id} value={p.id}>{p.nom} ({parsePrice(p).toLocaleString()} CFA)</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div style={{ width: '100px' }}>
+                    <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>Qté</label>
+                    <input type="number" className="form-input" min="1" value={l.quantite} onChange={e => updateLigne(idx, 'quantite', e.target.value)} style={{ background: 'white', textAlign: 'center', fontWeight: 700 }} />
+                  </div>
+                  <div style={{ flex: '1', textAlign: 'right' }}>
+                    <label className="form-label" style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', marginBottom: '0.5rem', display: 'block' }}>Sous-total</label>
+                    <div className="brand-glow" style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--primary)' }}>
+                      {(l.montant_ligne || 0).toLocaleString()} <span style={{ fontSize: '0.75rem' }}>CFA</span>
+                    </div>
+                  </div>
+                  <button type="button" className="btn" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: 'none', padding: '0.75rem', borderRadius: '12px' }} onClick={() => setLignes(lignes.filter((_, i) => i !== idx))}>
+                    <Trash2 size={20} />
+                  </button>
                 </div>
-                <div style={{ width: '80px' }}>
-                  <label className="form-label" style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Qté</label>
-                  <input type="number" className="form-input" min="1" value={l.quantite} onChange={e => updateLigne(idx, 'quantite', Math.max(1, Number(e.target.value)))} required />
-                </div>
-                <div style={{ width: '160px', padding: '0 0.5rem' }}>
-                   <label className="form-label" style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Prix Unit.</label>
-                   <div style={{ fontWeight: 500, padding: '0.5rem 0' }}>{l.prix_unitaire?.toLocaleString()} CFA</div>
-                </div>
-                <div style={{ flex: 1, textAlign: 'right', padding: '0 1rem' }}>
-                   <label className="form-label" style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Sous-total</label>
-                   <div style={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--primary-color)' }}>
-                     {(l.montant_ligne || 0).toLocaleString()} CFA
-                   </div>
-                </div>
-                <button type="button" className="btn btn-outline" style={{ border: 'none', color: 'var(--danger-color)', marginTop: '1.25rem' }} onClick={() => setLignes(lignes.filter((_, i) => i !== idx))}>
-                  <Trash2 size={18} />
-                </button>
-              </div>
-            ))}
+              ))}
+            </div>
+
             {lignes.length > 0 && (
-              <div style={{ borderTop: '1px dashed var(--border-color)', paddingTop: '1rem', textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                  Frais de livraison: {fraisLivraison.toLocaleString()} CFA
+              <div style={{ marginTop: '2.5rem', padding: '2rem', background: 'linear-gradient(135deg, var(--primary) 0%, #4338ca 100%)', borderRadius: '24px', color: 'white', boxShadow: '0 20px 25px -5px rgba(79, 70, 229, 0.3)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', opacity: 0.9, fontWeight: 500 }}>
+                  <span>Frais de livraison ({clientRecherche.commune || 'Standard'})</span>
+                  <span>{fraisLivraison.toLocaleString()} CFA</span>
                 </div>
-                <div style={{ fontWeight: 700, fontSize: '1.25rem', color: 'var(--primary-color)' }}>
-                  Total à payer: {totalMontant.toLocaleString()} CFA
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '1.1rem', fontWeight: 600 }}>Total à encaisser</span>
+                  <span style={{ fontSize: '2rem', fontWeight: 900 }}>{totalMontant.toLocaleString()} CFA</span>
                 </div>
               </div>
             )}
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          {/* SECTION 3: OPTIONS */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
             <div className="form-group">
-              <label className="form-label">Source de la commande</label>
-              <select className="form-select" value={source} onChange={e => setSource(e.target.value)}>
-                <option value="Facebook">Facebook</option>
-                <option value="WhatsApp">WhatsApp</option>
-                <option value="Site Web">Site Web</option>
-                <option value="Appel Entrant">Appel Entrant</option>
+              <label className="form-label" style={{ fontWeight: 700 }}>Provenance Commande</label>
+              <select className="form-select" value={source} onChange={e => setSource(e.target.value)} style={{ background: '#f8fafc', height: '48px' }}>
+                <option value="Facebook">Facebook Ads</option>
+                <option value="WhatsApp">WhatsApp Business</option>
+                <option value="Site Web">Site E-commerce</option>
+                <option value="Appel Entrant">Appel Entrant direct</option>
               </select>
             </div>
             
             <div className="form-group">
-              <label className="form-label">Mode de paiement</label>
-              <select className="form-select" value={modePaiement} onChange={e => setModePaiement(e.target.value)}>
-                <option value="Cash à la livraison">Cash à la livraison</option>
-                <option value="Mobile Money">Mobile Money (Avant livraison)</option>
+              <label className="form-label" style={{ fontWeight: 700 }}>Méthode de Paiement</label>
+              <select className="form-select" value={modePaiement} onChange={e => setModePaiement(e.target.value)} style={{ background: '#f8fafc', height: '48px' }}>
+                <option value="Cash à la livraison">Cash à la livraison (COD)</option>
+                <option value="Mobile Money">Paiement Mobile (Anticipé)</option>
               </select>
-            </div>
-            
-            <div className="form-group" style={{ gridColumn: 'span 2' }}>
-              <label className="form-label">Notes client / Instructions</label>
-              <textarea className="form-input" rows={2} value={notes} onChange={e => setNotes(e.target.value)} />
             </div>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '2rem' }}>
-            <button type="button" className="btn btn-outline" onClick={onClose} disabled={loading}>Annuler</button>
-            <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'Création...' : 'Créer la commande'}
+          <div className="form-group">
+            <label className="form-label" style={{ fontWeight: 700 }}>Observations & Instructions Spéciales</label>
+            <textarea className="form-input" rows={3} style={{ background: '#f8fafc', padding: '1rem', borderRadius: '16px' }} placeholder="Ex: Livraison après 17h, appeler avant de venir..." value={notes} onChange={e => setNotes(e.target.value)} />
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1.25rem', marginTop: '1.5rem' }}>
+            <button type="button" className="btn btn-outline" onClick={onClose} disabled={loading} style={{ padding: '0.8rem 2rem', fontWeight: 700, borderRadius: '14px' }}>Annuler</button>
+            <button type="submit" className="btn btn-primary" disabled={loading} style={{ padding: '0.8rem 3rem', fontWeight: 800, borderRadius: '14px', fontSize: '1rem', boxShadow: '0 10px 15px -3px rgba(79, 70, 229, 0.4)' }}>
+              {loading ? 'Traitement...' : 'Confirmer la Commande'}
             </button>
           </div>
         </form>

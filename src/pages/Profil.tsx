@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { insforge } from '../lib/insforge';
-import { User, Save, Lock } from 'lucide-react';
+import { Save, Lock } from 'lucide-react';
 import { useToast } from '../contexts/ToastContext';
 
 export const Profil = () => {
@@ -45,68 +45,83 @@ export const Profil = () => {
   };
 
   return (
-    <div className="container" style={{ maxWidth: '600px' }}>
-      <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <User size={28} style={{ color: 'var(--primary-color)' }} />
-          Mon Profil
-        </h1>
-        <p style={{ color: 'var(--text-secondary)', margin: '0.25rem 0 0' }}>Gérez vos informations et votre sécurité.</p>
+    <div style={{ animation: 'pageEnter 0.6s ease', maxWidth: '800px', margin: '0 auto' }}>
+      <div style={{ marginBottom: '3rem', textAlign: 'center' }}>
+        <h1 className="text-premium" style={{ fontSize: '2.5rem', fontWeight: 900 }}>Mon Espace Personnel</h1>
+        <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', fontWeight: 500 }}>Gérez vos accès sécurisés et vos préférences de compte.</p>
       </div>
 
-      <div className="card" style={{ marginBottom: '2rem' }}>
-        <h3 style={{ fontSize: '1.125rem', marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>Informations Personnelles</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <div>
-            <span style={{ color: 'var(--text-secondary)', width: '120px', display: 'inline-block' }}>Nom Complet:</span>
-            <strong style={{ fontSize: '1.125rem' }}>{currentUser.nom_complet}</strong>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2.5rem' }}>
+        {/* CARTE IDENTITE VISUELLE */}
+        <div className="card glass-effect" style={{ padding: '3rem', textAlign: 'center', border: '1px solid rgba(255,255,255,0.1)' }}>
+          <div style={{ position: 'relative', width: '120px', height: '120px', margin: '0 auto 1.5rem', background: 'linear-gradient(135deg, var(--primary) 0%, #818cf8 100%)', borderRadius: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem', fontWeight: 900, color: 'white', boxShadow: '0 20px 25px -5px rgba(99, 102, 255, 0.3)' }}>
+            {currentUser.nom_complet.charAt(0).toUpperCase()}
+            <div style={{ position: 'absolute', bottom: '-5px', right: '-5px', width: '32px', height: '32px', background: '#10b981', border: '4px solid white', borderRadius: '50%' }}></div>
           </div>
-          <div>
-            <span style={{ color: 'var(--text-secondary)', width: '120px', display: 'inline-block' }}>Email/Login:</span>
-            <strong>{currentUser.email}</strong>
+          
+          <h2 style={{ fontSize: '1.8rem', fontWeight: 900, margin: 0, color: 'var(--text-main)' }}>{currentUser.nom_complet}</h2>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '0.75rem', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.95rem', color: 'var(--text-muted)', fontWeight: 600 }}>{currentUser.email}</span>
+            <span style={{ padding: '0.3rem 0.8rem', background: 'rgba(99, 102, 255, 0.1)', color: 'var(--primary)', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+               {currentUser.role.replace('_', ' ')}
+            </span>
           </div>
-          <div>
-            <span style={{ color: 'var(--text-secondary)', width: '120px', display: 'inline-block' }}>Rôle:</span>
-            <span className="badge badge-info">{currentUser.role}</span>
+        </div>
+
+        {/* SECTION SÉCURITÉ */}
+        <div className="card glass-effect" style={{ padding: '2.5rem', border: '1px solid #f1f5f9' }}>
+           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
+            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: '#fee2e2', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Lock size={20} strokeWidth={2.5} />
+            </div>
+            <h3 style={{ fontSize: '1.3rem', fontWeight: 900, margin: 0 }}>Sécurité du Compte</h3>
           </div>
+
+          <form onSubmit={handleUpdatePassword}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label" style={{ fontWeight: 700 }}>Nouveau Mot de Passe</label>
+                <input 
+                  type="password" 
+                  className="form-input" 
+                  required
+                  style={{ height: '52px', borderRadius: '14px', fontWeight: 600 }}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="Secret robuste (min. 4 car.)"
+                />
+              </div>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label className="form-label" style={{ fontWeight: 700 }}>Confirmation</label>
+                <input 
+                  type="password" 
+                  className="form-input" 
+                  required
+                  style={{ height: '52px', borderRadius: '14px', fontWeight: 600 }}
+                  value={confirmPassword}
+                  onChange={e => setConfirmPassword(e.target.value)}
+                  placeholder="Répétez le secret"
+                />
+              </div>
+            </div>
+            
+            <button type="submit" className="btn btn-primary" disabled={loading} style={{ width: '100%', height: '56px', borderRadius: '16px', fontWeight: 900, fontSize: '1.1rem', display: 'flex', gap: '0.75rem', justifyContent: 'center', alignItems: 'center', boxShadow: '0 10px 15px -3px rgba(99, 102, 255, 0.4)' }}>
+              {loading ? (
+                <div className="spinner" style={{ width: '20px', height: '20px', borderTopColor: 'white' }}></div>
+              ) : (
+                <>
+                  <Save size={20} strokeWidth={2.5} />
+                  ACTUALISER LE MOT DE PASSE
+                </>
+              )}
+            </button>
+          </form>
         </div>
       </div>
 
-      <div className="card">
-         <h3 style={{ fontSize: '1.125rem', marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Lock size={18} />
-          Changer de mot de passe
-        </h3>
-        <form onSubmit={handleUpdatePassword}>
-          <div className="form-group">
-            <label className="form-label">Nouveau mot de passe</label>
-            <input 
-              type="password" 
-              className="form-input" 
-              required
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              placeholder="Minimum 4 caractères"
-            />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Confirmer le mot de passe</label>
-            <input 
-              type="password" 
-              className="form-input" 
-              required
-              value={confirmPassword}
-              onChange={e => setConfirmPassword(e.target.value)}
-            />
-          </div>
-          
-          <button type="submit" className="btn btn-primary" disabled={loading} style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-            <Save size={18} style={{ marginRight: '0.5rem' }} />
-            {loading ? 'Mise à jour...' : 'Sauvegarder le mot de passe'}
-          </button>
-        </form>
+      <div style={{ marginTop: '3rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600 }}>
+        Dernière connexion enregistrée : <span style={{ color: 'var(--text-main)' }}>{new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
       </div>
-
     </div>
   );
 };

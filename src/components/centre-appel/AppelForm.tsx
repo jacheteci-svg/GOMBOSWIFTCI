@@ -78,104 +78,148 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
       setLoading(false);
     }
   };
-
   return (
-    <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-      <div className="card" style={{ width: '100%', maxWidth: '500px', position: 'relative' }}>
-        <button onClick={onClose} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
-          <X size={20} />
+    <div style={{ 
+      position: 'fixed', 
+      inset: 0, 
+      backgroundColor: 'rgba(15, 23, 42, 0.7)', 
+      backdropFilter: 'blur(10px)',
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      zIndex: 1000,
+      padding: '1.5rem',
+      animation: 'pageEnter 0.4s ease-out'
+    }}>
+      <div className="card" style={{ 
+        width: '100%', 
+        maxWidth: '550px', 
+        position: 'relative',
+        padding: '2.5rem',
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.3)',
+        border: '1px solid rgba(255, 255, 255, 0.1)'
+      }}>
+        <button 
+          onClick={onClose} 
+          style={{ 
+            position: 'absolute', 
+            top: '1.5rem', 
+            right: '1.5rem', 
+            background: '#f1f5f9', 
+            border: 'none', 
+            borderRadius: '12px',
+            width: '36px',
+            height: '36px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer', 
+            color: 'var(--text-muted)',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          <X size={18} strokeWidth={2.5} />
         </button>
         
-        <h2 style={{ marginBottom: '0.5rem' }}>Traitement Appel</h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', marginBottom: '1.5rem' }}>
-          <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
-            Commande <strong style={{ color: 'var(--text-primary)' }}>#{commande.id.slice(0, 5)}</strong> - {Number(commande.montant_total).toLocaleString()} CFA
-          </p>
-          <p style={{ fontSize: '0.875rem', color: 'var(--text-primary)', margin: 0, fontWeight: 500 }}>
-            📞 {commande.nom_client || 'Client'} - {commande.telephone_client || 'Sans numéro'}
-          </p>
+        <div style={{ marginBottom: '2rem' }}>
+          <h2 className="text-premium" style={{ fontSize: '1.6rem', fontWeight: 800, margin: 0 }}>Traitement d'Appel</h2>
+          <div style={{ marginTop: '1rem', padding: '1.25rem', background: '#f8fafc', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Référence Commande</span>
+              <strong style={{ fontSize: '1rem', color: 'var(--text-main)' }}>#{commande.id.slice(0, 8).toUpperCase()}</strong>
+            </div>
+            <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-main)' }}>
+              {commande.nom_client || 'Client Anonyme'}
+            </div>
+            <div style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+              📞 {commande.telephone_client}
+            </div>
+          </div>
         </div>
         
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           
-          <div className="form-group" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '1.5rem' }}>
-            <label style={{ 
-              border: `1px solid ${resultat === 'validee' ? 'var(--success-color)' : 'var(--border-color)'}`, 
-              borderRadius: 'var(--radius-md)', padding: '0.75rem', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem',
-              backgroundColor: resultat === 'validee' ? 'rgba(16, 185, 129, 0.05)' : 'transparent'
-            }}>
-              <input type="radio" checked={resultat === 'validee'} onChange={() => setResultat('validee')} style={{ display: 'none' }} />
-              <CheckCircle size={24} color="var(--success-color)" />
-              <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>Valider</span>
-            </label>
-            
-            <label style={{ 
-              border: `1px solid ${resultat === 'a_rappeler' || resultat === 'injoignable' ? 'var(--warning-color)' : 'var(--border-color)'}`, 
-              borderRadius: 'var(--radius-md)', padding: '0.75rem', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem',
-              backgroundColor: resultat === 'a_rappeler' || resultat === 'injoignable' ? 'rgba(245, 158, 11, 0.05)' : 'transparent'
-            }}>
-              <input type="radio" checked={resultat === 'a_rappeler'} onChange={() => setResultat('a_rappeler')} style={{ display: 'none' }} />
-              <Clock size={24} color="var(--warning-color)" />
-              <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>À rappeler / Inj.</span>
-            </label>
+          <div>
+            <label className="form-label" style={{ fontWeight: 800, fontSize: '0.85rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '1rem', display: 'block' }}>Résultat de l'échange</label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <label style={{ 
+                border: `2px solid ${resultat === 'validee' ? 'var(--primary)' : '#e2e8f0'}`, 
+                borderRadius: '16px', padding: '1rem', cursor: 'pointer', transition: 'all 0.3s ease',
+                background: resultat === 'validee' ? 'rgba(99, 102, 255, 0.05)' : 'white',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem',
+                boxShadow: resultat === 'validee' ? '0 10px 15px -3px rgba(99, 102, 255, 0.2)' : 'none'
+              }}>
+                <input type="radio" checked={resultat === 'validee'} onChange={() => setResultat('validee')} style={{ display: 'none' }} />
+                <CheckCircle size={28} color={resultat === 'validee' ? 'var(--primary)' : '#94a3b8'} strokeWidth={2.5} />
+                <span style={{ fontSize: '0.9rem', fontWeight: 700, color: resultat === 'validee' ? 'var(--primary)' : '#64748b' }}>Valider</span>
+              </label>
+              
+              <label style={{ 
+                border: `2px solid ${resultat === 'a_rappeler' ? '#f59e0b' : '#e2e8f0'}`, 
+                borderRadius: '16px', padding: '1rem', cursor: 'pointer', transition: 'all 0.3s ease',
+                background: resultat === 'a_rappeler' ? 'rgba(245, 158, 11, 0.05)' : 'white',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem',
+                boxShadow: resultat === 'a_rappeler' ? '0 10px 15px -3px rgba(245, 158, 11, 0.2)' : 'none'
+              }}>
+                <input type="radio" checked={resultat === 'a_rappeler'} onChange={() => setResultat('a_rappeler')} style={{ display: 'none' }} />
+                <Clock size={28} color={resultat === 'a_rappeler' ? '#f59e0b' : '#94a3b8'} strokeWidth={2.5} />
+                <span style={{ fontSize: '0.9rem', fontWeight: 700, color: resultat === 'a_rappeler' ? '#d97706' : '#64748b' }}>À rappeler</span>
+              </label>
 
-            <label style={{ 
-              border: `1px solid ${resultat === 'annulee' ? 'var(--danger-color)' : 'var(--border-color)'}`, 
-              borderRadius: 'var(--radius-md)', padding: '0.75rem', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem',
-              backgroundColor: resultat === 'annulee' ? 'rgba(239, 68, 68, 0.05)' : 'transparent', gridColumn: 'span 2'
-            }}>
-              <input type="radio" checked={resultat === 'annulee'} onChange={() => setResultat('annulee')} style={{ display: 'none' }} />
-              <XCircle size={24} color="var(--danger-color)" />
-              <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>Annuler la commande</span>
-            </label>
+              <label style={{ 
+                border: `2px solid ${resultat === 'annulee' ? '#ef4444' : '#e2e8f0'}`, 
+                borderRadius: '16px', padding: '1rem', cursor: 'pointer', transition: 'all 0.3s ease',
+                background: resultat === 'annulee' ? 'rgba(239, 68, 68, 0.05)' : 'white',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem',
+                gridColumn: 'span 2',
+                boxShadow: resultat === 'annulee' ? '0 10px 15px -3px rgba(239, 68, 68, 0.2)' : 'none'
+              }}>
+                <input type="radio" checked={resultat === 'annulee'} onChange={() => setResultat('annulee')} style={{ display: 'none' }} />
+                <XCircle size={28} color={resultat === 'annulee' ? '#ef4444' : '#94a3b8'} strokeWidth={2.5} />
+                <span style={{ fontSize: '0.9rem', fontWeight: 700, color: resultat === 'annulee' ? '#dc2626' : '#64748b' }}>Annuler la commande</span>
+              </label>
+            </div>
           </div>
 
           {resultat === 'validee' && (
-            <div style={{ padding: '1rem', backgroundColor: 'rgba(16, 185, 129, 0.05)', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <h4 style={{ margin: 0, color: 'var(--success-color)', fontSize: '0.875rem' }}>Confirmer l'adresse de livraison finale</h4>
+            <div style={{ padding: '1.5rem', background: '#fdf4ff', borderRadius: '20px', border: '2px solid #f5d0fe', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">Commune (Zone de livraison) *</label>
-                <select className="form-select" required value={communeLocal} onChange={e => handleCommuneChange(e.target.value)}>
+                <label className="form-label" style={{ fontWeight: 700 }}>Zone de livraison finale</label>
+                <select className="form-select" required value={communeLocal} onChange={e => handleCommuneChange(e.target.value)} style={{ background: 'white', height: '44px' }}>
                   <option value="">Sélectionner une commune...</option>
-                  {communesDb.map(c => <option key={c.id} value={c.nom}>{c.nom}</option>)}
-                  <option value="Autre">Autre (Hors zone config.)</option>
+                  {communesDb.map(c => <option key={c.id} value={c.nom}>{c.nom} ({c.tarif_livraison} CFA)</option>)}
                 </select>
-                {communeLocal === 'Autre' && (
-                  <input type="text" className="form-input" placeholder="Préciser la commune..." style={{ marginTop: '0.5rem' }} onChange={e => setCommuneLocal(e.target.value)} />
-                )}
               </div>
               <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">Lieu exact *</label>
-                <input type="text" className="form-input" required value={adresseLocal} onChange={e => setAdresseLocal(e.target.value)} />
+                <label className="form-label" style={{ fontWeight: 700 }}>Lieu exact (Confirmation)</label>
+                <input type="text" className="form-input" required value={adresseLocal} onChange={e => setAdresseLocal(e.target.value)} style={{ background: 'white', height: '44px' }} />
               </div>
-              <div className="form-group" style={{ marginBottom: 0, padding: '1rem', backgroundColor: 'var(--bg-color)', borderRadius: 'var(--radius-sm)' }}>
-                <label className="form-label" style={{ fontWeight: 600 }}>Frais de Livraison négociés (CFA)</label>
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                  <input type="number" className="form-input" style={{ width: '150px' }} placeholder="Ex: 2000" min="0" value={fraisLivraison} onChange={e => setFraisLivraison(e.target.value ? Number(e.target.value) : '')} />
-                  <div style={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--primary-color)' }}>
-                    TOTAL À PAYER : {(Number(commande.montant_total) + (Number(fraisLivraison) || 0)).toLocaleString()} CFA
-                  </div>
-                </div>
+              <div style={{ padding: '1.25rem', background: 'white', borderRadius: '16px', border: '1px solid #f0abfc' }}>
+                 <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Montant total à encaisser</div>
+                 <div className="brand-glow" style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--primary)' }}>
+                   {(Number(commande.montant_total) + (Number(fraisLivraison) || 0)).toLocaleString()} <span style={{ fontSize: '0.8rem' }}>CFA</span>
+                 </div>
               </div>
             </div>
           )}
 
           <div className="form-group">
-            <label className="form-label">Note / Résultat de l'appel *</label>
+            <label className="form-label" style={{ fontWeight: 700 }}>Note d'appel</label>
             <textarea 
               className="form-input" 
               rows={3}
               required
-              placeholder="Détails de l'échange avec le client..."
+              style={{ background: '#f8fafc', borderRadius: '16px', padding: '1rem' }}
+              placeholder="Ex: Client confirmé, livraison OK pour demain matin..."
               value={commentaire}
               onChange={e => setCommentaire(e.target.value)}
             />
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '2rem' }}>
-            <button type="button" className="btn btn-outline" onClick={onClose} disabled={loading}>Fermer</button>
-            <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'Validation...' : 'Enregistrer'}
+          <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+            <button type="button" className="btn btn-outline" onClick={onClose} disabled={loading} style={{ flex: 1, height: '52px', fontWeight: 700, borderRadius: '14px' }}>Abandonner</button>
+            <button type="submit" className="btn btn-primary" disabled={loading} style={{ flex: 2, height: '52px', fontWeight: 800, borderRadius: '14px', boxShadow: '0 10px 15px -3px rgba(99, 102, 255, 0.4)' }}>
+              {loading ? 'Traitement...' : 'Enregistrer le résultat'}
             </button>
           </div>
         </form>

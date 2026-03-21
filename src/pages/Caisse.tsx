@@ -127,19 +127,23 @@ export const Caisse = () => {
   };
 
   return (
-    <div>
-      <div style={{ marginBottom: '2rem' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>Point de Retour / Caisse</h2>
-        <p style={{ color: 'var(--text-secondary)', margin: '0.25rem 0 0' }}>Saisie des retours papier et clôture financière de la journée.</p>
+    <div style={{ animation: 'pageEnter 0.6s ease' }}>
+      <div style={{ marginBottom: '2.5rem' }}>
+        <h1 className="text-premium" style={{ fontSize: '2.2rem', fontWeight: 800, margin: 0 }}>Point de Retour & Caisse</h1>
+        <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', marginTop: '0.4rem', fontWeight: 500 }}>Saisie des retours agents et clôture financière certifiée.</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem', alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2.5rem', alignItems: 'start' }}>
         
-        <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-          <div className="card" style={{ flex: 1, minWidth: '300px' }}>
-            <h3 style={{ fontSize: '1rem', marginBottom: '1rem' }}>1. Sélection du Livreur</h3>
-            <select className="form-select" value={selectedLivreur} onChange={(e) => loadLivreur(e.target.value)}>
-              <option value="">-- Renseignez un livreur --</option>
+        {/* ETAPE 1 & 2: SELECTION */}
+        <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
+          <div className="card glass-effect" style={{ flex: 1, minWidth: '350px', padding: '2rem', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem' }}>1</span>
+              Sélection du Livreur
+            </h3>
+            <select className="form-select" style={{ height: '52px', fontWeight: 700, fontSize: '1.05rem' }} value={selectedLivreur} onChange={(e) => loadLivreur(e.target.value)}>
+              <option value="">Renseignez l'agent...</option>
               {livreurs.map(l => (
                 <option key={l.id} value={l.id}>{l.nom_complet}</option>
               ))}
@@ -147,19 +151,42 @@ export const Caisse = () => {
           </div>
 
           {(selectedLivreur && (!feuille)) && (
-            <div className="card" style={{ flex: 2, minWidth: '300px' }}>
-              <h3 style={{ fontSize: '1rem', marginBottom: '1rem' }}>2. Choisissez une feuille en cours</h3>
+            <div className="card glass-effect" style={{ flex: 1.5, minWidth: '350px', padding: '2rem', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem' }}>2</span>
+                Choisir une feuille active
+              </h3>
                {feuilles.length === 0 ? (
-                 <p style={{ color: 'var(--text-secondary)' }}>Ce livreur n'a aucune feuille de route en cours.</p>
+                 <div style={{ padding: '2rem', textAlign: 'center', background: '#f8fafc', borderRadius: '20px', border: '2px dashed #e2e8f0' }}>
+                   <p style={{ color: 'var(--text-muted)', fontWeight: 600, margin: 0 }}>Aucune feuille de route en cours trouvée.</p>
+                 </div>
                ) : (
-                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                    {feuilles.map(f => (
-                     <div key={f.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', cursor: 'pointer', backgroundColor: 'var(--bg-color)' }} onClick={() => loadFeuille(f)}>
+                     <div 
+                       key={f.id} 
+                       style={{ 
+                         display: 'flex', 
+                         justifyContent: 'space-between', 
+                         alignItems: 'center', 
+                         padding: '1.25rem 1.5rem', 
+                         border: '1px solid #e2e8f0', 
+                         borderRadius: '20px', 
+                         cursor: 'pointer', 
+                         backgroundColor: 'white',
+                         transition: 'all 0.2s ease',
+                         boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
+                       }} 
+                       onClick={() => loadFeuille(f)}
+                       className="hover-card"
+                     >
                         <div>
-                          <div style={{ fontWeight: 'bold' }}>Feuille #{f.id.slice(0, 5)}</div>
-                          <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{format(new Date(f.date), 'dd/MM/yyyy HH:mm')} - {f.total_commandes} Colis</div>
+                          <div style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: '1.1rem' }}>Feuille #{f.id.slice(0, 8).toUpperCase()}</div>
+                          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600, marginTop: '0.2rem' }}>
+                            {format(new Date(f.date), 'dd MMMM yyyy à HH:mm')} • {f.total_commandes} Colis
+                          </div>
                         </div>
-                        <ChevronRight size={20} style={{ color: 'var(--primary-color)' }}/>
+                        <ChevronRight size={24} style={{ color: 'var(--primary)' }}/>
                      </div>
                    ))}
                  </div>
@@ -168,64 +195,75 @@ export const Caisse = () => {
           )}
         </div>
 
+        {/* ETAPE 3: RECONCILIATION */}
         {feuille && (
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', alignItems: 'start' }}>
-            <div className="card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                 <h3 style={{ fontSize: '1.25rem', margin: 0 }}>Cocher les résultats (Fiche #{feuille.id.slice(0,5)})</h3>
-                 <button className="btn btn-outline" style={{ padding: '0.25rem 0.75rem', fontSize: '0.875rem' }} onClick={() => setFeuille(null)}>Annuler / Revenir</button>
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) 400px', gap: '2.5rem', alignItems: 'start' }} className="responsive-grid">
+            
+            <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
+              <div style={{ padding: '1.5rem 2.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
+                 <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800 }}>
+                    Contrôle des encaissements
+                    <span style={{ marginLeft: '1rem', padding: '0.2rem 0.6rem', background: 'rgba(99, 102, 255, 0.1)', borderRadius: '8px', fontSize: '0.8rem', color: 'var(--primary)' }}>
+                      #{feuille.id.slice(0, 8).toUpperCase()}
+                    </span>
+                 </h3>
+                 <button className="btn btn-outline" style={{ borderRadius: '12px', height: '40px', fontWeight: 700 }} onClick={() => setFeuille(null)}>Changer de feuille</button>
               </div>
 
-              <div className="table-container" style={{ overflowX: 'auto' }}>
-                <table style={{ minWidth: '700px' }}>
+              <div className="table-container">
+                <table>
                   <thead>
                     <tr>
-                      <th>Ref. Colis</th>
-                      <th>Client (Commune)</th>
-                      <th>Montant</th>
-                      <th>Statut au Retour</th>
-                      <th>Mode Paiement</th>
+                      <th>Colis</th>
+                      <th>Client / Zone</th>
+                      <th style={{ textAlign: 'right' }}>Dû</th>
+                      <th>Statut Final</th>
+                      <th>Paiement</th>
                     </tr>
                   </thead>
                   <tbody>
                     {commandes.map(c => (
                       <tr key={c.id}>
-                        <td style={{ fontWeight: 600 }}>#{c.id.slice(0,5).toUpperCase()}</td>
+                        <td style={{ fontWeight: 800, color: 'var(--text-muted)' }}>#{c.id.slice(0, 5).toUpperCase()}</td>
                         <td>
-                          <div style={{ fontWeight: 600 }}>{c.nom_client || `Client #${c.client_id.slice(0,5)}`}</div>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{c.telephone_client} - {c.commune_livraison}</div>
+                          <div style={{ fontWeight: 800, color: 'var(--text-main)' }}>{c.nom_client || `Anonyme`}</div>
+                          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>{c.commune_livraison}</div>
                         </td>
-                        <td style={{ fontWeight: 600 }}>{Number(c.montant_total).toLocaleString()} CFA</td>
+                        <td style={{ fontWeight: 900, textAlign: 'right', fontSize: '1.05rem' }}>{Number(c.montant_total).toLocaleString()}</td>
                         <td>
                           <select 
                             className="form-select" 
                             style={{ 
-                              padding: '0.25rem 0.5rem', 
-                              backgroundColor: resolutions[c.id]?.statut === 'livree' ? '#dcfce7' : resolutions[c.id]?.statut === 'retour_livreur' ? '#fee2e2' :resolutions[c.id]?.statut === 'a_rappeler' ? '#fef3c7' : '#f3f4f6' 
+                              padding: '0.4rem 0.75rem', 
+                              borderRadius: '10px',
+                              fontWeight: 700,
+                              fontSize: '0.85rem',
+                              backgroundColor: resolutions[c.id]?.statut === 'livree' ? '#dcfce7' : resolutions[c.id]?.statut === 'retour_livreur' ? '#fee2e2' :resolutions[c.id]?.statut === 'a_rappeler' ? '#fef3c7' : '#f3f4f6',
+                              border: 'none'
                             }}
                             value={resolutions[c.id]?.statut || 'retour_livreur'}
                             onChange={(e) => updateResolution(c.id, 'statut', e.target.value)}
                           >
-                            <option value="livree">✅ Encaissé (Livré)</option>
-                            <option value="retour_livreur">🔙 De Retour (Échec)</option>
-                            <option value="a_rappeler">🔄 Reprogrammer</option>
-                            <option value="annulee">❌ Annuler</option>
+                            <option value="livree">Encaissé ✅</option>
+                            <option value="retour_livreur">Retour 🔙</option>
+                            <option value="a_rappeler">Reprog. 🔄</option>
+                            <option value="annulee">Annulé ❌</option>
                           </select>
                         </td>
                         <td>
                           {resolutions[c.id]?.statut === 'livree' ? (
                             <select 
                               className="form-select" 
-                              style={{ padding: '0.25rem 0.5rem' }}
+                              style={{ padding: '0.4rem 0.75rem', borderRadius: '10px', fontSize: '0.85rem', fontWeight: 700 }}
                               value={resolutions[c.id]?.mode_paiement}
                               onChange={(e) => updateResolution(c.id, 'mode_paiement', e.target.value)}
                             >
-                              <option value="Cash à la livraison">Cash</option>
-                              <option value="Mobile Money">Mobile Money</option>
-                              <option value="Carte">Carte ou Autre</option>
+                              <option value="Cash à la livraison">CASH</option>
+                              <option value="Mobile Money">MOBILE</option>
+                              <option value="Carte">AUTRE</option>
                             </select>
                           ) : (
-                            <span style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>-</span>
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: 600 }}>N/A</span>
                           )}
                         </td>
                       </tr>
@@ -235,68 +273,80 @@ export const Caisse = () => {
               </div>
             </div>
 
-            <div className="card" style={{ borderTop: '4px solid var(--primary-color)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
-                <Calculator size={20} color="var(--primary-color)" />
-                <h3 style={{ fontSize: '1.25rem', margin: 0 }}>Réconciliation</h3>
+            {/* PANNEAU DE RECONCILIATION FINANCIERE */}
+            <div className="card glass-effect" style={{ border: '2px solid var(--primary)', padding: '2.5rem', borderRadius: '32px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
+                <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Calculator size={24} strokeWidth={2.5} />
+                </div>
+                <h3 style={{ fontSize: '1.4rem', fontWeight: 900, margin: 0 }}>Calculateur</h3>
               </div>
               
-              <div style={{ marginBottom: '1.5rem', padding: '1.5rem', backgroundColor: 'var(--bg-color)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                  <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Attendu Cash :</span>
-                  <span style={{ fontWeight: 700, fontSize: '1.25rem', color: 'var(--success-color)' }}>{montantAttendu.toLocaleString()} CFA</span>
+              <div style={{ marginBottom: '2rem', padding: '1.75rem', background: '#f1f5f9', borderRadius: '24px', border: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.25rem', alignItems: 'center' }}>
+                  <span style={{ color: 'var(--text-muted)', fontWeight: 800, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Attendu en Cash :</span>
+                  <span className="brand-glow" style={{ fontWeight: 900, fontSize: '1.6rem', color: 'var(--primary)' }}>{montantAttendu.toLocaleString()} <span style={{ fontSize: '0.8rem' }}>CFA</span></span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
-                  <span style={{ color: 'var(--text-secondary)' }}>Mobile Money :</span>
-                  <span style={{ fontWeight: 600 }}>{montantMobileMoney.toLocaleString()} CFA</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '1rem', borderTop: '1px solid #e2e8f0' }}>
+                  <span style={{ color: 'var(--text-muted)', fontWeight: 700, fontSize: '0.85rem' }}>Mobile Money (Digital) :</span>
+                  <span style={{ fontWeight: 800, color: '#64748b' }}>{montantMobileMoney.toLocaleString()} <span style={{ fontSize: '0.7rem' }}>CFA</span></span>
                 </div>
               </div>
 
               <div className="form-group">
-                <label className="form-label">Total Cash Remis (Compté physiquement) *</label>
-                <input 
-                  type="number" 
-                  className="form-input" 
-                  min="0"
-                  style={{ fontSize: '1.5rem', fontWeight: 700, padding: '1rem', textAlign: 'center' }}
-                  value={montantRemisStr}
-                  onChange={e => setMontantRemisStr(e.target.value)}
-                />
+                <label className="form-label" style={{ fontWeight: 800, fontSize: '0.9rem', color: 'var(--text-main)' }}>Total Cash Reçu Physiquement *</label>
+                <div style={{ position: 'relative' }}>
+                  <input 
+                    type="number" 
+                    className="form-input" 
+                    min="0"
+                    placeholder="Montant compté..."
+                    style={{ fontSize: '2.2rem', fontWeight: 900, padding: '1.5rem', textAlign: 'center', height: '90px', borderRadius: '20px', border: '3px solid #e2e8f0', color: 'var(--primary)' }}
+                    value={montantRemisStr}
+                    onChange={e => setMontantRemisStr(e.target.value)}
+                  />
+                  <div style={{ position: 'absolute', right: '1.5rem', top: '50%', transform: 'translateY(-50%)', fontWeight: 900, color: '#94a3b8' }}>CFA</div>
+                </div>
               </div>
 
               {isMontantValide && (
                 <div style={{ 
-                  padding: '1rem', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem',
-                  backgroundColor: ecart === 0 ? 'rgba(16, 185, 129, 0.1)' : ecart > 0 ? 'rgba(59, 130, 246, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                  color: ecart === 0 ? 'var(--success-color)' : ecart > 0 ? 'var(--info-color)' : 'var(--danger-color)',
+                  padding: '1.75rem', borderRadius: '24px', marginBottom: '2rem', marginTop: '1.5rem',
+                  backgroundColor: ecart === 0 ? 'rgba(16, 185, 129, 0.05)' : 'rgba(239, 68, 68, 0.05)',
+                  border: `2px solid ${ecart === 0 ? '#10b981' : '#ef4444'}`,
                   textAlign: 'center'
                 }}>
-                  <div style={{ fontSize: '0.875rem', fontWeight: 500 }}>Écart de caisse final :</div>
-                  <div style={{ fontSize: '2rem', fontWeight: 800 }}>
-                    {ecart > 0 ? '+' : ''}{ecart.toLocaleString()} CFA
+                  <div style={{ fontSize: '0.85rem', fontWeight: 800, color: ecart === 0 ? '#059669' : '#dc2626', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Écart de caisse final</div>
+                  <div style={{ fontSize: '2.5rem', fontWeight: 900, color: ecart === 0 ? '#10b981' : '#ef4444' }}>
+                    {ecart > 0 ? '+' : ''}{ecart.toLocaleString()} <span style={{ fontSize: '1rem' }}>CFA</span>
                   </div>
                 </div>
               )}
 
               <div className="form-group">
-                <label className="form-label">Note / Explication écart (Optionnel)</label>
+                <label className="form-label" style={{ fontWeight: 700 }}>Note d'explication (Si écart)</label>
                 <textarea 
                   className="form-input" 
                   rows={2} 
+                  style={{ borderRadius: '16px', padding: '1rem', background: '#f8fafc' }}
                   value={commentaire}
                   onChange={e => setCommentaire(e.target.value)}
+                  placeholder="Justifiez toute différence de centime..."
                 />
               </div>
 
               <button 
                 className="btn btn-primary" 
-                style={{ width: '100%', height: '56px', fontSize: '1.125rem', marginTop: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
+                style={{ width: '100%', height: '70px', fontSize: '1.2rem', fontWeight: 900, marginTop: '1rem', borderRadius: '20px', boxShadow: '0 15px 25px -5px rgba(99, 102, 255, 0.4)', letterSpacing: '0.02em' }}
                 disabled={loading || !isMontantValide}
                 onClick={handleCloture}
               >
-                <CheckCircle2 size={24} />
-                CLÔTURER
+                {loading ? 'SCELLEMENT...' : <><CheckCircle2 size={28} strokeWidth={2.5} style={{ marginRight: '0.75rem' }} /> CLÔTURER LA SESSION</>}
               </button>
+              
+              <p style={{ marginTop: '1.25rem', textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, lineHeight: '1.4' }}>
+                 Attention : Cette action est irréversible et scellera les données financières de cette feuille de route.
+              </p>
             </div>
           </div>
         )}
