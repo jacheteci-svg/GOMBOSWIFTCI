@@ -53,9 +53,11 @@ export const processCaisse = async (feuilleRouteId: string, resolutions: {id: st
 
   if (frError) throw frError;
   
+  const orderIds = resolutions.map(r => r.id);
   const { data: lignesCommandes, error: linesError } = await insforge.database
     .from('lignes_commandes')
-    .select('*');
+    .select('*')
+    .in('commande_id', orderIds);
 
   if (linesError) throw linesError;
   

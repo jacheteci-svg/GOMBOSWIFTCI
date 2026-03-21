@@ -3,9 +3,10 @@ import { getAvailableLivreurs } from '../services/logistiqueService';
 import { getFeuillesEnCours, getCommandesConcernees, processCaisse } from '../services/caisseService';
 import { insforge } from '../lib/insforge';
 import type { User, Commande, FeuilleRoute } from '../types';
-import { Calculator, CheckCircle2, ChevronRight, Plus, Search } from 'lucide-react';
+import { Calculator, CheckCircle2, ChevronRight, Plus, Search, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '../contexts/ToastContext';
+import { CommandeDetails } from '../components/commandes/CommandeDetails';
 
 export const Caisse = () => {
   const { showToast } = useToast();
@@ -16,6 +17,7 @@ export const Caisse = () => {
   const [feuille, setFeuille] = useState<FeuilleRoute | null>(null);
   const [commandes, setCommandes] = useState<Commande[]>([]);
   const [resolutions, setResolutions] = useState<Record<string, { statut: string, mode_paiement: string }>>({});
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [extraSearch, setExtraSearch] = useState('');
@@ -137,6 +139,18 @@ export const Caisse = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleMarkAllAsDelivered = () => {
+    const newRes = { ...resolutions };
+    commandes.forEach(c => {
+      newRes[c.id] = {
+        statut: 'livree',
+        mode_paiement: c.mode_paiement || 'Cash à la livraison'
+      };
+    });
+    setResolutions(newRes);
+    showToast("Toutes les commandes ont été marquées comme encaissées.", "success");
   };
 
   const getMontantCashAttendu = () => {
@@ -266,14 +280,33 @@ export const Caisse = () => {
             
             <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
               <div style={{ padding: '1.5rem 2.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
-                 <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800 }}>
+                  <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800 }}>
                     Contrôle des encaissements
                     <span style={{ marginLeft: '1rem', padding: '0.2rem 0.6rem', background: 'rgba(99, 102, 255, 0.1)', borderRadius: '8px', fontSize: '0.8rem', color: 'var(--primary)' }}>
                       #{feuille.id.slice(0, 8).toUpperCase()}
                     </span>
-                 </h3>
-                 <button className="btn btn-outline" style={{ borderRadius: '12px', height: '40px', fontWeight: 700 }} onClick={() => setFeuille(null)}>Changer de feuille</button>
+                  </h3>
+                  <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    <button 
+                      className="btn btn-secondary" 
+                      style={{ borderRadius: '12px', height: '40px', fontWeight: 700, fontSize: '0.85rem' }} 
+                      onClick={handleMarkAllAsDelivered}
+                    >
+                      Tout marquer : Livré ✅
+                    </button>
+                    <button className="btn btn-outline" style={{ borderRadius: '12px', height: '40px', fontWeight: 700, fontSize: '0.85rem' }} onClick={() => setFeuille(null)}>Changer de feuille</button>
+                  </div>
               </div>
+
+              {/* RESTOCK SUMMARY */}
+              {Object.values(resolutions).some(r => r.statut === 'retour_livreur') && (
+                <div style={{ padding: '1rem 2.5rem', background: '#fff1f2', borderBottom: '1px solid #fee2e2', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                   <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#ef4444' }}></div>
+                   <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#991b1b' }}>
+                     {Object.values(resolutions).filter(r => r.statut === 'retour_livreur').length} colis à réintégrer en stock après clôture.
+                   </span>
+                </div>
+              )}
 
               {/* QUICK ADD EXTRA ORDERS */}
               <div style={{ padding: '1.5rem 2.5rem', borderBottom: '1px solid #f1f5f9', background: '#fffef0', display: 'flex', gap: '1rem', alignItems: 'center' }}>
@@ -308,7 +341,18 @@ export const Caisse = () => {
                   <tbody>
                     {commandes.map(c => (
                       <tr key={c.id}>
-                        <td style={{ fontWeight: 800, color: 'var(--text-muted)' }}>#{c.id.slice(0, 5).toUpperCase()}</td>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <button 
+                              className="btn btn-outline" 
+                              style={{ padding: '0.4rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}
+                              onClick={() => setSelectedOrderId(c.id)}
+                            >
+                              <Eye size={14} />
+                            </button>
+                            <span style={{ fontWeight: 800, color: 'var(--text-muted)' }}>#{c.id.slice(0, 5).toUpperCase()}</span>
+                          </div>
+                        </td>
                         <td>
                           <div style={{ fontWeight: 800, color: 'var(--text-main)' }}>{c.nom_client || `Anonyme`}</div>
                           <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>{c.commune_livraison}</div>
@@ -435,6 +479,13 @@ export const Caisse = () => {
           </div>
         )}
       </div>
+
+      {selectedOrderId && (
+        <CommandeDetails 
+          commandeId={selectedOrderId} 
+          onClose={() => setSelectedOrderId(null)} 
+        />
+      )}
     </div>
   );
 };
