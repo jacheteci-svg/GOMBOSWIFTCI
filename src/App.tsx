@@ -15,6 +15,7 @@ import { Clients } from './pages/Clients';
 import { Admin } from './pages/Admin';
 import { Profil } from './pages/Profil';
 import { Login } from './pages/Login';
+import { FinancialReport } from './pages/FinancialReport';
 
 const ProtectedRoute = ({ children, requiredPermission }: { children: React.ReactNode, requiredPermission: string }) => {
   const { currentUser, hasPermission } = useAuth();
@@ -69,6 +70,11 @@ const AppRoutes = () => {
         {/* Module 6: Caisse */}
         <Route path="caisse" element={
           <ProtectedRoute requiredPermission="CAISSE"><Caisse /></ProtectedRoute>
+        } />
+
+        {/* Financial Report */}
+        <Route path="rapport-financier" element={
+          <ProtectedRoute requiredPermission="FINANCE"><FinancialReport /></ProtectedRoute>
         } />
 
         {/* Historique et Impression */}

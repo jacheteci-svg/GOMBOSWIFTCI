@@ -80,3 +80,29 @@ export const processCaisse = async (feuilleRouteId: string, resolutions: {id: st
 
   if (retourError) throw retourError;
 };
+
+export const getDailyFinancials = async (dateStr: string): Promise<any> => {
+  const startOfDay = new Date(dateStr);
+  startOfDay.setHours(0,0,0,0);
+  const endOfDay = new Date(dateStr);
+  endOfDay.setHours(23,59,59,999);
+
+  // 1. Get Caisse Retours for the day
+  const { data: retours, error: retoursError } = await insforge.database
+    .from('caisse_retours')
+    .select('*')
+    .gte('date', startOfDay.toISOString())
+    .lte('date', endOfDay.toISOString());
+
+  if (retoursError) throw retoursError;
+
+  // 2. Get All Commandes modified or delivered today for stats
+  const { data: commandes, error: cmdError } = await insforge.database
+    .from('commandes')
+    .select('id, montant_total, statut_commande, mode_paiement')
+    .or(`date_livraison_effective.gte.${startOfDay.toISOString()},date_creation.gte.${startOfDay.toISOString()}`);
+
+  if (cmdError) throw cmdError;
+
+  return { retours, commandes };
+};

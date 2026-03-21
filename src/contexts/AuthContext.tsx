@@ -23,13 +23,13 @@ export const useAuth = () => useContext(AuthContext);
 
 // --- Role to Permission Mapping for Fallback ---
 const ROLE_PERMISSIONS: Record<Role, string[]> = {
-  ADMIN: ['DASHBOARD', 'PRODUITS', 'COMMANDES', 'CENTRE_APPEL', 'LOGISTIQUE', 'LIVREUR', 'CAISSE', 'CLIENTS', 'HISTORIQUE', 'ADMIN'],
+  ADMIN: ['DASHBOARD', 'PRODUITS', 'COMMANDES', 'CENTRE_APPEL', 'LOGISTIQUE', 'LIVREUR', 'CAISSE', 'CLIENTS', 'HISTORIQUE', 'ADMIN', 'FINANCE'],
   GESTIONNAIRE: ['PRODUITS', 'COMMANDES', 'CLIENTS'],
   AGENT_APPEL: ['COMMANDES', 'CENTRE_APPEL', 'CLIENTS'],
-  AGENT_MIXTE: ['COMMANDES', 'CENTRE_APPEL', 'CLIENTS', 'CAISSE'],
+  AGENT_MIXTE: ['COMMANDES', 'CENTRE_APPEL', 'CLIENTS', 'CAISSE', 'FINANCE'],
   LOGISTIQUE: ['COMMANDES', 'LOGISTIQUE'],
   LIVREUR: ['LIVREUR'],
-  CAISSIERE: ['CAISSE']
+  CAISSIERE: ['CAISSE', 'FINANCE']
 };
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
