@@ -86,6 +86,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (!error) {
       setCurrentUser(null);
       showToast("Déconnexion réussie.", "success");
+      window.location.href = '/login';
     } else {
       showToast("Erreur lors de la déconnexion.", "error");
     }
