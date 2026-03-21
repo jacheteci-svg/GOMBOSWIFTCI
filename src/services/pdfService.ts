@@ -228,14 +228,20 @@ export const generateAnalyticalReportPDF = (data: any, dateString: string) => {
   doc.text(`Rapport Analytique Business du ${format(new Date(dateString), 'dd MMMM yyyy', { locale: fr })}`, 20, 32);
 
   // Financial Summary
-  const succesCmds = data.commandes.filter((c: any) => c.statut_commande === 'terminee' || c.statut_commande === 'livree');
-  const failureCmds = data.commandes.filter((c: any) => !['terminee', 'livree', 'en_cours_livraison'].includes(c.statut_commande));
+  const getFrais = (c: any) => {
+    if (c.frais_livraison !== undefined && c.frais_livraison !== null) return Number(c.frais_livraison);
+    if (['terminee', 'livree'].includes(c.statut_commande)) return 1000;
+    return 0;
+  };
+
+  const succesCmds = (data.commandes || []).filter((c: any) => c.statut_commande === 'terminee' || c.statut_commande === 'livree');
+  const failureCmds = (data.commandes || []).filter((c: any) => !['terminee', 'livree', 'en_cours_livraison'].includes(c.statut_commande));
   
-  const totalEncaisseBrut = data.retours.reduce((acc: number, r: any) => acc + (r.montant_remis_par_livreur || 0), 0);
-  const totalFraisLivraison = succesCmds.reduce((acc: number, c: any) => acc + (c.frais_livraison || 0), 0);
+  const totalEncaisseBrut = (data.retours || []).reduce((acc: number, r: any) => acc + (r.montant_remis_par_livreur || 0), 0);
+  const totalFraisLivraison = succesCmds.reduce((acc: number, c: any) => acc + getFrais(c), 0);
   const totalNetProduits = totalEncaisseBrut - totalFraisLivraison;
   
-  const successRate = data.commandes.length > 0 ? (succesCmds.length / data.commandes.length) * 100 : 0;
+  const successRate = (data.commandes || []).length > 0 ? (succesCmds.length / data.commandes.length) * 100 : 0;
 
   doc.setDrawColor(241, 245, 249);
   doc.setFillColor(248, 250, 252);
@@ -254,14 +260,14 @@ export const generateAnalyticalReportPDF = (data: any, dateString: string) => {
   doc.text(`Taux de Succès: ${successRate.toFixed(1)}%`, pageWidth - 25, 73, { align: 'right' });
 
   // Detailed Table
-  doc.setFontSize(14);
+  doc.setFontSize(11);
   doc.text("Détails des Opérations de Caisse", 20, 100);
 
   const tableRows = (data.retours || []).map((r: any) => [
-    `#${r.feuille_route_id.substring(0, 8).toUpperCase()}`,
-    r.montant_remis_par_livreur?.toLocaleString(),
-    r.montant_attendu?.toLocaleString(),
-    r.ecart?.toLocaleString(),
+    r.feuille_route_id ? `#${r.feuille_route_id.substring(0, 8).toUpperCase()}` : "N/A",
+    r.montant_remis_par_livreur?.toLocaleString() || "0",
+    r.montant_attendu?.toLocaleString() || "0",
+    r.ecart?.toLocaleString() || "0",
     r.commentaire || "-"
   ]);
 

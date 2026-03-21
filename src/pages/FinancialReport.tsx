@@ -119,10 +119,12 @@ export const FinancialReport = () => {
 
   const handleGeneratePDF = () => {
     try {
+      console.log("Generating analytical report for:", selectedDate, data);
       generateAnalyticalReportPDF(data, selectedDate);
       showToast("Rapport analytique généré !", "success");
     } catch (e) {
-      showToast("Erreur lors de la génération du PDF", "error");
+      console.error("PDF Generation Error:", e);
+      showToast("Échec de la génération du PDF. Vérifiez la console pour plus de détails.", "error");
     }
   };
 
