@@ -109,50 +109,98 @@ export const Login = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <div className="login-header">
-          <div className="login-logo">
-            <LogIn size={32} color="white" />
+    <div className="login-wrapper" style={{ 
+      minHeight: '100vh', 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      background: 'radial-gradient(circle at top left, #4f46e5 0%, #1e1b4b 100%)',
+      padding: '2rem',
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
+      {/* Éléments décoratifs en arrière-plan */}
+      <div style={{ position: 'absolute', top: '-10%', left: '-10%', width: '40vw', height: '40vw', background: 'rgba(99, 102, 255, 0.1)', borderRadius: '50%', filter: 'blur(80px)' }}></div>
+      <div style={{ position: 'absolute', bottom: '-10%', right: '-10%', width: '30vw', height: '30vw', background: 'rgba(79, 70, 229, 0.15)', borderRadius: '50%', filter: 'blur(100px)' }}></div>
+
+      <div className="card glass-effect" style={{ 
+        width: '100%', 
+        maxWidth: '480px', 
+        padding: '3.5rem', 
+        border: '1px solid rgba(255,255,255,0.15)', 
+        borderRadius: '32px',
+        boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
+        animation: 'modalEnter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        position: 'relative',
+        zIndex: 1
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+          <div style={{ 
+            width: '80px', 
+            height: '80px', 
+            background: 'linear-gradient(135deg, #6366f1 0%, #4338ca 100%)', 
+            borderRadius: '24px', 
+            margin: '0 auto 1.5rem', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            boxShadow: '0 15px 25px -5px rgba(99, 102, 255, 0.4)',
+            transform: 'rotate(-5deg)'
+          }}>
+            <LogIn size={40} color="white" strokeWidth={2.5} />
           </div>
-          <h1 className="login-title">ECOM-360</h1>
-          <p className="login-subtitle">Système de Distribution & Logistique</p>
+          <h1 style={{ 
+            fontSize: '2.5rem', 
+            fontWeight: 900, 
+            margin: 0, 
+            color: 'white', 
+            letterSpacing: '-0.03em',
+            textShadow: '0 2px 4px rgba(0,0,0,0.2)'
+          }}>ECOM-360</h1>
+          <p style={{ 
+            color: 'rgba(255,255,255,0.6)', 
+            fontSize: '1.1rem', 
+            marginTop: '0.5rem',
+            fontWeight: 500
+          }}>Plateforme Logistique Intégrée</p>
         </div>
 
         {isVerifying ? (
-          <form onSubmit={handleVerify} className="login-form">
+          <form onSubmit={handleVerify} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <div className="form-group">
-              <label className="form-label">Code de vérification (E-mail)</label>
+              <label className="form-label" style={{ color: 'rgba(255,255,255,0.8)', fontWeight: 700 }}>Code secret (reçu par email)</label>
               <input
                 type="text"
                 required
                 value={verificationCode}
                 onChange={(e) => setVerificationCode(e.target.value)}
                 className="form-input"
-                placeholder="123456"
+                style={{ height: '56px', borderRadius: '16px', background: 'rgba(255,255,255,0.05)', border: '2px solid rgba(255,255,255,0.1)', color: 'white', fontSize: '1.2rem', textAlign: 'center', letterSpacing: '0.5em', fontWeight: 900 }}
+                placeholder="000000"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="login-btn"
+              className="btn btn-primary"
+              style={{ height: '60px', borderRadius: '18px', fontWeight: 900, fontSize: '1.1rem', boxShadow: '0 10px 15px -3px rgba(99, 102, 255, 0.5)' }}
             >
-              {loading ? <Loader2 className="animate-spin" /> : "Vérifier le code"}
+              {loading ? <Loader2 className="animate-spin" /> : "VÉRIFIER LE COMPTE"}
             </button>
             <button 
               type="button" 
               onClick={() => setIsVerifying(false)}
-              style={{ width: '100%', marginTop: '1rem', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.875rem' }}
+              style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600 }}
             >
-              Retour à la connexion
+              Retour au formulaire
             </button>
           </form>
         ) : (
-          <form onSubmit={handleAuth} className="login-form">
+          <form onSubmit={handleAuth} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <div className="form-group">
-              <label className="form-label">
-                {isSignUp ? 'Adresse E-mail' : 'Email ou Numéro de téléphone'}
+              <label className="form-label" style={{ color: 'rgba(255,255,255,0.8)', fontWeight: 700 }}>
+                {isSignUp ? 'VOTRE ADRESSE EMAIL' : 'IDENTIFIANT D\'ACCÈS'}
               </label>
               <input
                 type={isSignUp ? 'email' : 'text'}
@@ -160,41 +208,46 @@ export const Login = () => {
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
                 className="form-input"
-                placeholder={isSignUp ? 'votre@email.com' : 'votre@email.com ou 0102030405'}
+                style={{ height: '56px', borderRadius: '16px', background: 'rgba(255,255,255,0.05)', border: '2px solid rgba(255,255,255,0.1)', color: 'white', fontWeight: 600 }}
+                placeholder={isSignUp ? 'contact@entreprise.com' : 'Email ou Mobile'}
               />
             </div>
 
             <div className="form-group">
-              <label className="form-label">Mot de passe</label>
+              <label className="form-label" style={{ color: 'rgba(255,255,255,0.8)', fontWeight: 700 }}>CLÉ DE SÉCURITÉ</label>
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="form-input"
-                placeholder="••••••••"
+                style={{ height: '56px', borderRadius: '16px', background: 'rgba(255,255,255,0.05)', border: '2px solid rgba(255,255,255,0.1)', color: 'white', fontWeight: 600 }}
+                placeholder="••••••••••••"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="login-btn"
+              className="btn btn-primary"
+              style={{ height: '60px', borderRadius: '18px', fontWeight: 900, fontSize: '1.1rem', boxShadow: '0 10px 15px -3px rgba(99, 102, 255, 0.5)' }}
             >
-              {loading ? <Loader2 className="animate-spin" /> : (isSignUp ? "S'inscrire" : "Se connecter")}
+              {loading ? <Loader2 className="animate-spin" /> : (isSignUp ? "CRÉER MON ACCÈS" : "DÉVERROUILLER L'ACCÈS")}
             </button>
           </form>
         )}
 
-        <div className="login-footer">
+        <div style={{ marginTop: '2.5rem', textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '2rem' }}>
           <button 
             type="button"
             onClick={() => setIsSignUp(!isSignUp)} 
-            style={{ background: 'none', border: 'none', color: 'var(--primary-color)', cursor: 'pointer', fontWeight: 600, display: 'block', margin: '0 auto 1rem' }}
+            style={{ background: 'none', border: 'none', color: '#818cf8', cursor: 'pointer', fontWeight: 800, fontSize: '0.95rem', letterSpacing: '0.02em' }}
           >
-            {isSignUp ? 'Déjà un compte ? Se connecter' : 'Pas de compte ? S\'inscrire'}
+            {isSignUp ? 'DÉJÀ RÉFÉRENCÉ ? SE CONNECTER' : 'PAS ENCORE DE COMPTE ? S\'INSCRIRE'}
           </button>
-          Besoin d'aide ? Contactez l'administrateur système.
+          <div style={{ marginTop: '1.5rem', color: 'rgba(255,255,255,0.35)', fontSize: '0.8rem', fontWeight: 500 }}>
+             Accès restreint. Monitoring de sécurité actif.
+          </div>
         </div>
       </div>
     </div>
