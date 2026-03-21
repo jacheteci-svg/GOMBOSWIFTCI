@@ -1,19 +1,21 @@
-import { Bell, Search, Menu } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { Bell, Search, Menu, Home } from 'lucide-react';
+import { useLocation, Link } from 'react-router-dom';
 
 export const Header = ({ onMenuClick }: { onMenuClick: () => void }) => {
   const location = useLocation();
   
   const getPageTitle = () => {
     switch (location.pathname) {
-      case '/': return 'Tableau de bord';
+      case '/': return 'Portail GomboSwift';
+      case '/dashboard': return 'Business 360°';
       case '/produits': return 'Produits & Stock';
       case '/commandes': return 'Gestion des Commandes';
       case '/centre-appel': return 'Centre d\'Appel';
       case '/logistique': return 'Logistique & Feuilles de Route';
       case '/livraison': return 'Mes Livraisons';
       case '/caisse': return 'Caisse & Point de Retour';
-      default: return 'Application';
+      case '/rapport-financier': return 'Rapport Financier & Orientations';
+      default: return 'Nexus Logistics';
     }
   };
 
@@ -38,6 +40,10 @@ export const Header = ({ onMenuClick }: { onMenuClick: () => void }) => {
           />
         </div>
         
+        <Link to="/" className="btn btn-outline" style={{ border: 'none', padding: '0.6rem', borderRadius: '12px', background: 'var(--primary-glow)', color: 'var(--primary)', display: 'flex', alignItems: 'center' }}>
+          <Home size={20} />
+        </Link>
+
         <button className="btn btn-outline" style={{ border: 'none', padding: '0.6rem', borderRadius: '12px', background: '#f1f5f9' }}>
           <Bell size={20} style={{ color: 'var(--text-muted)' }} />
         </button>
