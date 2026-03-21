@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { getCommandesByStatus } from '../services/commandeService';
 import { getAvailableLivreurs, creerFeuilleRoute } from '../services/logistiqueService';
 import type { Commande, User } from '../types';
-import { Truck, Printer } from 'lucide-react';
+import { Truck, Printer, Eye } from 'lucide-react';
 import { useToast } from '../contexts/ToastContext';
 import { generateDeliverySlipPDF } from '../services/pdfService';
+import { CommandeDetails } from '../components/commandes/CommandeDetails';
 
 export const Logistique = () => {
   const { showToast } = useToast();
@@ -14,6 +15,7 @@ export const Logistique = () => {
   
   const [selectedCommands, setSelectedCommands] = useState<Set<string>>(new Set());
   const [selectedLivreur, setSelectedLivreur] = useState<string>('');
+  const [selectedCommandeId, setSelectedCommandeId] = useState<string | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -159,8 +161,19 @@ export const Logistique = () => {
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem', fontStyle: 'italic' }}>{c.adresse_livraison?.slice(0, 40)}</div>
                     </td>
                     <td style={{ textAlign: 'right' }}>
-                      <div style={{ fontWeight: 800, fontSize: '1.05rem' }}>{Number(c.montant_total).toLocaleString()} <span style={{ fontSize: '0.7rem' }}>CFA</span></div>
-                      {c.frais_livraison !== undefined && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Liv: {c.frais_livraison}</div>}
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '1rem' }}>
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontWeight: 800 }}>{Number(c.montant_total).toLocaleString()} CFA</div>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{(c.lignes || []).length} art.</div>
+                        </div>
+                        <button 
+                          className="btn btn-outline" 
+                          style={{ padding: '0.5rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}
+                          onClick={(e) => { e.stopPropagation(); setSelectedCommandeId(c.id); }}
+                        >
+                          <Eye size={16} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -225,6 +238,13 @@ export const Logistique = () => {
         </div>
 
       </div>
+
+      {selectedCommandeId && (
+        <CommandeDetails 
+          commandeId={selectedCommandeId} 
+          onClose={() => setSelectedCommandeId(null)} 
+        />
+      )}
     </div>
   );
 };

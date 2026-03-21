@@ -47,19 +47,26 @@ export const subscribeToCommandes = (callback: (commandes: Commande[]) => void) 
   return () => clearInterval(interval);
 };
 
-export const getCommandesByStatus = async (statusList: string[]): Promise<Commande[]> => {
-  const { data, error } = await insforge.database
+export const getCommandesByStatus = async (statusList: string[]): Promise<(Commande & { lignes: LigneCommande[] })[]> => {
+  const { data: orders, error: orderError } = await insforge.database
     .from('commandes')
     .select('*, clients(nom_complet, telephone)')
     .in('statut_commande', statusList)
     .order('date_creation', { ascending: false });
 
-  if (error) throw error;
+  if (orderError) throw orderError;
+
+  const { data: lines, error: linesError } = await insforge.database
+    .from('lignes_commandes')
+    .select('*');
+
+  if (linesError) throw linesError;
   
-  return (data || []).map((c: any) => ({
-    ...c,
-    nom_client: c.clients?.nom_complet,
-    telephone_client: c.clients?.telephone
+  return (orders || []).map((o: any) => ({
+    ...o,
+    nom_client: o.clients?.nom_complet,
+    telephone_client: o.clients?.telephone,
+    lignes: (lines || []).filter((l: any) => l.commande_id === o.id)
   }));
 };
 
@@ -143,7 +150,6 @@ export const updateCommandeStatus = async (id: string, status: string, additiona
 
   // 3. Stock management state machine
   const activeStates = ['en_attente_appel', 'validee', 'en_cours_livraison', 'livree', 'terminee'];
-  const inactiveStates = ['annulee', 'a_rappeler', 'echouee', 'retour_stock', 'retour_livreur', 'injoignable'];
 
   const wasActive = activeStates.includes(prevStatus);
   const isNowActive = activeStates.includes(nextStatus);

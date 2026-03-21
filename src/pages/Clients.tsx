@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { 
   Users, Search, 
-  X, TrendingUp
+  X, TrendingUp, Eye
 } from 'lucide-react';
 import { getClientsWithIntelligence, getClientCommandes, ClientFidelityStats } from '../services/clientService';
+import { CommandeDetails } from '../components/commandes/CommandeDetails';
 import type { Client, Commande } from '../types';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -13,6 +14,7 @@ export const Clients = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedClient, setSelectedClient] = useState<{ client: Client & ClientFidelityStats, commandes: Commande[] } | null>(null);
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchClients();
@@ -213,20 +215,29 @@ export const Clients = () => {
                </div>
 
                <h3 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '1rem' }}>Historique des Commandes</h3>
-               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                 {selectedClient.commandes.map((cmd) => (
-                   <div key={cmd.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem', background: '#f8fafc', borderRadius: '16px', border: '1px solid #f1f5f9' }}>
-                      <div>
-                        <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>#{cmd.id.slice(0,8).toUpperCase()}</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>{format(new Date(cmd.date_creation), 'dd MMMM yyyy', { locale: fr })}</div>
-                      </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontWeight: 900 }}>{cmd.montant_total?.toLocaleString()} CFA</div>
-                        <span className={`badge ${['livree', 'terminee'].includes(cmd.statut_commande) ? 'badge-success' : 'badge-danger'}`} style={{ fontSize: '0.65rem' }}>{cmd.statut_commande}</span>
-                      </div>
-                   </div>
-                 ))}
-               </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {selectedClient.commandes.map((cmd) => (
+                    <div key={cmd.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem', background: '#f8fafc', borderRadius: '16px', border: '1px solid #f1f5f9' }}>
+                       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                         <button 
+                           className="btn btn-outline" 
+                           style={{ padding: '0.4rem', borderRadius: '10px' }}
+                           onClick={() => setSelectedOrderId(cmd.id)}
+                         >
+                           <Eye size={14} />
+                         </button>
+                         <div>
+                           <div style={{ fontWeight: 800, fontSize: '0.9rem' }}>#{cmd.id.slice(0,8).toUpperCase()}</div>
+                           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>{format(new Date(cmd.date_creation), 'dd MMMM yyyy', { locale: fr })}</div>
+                         </div>
+                       </div>
+                       <div style={{ textAlign: 'right' }}>
+                         <div style={{ fontWeight: 900 }}>{cmd.montant_total?.toLocaleString()} CFA</div>
+                         <span className={`badge ${['livree', 'terminee'].includes(cmd.statut_commande) ? 'badge-success' : 'badge-danger'}`} style={{ fontSize: '0.65rem' }}>{cmd.statut_commande}</span>
+                       </div>
+                    </div>
+                  ))}
+                </div>
             </div>
 
             <div style={{ padding: '1.5rem 2rem', borderTop: '1px solid #f1f5f9', textAlign: 'right' }}>
@@ -234,6 +245,13 @@ export const Clients = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {selectedOrderId && (
+        <CommandeDetails 
+          commandeId={selectedOrderId} 
+          onClose={() => setSelectedOrderId(null)} 
+        />
       )}
     </>
   );

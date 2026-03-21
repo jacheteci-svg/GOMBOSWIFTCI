@@ -170,38 +170,33 @@ export const generateDeliverySlipPDF = (feuilleRoute: any, commandes: Commande[]
 
   // Commandes Table
   const tableRows = (commandes || []).map((c, i) => {
-    // Try to get total quantity if available, otherwise 1
-    const totalQty = c.nombre_produits || 1;
-    // P.U. Moyen or Main product price
-    const pu = (Number(c.montant_total) - (Number(c.frais_livraison) || 0)) / totalQty;
+    const itemsStr = (c.lignes || []).map((l: LigneCommande) => 
+      `${l.nom_produit} (${l.quantite} x ${(l.prix_unitaire || 0).toLocaleString()})`
+    ).join('\n');
     
     return [
       i + 1,
-      `#${(c.id || "").substring(0, 8).toUpperCase()}`,
-      c.nom_client || "Client",
-      c.commune_livraison || "-",
-      `${totalQty} pc`,
-      `${pu.toLocaleString()} CFA`,
+      `#${(c.id || "").substring(0, 8).toUpperCase()}\n${c.nom_client || "Client"}`,
+      `${c.commune_livraison || "-"}\n${c.adresse_livraison?.slice(0, 40) || ""}`,
+      itemsStr || "SANS ARTICLES",
       `${(c.montant_total || 0).toLocaleString()} CFA`
     ];
   });
 
   doc.autoTable({
     startY: 75,
-    head: [['N°', 'Réf Cmd', 'Client', 'Zone', 'Qté', 'P.U.', 'À Encaisser']],
+    head: [['N°', 'Référence / Client', 'Zone / Adresse', 'Articles (Détails)', 'À Encaisser']],
     body: tableRows,
     theme: 'grid',
     headStyles: { fillColor: [30, 41, 59] },
     columnStyles: {
       0: { cellWidth: 8 },
-      1: { cellWidth: 22 },
-      2: { cellWidth: 'auto' },
-      3: { cellWidth: 25 },
-      4: { halign: 'center', cellWidth: 15 },
-      5: { halign: 'right', cellWidth: 25 },
-      6: { halign: 'right', cellWidth: 30 }
+      1: { cellWidth: 35 },
+      2: { cellWidth: 40 },
+      3: { cellWidth: 'auto' },
+      4: { halign: 'right', cellWidth: 35 }
     },
-    styles: { fontSize: 8 }
+    styles: { fontSize: 8, cellPadding: 3 }
   });
 
   const finalY = (doc as any).lastAutoTable?.finalY || 100;

@@ -93,6 +93,7 @@ export interface Commande {
   commentaire_agent?: string;
   // Extras for Dashboard/Reporting
   nombre_produits?: number;
+  lignes?: LigneCommande[];
 }
 
 export interface LigneCommande {
