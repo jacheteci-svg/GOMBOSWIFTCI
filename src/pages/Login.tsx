@@ -109,73 +109,77 @@ export const Login = () => {
   };
 
   return (
-    <div className="login-wrapper" style={{ 
-      minHeight: '100vh', 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center', 
-      background: 'radial-gradient(circle at top left, #4f46e5 0%, #1e1b4b 100%)',
-      padding: '2rem',
-      position: 'relative',
-      overflow: 'hidden'
-    }}>
-      {/* Éléments décoratifs en arrière-plan */}
-      <div style={{ position: 'absolute', top: '-10%', left: '-10%', width: '40vw', height: '40vw', background: 'rgba(99, 102, 255, 0.1)', borderRadius: '50%', filter: 'blur(80px)' }}></div>
-      <div style={{ position: 'absolute', bottom: '-10%', right: '-10%', width: '30vw', height: '30vw', background: 'rgba(79, 70, 229, 0.15)', borderRadius: '50%', filter: 'blur(100px)' }}></div>
+    <div className="login-v2" style={{ position: 'relative', overflow: 'hidden' }}>
+      {/* BACKGROUND BLOBS ENGINE */}
+      <div className="blob-container">
+        <div className="blob" style={{ width: '600px', height: '600px', background: '#4f46e5', top: '-200px', left: '-200px', animationDelay: '0s' }}></div>
+        <div className="blob" style={{ width: '500px', height: '500px', background: '#9333ea', bottom: '-150px', right: '-150px', animationDelay: '-5s' }}></div>
+        <div className="blob" style={{ width: '400px', height: '400px', background: '#6366f1', top: '20%', right: '10%', animationDelay: '-10s' }}></div>
+      </div>
 
-      <div className="card glass-effect" style={{ 
+      <div className="glass-card-futuristic floating" style={{ 
         width: '100%', 
-        maxWidth: '480px', 
-        padding: '3.5rem', 
-        border: '1px solid rgba(255,255,255,0.15)', 
-        borderRadius: '32px',
-        boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
-        animation: 'modalEnter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
-        position: 'relative',
-        zIndex: 1
+        maxWidth: '500px', 
+        padding: '4rem', 
+        zIndex: 10,
+        margin: '1.5rem'
       }}>
-        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+        {/* LOGO & TITRE FUTURISTE */}
+        <div style={{ textAlign: 'center', marginBottom: '3.5rem', position: 'relative', zIndex: 2 }}>
           <div style={{ 
-            width: '80px', 
-            height: '80px', 
-            background: 'linear-gradient(135deg, #6366f1 0%, #4338ca 100%)', 
-            borderRadius: '24px', 
-            margin: '0 auto 1.5rem', 
+            width: '90px', 
+            height: '90px', 
+            background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', 
+            borderRadius: '28px', 
+            margin: '0 auto 2rem', 
             display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'center',
-            boxShadow: '0 15px 25px -5px rgba(99, 102, 255, 0.4)',
-            transform: 'rotate(-5deg)'
+            boxShadow: '0 0 30px rgba(99, 102, 255, 0.6), inset 0 0 15px rgba(255,255,255,0.3)',
+            transform: 'rotate(-8deg)',
+            border: '1px solid rgba(255,255,255,0.4)'
           }}>
-            <LogIn size={40} color="white" strokeWidth={2.5} />
+            <LogIn size={44} color="white" strokeWidth={2.5} />
           </div>
-          <h1 style={{ 
-            fontSize: '2.5rem', 
+          
+          <h1 className="text-neon" style={{ 
+            fontSize: '3rem', 
             fontWeight: 900, 
             margin: 0, 
-            color: 'white', 
-            letterSpacing: '-0.03em',
-            textShadow: '0 2px 4px rgba(0,0,0,0.2)'
+            letterSpacing: '-0.04em',
+            textTransform: 'uppercase'
           }}>GomboSwift</h1>
-          <p style={{ 
-            color: 'rgba(255,255,255,0.6)', 
-            fontSize: '1.1rem', 
-            marginTop: '0.5rem',
-            fontWeight: 500
-          }}>Plateforme Logistique Intégrée</p>
+          
+          <div style={{ 
+            marginTop: '0.75rem', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            gap: '10px' 
+          }}>
+            <div style={{ height: '1px', width: '30px', background: 'rgba(255,255,255,0.2)' }}></div>
+            <p style={{ 
+              color: 'rgba(255,255,255,0.8)', 
+              fontSize: '0.9rem', 
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.2em'
+            }}>Nexus Logistique</p>
+            <div style={{ height: '1px', width: '30px', background: 'rgba(255,255,255,0.2)' }}></div>
+          </div>
         </div>
 
         {isVerifying ? (
-          <form onSubmit={handleVerify} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <form onSubmit={handleVerify} style={{ display: 'flex', flexDirection: 'column', gap: '2rem', position: 'relative', zIndex: 2 }}>
             <div className="form-group">
-              <label className="form-label" style={{ color: 'rgba(255,255,255,0.8)', fontWeight: 700 }}>Code secret (reçu par email)</label>
+              <label className="form-label" style={{ color: 'rgba(255,255,255,0.9)', fontWeight: 800, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Code d'Authentification</label>
               <input
                 type="text"
                 required
                 value={verificationCode}
                 onChange={(e) => setVerificationCode(e.target.value)}
-                className="form-input"
-                style={{ height: '56px', borderRadius: '16px', background: 'rgba(255,255,255,0.05)', border: '2px solid rgba(255,255,255,0.1)', color: 'white', fontSize: '1.2rem', textAlign: 'center', letterSpacing: '0.5em', fontWeight: 900 }}
+                className="form-input input-futuristic"
+                style={{ height: '64px', borderRadius: '20px', fontSize: '1.5rem', textAlign: 'center', letterSpacing: '0.4em', fontWeight: 900 }}
                 placeholder="000000"
               />
             </div>
@@ -184,44 +188,45 @@ export const Login = () => {
               type="submit"
               disabled={loading}
               className="btn btn-primary"
-              style={{ height: '60px', borderRadius: '18px', fontWeight: 900, fontSize: '1.1rem', boxShadow: '0 10px 15px -3px rgba(99, 102, 255, 0.5)' }}
+              style={{ height: '64px', borderRadius: '20px', fontWeight: 900, fontSize: '1.2rem', background: 'linear-gradient(90deg, #6366f1, #a855f7)', border: 'none', boxShadow: '0 15px 30px -5px rgba(99, 102, 255, 0.5)' }}
             >
-              {loading ? <Loader2 className="animate-spin" /> : "VÉRIFIER LE COMPTE"}
+              {loading ? <Loader2 className="animate-spin" /> : "VÉRIFIER LE SIGNAL"}
             </button>
+            
             <button 
               type="button" 
               onClick={() => setIsVerifying(false)}
-              style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600 }}
+              style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase' }}
             >
-              Retour au formulaire
+              Annuler la demande
             </button>
           </form>
         ) : (
-          <form onSubmit={handleAuth} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <div className="form-group">
-              <label className="form-label" style={{ color: 'rgba(255,255,255,0.8)', fontWeight: 700 }}>
-                {isSignUp ? 'VOTRE ADRESSE EMAIL' : 'IDENTIFIANT D\'ACCÈS'}
+          <form onSubmit={handleAuth} style={{ display: 'flex', flexDirection: 'column', gap: '1.8rem', position: 'relative', zIndex: 2 }}>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label" style={{ color: 'rgba(255,255,255,0.9)', fontWeight: 800, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                {isSignUp ? 'Identité Digitale (Email)' : 'Identifiant de Connexion'}
               </label>
               <input
                 type={isSignUp ? 'email' : 'text'}
                 required
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
-                className="form-input"
-                style={{ height: '56px', borderRadius: '16px', background: 'rgba(255,255,255,0.05)', border: '2px solid rgba(255,255,255,0.1)', color: 'white', fontWeight: 600 }}
-                placeholder={isSignUp ? 'contact@entreprise.com' : 'Email ou Mobile'}
+                className="form-input input-futuristic"
+                style={{ height: '60px', borderRadius: '18px', fontWeight: 600 }}
+                placeholder={isSignUp ? 'nom@secteur.ci' : 'Email ou Mobile'}
               />
             </div>
 
-            <div className="form-group">
-              <label className="form-label" style={{ color: 'rgba(255,255,255,0.8)', fontWeight: 700 }}>CLÉ DE SÉCURITÉ</label>
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label" style={{ color: 'rgba(255,255,255,0.9)', fontWeight: 800, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Clé d'Accès</label>
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="form-input"
-                style={{ height: '56px', borderRadius: '16px', background: 'rgba(255,255,255,0.05)', border: '2px solid rgba(255,255,255,0.1)', color: 'white', fontWeight: 600 }}
+                className="form-input input-futuristic"
+                style={{ height: '60px', borderRadius: '18px', fontWeight: 600 }}
                 placeholder="••••••••••••"
               />
             </div>
@@ -230,23 +235,49 @@ export const Login = () => {
               type="submit"
               disabled={loading}
               className="btn btn-primary"
-              style={{ height: '60px', borderRadius: '18px', fontWeight: 900, fontSize: '1.1rem', boxShadow: '0 10px 15px -3px rgba(99, 102, 255, 0.5)' }}
+              style={{ height: '64px', borderRadius: '20px', fontWeight: 900, fontSize: '1.2rem', background: 'linear-gradient(90deg, #6366f1, #a855f7)', border: 'none', boxShadow: '0 15px 30px -5px rgba(99, 102, 255, 0.5)', marginTop: '1rem' }}
             >
-              {loading ? <Loader2 className="animate-spin" /> : (isSignUp ? "CRÉER MON ACCÈS" : "DÉVERROUILLER L'ACCÈS")}
+              {loading ? <Loader2 className="animate-spin" size={24} /> : (isSignUp ? "INITIALISER L'ACCÈS" : "DÉVERROUILLER L'ACCÈS")}
             </button>
           </form>
         )}
 
-        <div style={{ marginTop: '2.5rem', textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '2rem' }}>
+        <div style={{ marginTop: '3rem', textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '2.5rem', position: 'relative', zIndex: 2 }}>
           <button 
             type="button"
             onClick={() => setIsSignUp(!isSignUp)} 
-            style={{ background: 'none', border: 'none', color: '#818cf8', cursor: 'pointer', fontWeight: 800, fontSize: '0.95rem', letterSpacing: '0.02em' }}
+            style={{ 
+              background: 'rgba(255,255,255,0.05)', 
+              border: '1px solid rgba(255,255,255,0.1)', 
+              color: 'white', 
+              padding: '0.75rem 1.5rem',
+              borderRadius: '14px',
+              cursor: 'pointer', 
+              fontWeight: 800, 
+              fontSize: '0.85rem', 
+              letterSpacing: '0.05em',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
+            onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
           >
-            {isSignUp ? 'DÉJÀ RÉFÉRENCÉ ? SE CONNECTER' : 'PAS ENCORE DE COMPTE ? S\'INSCRIRE'}
+            {isSignUp ? 'FLUX VERS CONNEXION' : 'PAS DE COMPTE ? CRÉER SIGNAL'}
           </button>
-          <div style={{ marginTop: '1.5rem', color: 'rgba(255,255,255,0.35)', fontSize: '0.8rem', fontWeight: 500 }}>
-             Accès restreint. Monitoring de sécurité actif.
+          
+          <div style={{ 
+            marginTop: '2rem', 
+            color: 'rgba(255,255,255,0.4)', 
+            fontSize: '0.75rem', 
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            letterSpacing: '0.15em',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px'
+          }}>
+             <div style={{ width: '6px', height: '6px', background: '#10b981', borderRadius: '50%', boxShadow: '0 0 10px #10b981' }}></div>
+             Système Sécurisé & Chiffré
           </div>
         </div>
       </div>

@@ -352,6 +352,86 @@ tr:hover td {
   box-shadow: 0 40px 100px -20px rgba(0,0,0,0.5);
 }
 
+/* --- FUTURISTIC & NEON ADDITIONS --- */
+.text-neon {
+  color: #fff;
+  text-shadow: 
+    0 0 7px #fff,
+    0 0 10px #6366f1,
+    0 0 21px #6366f1,
+    0 0 42px #6366f1,
+    0 0 82px #6366f1;
+}
+
+.glass-card-futuristic {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 40px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card-futuristic::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: conic-gradient(transparent, rgba(99, 102, 255, 0.3), transparent 30%);
+  animation: rotateGlow 6s linear infinite;
+}
+
+@keyframes rotateGlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.floating {
+  animation: floating 6s ease-in-out infinite;
+}
+
+@keyframes floating {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+  100% { transform: translateY(0px); }
+}
+
+.blob-container {
+  position: absolute;
+  width: 100%; height: 100%;
+  top: 0; left: 0;
+  overflow: hidden;
+  z-index: -1;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.4;
+  animation: blobFloat 20s infinite alternate;
+}
+
+@keyframes blobFloat {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(100px, 100px) scale(1.2); }
+}
+
+.input-futuristic {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+  transition: all 0.3s ease;
+}
+
+.input-futuristic:focus {
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 15px rgba(99, 102, 255, 0.3) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
 /* Custom Scrollbar for Premium Feel */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
