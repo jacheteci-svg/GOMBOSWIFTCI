@@ -23,7 +23,7 @@ export const Home = () => {
     { path: '/clients', label: 'Clients CRM', desc: 'Fidélisation et base clients', icon: Users, permission: 'CLIENTS', color: '#f59e0b' },
     { path: '/logistique', label: 'Logistique', desc: 'Dispatching et tournées', icon: Truck, permission: 'LOGISTIQUE', color: '#10b981' },
     { path: '/caisse', label: 'Caisse', desc: 'Encaissements et retours', icon: Calculator, permission: 'CAISSE', color: '#06b6d4' },
-    { path: '/rapport-financier', label: 'Analyses', desc: 'Performances et orientations', icon: TrendingUp, permission: 'FINANCE', color: '#6366f1' },
+    { path: '/rapport-financier', label: 'Rapport Journalier', desc: 'Rapport Journalier et orientations quotidiennes', icon: TrendingUp, permission: 'FINANCE', color: '#6366f1' },
     { path: '/historique', label: 'Historique', desc: 'Archives et impressions', icon: History, permission: 'HISTORIQUE', color: '#64748b' },
     { path: '/admin', label: 'Admin', desc: 'Paramètres et utilisateurs', icon: Settings, permission: 'ADMIN', color: '#ef4444' },
   ];

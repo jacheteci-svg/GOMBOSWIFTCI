@@ -14,7 +14,7 @@ export const Header = ({ onMenuClick }: { onMenuClick: () => void }) => {
       case '/logistique': return 'Logistique & Feuilles de Route';
       case '/livraison': return 'Mes Livraisons';
       case '/caisse': return 'Caisse & Point de Retour';
-      case '/rapport-financier': return 'Rapport Financier & Orientations';
+      case '/rapport-financier': return 'Rapport Journalier & Analyses';
       default: return 'Nexus Logistics';
     }
   };

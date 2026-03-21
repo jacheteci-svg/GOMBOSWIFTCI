@@ -31,7 +31,7 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
     { path: '/logistique', label: 'Logistique', icon: Truck, permission: 'LOGISTIQUE' },
     { path: '/livraison', label: 'Mes Livraisons', icon: UserIcon, permission: 'LIVREUR' },
     { path: '/caisse', icon: Calculator, label: 'Caisse / Retour', permission: 'CAISSE' },
-    { path: '/rapport-financier', icon: TrendingUp, label: 'Rapport Financier', permission: 'FINANCE' },
+    { path: '/rapport-financier', icon: TrendingUp, label: 'Rapport Journalier', permission: 'FINANCE' },
     { path: '/historique', icon: History, label: 'Historique & Impression', permission: 'HISTORIQUE' },
     { path: '/admin', icon: Settings, label: 'Administration', permission: 'ADMIN' },
     { path: '/profil', icon: UserIcon, label: 'Mon Profil', permission: 'PROFIL' },
