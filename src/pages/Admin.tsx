@@ -96,7 +96,9 @@ const UsersManager = ({ showToast }: { showToast: any }) => {
     const sanitizedTel = (form.telephone || '').replace(/\s+/g, '');
     const isLivreur = form?.role === 'LIVREUR';
     const email = isLivreur ? `${sanitizedTel.toLowerCase()}@livreur.com` : (form.email || '').trim();
-    const password = isLivreur ? sanitizedTel : (form.password || 'Admin123!');
+    
+    // Logic: Use provided password, or phone number for Livreurs, or default Admin123!
+    const password = form.password || (isLivreur ? sanitizedTel : 'Admin123!');
 
     if (!form?.nom_complet || !email || !form?.role || (isLivreur && !sanitizedTel)) {
       showToast("Champs obligatoires manquants.", "error"); return;
@@ -183,6 +185,21 @@ const UsersManager = ({ showToast }: { showToast: any }) => {
                       <div className="form-group">
                         <label className="form-label">Email</label>
                         <input className="form-input" value={form.email || ''} onChange={e => setForm({...form, email: e.target.value})} />
+                      </div>
+                    )}
+                    {editingId === 'new' && (
+                      <div className="form-group">
+                        <label className="form-label">Mot de Passe (Optionnel)</label>
+                        <input 
+                          type="text" 
+                          className="form-input" 
+                          placeholder={form.role === 'LIVREUR' ? 'Défaut: Téléphone' : 'Défaut: Admin123!'}
+                          value={form.password || ''} 
+                          onChange={e => setForm({...form, password: e.target.value})} 
+                        />
+                        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                          {form.role === 'LIVREUR' ? 'Par défaut, c\'est son numéro de téléphone.' : 'Par défaut: Admin123!'}
+                        </p>
                       </div>
                     )}
                     <div style={{ gridColumn: '1 / -1' }}>
