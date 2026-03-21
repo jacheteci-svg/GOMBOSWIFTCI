@@ -41,7 +41,7 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
           <div style={{ background: 'var(--primary)', width: '38px', height: '38px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
             <Package size={22} />
           </div>
-          <span style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.04em' }}>E-Logistics</span>
+          <span style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-main)', letterSpacing: '-0.04em' }}>GomboSwift</span>
         </div>
 
         <nav style={{ flex: 1, padding: '1rem 0', overflowY: 'auto' }}>

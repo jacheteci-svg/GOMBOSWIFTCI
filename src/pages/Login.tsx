@@ -156,7 +156,7 @@ export const Login = () => {
             color: 'white', 
             letterSpacing: '-0.03em',
             textShadow: '0 2px 4px rgba(0,0,0,0.2)'
-          }}>ECOM-360</h1>
+          }}>GomboSwift</h1>
           <p style={{ 
             color: 'rgba(255,255,255,0.6)', 
             fontSize: '1.1rem', 
