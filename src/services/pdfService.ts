@@ -230,7 +230,7 @@ export const generateDeliverySlipPDF = (feuilleRoute: any, commandes: Commande[]
       qtyStr || "0",
       `${fP(c.montant_total || 0)}`,
       c.telephone_client || "-",
-      c.commune_livraison || "-",
+      `${c.commune_livraison || ""} - ${c.adresse_livraison || ""}`.trim() || "-",
       " " 
     ];
   });
