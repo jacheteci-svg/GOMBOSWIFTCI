@@ -15,7 +15,7 @@ interface StaffStats {
   total_cmds: number;
   livrees: number;
   echouees: number;
-  encaisse: number;
+  ca_livraison: number; // Renamed from encaisse for clarity
   taux_succes: number;
 }
 
@@ -35,7 +35,6 @@ export const StaffPerformance = () => {
 
         const now = new Date();
         
-        // Group orders by livreur_id once (O(N) vs O(N*M))
         const ordersByLivreur: Record<string, Commande[]> = {};
         allCmds.forEach((c: Commande) => {
           if (!c.livreur_id) return;
@@ -55,7 +54,11 @@ export const StaffPerformance = () => {
           
           const livrees = livreurCmds.filter((c: Commande) => ['livree', 'terminee'].includes(c.statut_commande)).length;
           const echouees = livreurCmds.filter((c: Commande) => ['echouee', 'retour_livreur', 'retour_stock'].includes(c.statut_commande)).length;
-          const encaisse = livreurCmds.reduce((acc: number, c: Commande) => acc + (['livree', 'terminee'].includes(c.statut_commande) ? (Number(c.montant_total) || 0) : 0), 0);
+          
+          // Focus exclusively on delivery fees as requested
+          const ca_livraison = livreurCmds.reduce((acc: number, c: Commande) => 
+            acc + (['livree', 'terminee'].includes(c.statut_commande) ? (Number(c.frais_livraison) || 0) : 0)
+          , 0);
           
           return {
             id: livreur.id,
@@ -63,7 +66,7 @@ export const StaffPerformance = () => {
             total_cmds: livreurCmds.length,
             livrees,
             echouees,
-            encaisse,
+            ca_livraison,
             taux_succes: livreurCmds.length > 0 ? Math.round((livrees / livreurCmds.length) * 100) : 0
           };
         }).sort((a: StaffStats, b: StaffStats) => b.taux_succes - a.taux_succes);
@@ -79,7 +82,7 @@ export const StaffPerformance = () => {
     fetchData();
   }, [timeFilter]);
 
-  const totalGlobalEncaisse = stats.reduce((acc: number, s: StaffStats) => acc + s.encaisse, 0);
+  const totalGlobalCALivraison = stats.reduce((acc: number, s: StaffStats) => acc + s.ca_livraison, 0);
   const averageSuccessRate = stats.length > 0 ? Math.round(stats.reduce((acc: number, s: StaffStats) => acc + s.taux_succes, 0) / stats.length) : 0;
   const bestLivreur = stats[0];
 
@@ -146,12 +149,12 @@ export const StaffPerformance = () => {
         <div className="card glass-effect">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>Total Encaissé</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>CA Livraison Total</p>
               <h2 style={{ fontSize: '2rem', fontWeight: 900, margin: '0.5rem 0', color: 'var(--text-main)' }}>
-                {totalGlobalEncaisse.toLocaleString()} <span style={{ fontSize: '0.8rem' }}>CFA</span>
+                {totalGlobalCALivraison.toLocaleString()} <span style={{ fontSize: '0.8rem' }}>CFA</span>
               </h2>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#10b981', fontWeight: 700, fontSize: '0.85rem' }}>
-                <Coins size={14} /> Flux validé
+                <Coins size={14} /> Gains de livraison
               </div>
             </div>
             <div style={{ background: 'rgba(99, 102, 255, 0.1)', padding: '0.75rem', borderRadius: '12px', color: 'var(--primary)' }}>
@@ -213,7 +216,8 @@ export const StaffPerformance = () => {
                   <th style={{ textAlign: 'center' }}>Total</th>
                   <th style={{ textAlign: 'center' }}>Livrés</th>
                   <th style={{ textAlign: 'center' }}>Échecs</th>
-                  <th style={{ textAlign: 'right' }}>Encaissé</th>
+                  <th style={{ textAlign: 'right' }}>CA Livraison</th>
+                  <th style={{ textAlign: 'right' }}>Moy/Colis</th>
                 </tr>
               </thead>
               <tbody>
@@ -240,7 +244,10 @@ export const StaffPerformance = () => {
                       <span className="badge badge-danger" style={{ padding: '0.2rem 0.5rem', background: 'rgba(244, 63, 94, 0.1)', color: '#f43f5e' }}>{s.echouees}</span>
                     </td>
                     <td style={{ textAlign: 'right', fontWeight: 800 }}>
-                      {s.encaisse.toLocaleString()} <span style={{ fontSize: '0.7rem' }}>CFA</span>
+                      <div style={{ whiteSpace: 'nowrap' }}>{s.ca_livraison.toLocaleString()} <span style={{ fontSize: '0.65rem' }}>CFA</span></div>
+                    </td>
+                    <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--text-muted)' }}>
+                      <div style={{ whiteSpace: 'nowrap' }}>{s.livrees > 0 ? Math.round(s.ca_livraison / s.livrees).toLocaleString() : 0} <span style={{ fontSize: '0.6rem' }}>CFA</span></div>
                     </td>
                   </tr>
                 ))}
