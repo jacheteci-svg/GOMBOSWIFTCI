@@ -61,7 +61,7 @@ export const AdminTresorerie = () => {
   }, [startDate, endDate]);
 
   // Calculations for Private Dashboard
-  const totalRevenue = data.orders.reduce((acc, c) => acc + (Number(c.montant_total) || 0), 0);
+  const totalRevenue = data.orders.reduce((acc, c) => acc + ((Number(c.montant_total) || 0) - (Number(c.frais_livraison) || 0)), 0);
   
   const extractionVentes = data.orders.length * 250;
   const extractionLogistique = data.orders.length * 500;
@@ -75,7 +75,7 @@ export const AdminTresorerie = () => {
       type: 'Entrée' as const,
       categorie: 'Vente',
       description: `Commande #${o.id.substring(0, 8).toUpperCase()} - ${o.nom_client}`,
-      montant: Number(o.montant_total) || 0
+      montant: (Number(o.montant_total) || 0) - (Number(o.frais_livraison) || 0)
     })),
     ...data.expenses.map(e => ({
       date: new Date(e.date),
@@ -147,7 +147,7 @@ export const AdminTresorerie = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
         <div className="card" style={{ padding: '1.75rem', borderLeft: '5px solid var(--primary)', position: 'relative', overflow: 'hidden' }}>
           <div style={{ opacity: 0.1, position: 'absolute', right: '-10px', top: '-10px' }}><BarChart3 size={100} /></div>
-          <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>CA Brut (Ventes terminées)</p>
+          <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>CA Produits (Net Livraison)</p>
           <h2 style={{ fontSize: '2.2rem', margin: '0.5rem 0', fontWeight: 800 }}>{totalRevenue.toLocaleString()} F</h2>
           <p style={{ fontSize: '0.85rem', color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontWeight: 700 }}>
             <ArrowUpRight size={16} /> {data.orders.length} ventes livrées
