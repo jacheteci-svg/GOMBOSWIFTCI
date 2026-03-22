@@ -16,7 +16,8 @@ import {
   Activity,
   DollarSign,
   Home as HomeIcon,
-  User as UserIcon
+  User as UserIcon,
+  Wallet
 } from 'lucide-react';
 
 export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
@@ -36,6 +37,7 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
     { path: '/caisse', icon: Calculator, label: 'Caisse / Retour', permission: 'CAISSE' },
     { path: '/rapport-financier', icon: TrendingUp, label: 'Rapport Journalier', permission: 'ADMIN' },
     { path: '/net-profit', icon: DollarSign, label: 'Profit & Finances', permission: 'ADMIN' },
+    { path: '/admin/tresorerie', icon: Wallet, label: 'Trésorerie Admin', permission: 'TRESORERIE' },
     { path: '/historique', icon: History, label: 'Historique & Impression', permission: 'HISTORIQUE' },
     { path: '/admin', icon: Settings, label: hasPermission('ADMIN') ? 'Administration' : 'Équipe & Zones', permission: 'COMMUNES' },
     { path: '/profil', icon: UserIcon, label: 'Mon Profil', permission: 'PROFIL' },

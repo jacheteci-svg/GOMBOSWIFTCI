@@ -14,7 +14,8 @@ export type Permission =
   | 'PROFIL'
   | 'FINANCE'
   | 'COMMUNES'
-  | 'GESTION_LIVREURS';
+  | 'GESTION_LIVREURS'
+  | 'TRESORERIE';
 
 export interface User {
   id: string;

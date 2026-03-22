@@ -84,6 +84,7 @@ const PERMISSIONS_LIST: { id: Permission, label: string }[] = [
   { id: 'PROFIL', label: 'Mon Profil' },
   { id: 'COMMUNES', label: 'Gestion Zones & Tarifs' },
   { id: 'GESTION_LIVREURS', label: 'Gestion Équipe Livreurs' },
+  { id: 'TRESORERIE', label: 'Trésorerie & Dashboard Privé' },
 ];
 
 const UsersManager = ({ showToast }: { showToast: any }) => {
