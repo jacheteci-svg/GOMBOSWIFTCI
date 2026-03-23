@@ -83,7 +83,7 @@ const AppRoutes = () => {
 
         {/* Financial Report */}
         <Route path="rapport-financier" element={
-          <ProtectedRoute requiredPermission="ADMIN"><FinancialReport /></ProtectedRoute>
+          <ProtectedRoute requiredPermission="FINANCE"><FinancialReport /></ProtectedRoute>
         } />
 
         {/* Historique et Impression */}

@@ -36,7 +36,7 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
     { path: '/performance-staff', label: 'Performance Livreurs', icon: Activity, permission: 'GESTION_LIVREURS' },
     { path: '/livraison', label: 'Mes Livraisons', icon: UserIcon, permission: 'LIVREUR' },
     { path: '/caisse', icon: Calculator, label: 'Caisse / Retour', permission: 'CAISSE' },
-    { path: '/rapport-financier', icon: TrendingUp, label: 'Rapport Journalier', permission: 'ADMIN' },
+    { path: '/rapport-financier', icon: TrendingUp, label: 'Rapport Journalier', permission: 'FINANCE' },
     { path: '/net-profit', icon: DollarSign, label: 'Profit & Finances', permission: 'ADMIN' },
     { path: '/admin/tresorerie', icon: Wallet, label: 'Trésorerie Admin', permission: 'TRESORERIE' },
     { path: '/audit-tresorerie', icon: ShieldCheck, label: 'Expertise Comptable', permission: 'ADMIN' },
