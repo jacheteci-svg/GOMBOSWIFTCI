@@ -62,7 +62,15 @@ export const ProduitList = ({ produits, onEdit, onStock }: ProduitListProps) => 
               <td>
                 <div style={{ position: 'relative', width: '56px', height: '56px', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 10px rgba(0,0,0,0.1)', border: '2px solid white' }}>
                   {produit.image_url ? (
-                    <img src={produit.image_url} alt={produit.nom} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img 
+                      src={produit.image_url} 
+                      alt={produit.nom} 
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                      onError={(e) => {
+                        e.currentTarget.onerror = null; // prevents looping
+                        e.currentTarget.src = 'https://placehold.co/400x400?text=Image+Non+Trouvée';
+                      }}
+                    />
                   ) : (
                     <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <ImageIcon size={20} color="#94a3b8" />

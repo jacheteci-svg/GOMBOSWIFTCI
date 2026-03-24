@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Produit } from '../../types';
 import { createProduit, updateProduit } from '../../services/produitService';
 import { X } from 'lucide-react';
+import { useToast } from '../../contexts/ToastContext';
 
 interface ProduitFormProps {
   produit?: Produit | null;
@@ -27,6 +28,7 @@ export const ProduitForm = ({ produit, onClose, onSave }: ProduitFormProps) => {
   });
   const [loading, setLoading] = useState(false);
   const [hasPromo, setHasPromo] = useState(false);
+  const { showToast } = useToast();
 
   useEffect(() => {
     if (produit) {
@@ -57,12 +59,17 @@ export const ProduitForm = ({ produit, onClose, onSave }: ProduitFormProps) => {
 
       if (produit?.id) {
         await updateProduit(produit.id, dataToSave);
+        showToast("Configuration article mise à jour avec succès !", "success");
       } else {
         await createProduit(dataToSave as Omit<Produit, 'id'>);
+        showToast("Nouvel article référencé avec succès !", "success");
       }
       onSave();
-    } catch (error) {
+      onClose();
+    } catch (error: any) {
       console.error("Error saving product", error);
+      const errorMsg = error.message || "Impossible d'enregistrer la fiche technique.";
+      showToast(errorMsg, "error");
     } finally {
       setLoading(false);
     }
@@ -103,9 +110,32 @@ export const ProduitForm = ({ produit, onClose, onSave }: ProduitFormProps) => {
               </div>
               <div className="form-group">
                 <label className="form-label" style={{ fontWeight: 700 }}>Lien Image Haute Définition</label>
-                <input type="url" className="form-input" placeholder="https://cdn.example.com/photo.jpg" style={{ height: '52px', borderRadius: '14px' }} value={formData.image_url || ''} onChange={e => setFormData({...formData, image_url: e.target.value})} />
+                <div style={{ position: 'relative' }}>
+                  <input type="url" className="form-input" placeholder="https://cdn.example.com/photo.jpg" style={{ height: '52px', borderRadius: '14px', paddingRight: '120px' }} value={formData.image_url || ''} onChange={e => setFormData({...formData, image_url: e.target.value})} />
+                  {formData.image_url && (
+                    <div style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', width: '100px', height: '40px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0', background: '#f8fafc' }}>
+                      <img 
+                        src={formData.image_url} 
+                        alt="Preview" 
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                        onError={(e) => (e.currentTarget.style.display = 'none')}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
+            {formData.image_url && (
+              <div style={{ marginTop: '1rem', padding: '1rem', borderRadius: '16px', background: 'rgba(99, 102, 255, 0.05)', border: '1px dashed var(--primary)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                 <div style={{ width: '60px', height: '60px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0 }}>
+                    <img src={formData.image_url} alt="Large Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => (e.currentTarget.src = 'https://placehold.co/100x100?text=Format+Invalide')} />
+                 </div>
+                 <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    <div style={{ fontWeight: 800, color: 'var(--primary)', marginBottom: '2px' }}>Aperçu du visuel</div>
+                    L'image sera affichée sur le catalogue et les factures.
+                 </div>
+              </div>
+            )}
           </div>
 
           {/* SECTION 2: ECONOMIE */}
