@@ -57,6 +57,12 @@ export const ProduitForm = ({ produit, onClose, onSave }: ProduitFormProps) => {
         if (dataToSave.promo_fin) dataToSave.promo_fin = new Date(dataToSave.promo_fin).getTime();
       }
 
+      // Ensure image is also in the images array for compatibility
+      if (dataToSave.image_url) {
+        dataToSave.image_url = dataToSave.image_url.trim();
+        dataToSave.images = [dataToSave.image_url];
+      }
+
       if (produit?.id) {
         await updateProduit(produit.id, dataToSave);
         showToast("Configuration article mise à jour avec succès !", "success");

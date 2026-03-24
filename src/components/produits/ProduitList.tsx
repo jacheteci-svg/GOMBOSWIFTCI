@@ -57,27 +57,31 @@ export const ProduitList = ({ produits, onEdit, onStock }: ProduitListProps) => 
           </tr>
         </thead>
         <tbody>
-          {produits.map((produit) => (
-            <tr key={produit.id} style={{ opacity: produit.actif ? 1 : 0.55, transition: 'all 0.3s ease' }} className="hover-card">
-              <td>
-                <div style={{ position: 'relative', width: '56px', height: '56px', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 10px rgba(0,0,0,0.1)', border: '2px solid white' }}>
-                  {produit.image_url ? (
-                    <img 
-                      src={produit.image_url} 
-                      alt={produit.nom} 
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                      onError={(e) => {
-                        e.currentTarget.onerror = null; // prevents looping
-                        e.currentTarget.src = 'https://placehold.co/400x400?text=Image+Non+Trouvée';
-                      }}
-                    />
-                  ) : (
-                    <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <ImageIcon size={20} color="#94a3b8" />
-                    </div>
-                  )}
-                </div>
-              </td>
+          {produits.map((produit) => {
+            // Robust image resolution
+            const resolvedImage = produit.image_url || (Array.isArray(produit.images) && produit.images.length > 0 ? produit.images[0] : null);
+            
+            return (
+              <tr key={produit.id} style={{ opacity: produit.actif ? 1 : 0.55, transition: 'all 0.3s ease' }} className="hover-card">
+                <td>
+                  <div style={{ position: 'relative', width: '56px', height: '56px', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 10px rgba(0,0,0,0.1)', border: '2px solid white' }}>
+                    {resolvedImage ? (
+                      <img 
+                        src={resolvedImage} 
+                        alt={produit.nom} 
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                        onError={(e) => {
+                          e.currentTarget.onerror = null; 
+                          e.currentTarget.src = 'https://placehold.co/400x400?text=Format+Invalide';
+                        }}
+                      />
+                    ) : (
+                      <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <ImageIcon size={20} color="#94a3b8" />
+                      </div>
+                    )}
+                  </div>
+                </td>
               <td>
                 <div style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '0.85rem', color: 'var(--primary)' }}>#{produit.sku || produit.id.slice(0, 8).toUpperCase()}</div>
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600 }}>REF-IND-01</div>
@@ -147,7 +151,7 @@ export const ProduitList = ({ produits, onEdit, onStock }: ProduitListProps) => 
                 </div>
               </td>
             </tr>
-          ))}
+          )})}
         </tbody>
       </table>
     </div>
