@@ -61,10 +61,11 @@ export const AdminTresorerie = () => {
   }, [startDate, endDate]);
 
   // Calculations for Private Dashboard
-  const totalRevenue = data.orders.reduce((acc, c) => acc + ((Number(c.montant_total) || 0) - (Number(c.frais_livraison) || 0)), 0);
+  const activeOrders = data.orders || [];
+  const totalRevenue = activeOrders.reduce((acc, c) => acc + ((Number(c.montant_total) || 0) - (Number(c.frais_livraison) || 0)), 0);
   
-  const extractionVentes = data.orders.length * 250;
-  const extractionLogistique = data.orders.length * 500;
+  const extractionVentes = activeOrders.length * 250;
+  const extractionLogistique = activeOrders.length * 500;
   const totalExtractions = extractionVentes + extractionLogistique;
   const caRestant = totalRevenue - totalExtractions;
 
@@ -86,8 +87,14 @@ export const AdminTresorerie = () => {
     }))
   ].sort((a, b) => b.date.getTime() - a.date.getTime());
 
-  const totalInflow = transactions.filter(t => t.type === 'Entrée').reduce((acc, t) => acc + t.montant, 0);
-  const totalOutflow = Math.abs(transactions.filter(t => t.type === 'Sortie').reduce((acc, t) => acc + t.montant, 0));
+  const totalInflow = transactions
+    .filter(t => t.type.toLowerCase() === 'entrée' || t.type.toLowerCase() === 'entree')
+    .reduce((acc, t) => acc + t.montant, 0);
+  const totalOutflow = Math.abs(
+    transactions
+      .filter(t => t.type.toLowerCase() === 'sortie')
+      .reduce((acc, t) => acc + t.montant, 0)
+  );
   const currentBalance = totalInflow - totalOutflow;
 
   const exportToExcel = () => {
@@ -123,7 +130,7 @@ export const AdminTresorerie = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h1 className="text-premium" style={{ fontSize: '2.2rem', fontWeight: 800, margin: 0 }}>
-            Trésorerie & Dashboard Privé
+            Trésorerie & Tableau de Bord Privé
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', marginTop: '0.4rem' }}>
             Gestion confidentielle des flux et extractions de CA.
@@ -201,7 +208,7 @@ export const AdminTresorerie = () => {
                   <tr key={idx}>
                     <td style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{format(t.date, 'dd/MM HH:mm')}</td>
                     <td>
-                      <span className={`badge ${t.type === 'Entrée' ? 'badge-success' : 'badge-danger'}`} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', width: 'fit-content' }}>
+                      <span className={`badge ${t.type.toLowerCase().includes('entr') ? 'badge-success' : 'badge-danger'}`} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', width: 'fit-content' }}>
                         {t.type === 'Entrée' ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
                         {t.type}
                       </span>

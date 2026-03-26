@@ -250,7 +250,7 @@ export const getFinancialData = async (startDate?: string, endDate?: string): Pr
   let query = insforge.database
     .from('commandes')
     .select('*, clients(nom_complet, telephone)')
-    .in('statut_commande', ['livree', 'terminee']);
+    .in('statut_commande', ['livree', 'terminee', 'LIVREE', 'TERMINEE']);
 
   if (startDate) query = query.gte('date_creation', startDate);
   if (endDate) query = query.lte('date_creation', endDate);
