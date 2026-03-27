@@ -7,7 +7,7 @@ export const getFeuillesEnCours = async (livreurId: string): Promise<FeuilleRout
     .from('feuilles_route')
     .select('*')
     .eq('livreur_id', livreurId)
-    .eq('statut_feuille', 'en_cours');
+    .in('statut_feuille', ['en_cours', 'cloturee']);
 
   if (error) throw error;
   return data || [];
@@ -17,7 +17,7 @@ export const getCloturedFeuilles = async (): Promise<FeuilleRoute[]> => {
   const { data, error } = await insforge.database
     .from('feuilles_route')
     .select('*, livreurs:livreur_id(nom_complet)')
-    .in('statut_feuille', ['cloturee', 'terminee'])
+    .eq('statut_feuille', 'terminee')
     .order('date', { ascending: false });
 
   if (error) throw error;
