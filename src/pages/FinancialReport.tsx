@@ -67,6 +67,13 @@ export const FinancialReport = () => {
     return calculateProfitMetrics(data.commandes, []);
   }, [data]);
 
+  const diffDays = useMemo(() => {
+    const s = new Date(startDate);
+    const e = new Date(endDate);
+    if (isNaN(s.getTime()) || isNaN(e.getTime())) return 1;
+    return Math.ceil(Math.abs(e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+  }, [startDate, endDate]);
+
   if (loading || !data) {
     return <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
       <div className="spinner" style={{ margin: '0 auto 1.5rem' }}></div>
@@ -95,13 +102,6 @@ export const FinancialReport = () => {
   const successRate = data.commandes.length > 0 
     ? (succesCommandes.length / data.commandes.length) * 100 
     : 0;
-
-  const diffDays = useMemo(() => {
-    const s = new Date(startDate);
-    const e = new Date(endDate);
-    if (isNaN(s.getTime()) || isNaN(e.getTime())) return 1;
-    return Math.ceil(Math.abs(e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-  }, [startDate, endDate]);
 
   const timeSeries = generateTimeSeriesData(data.commandes, diffDays > 31 ? 'monthly' : 'daily');
 
