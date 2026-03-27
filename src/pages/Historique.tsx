@@ -7,6 +7,8 @@ import { fr } from 'date-fns/locale';
 import { FeuilleRoute, Commande } from '../types';
 import { generateDeliverySlipPDF } from '../services/pdfService';
 import { useToast } from '../contexts/ToastContext';
+import { useAuth } from '../contexts/AuthContext';
+import { reopenFeuilleRoute } from '../services/caisseService';
 
 export const Historique = () => {
   const { showToast } = useToast();
@@ -18,17 +20,19 @@ export const Historique = () => {
   const [associatedCommandes, setAssociatedCommandes] = useState<Commande[]>([]);
   const [modalLoading, setModalLoading] = useState(false);
 
+  const load = async () => {
+    setLoading(true);
+    try {
+      const data = await getCloturedFeuilles();
+      setFeuilles(data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const load = async () => {
-      try {
-        const data = await getCloturedFeuilles();
-        setFeuilles(data);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
-    };
     load();
   }, []);
 
@@ -135,6 +139,7 @@ export const Historique = () => {
           commandes={associatedCommandes} 
           loading={modalLoading} 
           onClose={() => setSelectedFeuille(null)} 
+          onRefresh={load}
           showToast={showToast}
         />
       )}
@@ -142,13 +147,28 @@ export const Historique = () => {
   );
 };
 
-const ReviewModal = ({ feuille, commandes, loading, onClose, showToast }: any) => {
+const ReviewModal = ({ feuille, commandes, loading, onClose, onRefresh, showToast }: any) => {
+  const { currentUser } = useAuth();
+  const isAdmin = currentUser?.role === 'ADMIN' || currentUser?.role === 'GESTIONNAIRE';
+
   const handleReprint = async () => {
     try {
       await generateDeliverySlipPDF(feuille, commandes);
       showToast("Réimpression lancée.", "success");
     } catch (e) {
       showToast("Erreur lors de la génération PDF.", "error");
+    }
+  };
+
+  const handleReopen = async () => {
+    if (!window.confirm("Êtes-vous sûr de vouloir ré-ouvrir cette feuille ? Elle reviendra en caisse pour traitement.")) return;
+    try {
+      await reopenFeuilleRoute(feuille.id);
+      showToast("Feuille ré-ouverte avec succès.", "success");
+      onRefresh();
+      onClose();
+    } catch (e) {
+      showToast("Erreur lors de la ré-ouverture.", "error");
     }
   };
 
@@ -252,6 +272,11 @@ const ReviewModal = ({ feuille, commandes, loading, onClose, showToast }: any) =
 
         <div style={{ padding: '1.5rem 2rem', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
            <button className="btn btn-outline" onClick={onClose}>Fermer</button>
+           {isAdmin && (
+             <button className="btn btn-outline" style={{ borderColor: '#ef4444', color: '#ef4444' }} onClick={handleReopen}>
+               Ré-ouvrir la Feuille
+             </button>
+           )}
            <button className="btn btn-primary" onClick={handleReprint}>
              <Printer size={18} /> Ré-imprimer
            </button>

@@ -130,6 +130,20 @@ export const processCaisse = async (
   if (retourError) throw retourError;
 };
 
+export const reopenFeuilleRoute = async (id: string): Promise<void> => {
+  const { error } = await insforge.database
+    .from('feuilles_route')
+    .update({
+      statut_feuille: 'en_cours',
+      montant_encaisse: 0,
+      ecart_caisse: 0,
+      date_traitement: null
+    })
+    .eq('id', id);
+
+  if (error) throw error;
+};
+
 export const getRangeFinancials = async (startDateStr: string, endDateStr?: string): Promise<any> => {
   const start = new Date(startDateStr);
   start.setHours(0,0,0,0);
