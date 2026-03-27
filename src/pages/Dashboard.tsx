@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { subscribeToCommandes, getTopSellingProducts } from '../services/commandeService';
+import { calculateLogisticalStats } from '../services/financialService';
 import type { Commande } from '../types';
 import { Activity, Percent, DollarSign, TrendingUp, Truck, AlertCircle, ShoppingBag, BarChart2, Calendar } from 'lucide-react';
 import { 
@@ -75,20 +76,18 @@ export const Dashboard = () => {
        return 0;
     };
 
-    const succes = filteredCommandes.filter(c => c.statut_commande === 'livree' || c.statut_commande === 'terminee');
-    const echecsLivraison = filteredCommandes.filter(c => ['echouee', 'retour_stock', 'retour_livreur'].includes(c.statut_commande));
+    const pending = filteredCommandes.filter(c => ['en_attente_appel', 'a_rappeler', 'nouvelle'].includes(c.statut_commande));
+    const succes = filteredCommandes.filter(c => ['livree', 'terminee'].includes(c.statut_commande || ''));
     
     const totalEncaisse = succes.reduce((acc, c) => acc + (c.montant_encaisse || c.montant_total), 0);
     const totalFraisLivraison = succes.reduce((acc, c) => acc + getFrais(c), 0);
     const caNetProduits = totalEncaisse - totalFraisLivraison;
 
-    const caPotentiel = filteredCommandes.filter(c => ['validee', 'en_cours_livraison'].includes(c.statut_commande))
+    const caPotentiel = filteredCommandes.filter(c => ['validee', 'en_cours_livraison'].includes(c.statut_commande || ''))
                                          .reduce((acc, c) => acc + (c.montant_total - getFrais(c)), 0);
     
-    const pending = filteredCommandes.filter(c => ['en_attente_appel', 'a_rappeler', 'nouvelle'].includes(c.statut_commande));
-    
-    const totalTentatives = succes.length + echecsLivraison.length;
-    const tauxSuccesLivraison = totalTentatives > 0 ? Math.round((succes.length / totalTentatives) * 100) : 0;
+    const logStats = calculateLogisticalStats(filteredCommandes);
+    const tauxSuccesLivraison = logStats.taux_succes;
     
     // Status Distribution Data
     const statusCounts: Record<string, number> = {};
@@ -135,12 +134,11 @@ export const Dashboard = () => {
     }) : [];
 
     const succesPrev = prevPeriodData.filter(c => c.statut_commande === 'livree' || c.statut_commande === 'terminee');
-    const echecsPrev = prevPeriodData.filter(c => ['echouee', 'retour_stock', 'retour_livreur'].includes(c.statut_commande));
     const totalEncaissePrev = succesPrev.reduce((acc, c) => acc + (c.montant_encaisse || c.montant_total), 0);
     const totalFraisPrev = succesPrev.reduce((acc, c) => acc + getFrais(c), 0);
     const caNetPrev = totalEncaissePrev - totalFraisPrev;
-    const totalTentativesPrev = succesPrev.length + echecsPrev.length;
-    const tauxSuccesPrev = totalTentativesPrev > 0 ? Math.round((succesPrev.length / totalTentativesPrev) * 100) : 0;
+    const logStatsPrev = calculateLogisticalStats(prevPeriodData);
+    const tauxSuccesPrev = logStatsPrev.taux_succes;
 
     const diffCA = caNetPrev > 0 ? Math.round(((caNetProduits - caNetPrev) / caNetPrev) * 100) : 0;
     const diffTaux = tauxSuccesPrev > 0 ? Math.round((tauxSuccesLivraison - tauxSuccesPrev)) : 0;
@@ -183,7 +181,8 @@ export const Dashboard = () => {
         caPotentiel, 
         totalEncaisse,
         diffCA,
-        diffTaux
+        diffTaux,
+        logStats
       }, 
       historyData,
       statusData,
@@ -192,15 +191,16 @@ export const Dashboard = () => {
   }, [filteredCommandes, period, commandes, startDate, endDate]);
 
   const { stats, historyData, statusData, zoneData } = memoizedAnalytics;
+  const { logStats, tauxSuccesLivraison } = stats;
 
   if (loading) return <div className="p-8 text-center">Chargement...</div>;
 
   return (
     <div style={{ animation: 'pageEnter 0.6s ease' }}>
       <div style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
-        <div>
-           <h1 className="text-premium" style={{ fontSize: '2.5rem', fontWeight: 900, margin: 0 }}>Tableau de Bord 360°</h1>
-           <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginTop: '0.4rem', fontWeight: 600 }}>Performance Analytique & Temps Réel</p>
+        <div className="mobile-stack">
+           <h1 className="text-premium" style={{ fontSize: 'clamp(1.8rem, 5vw, 2.5rem)', fontWeight: 900, margin: 0 }}>Tableau de Bord 360°</h1>
+           <p style={{ color: 'var(--text-muted)', fontSize: '1rem', marginTop: '0.4rem', fontWeight: 600 }}>Performance Analytique & Temps Réel</p>
         </div>
         
         {/* Period Selector */}
@@ -287,10 +287,11 @@ export const Dashboard = () => {
                <Percent size={20} color="#f59e0b" />
             </div>
           </div>
-          <div style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-main)' }}>{stats.tauxSuccesLivraison}%</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.8rem' }}>
-             <div className="badge badge-success" style={{ borderRadius: '6px' }}>LOGISTIQUE</div>
-             <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)' }}>{stats.succes} livrées</span>
+          <div style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-main)' }}>{tauxSuccesLivraison}%</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.4rem', marginTop: '0.8rem' }}>
+             <div className="badge badge-success" style={{ borderRadius: '6px', fontSize: '0.7rem' }}>{logStats.livrees} L</div>
+             <div className="badge badge-info" style={{ borderRadius: '6px', fontSize: '0.7rem' }}>{logStats.retours} R</div>
+             <div className="badge badge-warning" style={{ borderRadius: '6px', fontSize: '0.7rem' }}>{logStats.reportees} P</div>
           </div>
         </div>
 
@@ -308,7 +309,7 @@ export const Dashboard = () => {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem', marginBottom: '2.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '2rem', marginBottom: '2.5rem' }}>
         {/* Status Distribution (Pie Chart) */}
         <div className="card" style={{ padding: '2rem' }}>
           <h3 style={{ marginBottom: '1.5rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -385,7 +386,7 @@ export const Dashboard = () => {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.5fr) 1fr', gap: '2rem' }} className="responsive-grid">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))', gap: '2rem' }}>
         {/* Revenue Trend */}
         <div className="card" style={{ padding: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>

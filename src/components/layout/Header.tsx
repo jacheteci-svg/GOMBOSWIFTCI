@@ -32,7 +32,7 @@ export const Header = ({ onMenuClick }: { onMenuClick: () => void }) => {
       </div>
       
       <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-        <div className="search-premium">
+        <div className="search-premium mobile-hide">
           <Search size={18} />
           <input 
             type="text" 

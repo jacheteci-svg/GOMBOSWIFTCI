@@ -225,9 +225,9 @@ export const Caisse = () => {
 
   return (
     <div style={{ animation: 'pageEnter 0.6s ease' }}>
-      <div style={{ marginBottom: '2.5rem' }}>
-        <h1 className="text-premium" style={{ fontSize: '2.2rem', fontWeight: 800, margin: 0 }}>Point de Retour & Caisse</h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', marginTop: '0.4rem', fontWeight: 500 }}>Saisie des retours agents et clôture financière certifiée.</p>
+      <div style={{ marginBottom: '2.5rem' }} className="mobile-stack">
+        <h1 className="text-premium" style={{ fontSize: 'clamp(1.8rem, 5vw, 2.2rem)', fontWeight: 800, margin: 0 }}>Point de Retour & Caisse</h1>
+        <p style={{ color: 'var(--text-muted)', fontSize: '1rem', marginTop: '0.4rem', fontWeight: 500 }}>Saisie des retours agents et clôture financière certifiée.</p>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2.5rem', alignItems: 'start' }}>
@@ -294,7 +294,7 @@ export const Caisse = () => {
 
         {/* ETAPE 3: RECONCILIATION */}
         {feuille && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) 400px', gap: '2.5rem', alignItems: 'start' }} className="responsive-grid">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))', gap: '2.5rem', alignItems: 'start' }}>
             
             <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
               <div style={{ padding: '1.5rem 2.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
