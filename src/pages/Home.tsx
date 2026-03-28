@@ -40,7 +40,7 @@ export const Home = () => {
           Bonne arrivée, {currentUser?.nom_complet?.split(' ')[0]} ! 👋
         </h1>
         <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem', fontWeight: 500 }}>
-          Ravi de vous revoir sur <span style={{ color: 'var(--primary)', fontWeight: 800 }}>gomboswiftciCI</span>. Où souhaitez-vous travailler aujourd'hui ?
+          Ravi de vous revoir sur <span style={{ color: 'var(--primary)', fontWeight: 800 }}>GomboSwiftCI</span>. Où souhaitez-vous travailler aujourd'hui ?
         </p>
       </div>
 

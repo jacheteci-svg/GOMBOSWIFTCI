@@ -29,7 +29,8 @@ const ROLE_PERMISSIONS: Record<Role, string[]> = {
   AGENT_MIXTE: ['COMMANDES', 'CENTRE_APPEL', 'CLIENTS', 'CAISSE', 'FINANCE', 'PROFIL'],
   LOGISTIQUE: ['COMMANDES', 'LOGISTIQUE', 'PROFIL'],
   LIVREUR: ['LIVREUR', 'PROFIL'],
-  CAISSIERE: ['CAISSE', 'FINANCE', 'PROFIL']
+  CAISSIERE: ['CAISSE', 'FINANCE', 'PROFIL'],
+  SUPER_ADMIN: ['DASHBOARD', 'PRODUITS', 'COMMANDES', 'CENTRE_APPEL', 'LOGISTIQUE', 'LIVREUR', 'CAISSE', 'CLIENTS', 'HISTORIQUE', 'ADMIN', 'FINANCE', 'PROFIL', 'SUPER_ADMIN']
 };
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -92,16 +93,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const initAuth = async () => {
       try {
+        setLoading(true);
         console.log("Checking user session...");
-        const { data } = await insforge.auth.getCurrentUser();
+        const { data, error: authError } = await insforge.auth.getCurrentUser();
         
-        if (data?.user) {
-          console.log("Found user:", data.user.id);
-          const userData = await fetchUserData(data.user.id, data.user.email || '');
-          setCurrentUser(userData);
-        } else {
-          console.log("No user session found");
+        if (authError || !data?.user) {
+          console.log("No valid user session found or auth error:", authError);
           setCurrentUser(null);
+        } else {
+          console.log("Found user session for:", data.user.id);
+          const userData = await fetchUserData(data.user.id, data.user.email || '');
+          
+          // If profile fetch failed and returned a fallback but we suspect auth or config issue
+          if (userData && userData.tenant_id === 'default') {
+             // In production, we don't want phantom users if the database is unreachable
+             if (window.location.hostname !== 'localhost') {
+                console.warn("DB connection issue detected on production, resetting user.");
+                setCurrentUser(null);
+                return;
+             }
+          }
+          setCurrentUser(userData);
         }
       } catch (e) {
         console.error("Auth initialization failed:", e);
