@@ -5,10 +5,12 @@ import { Plus, Trash2, Users as UsersIcon, Map as MapIcon } from 'lucide-react';
 import { useToast } from '../contexts/ToastContext';
 import { insforge } from '../lib/insforge';
 import { useAuth } from '../contexts/AuthContext';
+import { useSaas } from '../saas/SaasProvider';
 
 export const Admin = () => {
   const { showToast } = useToast();
   const { hasPermission } = useAuth();
+  const { tenant } = useSaas();
   
   const canManageUsers = hasPermission('ADMIN') || hasPermission('GESTION_LIVREURS');
   const canManageCommunes = hasPermission('ADMIN') || hasPermission('COMMUNES');
@@ -63,7 +65,7 @@ export const Admin = () => {
       </div>
 
       <div>
-        {activeTab === 'utilisateurs' ? <UsersManager showToast={showToast} /> : <CommunesManager showToast={showToast} />}
+        {activeTab === 'utilisateurs' ? <UsersManager showToast={showToast} tenantId={tenant?.id || 'default'} /> : <CommunesManager showToast={showToast} tenantId={tenant?.id || 'default'} />}
       </div>
     </div>
   );
@@ -87,7 +89,7 @@ const PERMISSIONS_LIST: { id: Permission, label: string }[] = [
   { id: 'TRESORERIE', label: 'Trésorerie & Dashboard Privé' },
 ];
 
-const UsersManager = ({ showToast }: { showToast: any }) => {
+const UsersManager = ({ showToast, tenantId }: { showToast: any, tenantId: string }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -151,7 +153,8 @@ const UsersManager = ({ showToast }: { showToast: any }) => {
           role: form.role as any,
           telephone: sanitizedTel,
           permissions: form.permissions || [],
-          actif: true
+          actif: true,
+          tenant_id: tenantId
         }, authData?.user?.id || '');
       } else if (editingId) {
         await updateAdminUser(editingId, { ...form, telephone: sanitizedTel });
@@ -303,7 +306,7 @@ const UsersManager = ({ showToast }: { showToast: any }) => {
 };
 
 // --- COMMUNES MANAGER COMPONENT ---
-const CommunesManager = ({ showToast }: { showToast: any }) => {
+const CommunesManager = ({ showToast, tenantId }: { showToast: any, tenantId: string }) => {
   const [communes, setCommunes] = useState<Commune[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -334,7 +337,7 @@ const CommunesManager = ({ showToast }: { showToast: any }) => {
     setLoading(true);
     try {
       if (editingId === 'new') {
-        await createCommune({ nom, tarif_livraison: tarif });
+        await createCommune({ nom, tarif_livraison: tarif, tenant_id: tenantId });
       } else if (editingId) {
         await updateCommune(editingId, { nom, tarif_livraison: tarif });
       }

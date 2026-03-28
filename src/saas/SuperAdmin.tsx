@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { insforge } from '../lib/insforge';
-import { Tenant, Plan } from '../types';
+import { Tenant } from '../types';
 import { 
   Building, 
   Users, 
-  CreditCard, 
   Plus, 
   Search, 
   MoreVertical, 

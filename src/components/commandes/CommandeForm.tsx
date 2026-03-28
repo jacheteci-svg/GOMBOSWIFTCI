@@ -7,9 +7,11 @@ import { createCommandeBase } from '../../services/commandeService';
 import { getCommunes } from '../../services/adminService';
 import { useToast } from '../../contexts/ToastContext';
 import type { Commune } from '../../types';
+import { useSaas } from '../../saas/SaasProvider';
 
 export const CommandeForm = ({ onClose, onSave }: { onClose: () => void, onSave: () => void }) => {
   const { showToast } = useToast();
+  const { tenant } = useSaas();
   const [loading, setLoading] = useState(false);
   
   // Client Search & State
@@ -130,6 +132,8 @@ export const CommandeForm = ({ onClose, onSave }: { onClose: () => void, onSave:
     setLoading(true);
     try {
       let finalClientId = clientId;
+      const tenantId = tenant?.id || 'default';
+
       if (!finalClientId && clientRecherche.telephone) {
         const existing = await searchClientByPhone(clientRecherche.telephone);
         if (existing) {
@@ -142,7 +146,8 @@ export const CommandeForm = ({ onClose, onSave }: { onClose: () => void, onSave:
             adresse: clientRecherche.adresse || '',
             commune: clientRecherche.commune || '',
             ville: clientRecherche.ville || 'Abidjan',
-            remarques: clientRecherche.remarques || ''
+            remarques: clientRecherche.remarques || '',
+            tenant_id: tenantId
           });
         }
       }
@@ -162,6 +167,7 @@ export const CommandeForm = ({ onClose, onSave }: { onClose: () => void, onSave:
         commune_livraison: clientRecherche.commune || '',
         adresse_livraison: clientRecherche.adresse || '',
         notes_client: notes,
+        tenant_id: tenantId
       };
 
       await createCommandeBase(newCommande as any, lignes as Omit<LigneCommande, 'id' | 'commande_id'>[]);

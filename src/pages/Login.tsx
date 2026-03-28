@@ -5,7 +5,7 @@ import { LogIn, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const Login = () => {
-  const [isSignUp, setIsSignUp] = useState(false);
+  const isSignUp = false;
   const [isVerifying, setIsVerifying] = useState(false);
   const [identifier, setIdentifier] = useState(''); // email or phone
   const [password, setPassword] = useState('');

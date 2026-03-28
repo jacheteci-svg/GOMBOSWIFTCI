@@ -5,9 +5,7 @@ import {
   Package, 
   ShieldCheck, 
   TrendingUp, 
-  Smartphone, 
   Users, 
-  CheckCircle2, 
   ArrowRight,
   Zap,
   Layout

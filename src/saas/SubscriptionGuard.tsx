@@ -1,7 +1,6 @@
-import React from 'react';
 import { useSaas } from './SaasProvider';
 import { Plan } from '../types';
-import { Crown, Lock, Zap } from 'lucide-react';
+import { Crown, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface SubscriptionGuardProps {

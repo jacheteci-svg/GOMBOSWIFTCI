@@ -13,7 +13,6 @@ import {
   Zap
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useSaas } from '../saas/SaasProvider';
 
 export const Home = () => {
   const { currentUser, hasPermission } = useAuth();
