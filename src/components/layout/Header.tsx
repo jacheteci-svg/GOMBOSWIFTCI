@@ -7,7 +7,7 @@ export const Header = ({ onMenuClick }: { onMenuClick: () => void }) => {
   
   const getPageTitle = () => {
     switch (location.pathname) {
-      case '/': return 'Portail GomboSwift';
+      case '/': return 'Portail gomboswiftciCI';
       case '/dashboard': return 'Business 360°';
       case '/produits': return 'Produits & Stock';
       case '/commandes': return 'Gestion des Commandes';

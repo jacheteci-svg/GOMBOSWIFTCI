@@ -54,7 +54,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           nom_complet: 'Admin (Recouvrement)',
           telephone: '',
           permissions: ROLE_PERMISSIONS['ADMIN'],
-          actif: true
+          actif: true,
+          tenant_id: 'default'
         } as User;
       }
 
@@ -62,8 +63,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const processedUser = {
         ...data,
         email: data.email || email,
-        nom_complet: data.nom_complet || 'Utilisateur GomboSwift',
+        nom_complet: data.nom_complet || 'Utilisateur GomboSwiftCI',
         role: data.role || 'ADMIN', // Default to ADMIN if role is missing in DB
+        tenant_id: data.tenant_id || 'default',
         permissions: data.permissions && data.permissions.length > 0 
           ? data.permissions 
           : (ROLE_PERMISSIONS[data.role as Role] || ROLE_PERMISSIONS['ADMIN'])
@@ -81,7 +83,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         nom_complet: 'Admin (Secours)',
         telephone: '',
         permissions: ROLE_PERMISSIONS['ADMIN'],
-        actif: true
+        actif: true,
+        tenant_id: 'default'
       } as User;
     }
   };

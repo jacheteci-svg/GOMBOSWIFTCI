@@ -9,9 +9,11 @@ import {
   History, 
   TrendingUp, 
   Settings,
-  ChevronRight
+  ChevronRight,
+  Zap
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useSaas } from '../saas/SaasProvider';
 
 export const Home = () => {
   const { currentUser, hasPermission } = useAuth();
@@ -26,6 +28,7 @@ export const Home = () => {
     { path: '/rapport-financier', label: 'Rapport Journalier', desc: 'Rapport Journalier et orientations quotidiennes', icon: TrendingUp, permission: 'FINANCE', color: '#6366f1' },
     { path: '/historique', label: 'Historique', desc: 'Archives et impressions', icon: History, permission: 'HISTORIQUE', color: '#64748b' },
     { path: '/admin', label: 'Admin', desc: 'Paramètres et utilisateurs', icon: Settings, permission: 'ADMIN', color: '#ef4444' },
+    { path: '/saas/pricing', label: 'Mon Abonnement', desc: 'Gérer mon forfait SaaS', icon: Zap, permission: 'ADMIN', color: '#10b981' },
   ];
 
   const allowedItems = menuItems.filter(item => hasPermission(item.permission));
@@ -37,7 +40,7 @@ export const Home = () => {
           Bonne arrivée, {currentUser?.nom_complet?.split(' ')[0]} ! 👋
         </h1>
         <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem', fontWeight: 500 }}>
-          Ravi de vous revoir sur <span style={{ color: 'var(--primary)', fontWeight: 800 }}>GomboSwift</span>. Où souhaitez-vous travailler aujourd'hui ?
+          Ravi de vous revoir sur <span style={{ color: 'var(--primary)', fontWeight: 800 }}>gomboswiftciCI</span>. Où souhaitez-vous travailler aujourd'hui ?
         </p>
       </div>
 

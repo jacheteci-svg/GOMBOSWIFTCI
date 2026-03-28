@@ -3,10 +3,14 @@ import { useAuth } from '../contexts/AuthContext';
 import { insforge } from '../lib/insforge';
 import { Save, Lock } from 'lucide-react';
 import { useToast } from '../contexts/ToastContext';
+import { useSaas } from '../saas/SaasProvider';
+import { Crown, Zap, Building } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export const Profil = () => {
   const { currentUser } = useAuth();
   const { showToast } = useToast();
+  const { tenant } = useSaas();
   
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -65,6 +69,24 @@ export const Profil = () => {
             <span style={{ padding: '0.3rem 0.8rem', background: 'rgba(99, 102, 255, 0.1)', color: 'var(--primary)', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                {currentUser.role.replace('_', ' ')}
             </span>
+          </div>
+
+          <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid #f1f5f9', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', color: 'var(--text-main)', fontWeight: 700 }}>
+              <Building size={18} />
+              <span>Organisation : {tenant?.nom || 'GomboSwiftCI Community'}</span>
+            </div>
+            
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 1rem', background: '#fef3c7', color: '#d97706', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 800 }}>
+                <Crown size={16} />
+                PLAN {tenant?.plan || 'FREE'}
+              </div>
+              <Link to="/saas/pricing" style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                <Zap size={14} fill="currentColor" />
+                Changer de forfait
+              </Link>
+            </div>
           </div>
         </div>
 

@@ -1,4 +1,12 @@
-# React + TypeScript + Vite
+# GomboSwiftCI - Plateforme SaaS de Logistique & E-commerce
+
+GomboSwiftCI est une solution logicielle complète de gestion logistique, transport et e-commerce, désormais évoluée en modèle **SaaS (Software-as-a-Service)**.
+
+## 🚀 Vision SaaS
+- **Multi-tenancy** : Chaque entreprise dispose de son propre espace de travail sécurisé.
+- **Gestion des Abonnements** : Modèles de tarification flexibles (Free, Basic, Premium).
+- **Architecture Évolutive** : Conçu pour supporter des milliers de boutiques et livreurs.
+- **Haute Performance** : Stack technique moderne avec React, TypeScript et Infrastructures Cloud.
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 

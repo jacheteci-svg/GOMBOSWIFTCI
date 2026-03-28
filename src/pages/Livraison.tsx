@@ -150,7 +150,7 @@ export const Livraison = () => {
                       <Phone size={18} />
                     </a>
                     <a 
-                      href={`https://wa.me/${c.telephone_client?.replace(/\s/g, '')}?text=${encodeURIComponent(`Bonjour ${c.nom_client}, c'est votre livreur GomboSwift. Je suis en route pour votre commande de ${c.montant_total} CFA. Serez-vous disponible ?`)}`}
+                      href={`https://wa.me/${c.telephone_client?.replace(/\s/g, '')}?text=${encodeURIComponent(`Bonjour ${c.nom_client}, c'est votre livreur gomboswiftciCI. Je suis en route pour votre commande de ${c.montant_total} CFA. Serez-vous disponible ?`)}`}
                       target="_blank" 
                       rel="noopener noreferrer" 
                       className="btn" 

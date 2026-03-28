@@ -147,7 +147,7 @@ export const AuditTresorerie = () => {
 
   const handleJsonExport = () => {
     const auditData = {
-      rapport: "Audit Trésorerie GomboSwift",
+      rapport: "Audit Trésorerie gomboswiftciCI",
       periode: { debut: startDate, fin: endDate },
       metriques: financials,
       journaux: transactions

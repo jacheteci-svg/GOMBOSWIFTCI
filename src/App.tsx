@@ -3,6 +3,12 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastProvider } from './contexts/ToastContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Layout } from './components/layout/Layout';
+import { SaasProvider } from './saas/SaasProvider';
+import { Pricing } from './saas/Pricing';
+import { SubscriptionGuard } from './saas/SubscriptionGuard';
+import { LandingPage } from './saas/LandingPage';
+import { SuperAdmin } from './saas/SuperAdmin';
+import { RegisterTenant } from './saas/RegisterTenant';
 
 // --- Direct Imports to prevent Lazy Loading crashes on Vercel Delta ---
 import { Dashboard } from './pages/Dashboard';
@@ -47,7 +53,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
       return (
         <div style={{ padding: '2rem', textAlign: 'center', background: '#fef2f2', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
           <h1 style={{ color: '#991b1b' }}>Une erreur critique est survenue</h1>
-          <p>L'application GomboSwift a rencontré un problème inattendu au rendu.</p>
+          <p>L'application gomboswiftciCI a rencontré un problème inattendu au rendu.</p>
           <pre style={{ background: '#fee2e2', padding: '1rem', borderRadius: '8px', overflow: 'auto', maxWidth: '90%', fontSize: '0.8rem' }}>
             {this.state.error?.toString()}
           </pre>
@@ -64,8 +70,16 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
 const ProtectedRoute = ({ children, requiredPermission }: { children: React.ReactNode, requiredPermission: string }) => {
   const { currentUser, hasPermission } = useAuth();
   
-  if (!currentUser) return <Navigate to="/login" replace />;
-  if (!hasPermission(requiredPermission)) {
+  if (!currentUser) {
+    if (window.location.pathname === '/') return <LandingPage />;
+    return <Navigate to="/login" replace />;
+  }
+
+  if (requiredPermission === 'SUPER_ADMIN' && currentUser.role !== 'SUPER_ADMIN') {
+    return <Navigate to="/" replace />;
+  }
+  
+  if (requiredPermission !== 'SUPER_ADMIN' && !hasPermission(requiredPermission)) {
     console.warn(`Access denied for ${requiredPermission}`);
     return <Navigate to="/" replace />;
   }
@@ -144,10 +158,17 @@ const AppRoutes = () => {
           <ProtectedRoute requiredPermission="TRESORERIE"><AdminTresorerie /></ProtectedRoute>
         } />
 
-        {/* Audit & Expertise Comptable */}
+        {/* Audit & Expertise Comptable - PREMIUM */}
         <Route path="audit-tresorerie" element={
-          <ProtectedRoute requiredPermission="ADMIN"><AuditTresorerie /></ProtectedRoute>
+          <ProtectedRoute requiredPermission="ADMIN">
+            <SubscriptionGuard requiredPlan="PREMIUM">
+              <AuditTresorerie />
+            </SubscriptionGuard>
+          </ProtectedRoute>
         } />
+
+        {/* SaaS Pricing */}
+        <Route path="saas/pricing" element={<Pricing />} />
 
         {/* Profil Route */}
         <Route path="profil" element={
@@ -158,9 +179,16 @@ const AppRoutes = () => {
         <Route path="admin" element={
           <ProtectedRoute requiredPermission="ADMIN"><Admin /></ProtectedRoute>
         } />
+
+        {/* Super Admin Console */}
+        <Route path="super-admin" element={
+          <ProtectedRoute requiredPermission="SUPER_ADMIN"><SuperAdmin /></ProtectedRoute>
+        } />
       </Route>
 
       <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<RegisterTenant />} />
+      <Route path="/landing" element={<LandingPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
@@ -171,11 +199,13 @@ function App() {
     <ErrorBoundary>
       <ToastProvider>
         <AuthProvider>
-          <BrowserRouter>
-            <Suspense fallback={<PageLoader />}>
-              <AppRoutes />
-            </Suspense>
-          </BrowserRouter>
+          <SaasProvider>
+            <BrowserRouter>
+              <Suspense fallback={<PageLoader />}>
+                <AppRoutes />
+              </Suspense>
+            </BrowserRouter>
+          </SaasProvider>
         </AuthProvider>
       </ToastProvider>
     </ErrorBoundary>

@@ -1,4 +1,4 @@
-export type Role = 'ADMIN' | 'GESTIONNAIRE' | 'AGENT_APPEL' | 'LOGISTIQUE' | 'LIVREUR' | 'CAISSIERE' | 'AGENT_MIXTE';
+export type Role = 'SUPER_ADMIN' | 'ADMIN' | 'GESTIONNAIRE' | 'AGENT_APPEL' | 'LOGISTIQUE' | 'LIVREUR' | 'CAISSIERE' | 'AGENT_MIXTE';
 
 export type Permission = 
   | 'DASHBOARD'
@@ -17,6 +17,31 @@ export type Permission =
   | 'GESTION_LIVREURS'
   | 'TRESORERIE';
 
+export type Plan = 'FREE' | 'BASIC' | 'PREMIUM' | 'ENTERPRISE';
+
+export interface Tenant {
+  id: string;
+  nom: string;
+  email_contact: string;
+  telephone_contact?: string;
+  slug: string;
+  logo_url?: string;
+  plan: Plan;
+  actif: boolean;
+  settings?: any;
+  created_at: any;
+}
+
+export interface Subscription {
+  id: string;
+  tenant_id: string;
+  plan: Plan;
+  status: 'active' | 'canceled' | 'past_due' | 'trialing';
+  current_period_start?: any;
+  current_period_end?: any;
+  cancel_at_period_end: boolean;
+}
+
 export interface User {
   id: string;
   email: string;
@@ -27,6 +52,8 @@ export interface User {
   communes_servies?: string[]; 
   permissions?: string[]; // Dynamic permissions
   actif?: boolean;
+  tenant_id: string;
+  tenant?: Tenant;
 }
 
 export interface Produit {
@@ -45,6 +72,7 @@ export interface Produit {
   actif: boolean;
   images?: string[];
   image_url?: string;
+  tenant_id: string;
 }
 
 export interface Client {
@@ -56,6 +84,7 @@ export interface Client {
   commune?: string;
   ville?: string;
   remarques?: string;
+  tenant_id: string;
 }
 
 export type StatutCommande =
@@ -95,6 +124,7 @@ export interface Commande {
   // Extras for Dashboard/Reporting
   nombre_produits?: number;
   lignes?: LigneCommande[];
+  tenant_id: string;
 }
 
 export interface LigneCommande {
@@ -131,6 +161,7 @@ export interface FeuilleRoute {
   montant_encaisse?: number;
   ecart_caisse?: number;
   nom_livreur?: string;
+  tenant_id: string;
 }
 
 export interface MouvementStock {
@@ -147,6 +178,7 @@ export interface Commune {
   id: string;
   nom: string;
   tarif_livraison: number;
+  tenant_id: string;
 }
 
 export interface CaisseRetour {
@@ -159,6 +191,7 @@ export interface CaisseRetour {
   ecart: number;
   commentaire_caissiere?: string;
   caissiere_id?: string;
+  tenant_id: string;
 }
 
 export interface Depense {

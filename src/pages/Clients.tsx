@@ -48,7 +48,7 @@ export const Clients = () => {
     const nom = client.nom_complet.split(' ')[0] || 'Cher client';
     
     if (templateName === 'friendly') {
-      message = `Bonjour ${nom} ! 🌟\nComment allez-vous ? J'espère que vous êtes satisfait de nos services. Si vous avez besoin de quoi que ce soit, nous sommes à votre disposition !\n- GomboSwift`;
+      message = `Bonjour ${nom} ! 🌟\nComment allez-vous ? J'espère que vous êtes satisfait de nos services. Si vous avez besoin de quoi que ce soit, nous sommes à votre disposition !\n- gomboswiftciCI`;
     } 
     else if (templateName === 'promo') {
       message = `Coucou ${nom} ! 🎉\nEn tant que client fidèle, nous vous offrons une remise spéciale sur votre prochaine commande chez nous ! Utilisez ce code PROMO VIP.\nDécouvrez nos nouveautés dès maintenant !`;

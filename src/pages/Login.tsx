@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { insforge } from '../lib/insforge';
 import { useToast } from '../contexts/ToastContext';
 import { LogIn, Loader2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export const Login = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -156,7 +157,7 @@ export const Login = () => {
             letterSpacing: '-0.04em',
             lineHeight: 1.1,
             textTransform: 'uppercase'
-          }}>GomboSwift</h1>
+          }}>gomboswiftci</h1>
           
           <div style={{ 
             marginTop: '1.2rem', 
@@ -253,10 +254,10 @@ export const Login = () => {
         )}
 
         <div style={{ marginTop: '2.5rem', textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '2.5rem', position: 'relative', zIndex: 2 }}>
-          <button 
-            type="button"
-            onClick={() => setIsSignUp(!isSignUp)} 
+          <Link 
+            to="/register"
             style={{ 
+              textDecoration: 'none',
               background: 'rgba(255,255,255,0.05)', 
               border: '1px solid rgba(255,255,255,0.12)', 
               color: 'rgba(255,255,255,0.85)', 
@@ -267,13 +268,13 @@ export const Login = () => {
               fontSize: '0.8rem', 
               letterSpacing: '0.05em',
               transition: 'all 0.3s ease',
+              textAlign: 'center',
+              display: 'block',
               width: '100%'
             }}
-            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-            onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
           >
-            {isSignUp ? 'DÉJÀ RÉFÉRENCÉ ? SE CONNECTER' : 'PAS DE COMPTE ? S\'INSCRIRE'}
-          </button>
+            NOUVELLE ENTREPRISE ? CRÉER UN ESPACE SAAS
+          </Link>
           
           <div style={{ 
             marginTop: '2rem', 

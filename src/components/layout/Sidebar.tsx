@@ -43,6 +43,7 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
     { path: '/historique', icon: History, label: 'Historique & Impression', permission: 'HISTORIQUE' },
     { path: '/admin', icon: Settings, label: hasPermission('ADMIN') ? 'Administration' : 'Équipe & Zones', permission: 'COMMUNES' },
     { path: '/profil', icon: UserIcon, label: 'Mon Profil', permission: 'PROFIL' },
+    { path: '/super-admin', icon: ShieldCheck, label: 'Console SuperAdmin', permission: 'SUPER_ADMIN' },
   ];
 
   return (
@@ -53,7 +54,7 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
           <div style={{ background: 'var(--primary)', width: '38px', height: '38px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
             <Package size={22} />
           </div>
-          <span style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-main)', letterSpacing: '-0.04em' }}>GomboSwift</span>
+          <span style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--text-main)', letterSpacing: '-0.04em' }}>gomboswiftciCI</span>
         </div>
 
         <nav style={{ flex: 1, padding: '1rem 0', overflowY: 'auto' }}>
