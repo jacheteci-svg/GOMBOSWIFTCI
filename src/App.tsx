@@ -53,7 +53,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
       return (
         <div style={{ padding: '2rem', textAlign: 'center', background: '#fef2f2', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
           <h1 style={{ color: '#991b1b' }}>Une erreur critique est survenue</h1>
-          <p>L'application gomboswiftciCI a rencontré un problème inattendu au rendu.</p>
+          <p>L'application GomboSwiftCI a rencontré un problème inattendu au rendu.</p>
           <pre style={{ background: '#fee2e2', padding: '1rem', borderRadius: '8px', overflow: 'auto', maxWidth: '90%', fontSize: '0.8rem' }}>
             {this.state.error?.toString()}
           </pre>
@@ -67,7 +67,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   }
 }
 
-const ProtectedRoute = ({ children, requiredPermission }: { children: React.ReactNode, requiredPermission: string }) => {
+const ProtectedRoute = ({ children, requiredPermission }: { children: React.ReactNode, requiredPermission?: string }) => {
   const { currentUser, hasPermission } = useAuth();
   
   if (!currentUser) {
@@ -75,13 +75,15 @@ const ProtectedRoute = ({ children, requiredPermission }: { children: React.Reac
     return <Navigate to="/login" replace />;
   }
 
-  if (requiredPermission === 'SUPER_ADMIN' && currentUser.role !== 'SUPER_ADMIN') {
-    return <Navigate to="/" replace />;
-  }
-  
-  if (requiredPermission !== 'SUPER_ADMIN' && !hasPermission(requiredPermission)) {
-    console.warn(`Access denied for ${requiredPermission}`);
-    return <Navigate to="/" replace />;
+  if (requiredPermission) {
+    if (requiredPermission === 'SUPER_ADMIN' && currentUser.role !== 'SUPER_ADMIN') {
+      return <Navigate to="/" replace />;
+    }
+    
+    if (requiredPermission !== 'SUPER_ADMIN' && !hasPermission(requiredPermission)) {
+      console.warn(`Access denied for ${requiredPermission}`);
+      return <Navigate to="/" replace />;
+    }
   }
   
   return <>{children}</>;
@@ -90,75 +92,28 @@ const ProtectedRoute = ({ children, requiredPermission }: { children: React.Reac
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<Layout />}>
+      {/* Public Core Routes */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<RegisterTenant />} />
+      <Route path="/landing" element={<LandingPage />} />
+      <Route path="/saas/pricing" element={<Pricing />} />
+
+      {/* Main App with Protected Layout */}
+      <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route index element={<Home />} />
-        
-        {/* Admin Dashboard */}
-        <Route path="/dashboard" element={
-          <ProtectedRoute requiredPermission="DASHBOARD"><Dashboard /></ProtectedRoute>
-        } />
-        
-        {/* Module 1: Produits */}
-        <Route path="produits" element={
-          <ProtectedRoute requiredPermission="PRODUITS"><Produits /></ProtectedRoute>
-        } />
-        
-        {/* Module 2: Commandes */}
-        <Route path="commandes" element={
-          <ProtectedRoute requiredPermission="COMMANDES"><Commandes /></ProtectedRoute>
-        } />
-        
-        {/* Module 3: Centre d'Appel */}
-        <Route path="centre-appel" element={
-          <ProtectedRoute requiredPermission="CENTRE_APPEL"><CentreAppel /></ProtectedRoute>
-        } />
-        
-        {/* Module 4: Logistique */}
-        <Route path="logistique" element={
-          <ProtectedRoute requiredPermission="LOGISTIQUE"><Logistique /></ProtectedRoute>
-        } />
-        
-        {/* Module 5: Livraison */}
-        <Route path="livraison" element={
-          <ProtectedRoute requiredPermission="LIVREUR"><Livraison /></ProtectedRoute>
-        } />
-        
-        {/* Module 6: Caisse */}
-        <Route path="caisse" element={
-          <ProtectedRoute requiredPermission="CAISSE"><Caisse /></ProtectedRoute>
-        } />
-
-        {/* Financial Report */}
-        <Route path="rapport-financier" element={
-          <ProtectedRoute requiredPermission="FINANCE"><FinancialReport /></ProtectedRoute>
-        } />
-
-        {/* Historique et Impression */}
-        <Route path="historique" element={
-          <ProtectedRoute requiredPermission="HISTORIQUE"><Historique /></ProtectedRoute>
-        } />
-
-        {/* CRM Web - Clients */}
-        <Route path="clients" element={
-          <ProtectedRoute requiredPermission="CLIENTS"><Clients /></ProtectedRoute>
-        } />
-
-        {/* Staff Performance */}
-        <Route path="performance-staff" element={
-          <ProtectedRoute requiredPermission="GESTION_LIVREURS"><StaffPerformance /></ProtectedRoute>
-        } />
-
-        {/* Net Profit & Expenses */}
-        <Route path="net-profit" element={
-          <ProtectedRoute requiredPermission="ADMIN"><NetProfit /></ProtectedRoute>
-        } />
-
-        {/* Admin Treasury & Private Dashboard */}
-        <Route path="admin/tresorerie" element={
-          <ProtectedRoute requiredPermission="TRESORERIE"><AdminTresorerie /></ProtectedRoute>
-        } />
-
-        {/* Audit & Expertise Comptable - PREMIUM */}
+        <Route path="dashboard" element={<ProtectedRoute requiredPermission="DASHBOARD"><Dashboard /></ProtectedRoute>} />
+        <Route path="produits" element={<ProtectedRoute requiredPermission="PRODUITS"><Produits /></ProtectedRoute>} />
+        <Route path="commandes" element={<ProtectedRoute requiredPermission="COMMANDES"><Commandes /></ProtectedRoute>} />
+        <Route path="centre-appel" element={<ProtectedRoute requiredPermission="CENTRE_APPEL"><CentreAppel /></ProtectedRoute>} />
+        <Route path="logistique" element={<ProtectedRoute requiredPermission="LOGISTIQUE"><Logistique /></ProtectedRoute>} />
+        <Route path="livraison" element={<ProtectedRoute requiredPermission="LIVREUR"><Livraison /></ProtectedRoute>} />
+        <Route path="caisse" element={<ProtectedRoute requiredPermission="CAISSE"><Caisse /></ProtectedRoute>} />
+        <Route path="rapport-financier" element={<ProtectedRoute requiredPermission="FINANCE"><FinancialReport /></ProtectedRoute>} />
+        <Route path="historique" element={<ProtectedRoute requiredPermission="HISTORIQUE"><Historique /></ProtectedRoute>} />
+        <Route path="clients" element={<ProtectedRoute requiredPermission="CLIENTS"><Clients /></ProtectedRoute>} />
+        <Route path="performance-staff" element={<ProtectedRoute requiredPermission="GESTION_LIVREURS"><StaffPerformance /></ProtectedRoute>} />
+        <Route path="net-profit" element={<ProtectedRoute requiredPermission="ADMIN"><NetProfit /></ProtectedRoute>} />
+        <Route path="admin/tresorerie" element={<ProtectedRoute requiredPermission="TRESORERIE"><AdminTresorerie /></ProtectedRoute>} />
         <Route path="audit-tresorerie" element={
           <ProtectedRoute requiredPermission="ADMIN">
             <SubscriptionGuard requiredPlan="PREMIUM">
@@ -166,29 +121,11 @@ const AppRoutes = () => {
             </SubscriptionGuard>
           </ProtectedRoute>
         } />
-
-        {/* SaaS Pricing */}
-        <Route path="saas/pricing" element={<Pricing />} />
-
-        {/* Profil Route */}
-        <Route path="profil" element={
-          <ProtectedRoute requiredPermission="PROFIL"><Profil /></ProtectedRoute>
-        } />
-
-        {/* Admin Page */}
-        <Route path="admin" element={
-          <ProtectedRoute requiredPermission="ADMIN"><Admin /></ProtectedRoute>
-        } />
-
-        {/* Super Admin Console */}
-        <Route path="super-admin" element={
-          <ProtectedRoute requiredPermission="SUPER_ADMIN"><SuperAdmin /></ProtectedRoute>
-        } />
+        <Route path="profil" element={<ProtectedRoute requiredPermission="PROFIL"><Profil /></ProtectedRoute>} />
+        <Route path="admin" element={<ProtectedRoute requiredPermission="ADMIN"><Admin /></ProtectedRoute>} />
+        <Route path="super-admin" element={<ProtectedRoute requiredPermission="SUPER_ADMIN"><SuperAdmin /></ProtectedRoute>} />
       </Route>
 
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<RegisterTenant />} />
-      <Route path="/landing" element={<LandingPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
