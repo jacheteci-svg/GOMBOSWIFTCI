@@ -32,7 +32,6 @@ body {
   font-family: 'Inter', sans-serif;
   background-color: var(--bg-app);
   color: var(--text-main);
-  overflow: hidden; /* Main window fixed, page scrolls */
   min-height: 100vh;
 }
 
