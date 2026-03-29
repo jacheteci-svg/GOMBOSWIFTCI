@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { insforge } from '../lib/insforge';
 import { useToast } from '../contexts/ToastContext';
 import { ShieldCheck, Lock, Mail, User, Loader2, ArrowRight, Terminal, Cpu, Zap, CheckCircle2 } from 'lucide-react';
@@ -13,7 +13,6 @@ interface PlatformPortalProps {
 export const PlatformPortal: React.FC<PlatformPortalProps> = ({ mode: propMode }) => {
   const [searchParams] = useSearchParams();
   const mode = propMode || searchParams.get('mode') || 'login';
-  const navigate = useNavigate();
   const { showToast } = useToast();
 
   const [loading, setLoading] = useState(false);
@@ -82,10 +81,12 @@ export const PlatformPortal: React.FC<PlatformPortalProps> = ({ mode: propMode }
       const { error } = await insforge.auth.signInWithPassword({ email, password });
       if (error) throw error;
       showToast('Accès autorisé. Bienvenue au centre de contrôle.', 'success');
-      navigate('/super-admin');
+      /* Use full page reload so AuthContext re-initializes before ProtectedRoute checks */
+      setTimeout(() => {
+        window.location.href = '/super-admin';
+      }, 800);
     } catch {
       showToast('Identifiants incorrects ou accès refusé.', 'error');
-    } finally {
       setLoading(false);
     }
   };

@@ -65,8 +65,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         ...data,
         email: data.email || email,
         nom_complet: data.nom_complet || 'Utilisateur GomboSwiftCI',
-        role: data.role || 'ADMIN', // Default to ADMIN if role is missing in DB
-        tenant_id: data.tenant_id || 'default',
+        role: data.role || 'ADMIN',
+        // Keep null for SUPER_ADMIN — do NOT replace with 'default'
+        tenant_id: data.tenant_id || (data.role === 'SUPER_ADMIN' ? null : 'default'),
         permissions: data.permissions && data.permissions.length > 0 
           ? data.permissions 
           : (ROLE_PERMISSIONS[data.role as Role] || ROLE_PERMISSIONS['ADMIN'])
@@ -104,9 +105,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           console.log("Found user session for:", data.user.id);
           const userData = await fetchUserData(data.user.id, data.user.email || '');
           
-          // If profile fetch failed and returned a fallback but we suspect auth or config issue
-          if (userData && userData.tenant_id === 'default') {
-             // In production, we don't want phantom users if the database is unreachable
+          // Safety check: reject users whose profile couldn't be fetched properly,
+          // BUT allow SUPER_ADMIN who legitimately has tenant_id=null
+          if (userData && userData.tenant_id === 'default' && userData.role !== 'SUPER_ADMIN') {
              if (window.location.hostname !== 'localhost') {
                 console.warn("DB connection issue detected on production, resetting user.");
                 setCurrentUser(null);
