@@ -21,13 +21,26 @@ export const RegisterTenant: React.FC = () => {
     setLoading(true);
 
     try {
-      // 1. Create the Tenant first
-      // In a real app, you might want to check if slug is unique first
+      const normalizedSlug = tenantSlug.toLowerCase().replace(/[^a-z0-9-]/g, '');
+      if (!normalizedSlug) throw new Error("Veuillez choisir un identifiant URL valide.");
+
+      // 1. Check if slug is already taken
+      const { data: existingTenant } = await insforge.database
+        .from('tenants')
+        .select('id')
+        .eq('slug', normalizedSlug)
+        .maybeSingle();
+
+      if (existingTenant) {
+        throw new Error("Cet identifiant URL (slug) est déjà utilisé par une autre organisation. Veuillez en choisir un autre.");
+      }
+
+      // 2. Create the Tenant
       const { data: tenantData, error: tenantError } = await insforge.database
         .from('tenants')
         .insert([{
           nom: tenantName,
-          slug: tenantSlug.toLowerCase().replace(/[^a-z0-9]/g, ''),
+          slug: normalizedSlug,
           email_contact: email,
           plan: 'FREE',
           actif: true
