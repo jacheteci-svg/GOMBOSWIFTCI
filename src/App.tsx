@@ -9,6 +9,8 @@ import { SubscriptionGuard } from './saas/SubscriptionGuard';
 import { LandingPage } from './saas/LandingPage';
 import { SuperAdmin } from './saas/SuperAdmin';
 import { RegisterTenant } from './saas/RegisterTenant';
+import { PlatformPortal } from './saas/PlatformPortal';
+
 
 // --- Direct Imports to prevent Lazy Loading crashes on Vercel Delta ---
 import { Dashboard } from './pages/Dashboard';
@@ -43,11 +45,14 @@ import {
 } from './pages/StaticPages';
 import { DemoPage } from './pages/DemoPage';
 
-const PageLoader = () => (
-  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%', padding: '5rem' }}>
-    <div className="spinner"></div>
-  </div>
-);
+const PageLoader = () => {
+  console.log("Routing to:", window.location.pathname);
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%', padding: '5rem' }}>
+      <div className="spinner"></div>
+    </div>
+  );
+};
 
 // --- Error Boundary Component ---
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean, error: any }> {
@@ -105,10 +110,19 @@ const ProtectedRoute = ({ children, requiredPermission }: { children: React.Reac
 const AppRoutes = () => {
   return (
     <Routes>
-      {/* Public Core Routes */}
+      {/* 1. Debug/Diagnostic Route */}
+      <Route path="/test" element={<div>Test Route OK. Path: {window.location.pathname}</div>} />
+
+      {/* 2. Platform Backend Routes (Prioritized) */}
+      <Route path="/platform/login" element={<PlatformPortal mode="login" />} />
+      <Route path="/platform/setup" element={<PlatformPortal mode="setup" />} />
+      
+      {/* 3. Explicit Landing Page (Matches ONLY /) */}
+      <Route path="/landing" element={<LandingPage />} />
+      
+      {/* 4. Public Core Routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<RegisterTenant />} />
-      <Route path="/landing" element={<LandingPage />} />
       <Route path="/saas/pricing" element={<Pricing />} />
 
       {/* Static Info Pages */}

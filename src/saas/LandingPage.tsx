@@ -15,6 +15,7 @@ import {
 import { Pricing } from './Pricing';
 
 export const LandingPage: React.FC = () => {
+  console.log("LandingPage rendering on path:", window.location.pathname);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
   // Scroll Reveal Logic
@@ -39,7 +40,6 @@ export const LandingPage: React.FC = () => {
         <div style={{ position: 'absolute', bottom: '10%', right: '-10%', width: '50%', height: '50%', background: 'radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%)', filter: 'blur(80px)' }} />
       </div>
 
-      {/* Sticky Navigation Bar */}
       <nav style={{ 
         padding: '1.25rem 2rem', 
         display: 'flex', 
@@ -47,10 +47,11 @@ export const LandingPage: React.FC = () => {
         alignItems: 'center', 
         position: 'sticky', 
         top: 0, 
-        background: 'rgba(2, 6, 23, 0.8)', 
-        backdropFilter: 'blur(12px)',
+        background: 'rgba(2, 6, 23, 0.85)', 
+        backdropFilter: 'blur(16px)',
         zIndex: 1000,
-        borderBottom: '1px solid rgba(255,255,255,0.05)'
+        borderBottom: '1px solid rgba(255,255,255,0.08)',
+        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <div style={{ background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', padding: '0.6rem', borderRadius: '14px', color: 'white', boxShadow: '0 0 20px rgba(99, 102, 241, 0.3)' }}>
@@ -60,21 +61,12 @@ export const LandingPage: React.FC = () => {
         </div>
         <div style={{ display: 'flex', gap: '2.5rem', alignItems: 'center' }}>
           <div style={{ display: 'flex', gap: '2rem', marginRight: '2rem' }} className="nav-links mobile-hide">
-            <a href="#features" style={{ textDecoration: 'none', color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem' }}>Produit</a>
-            <a href="#pricing" style={{ textDecoration: 'none', color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem' }}>Tarifs</a>
-            <a href="#faq" style={{ textDecoration: 'none', color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem' }}>FAQ</a>
+            <a href="#features" className="premium-link">Produit</a>
+            <a href="#pricing" className="premium-link">Tarifs</a>
+            <a href="#faq" className="premium-link">FAQ</a>
           </div>
-          <Link to="/login" style={{ textDecoration: 'none', color: '#fff', fontWeight: 700, fontSize: '0.9rem' }} className="mobile-hide">Connexion</Link>
-          <Link to="/register" style={{ 
-            padding: '0.75rem 1.8rem', 
-            borderRadius: '12px', 
-            background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', 
-            color: 'white', 
-            textDecoration: 'none',
-            fontSize: '0.9rem',
-            fontWeight: 800,
-            boxShadow: '0 10px 20px rgba(99, 102, 241, 0.2)' 
-          }}>Essai Gratuit</Link>
+          <Link to="/login" style={{ textDecoration: 'none', color: '#fff', fontWeight: 700, fontSize: '0.9rem' }} className="mobile-hide hover-glow">Connexion</Link>
+          <Link to="/register" className="btn-premium">Essai Gratuit</Link>
         </div>
       </nav>
 
@@ -250,12 +242,13 @@ export const LandingPage: React.FC = () => {
               { t: 'Trésorerie dans le Flou ?', d: 'Nos rapports en temps réel éliminent les écarts de caisse. Chaque franc est audité automatiquement.', i: TrendingUp },
               { t: 'Clients Insatisfaits ?', d: 'Notifications WhatsApp pro-actives et notifications de livraison automatiques pour une fidélisation sans effort.', i: Target }
             ].map((item, i) => (
-              <div key={i} className="reveal" style={{ padding: '3.5rem 3rem', borderRadius: '32px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', transition: 'all 0.3s ease' }}>
+              <div key={i} className="reveal premium-card" style={{ padding: '3.5rem 3rem', borderRadius: '32px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', position: 'relative', overflow: 'hidden' }}>
                 <div style={{ width: '70px', height: '70px', borderRadius: '20px', background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '2.5rem', color: 'white', boxShadow: '0 10px 20px rgba(99, 102, 241, 0.2)' }}>
                   <item.i size={35} />
                 </div>
                 <h3 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '1.5rem' }}>{item.t}</h3>
                 <p style={{ color: '#94a3b8', lineHeight: 1.7, fontSize: '1.1rem' }}>{item.d}</p>
+                <div className="card-shine"></div>
               </div>
             ))}
           </div>
@@ -310,11 +303,12 @@ export const LandingPage: React.FC = () => {
               <div key={i} 
                 onClick={() => setActiveFaq(activeFaq === i ? null : i)}
                 style={{ 
-                  padding: '2rem', 
+                   padding: '2rem', 
                   borderRadius: '20px', 
                   background: 'rgba(255,255,255,0.02)', 
                   border: '1px solid rgba(255,255,255,0.05)', 
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  transition: 'all 0.3s'
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -407,6 +401,73 @@ export const LandingPage: React.FC = () => {
           opacity: 1;
           transform: translateY(0);
           pointer-events: auto;
+        }
+        .premium-card {
+          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .premium-card:hover {
+          transform: translateY(-12px);
+          border-color: rgba(99, 102, 241, 0.3) !important;
+          background: rgba(255,255,255,0.05) !important;
+          box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.5), 0 0 20px rgba(99, 102, 241, 0.1);
+        }
+        .card-shine {
+          position: absolute;
+          top: -100%;
+          left: -100%;
+          width: 300%;
+          height: 300%;
+          background: linear-gradient(135deg, transparent 45%, rgba(255,255,255,0.03) 50%, transparent 55%);
+          transition: all 0.6s;
+          pointer-events: none;
+        }
+        .premium-card:hover .card-shine {
+          top: 0;
+          left: 0;
+        }
+        .btn-premium {
+          padding: 0.75rem 1.8rem;
+          border-radius: 12px;
+          background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+          color: white;
+          text-decoration: none;
+          font-size: 0.9rem;
+          font-weight: 800;
+          box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);
+          transition: all 0.3s ease;
+          display: inline-block;
+        }
+        .btn-premium:hover {
+          transform: translateY(-2px) scale(1.05);
+          box-shadow: 0 15px 30px rgba(99, 102, 241, 0.4);
+        }
+        .premium-link {
+          text-decoration: none;
+          color: #94a3b8;
+          font-weight: 600;
+          font-size: 0.9rem;
+          transition: all 0.3s;
+          position: relative;
+        }
+        .premium-link:hover {
+          color: #fff;
+        }
+        .premium-link::after {
+          content: '';
+          position: absolute;
+          bottom: -4px;
+          left: 0;
+          width: 0;
+          height: 2px;
+          background: #6366f1;
+          transition: width 0.3s;
+        }
+        .premium-link:hover::after {
+          width: 100%;
+        }
+        .hover-glow:hover {
+          text-shadow: 0 0 10px rgba(255,255,255,0.5);
+          color: #fff !important;
         }
         @keyframes mockupIn {
           from { opacity: 0; transform: perspective(1500px) rotateX(25deg) translateY(100px); }
