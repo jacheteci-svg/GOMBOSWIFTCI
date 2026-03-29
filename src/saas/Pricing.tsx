@@ -1,6 +1,7 @@
 import React from 'react';
-import { Check, Zap, Rocket, Crown } from 'lucide-react';
+import { Check, Zap, Rocket, Crown, Settings } from 'lucide-react';
 import { Plan } from '../types';
+import { useNavigate } from 'react-router-dom';
 
 interface PricingPlan {
   id: Plan;
@@ -63,12 +64,35 @@ const plans: PricingPlan[] = [
       'API & Intégrations',
       'Account Manager dédié'
     ]
+  },
+  {
+    id: 'CUSTOM',
+    name: 'Sur Mesure',
+    price: 'Contactez-nous',
+    period: '',
+    description: 'Une version unique, non-SaaS, personnalisée à 100% pour vos besoins spécifiques.',
+    icon: Settings,
+    color: '#0f172a',
+    features: [
+      'Code source dédié & unique',
+      'Hébergement privé',
+      'Fonctionnalités sur demande',
+      'Identité visuelle exclusive',
+      'Maintenance VIP 24/7',
+      'Formation sur site'
+    ]
   }
 ];
 
 export const Pricing: React.FC = () => {
+  const navigate = useNavigate();
+
+  const handleSelectPlan = (planId: Plan) => {
+    navigate(`/register?plan=${planId}`);
+  };
+
   return (
-    <div style={{ padding: '4rem 2rem', maxWidth: '1200px', margin: '0 auto' }}>
+    <div style={{ padding: '4rem 2rem', maxWidth: '1280px', margin: '0 auto' }}>
       <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
         <h1 className="text-premium" style={{ fontSize: '3rem', fontWeight: 900, marginBottom: '1rem' }}>
           Propulsez votre logistique avec GomboSwiftCI
@@ -80,8 +104,8 @@ export const Pricing: React.FC = () => {
 
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
-        gap: '2.5rem',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+        gap: '2rem',
         alignItems: 'stretch'
       }}>
         {plans.map((plan) => (
@@ -133,12 +157,12 @@ export const Pricing: React.FC = () => {
             </div>
 
             <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.5rem' }}>{plan.name}</h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem', minHeight: '3rem' }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem', minHeight: '3.5rem' }}>
               {plan.description}
             </p>
 
             <div style={{ marginBottom: '2rem' }}>
-              <span style={{ fontSize: '2.5rem', fontWeight: 900 }}>{plan.price}</span>
+              <span style={{ fontSize: '1.8rem', fontWeight: 900 }}>{plan.price}</span>
               <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>{plan.period}</span>
             </div>
 
@@ -149,23 +173,24 @@ export const Pricing: React.FC = () => {
                   alignItems: 'center', 
                   gap: '0.75rem', 
                   marginBottom: '1rem',
-                  fontSize: '0.95rem',
+                  fontSize: '0.9rem',
                   fontWeight: 500,
                   color: 'var(--text-main)'
                 }}>
-                  <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#10b98120', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#10b98120', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <Check size={12} strokeWidth={3} />
                   </div>
-                  {feature}
+                  <span style={{ textAlign: 'left' }}>{feature}</span>
                 </li>
               ))}
             </ul>
 
             <button 
+              onClick={() => handleSelectPlan(plan.id)}
               className={`btn ${plan.popular ? 'btn-primary' : 'btn-outline'}`}
               style={{ width: '100%', padding: '1.1rem', borderRadius: '16px', fontWeight: 800, fontSize: '1rem' }}
             >
-              {plan.id === 'FREE' ? 'Commencer Gratuitement' : 'Choisir ce Plan'}
+              {plan.id === 'FREE' ? 'Commencer Gratuitement' : (plan.id === 'CUSTOM' ? 'Demander un Devis' : 'Choisir ce Plan')}
             </button>
           </div>
         ))}

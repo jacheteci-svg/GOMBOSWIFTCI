@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { insforge } from '../lib/insforge';
 import { useToast } from '../contexts/ToastContext';
 import { Building, User, Mail, Lock, Globe, Loader2, ArrowRight, ShieldCheck } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
+import { Plan } from '../types';
 
 export const RegisterTenant: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const { showToast } = useToast();
+  const [searchParams] = useSearchParams();
+  const selectedPlan = (searchParams.get('plan') as Plan) || 'FREE';
 
   // Form State
   const [tenantName, setTenantName] = useState('');
@@ -19,6 +22,20 @@ export const RegisterTenant: React.FC = () => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
   const [createdTenantId, setCreatedTenantId] = useState('');
+
+  // Auto-generate slug from name
+  useEffect(() => {
+    if (tenantName && !tenantSlug) {
+      const generated = tenantName
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+      setTenantSlug(generated);
+    }
+  }, [tenantName]);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,7 +63,7 @@ export const RegisterTenant: React.FC = () => {
           nom: tenantName,
           slug: normalizedSlug,
           email_contact: email,
-          plan: 'FREE',
+          plan: selectedPlan,
           actif: true
         }])
         .select()
@@ -102,6 +119,9 @@ export const RegisterTenant: React.FC = () => {
       if (profileError) throw profileError;
 
       showToast("Compte vérifié et prêt ! Bienvenue.", "success");
+      
+      // Redirect to the new tenant's subfolder/subdomain if needed, 
+      // but for now just go to root where SaasProvider will handle it
       window.location.href = '/';
     } catch (err: any) {
       showToast(err.message || "Code incorrect ou erreur de profil.", "error");
@@ -146,11 +166,12 @@ export const RegisterTenant: React.FC = () => {
           </div>
           
           <h1 style={{ fontSize: '3rem', fontWeight: 900, lineHeight: 1.1, marginBottom: '1.5rem', color: '#0f172a' }}>
-            Créez votre espace logistique en 60 secondes.
+            {selectedPlan === 'CUSTOM' ? "Créez votre version unique de GomboSwiftCI." : "Créez votre espace logistique en 60 secondes."}
           </h1>
           <p style={{ fontSize: '1.1rem', color: '#64748b', lineHeight: 1.6, marginBottom: '2.5rem' }}>
-            Rejoignez des centaines d'entreprises qui optimisent leur livraison avec GomboSwiftCI. 
-            Pas de carte bancaire requise pour commencer.
+            {selectedPlan === 'CUSTOM' 
+              ? "Bénéficiez d'une instance totalement isolée et personnalisée selon vos processus métiers spécifiques."
+              : "Rejoignez des centaines d'entreprises qui optimisent leur livraison avec GomboSwiftCI. Pas de carte bancaire requise pour commencer."}
           </p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -173,9 +194,16 @@ export const RegisterTenant: React.FC = () => {
 
         {/* Right Side: Form */}
         <div className="card glass-effect" style={{ padding: '3rem', borderRadius: '32px', border: '1px solid #f1f5f9', boxShadow: '0 50px 100px -20px rgba(0,0,0,0.05)' }}>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '2rem' }}>
-            {isVerifying ? "Vérification de l'Identité" : "Détails de l'Organisation"}
-          </h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>
+              {isVerifying ? "Vérification" : "Inscription"}
+            </h2>
+            {!isVerifying && (
+              <span style={{ background: 'var(--primary-glow)', color: 'var(--primary)', padding: '0.4rem 0.8rem', borderRadius: '10px', fontSize: '0.75rem', fontWeight: 800 }}>
+                PLAN: {selectedPlan}
+              </span>
+            )}
+          </div>
           
           {isVerifying ? (
             <form onSubmit={handleVerify} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -238,12 +266,17 @@ export const RegisterTenant: React.FC = () => {
                     placeholder="Ex: Ivoire Express" 
                     style={{ paddingLeft: '3rem', height: '52px', borderRadius: '14px' }}
                     value={tenantName}
-                    onChange={e => {
-                      setTenantName(e.target.value);
-                      if (!tenantSlug) setTenantSlug(e.target.value.toLowerCase().replace(/ /g, '-'));
-                    }}
+                    onChange={e => setTenantName(e.target.value)}
                   />
                 </div>
+                {tenantSlug && (
+                  <div style={{ marginTop: '0.5rem', padding: '0.75rem', background: '#f8fafc', borderRadius: '10px', border: '1px dashed #e2e8f0' }}>
+                    <span style={{ fontSize: '0.8rem', color: '#64748b', display: 'block', marginBottom: '0.25rem' }}>Votre lien personnalisé :</span>
+                    <code style={{ fontSize: '0.95rem', color: 'var(--primary)', fontWeight: 700 }}>
+                      https://{tenantSlug}.gomboswiftci.ci
+                    </code>
+                  </div>
+                )}
               </div>
 
               <div className="form-group">

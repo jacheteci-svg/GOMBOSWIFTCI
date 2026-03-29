@@ -25,7 +25,8 @@ const PLAN_HIERARCHY: Record<Plan, number> = {
   'FREE': 0,
   'BASIC': 1,
   'PREMIUM': 2,
-  'ENTERPRISE': 3
+  'ENTERPRISE': 3,
+  'CUSTOM': 4
 };
 
 export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

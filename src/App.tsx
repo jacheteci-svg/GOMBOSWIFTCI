@@ -29,6 +29,18 @@ import { StaffPerformance } from './pages/StaffPerformance';
 import { NetProfit } from './pages/NetProfit';
 import { AdminTresorerie } from './pages/AdminTresorerie';
 import { AuditTresorerie } from './pages/AuditTresorerie';
+import { 
+  FeaturesPage, 
+  CostCalculatorPage, 
+  ApiDocsPage, 
+  SystemStatusPage, 
+  HelpCenterPage, 
+  ContactSalesPage, 
+  ReportBugPage, 
+  PrivacyPage, 
+  TermsPage, 
+  GdprPage 
+} from './pages/StaticPages';
 
 const PageLoader = () => (
   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%', padding: '5rem' }}>
@@ -97,6 +109,18 @@ const AppRoutes = () => {
       <Route path="/register" element={<RegisterTenant />} />
       <Route path="/landing" element={<LandingPage />} />
       <Route path="/saas/pricing" element={<Pricing />} />
+
+      {/* Static Info Pages */}
+      <Route path="/features" element={<FeaturesPage />} />
+      <Route path="/cost-calculator" element={<CostCalculatorPage />} />
+      <Route path="/api-docs" element={<ApiDocsPage />} />
+      <Route path="/status" element={<SystemStatusPage />} />
+      <Route path="/help-center" element={<HelpCenterPage />} />
+      <Route path="/contact-sales" element={<ContactSalesPage />} />
+      <Route path="/report-bug" element={<ReportBugPage />} />
+      <Route path="/privacy" element={<PrivacyPage />} />
+      <Route path="/terms" element={<TermsPage />} />
+      <Route path="/gdpr" element={<GdprPage />} />
 
       {/* Main App with Protected Layout */}
       <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>

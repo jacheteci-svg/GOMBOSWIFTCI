@@ -17,7 +17,7 @@ export type Permission =
   | 'GESTION_LIVREURS'
   | 'TRESORERIE';
 
-export type Plan = 'FREE' | 'BASIC' | 'PREMIUM' | 'ENTERPRISE';
+export type Plan = 'FREE' | 'BASIC' | 'PREMIUM' | 'ENTERPRISE' | 'CUSTOM';
 
 export interface Tenant {
   id: string;

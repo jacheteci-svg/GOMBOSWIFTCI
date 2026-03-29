@@ -1,238 +1,350 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Truck, 
-  Package, 
-  ShieldCheck, 
-  TrendingUp, 
-  Users, 
   ArrowRight,
   Zap,
-  Layout
+  ChevronDown,
+  PieChart,
+  Target,
+  TrendingUp
 } from 'lucide-react';
 import { Pricing } from './Pricing';
 
 export const LandingPage: React.FC = () => {
+  const [activeFaq, setActiveFaq] = useState<number | null>(null);
+
   return (
-    <div style={{ background: '#ffffff', color: '#1e293b', fontFamily: 'Inter, sans-serif' }}>
-      {/* Navigation Bar */}
+    <div style={{ background: '#020617', color: '#f8fafc', fontFamily: 'Inter, sans-serif' }}>
+      {/* Dynamic Background Noise/Glows */}
+      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+        <div style={{ position: 'absolute', top: '-10%', left: '-10%', width: '40%', height: '40%', background: 'radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%)', filter: 'blur(50px)' }} />
+        <div style={{ position: 'absolute', bottom: '10%', right: '-10%', width: '50%', height: '50%', background: 'radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%)', filter: 'blur(80px)' }} />
+      </div>
+
+      {/* Sticky Navigation Bar */}
       <nav style={{ 
-        padding: '1.5rem 2rem', 
+        padding: '1.25rem 2rem', 
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center', 
         position: 'sticky', 
         top: 0, 
-        background: 'rgba(255,255,255,0.8)', 
-        backdropFilter: 'blur(10px)',
-        zIndex: 100,
-        borderBottom: '1px solid #f1f5f9'
+        background: 'rgba(2, 6, 23, 0.8)', 
+        backdropFilter: 'blur(12px)',
+        zIndex: 1000,
+        borderBottom: '1px solid rgba(255,255,255,0.05)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div style={{ background: 'var(--primary)', padding: '0.5rem', borderRadius: '10px', color: 'white' }}>
+          <div style={{ background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', padding: '0.6rem', borderRadius: '14px', color: 'white', boxShadow: '0 0 20px rgba(99, 102, 241, 0.3)' }}>
             <Truck size={24} strokeWidth={2.5} />
           </div>
-          <span style={{ fontSize: '1.5rem', fontWeight: 900, letterSpacing: '-0.04em' }}>GomboSwiftCI</span>
+          <span style={{ fontSize: '1.6rem', fontWeight: 950, letterSpacing: '-0.04em', background: 'linear-gradient(to right, #fff, #94a3b8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>GomboSwiftCI</span>
         </div>
-        <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-          <a href="#features" style={{ textDecoration: 'none', color: '#64748b', fontWeight: 600 }}>Fonctionnalités</a>
-          <a href="#pricing" style={{ textDecoration: 'none', color: '#64748b', fontWeight: 600 }}>Tarification</a>
-          <Link to="/login" className="btn btn-outline" style={{ padding: '0.6rem 1.5rem', borderRadius: '12px' }}>Connexion</Link>
-          <Link to="/register" className="btn btn-primary" style={{ padding: '0.6rem 1.5rem', borderRadius: '12px' }}>Essai Gratuit</Link>
+        <div style={{ display: 'flex', gap: '2.5rem', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '2rem', marginRight: '2rem' }} className="nav-links mobile-hide">
+            <a href="#features" style={{ textDecoration: 'none', color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem' }}>Produit</a>
+            <a href="#pricing" style={{ textDecoration: 'none', color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem' }}>Tarifs</a>
+            <a href="#faq" style={{ textDecoration: 'none', color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem' }}>FAQ</a>
+          </div>
+          <Link to="/login" style={{ textDecoration: 'none', color: '#fff', fontWeight: 700, fontSize: '0.9rem' }} className="mobile-hide">Connexion</Link>
+          <Link to="/register" style={{ 
+            padding: '0.75rem 1.8rem', 
+            borderRadius: '12px', 
+            background: 'white', 
+            color: '#020617', 
+            textDecoration: 'none',
+            fontSize: '0.9rem',
+            fontWeight: 800,
+            boxShadow: '0 10px 20px rgba(255,255,255,0.1)' 
+          }}>Essai Gratuit</Link>
         </div>
       </nav>
 
-      {/* Hero Section */}
+      {/* Immersive Hero Section */}
       <header style={{ 
-        padding: '8rem 2rem', 
+        padding: '10rem 2rem 15rem', 
         textAlign: 'center', 
-        background: 'radial-gradient(circle at top right, #f5f3ff 0%, #ffffff 50%)',
         position: 'relative',
-        overflow: 'hidden'
+        zIndex: 1
       }}>
-        <div style={{ position: 'absolute', top: '10%', left: '5%', opacity: 0.1 }}>
-          <Package size={120} color="var(--primary)" />
-        </div>
-        <div style={{ position: 'absolute', bottom: '10%', right: '5%', opacity: 0.1 }}>
-          <Truck size={150} color="var(--primary)" />
-        </div>
-
-        <div style={{ maxWidth: '900px', margin: '0 auto', position: 'relative' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
           <div style={{ 
             display: 'inline-flex', 
             alignItems: 'center', 
-            gap: '0.5rem', 
-            padding: '0.5rem 1rem', 
-            background: '#eff6ff', 
-            color: 'var(--primary)', 
+            gap: '0.6rem', 
+            padding: '0.6rem 1.25rem', 
+            background: 'rgba(99, 102, 241, 0.1)', 
+            color: '#818cf8', 
             borderRadius: '50px', 
             fontSize: '0.85rem', 
             fontWeight: 800, 
-            marginBottom: '2rem',
-            border: '1px solid #dbeafe'
+            marginBottom: '2.5rem',
+            border: '1px solid rgba(99, 102, 241, 0.2)'
           }}>
             <Zap size={14} fill="currentColor" />
-            NOUVEAU : GOMBOSWIFTCI SAAS EST DISPONIBLE
+            VOTRE LOGISTIQUE SOUS STÉROÏDES : DISPONIBLE MAINTENANT
           </div>
+          
           <h1 style={{ 
-            fontSize: '4.5rem', 
-            fontWeight: 900, 
-            lineHeight: 1.1, 
-            marginBottom: '1.5rem', 
-            letterSpacing: '-0.02em',
-            background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
+            fontSize: '5.5rem', 
+            fontWeight: 950, 
+            lineHeight: 1, 
+            marginBottom: '2rem', 
+            letterSpacing: '-0.05em',
+            background: 'linear-gradient(to bottom, #ffffff 0%, #94a3b8 100%)',
             WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
+            WebkitTextFillColor: 'transparent',
+            maxWidth: '1200px',
+            margin: '0 auto 2.5rem'
           }}>
-            Dominez votre Logistique <br />avec Élégance et Performance.
+            Ne Gérez Plus. <br/> <span style={{ color: '#6366f1' }}>Maîtrisez</span> votre Croissance.
           </h1>
-          <p style={{ fontSize: '1.4rem', color: '#64748b', marginBottom: '3rem', lineHeight: 1.5 }}>
-            La plateforme SaaS ultime pour les e-commerçants et entreprises de transport. 
-            Gérez vos stocks, commandes et livreurs en temps réel, partout dans le monde.
+          
+          <p style={{ fontSize: '1.4rem', color: '#94a3b8', marginBottom: '4rem', lineHeight: 1.6, maxWidth: '800px', margin: '0 auto 4.5rem' }}>
+            La première infrastructure logistique intelligente conçue pour l'Afrique. 
+            Vitesse, Précision, Audit. Tout en un seul tableau de bord futuriste.
           </p>
-          <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center' }}>
-            <Link to="/login" style={{ padding: '1.25rem 2.5rem', borderRadius: '16px', fontSize: '1.1rem', fontWeight: 800, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'var(--primary)', color: 'white', boxShadow: '0 20px 40px -10px var(--primary-glow)' }}>
-              Démarrer Maintenant <ArrowRight size={20} />
+          
+          <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', marginBottom: '6rem' }}>
+            <Link to="/register" style={{ 
+              padding: '1.4rem 3rem', 
+              borderRadius: '18px', 
+              fontSize: '1.2rem', 
+              fontWeight: 800, 
+              textDecoration: 'none', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '1rem', 
+              background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', 
+              color: 'white', 
+              boxShadow: '0 25px 50px -12px rgba(99, 102, 241, 0.5)',
+              transition: 'all 0.3s ease'
+            }}>
+              ÉCRASEZ LA CONCURRENCE <ArrowRight size={20} />
             </Link>
-            <button style={{ padding: '1.25rem 2.5rem', borderRadius: '16px', fontSize: '1.1rem', fontWeight: 800, background: 'white', color: '#1e293b', border: '2px solid #e2e8f0' }}>
-              Voir la Démo
+            <button style={{ padding: '1.4rem 3rem', borderRadius: '18px', fontSize: '1.2rem', fontWeight: 800, background: 'rgba(255,255,255,0.03)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(5px)' }}>
+              Voir la Démo Live
             </button>
+          </div>
+
+          {/* Perspective Dashboard Mockup */}
+          <div style={{ position: 'relative', marginTop: '4rem', padding: '1rem' }}>
+            <div style={{ 
+              background: 'linear-gradient(to right, #6366f1, #a855f7)', 
+              padding: '2px', 
+              borderRadius: '24px', 
+              transform: 'perspective(1500px) rotateX(15deg) translateY(-50px)',
+              boxShadow: '0 100px 100px -30px rgba(0,0,0,0.8), 0 0 40px rgba(99, 102, 241, 0.2)',
+              animation: 'mockupIn 1.5s ease-out forwards'
+            }}>
+              <img 
+                src="dashboard_mockup_premium_1774751906087.png" 
+                alt="Infrastructure Dashboard" 
+                style={{ width: '100%', height: 'auto', borderRadius: '22px', display: 'block' }}
+              />
+            </div>
+            {/* Floating Card */}
+            <div style={{ position: 'absolute', top: '20%', left: '-5%', padding: '1.5rem', background: 'rgba(2, 6, 23, 0.8)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', backdropFilter: 'blur(10px)', boxShadow: '0 20px 40px rgba(0,0,0,0.4)', animation: 'float 6s ease-in-out infinite' }}>
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <div style={{ background: '#10b98120', color: '#10b981', padding: '0.4rem', borderRadius: '8px' }}><Zap size={20}/></div>
+                <div style={{ textAlign: 'left' }}>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 800 }}>99.9%</div>
+                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Livraisons Réussies</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Trust Quote / Stats */}
-      <section style={{ padding: '4rem 2rem', background: '#f8fafc', textAlign: 'center' }}>
-        <p style={{ fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '3rem' }}>FAITES CONFIANCE À LA PERFORMANCE</p>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '6rem', flexWrap: 'wrap' }}>
-          <div>
-            <div style={{ fontSize: '2.5rem', fontWeight: 900, color: '#1e293b' }}>+150k</div>
-            <div style={{ color: '#64748b', fontWeight: 600 }}>Livraisons Réussies</div>
-          </div>
-          <div>
-            <div style={{ fontSize: '2.5rem', fontWeight: 900, color: '#1e293b' }}>99.9%</div>
-            <div style={{ color: '#64748b', fontWeight: 600 }}>Taux de Disponibilité</div>
-          </div>
-          <div>
-            <div style={{ fontSize: '2.5rem', fontWeight: 900, color: '#1e293b' }}>25%</div>
-            <div style={{ color: '#64748b', fontWeight: 600 }}>Gain de Productivité</div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Grid */}
-      <section id="features" style={{ padding: '8rem 2rem', maxWidth: '1200px', margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: '5rem' }}>
-          <h2 style={{ fontSize: '3rem', fontWeight: 900, marginBottom: '1.5rem' }}>Une Solution à 360°</h2>
-          <p style={{ fontSize: '1.2rem', color: '#64748b', maxWidth: '600px', margin: '0 auto' }}>
-            Tout ce dont vous avez besoin pour gérer votre business, du dispatching à l'audit comptable.
-          </p>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '3rem' }}>
+      {/* Stats Ribbon */}
+      <section style={{ padding: '6rem 2rem', background: 'rgba(99, 102, 241, 0.05)', borderTop: '1px solid rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.02)', position: 'relative', zIndex: 1 }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '10rem', flexWrap: 'wrap' }}>
           {[
-            { title: 'Gestion de Stock Intuitive', desc: 'Alertes de stock bas, mouvements et historique complet pour ne jamais manquer une vente.', icon: Package, color: '#6366f1' },
-            { title: 'Workflow de Commandes CMS', desc: 'Importez et suivez vos commandes avec des statuts clairs et automatisés.', icon: Layout, color: '#8b5cf6' },
-            { title: 'Dispatching Intelligent', desc: 'Assignez des colis à vos livreurs et créez des feuilles de route optimisées en un clic.', icon: Truck, color: '#10b981' },
-            { title: 'CRM Expériences Client', desc: 'Envoyez des notifications WhatsApp directement depuis le panel pour fidéliser vos clients.', icon: Users, color: '#f59e0b' },
-            { title: 'Trésorerie & Audit Expert', desc: 'Rapports financiers détaillés et expertise comptable intégrée pour une transparence totale.', icon: TrendingUp, color: '#ec4899' },
-            { title: 'Sécurité Maximale', desc: 'Chiffrement de bout en bout et isolation totale des données entre chaque entreprise.', icon: ShieldCheck, color: '#0ea5e9' }
-          ].map((feat, i) => (
-            <div key={i} style={{ padding: '2.5rem', borderRadius: '24px', border: '1px solid #f1f5f9', background: 'white', transition: 'all 0.3s ease' }}>
-              <div style={{ 
-                width: '64px', 
-                height: '64px', 
-                borderRadius: '16px', 
-                background: `${feat.color}15`, 
-                color: feat.color, 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                marginBottom: '1.5rem'
-              }}>
-                <feat.icon size={32} strokeWidth={2.5} />
-              </div>
-              <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '1rem' }}>{feat.title}</h3>
-              <p style={{ color: '#64748b', lineHeight: 1.6, fontSize: '1.05rem' }}>{feat.desc}</p>
+            { v: "+250%", l: "ROI Moyenné", c: "#10b981" },
+            { v: "24/7", l: "Uptime Système", c: "#6366f1" },
+            { v: "0ms", l: "Latence Données", c: "#a855f7" }
+          ].map((s, i) => (
+            <div key={i}>
+              <div style={{ fontSize: '3rem', fontWeight: 950, color: s.c, marginBottom: '0.5rem' }}>{s.v}</div>
+              <div style={{ color: '#94a3b8', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', fontSize: '0.8rem' }}>{s.l}</div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Testimonial Section */}
-      <section style={{ padding: '6rem 2rem', background: 'linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%)', color: 'white', overflow: 'hidden', position: 'relative' }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 1 }}>
-          <h2 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '3rem' }}>"GomboSwiftCI a radicalement changé ma façon de gérer mes livraisons. C'est le jour et la nuit."</h2>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
-            <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Users size={30} color="var(--primary)" />
-            </div>
-            <div style={{ textAlign: 'left' }}>
-              <div style={{ fontWeight: 800, fontSize: '1.2rem' }}>Abdou Diop</div>
-              <div style={{ opacity: 0.8, fontSize: '0.9rem' }}>CEO, Laye Transport & Logistics</div>
-            </div>
+      {/* Pain Points Section */}
+      <section id="features" style={{ padding: '12rem 2rem', position: 'relative', zIndex: 1 }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '8rem' }}>
+            <h2 style={{ fontSize: '3.5rem', fontWeight: 900, marginBottom: '2rem' }}>La logistique traditionnelle est <span style={{ color: '#f43f5e' }}>Morte</span>.</h2>
+            <p style={{ fontSize: '1.25rem', color: '#94a3b8', maxWidth: '700px', margin: '0 auto' }}>Arrêtez de lutter avec des Excel obsolètes et des livreurs en retard. Adoptez l'intelligence GomboSwiftCI.</p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '4rem' }}>
+            {[
+              { t: 'Perte de Traçabilité ?', d: 'GomboSwiftCI suit chaque mouvement, du pick-up à l\'encaissement final, avec une précision chirurgicale.', i: PieChart },
+              { t: 'Trésorerie dans le Flou ?', d: 'Nos rapports en temps réel éliminent les écarts de caisse. Chaque franc est audité automatiquement.', i: TrendingUp },
+              { t: 'Clients Insatisfaits ?', d: 'Notifications WhatsApp pro-actives et notifications de livraison automatiques pour une fidélisation sans effort.', i: Target }
+            ].map((item, i) => (
+              <div key={i} style={{ padding: '3.5rem 3rem', borderRadius: '32px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', transition: 'all 0.3s ease' }}>
+                <div style={{ width: '70px', height: '70px', borderRadius: '20px', background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '2.5rem', color: 'white', boxShadow: '0 10px 20px rgba(99, 102, 241, 0.2)' }}>
+                  <item.i size={35} />
+                </div>
+                <h3 style={{ fontSize: '1.8rem', fontWeight: 800, marginBottom: '1.5rem' }}>{item.t}</h3>
+                <p style={{ color: '#94a3b8', lineHeight: 1.7, fontSize: '1.1rem' }}>{item.d}</p>
+              </div>
+            ))}
           </div>
         </div>
+      </section>
+
+      {/* Testimonials */}
+      <section style={{ padding: '6rem 2rem', background: '#0a0f1e' }}>
+         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '6rem' }}>
+            <h2 style={{ fontSize: '3rem', fontWeight: 900, marginBottom: '1.5rem' }}>Propulsé par le succès de nos partenaires</h2>
+          </div>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
+            {[
+              { name: "Yaya Touré", role: "Directeur Logistique", company: "CI-Business", text: "On a triplé notre nombre de commandes quotidiennes sans embaucher un seul agent administratif de plus. La CAISSE est magique.", initial: "YT" },
+              { name: "Marie-Louise", role: "Fondatrice", company: "E-Boutique Luxe", text: "Enfin une interface que mon équipe adore utiliser. Moderne, rapide et surtout fiable.", initial: "ML" },
+              { name: "Koffi Serge", role: "Propriétaire", company: "Swift Express", text: "Le module WhatsApp est notre arme secrète. Nos clients nous recommandent pour notre sérieux.", initial: "KS" }
+            ].map((t, i) => (
+              <div key={i} style={{ padding: '3rem', borderRadius: '32px', background: 'rgba(2, 6, 23, 0.5)', border: '1px solid rgba(255,255,255,0.03)', position: 'relative' }}>
+                <div style={{ fontSize: '4rem', color: '#6366f120', position: 'absolute', top: '1rem', left: '2rem', fontFamily: 'serif' }}>“</div>
+                <p style={{ fontSize: '1.1rem', marginBottom: '2.5rem', lineHeight: 1.6, color: '#f8fafc', position: 'relative', zIndex: 1 }}>{t.text}</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+                  <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'linear-gradient(to bottom, #6366f1, #a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, color: 'white' }}>{t.initial}</div>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: '1.1rem' }}>{t.name}</div>
+                    <div style={{ color: '#64748b', fontSize: '0.85rem' }}>{t.role}, {t.company}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+         </div>
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" style={{ background: '#f8fafc' }}>
+      <section id="pricing" style={{ padding: '10rem 2rem', background: '#020617' }}>
         <Pricing />
       </section>
 
-      {/* CTA Section */}
-      <section style={{ padding: '8rem 2rem', textAlign: 'center' }}>
-        <h2 style={{ fontSize: '3.5rem', fontWeight: 900, marginBottom: '1.5rem', letterSpacing: '-0.03em' }}>
-          Prêt à faire passer votre logistique <br />dans le futur ?
-        </h2>
-        <p style={{ fontSize: '1.25rem', color: '#64748b', marginBottom: '3.5rem' }}>Inscrivez-vous aujourd'hui et commencez à gérer vos opérations comme un pro.</p>
-        <Link to="/login" style={{ padding: '1.25rem 3.5rem', borderRadius: '16px', fontSize: '1.2rem', fontWeight: 800, textDecoration: 'none', background: 'var(--primary)', color: 'white', boxShadow: '0 20px 40px -10px var(--primary-glow)' }}>
-          Créer un Compte Gratuit
-        </Link>
+      {/* FAQ Section */}
+      <section id="faq" style={{ padding: '10rem 2rem' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+          <h2 style={{ fontSize: '3.5rem', fontWeight: 900, textAlign: 'center', marginBottom: '6rem' }}>Questions Fréquentes</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {[
+              { q: 'Est-ce vraiment facile à prendre en main ?', a: 'Oui. GomboSwiftCI est conçu comme une application grand public. 15 minutes suffisent pour former un agent.' },
+              { q: 'Puis-je utiliser mon propre domaine ?', a: 'Absolument. Nos offres Premium et Custom permettent un hébergement entièrement personnalisé.' },
+              { q: 'Mes données sont-elles vraiment en sécurité ?', a: 'Plus que n\'importe où. Nous utilisons l\'infrastructure cloud leader mondiale avec isolation cryptographique totale.' },
+              { q: 'Comment fonctionne le module WhatsApp ?', a: 'Il est intégré nativement. Vous pouvez envoyer des confirmations de commande et des rappels de livraison en un clic.' }
+            ].map((faq, i) => (
+              <div key={i} 
+                onClick={() => setActiveFaq(activeFaq === i ? null : i)}
+                style={{ 
+                  padding: '2rem', 
+                  borderRadius: '20px', 
+                  background: 'rgba(255,255,255,0.02)', 
+                  border: '1px solid rgba(255,255,255,0.05)', 
+                  cursor: 'pointer'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h4 style={{ margin: 0, fontWeight: 800, fontSize: '1.2rem' }}>{faq.q}</h4>
+                  <ChevronDown size={24} style={{ transform: activeFaq === i ? 'rotate(180deg)' : 'none', transition: 'transform 0.3s' }} />
+                </div>
+                {activeFaq === i && (
+                  <p style={{ marginTop: '1.5rem', color: '#94a3b8', lineHeight: 1.6, fontSize: '1.05rem' }}>{faq.a}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section style={{ padding: '12rem 2rem', textAlign: 'center', position: 'relative' }}>
+        <div style={{ 
+          maxWidth: '1200px', 
+          margin: '0 auto', 
+          padding: '8rem 4rem', 
+          background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', 
+          borderRadius: '4rem',
+          boxShadow: '0 50px 100px -20px rgba(99, 102, 241, 0.5)',
+          overflow: 'hidden',
+          position: 'relative'
+        }}>
+          <h2 style={{ fontSize: '4.5rem', fontWeight: 950, marginBottom: '2rem', letterSpacing: '-0.04em', lineHeight: 1 }}>
+            Rejoignez l'élite Logistique. <br/> <span style={{ color: 'rgba(255,255,255,0.7)' }}>Maintenant.</span>
+          </h2>
+          <p style={{ fontSize: '1.4rem', marginBottom: '4rem', opacity: 0.9, maxWidth: '700px', margin: '0 auto 4.5rem' }}>
+            Chaque minute passée sur un autre outil est une minute de profit perdue.
+          </p>
+          <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center' }}>
+            <Link to="/register" style={{ padding: '1.5rem 4rem', borderRadius: '20px', fontSize: '1.4rem', fontWeight: 900, textDecoration: 'none', background: 'white', color: '#6366f1', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
+              Démarrer le Futur Gratuitement
+            </Link>
+          </div>
+        </div>
       </section>
 
       {/* Footer */}
-      <footer style={{ padding: '5rem 2rem', borderTop: '1px solid #f1f5f9', background: '#ffffff' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '4rem' }}>
+      <footer style={{ padding: '8rem 2rem 5rem', background: '#020617', borderTop: '1px solid rgba(255,255,255,0.03)' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '6rem' }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-              <Truck size={24} color="var(--primary)" />
-              <span style={{ fontSize: '1.3rem', fontWeight: 900 }}>GomboSwiftCI</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
+              <div style={{ background: '#6366f1', padding: '0.4rem', borderRadius: '8px' }}><Truck size={20} color="white"/></div>
+              <span style={{ fontSize: '1.4rem', fontWeight: 950 }}>GomboSwiftCI</span>
             </div>
-            <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: 1.6 }}>
-              La plateforme logistique leader en Côte d'Ivoire et au-delà. Logiciel en tant que service (SaaS) premium.
+            <p style={{ color: '#64748b', fontSize: '1rem', lineHeight: 1.7, marginBottom: '2.5rem' }}>
+              L'infrastructure logistique SaaS de référence pour les entreprises en pleine expansion en Côte d'Ivoire.
             </p>
+            <div style={{ color: '#94a3b8', fontSize: '0.9rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>📍 Yopougon Toit Rouge, Non loin de la grande mosquée après le stade BAE</div>
+              <div>WhatsApp: <a href="https://wa.me/2250700000000" style={{ color: '#25D366', fontWeight: 800, textDecoration: 'none' }}>+225 07 00 00 00 00</a></div>
+            </div>
           </div>
-          <div>
-            <h4 style={{ fontWeight: 800, marginBottom: '1.5rem' }}>Produit</h4>
-            <ul style={{ listStyle: 'none', padding: 0, color: '#64748b', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              <li>Fonctionnalités</li>
-              <li>Calculateur de Coût</li>
-              <li>API Developer</li>
-              <li>Statut Système</li>
-            </ul>
-          </div>
-          <div>
-            <h4 style={{ fontWeight: 800, marginBottom: '1.5rem' }}>Support</h4>
-            <ul style={{ listStyle: 'none', padding: 0, color: '#64748b', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              <li>Centre d'aide</li>
-              <li>Contact Commercial</li>
-              <li>Signaler un bug</li>
-            </ul>
-          </div>
-          <div>
-            <h4 style={{ fontWeight: 800, marginBottom: '1.5rem' }}>Légal</h4>
-            <ul style={{ listStyle: 'none', padding: 0, color: '#64748b', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              <li>Confidentialité</li>
-              <li>Conditions d'utilisation</li>
-              <li>RGPD Compliance</li>
-            </ul>
-          </div>
+          
+          {[
+            { t: 'Produit', l: [['Fonctionnalités', '/features'], ['Calculateur Coût', '/cost-calculator'], ['API Docs', '/api-docs'], ['Statut', '/status']] },
+            { t: 'Support', l: [['Help Center', '/help-center'], ['Sales', '/contact-sales'], ['Bugs', '/report-bug']] },
+            { t: 'Légal', l: [['Privacy', '/privacy'], ['Terms', '/terms'], ['GDPR', '/gdpr']] }
+          ].map((col, i) => (
+            <div key={i}>
+              <h4 style={{ fontWeight: 800, marginBottom: '2rem', color: '#fff' }}>{col.t}</h4>
+              <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                {col.l.map((link, j) => (
+                  <li key={j}><Link to={link[1]} style={{ textDecoration: 'none', color: '#64748b', fontWeight: 500 }}>{link[0]}</Link></li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
-        <div style={{ marginTop: '5rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.85rem' }}>
+        <div style={{ marginTop: '8rem', textAlign: 'center', color: '#475569', fontSize: '0.9rem' }}>
           &copy; {new Date().getFullYear()} GomboSwiftCI S.A.S. Tous droits réservés.
         </div>
       </footer>
+
+      <style>{`
+        @keyframes mockupIn {
+          from { opacity: 0; transform: perspective(1500px) rotateX(25deg) translateY(100px); }
+          to { opacity: 1; transform: perspective(1500px) rotateX(15deg) translateY(-50px); }
+        }
+        @keyframes float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-20px); }
+        }
+        @media (max-width: 768px) {
+          .mobile-hide { display: none !important; }
+          h1 { font-size: 3.5rem !important; }
+        }
+      `}</style>
     </div>
   );
 };
