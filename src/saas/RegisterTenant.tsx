@@ -110,6 +110,19 @@ export const RegisterTenant: React.FC = () => {
     }
   };
 
+  const handleResend = async () => {
+    setLoading(true);
+    try {
+      const { error } = await insforge.auth.signUp({ email, password });
+      if (error) throw error;
+      showToast("Un nouveau code a été envoyé !", "success");
+    } catch (err: any) {
+      showToast(err.message || "Erreur lors du renvoi du code", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div style={{ 
       minHeight: '100vh', 
@@ -191,13 +204,24 @@ export const RegisterTenant: React.FC = () => {
                 {loading ? <Loader2 className="animate-spin" /> : "CONFIRMER & CRÉER LE COMPTE"}
               </button>
 
-              <button 
-                type="button" 
-                onClick={() => setIsVerifying(false)}
-                style={{ background: 'none', border: 'none', color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer' }}
-              >
-                Retourner aux détails
-              </button>
+              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '1rem' }}>
+                <button 
+                  type="button" 
+                  onClick={handleResend}
+                  disabled={loading}
+                  style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}
+                >
+                  Renvoyer le code
+                </button>
+                <span style={{ color: '#cbd5e1' }}>|</span>
+                <button 
+                  type="button" 
+                  onClick={() => setIsVerifying(false)}
+                  style={{ background: 'none', border: 'none', color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer' }}
+                >
+                  Retourner aux détails
+                </button>
+              </div>
             </form>
           ) : (
             <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
