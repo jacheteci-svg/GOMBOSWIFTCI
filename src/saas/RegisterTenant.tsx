@@ -113,7 +113,9 @@ export const RegisterTenant: React.FC = () => {
   const handleResend = async () => {
     setLoading(true);
     try {
-      const { error } = await insforge.auth.signUp({ email, password });
+      const { error } = await insforge.auth.resendVerificationEmail({ 
+        email: email 
+      });
       if (error) throw error;
       showToast("Un nouveau code a été envoyé !", "success");
     } catch (err: any) {
