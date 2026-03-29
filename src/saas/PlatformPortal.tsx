@@ -38,8 +38,9 @@ export const PlatformPortal: React.FC<PlatformPortalProps> = ({ mode: propMode }
 
   const handleSetup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (masterKey !== MASTER_KEY) {
-      showToast("Code Maître invalide. Accès refusé.", "error");
+    /* Trim whitespace to avoid copy-paste issues */
+    if (masterKey.trim() !== MASTER_KEY.trim()) {
+      showToast(`Code Maître invalide. Vous avez entré: "${masterKey.trim()}"`, "error");
       return;
     }
 
@@ -166,10 +167,10 @@ export const PlatformPortal: React.FC<PlatformPortalProps> = ({ mode: propMode }
                   <div style={{ position: 'relative' }}>
                     <Zap size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#6366f1' }} />
                     <input 
-                      type="password" 
+                      type="text"
                       className="form-input" 
-                      style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', height: '52px', borderRadius: '12px', color: 'white', paddingLeft: '3rem', fontSize: '1rem' }}
-                      placeholder="Required for initial setup"
+                      style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', height: '52px', borderRadius: '12px', color: 'white', paddingLeft: '3rem', fontSize: '1rem', fontFamily: 'monospace', letterSpacing: '0.05em' }}
+                      placeholder="GOMBO-EXPRESS-2026"
                       required
                       value={masterKey}
                       onChange={e => setMasterKey(e.target.value)}
