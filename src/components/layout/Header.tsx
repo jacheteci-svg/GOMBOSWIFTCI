@@ -1,10 +1,36 @@
-import { Search, Menu, Home } from 'lucide-react';
+import { Search, Menu, Home, Building2 } from 'lucide-react';
 import { useLocation, Link } from 'react-router-dom';
 import { NotificationCenter } from './NotificationCenter';
+import { useAuth } from '../../contexts/AuthContext';
+import { insforge } from '../../lib/insforge';
+import { useState, useEffect } from 'react';
 
 export const Header = ({ onMenuClick }: { onMenuClick: () => void }) => {
   const location = useLocation();
-  
+  const { currentUser } = useAuth();
+  const [tenantName, setTenantName] = useState<string>('');
+
+  useEffect(() => {
+    const fetchTenantName = async () => {
+      if (currentUser?.tenant_id && currentUser.tenant_id !== 'default') {
+        try {
+          const { data, error } = await insforge.database
+            .from('tenants')
+            .select('nom')
+            .eq('id', currentUser.tenant_id)
+            .single();
+          
+          if (data && !error) {
+            setTenantName(data.nom);
+          }
+        } catch (err) {
+          console.error("Error fetching tenant name:", err);
+        }
+      }
+    };
+
+    fetchTenantName();
+  }, [currentUser]);
   const getPageTitle = () => {
     switch (location.pathname) {
       case '/': return 'Portail gomboswiftciCI';
@@ -26,9 +52,16 @@ export const Header = ({ onMenuClick }: { onMenuClick: () => void }) => {
         <button className="mobile-menu-btn" onClick={onMenuClick}>
            <Menu size={22} />
         </button>
-        <h2 style={{ fontSize: '1.25rem', margin: 0, fontWeight: 700 }} className="text-premium">
-          {getPageTitle()}
-        </h2>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <h2 style={{ fontSize: '1.25rem', margin: 0, fontWeight: 700 }} className="text-premium">
+            {getPageTitle()}
+          </h2>
+          {tenantName && (
+            <span style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <Building2 size={10} /> {tenantName}
+            </span>
+          )}
+        </div>
       </div>
       
       <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>

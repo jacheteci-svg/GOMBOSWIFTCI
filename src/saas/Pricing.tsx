@@ -162,8 +162,8 @@ export const Pricing: React.FC = () => {
             </p>
 
             <div style={{ marginBottom: '2rem' }}>
-              <span style={{ fontSize: '1.8rem', fontWeight: 900 }}>{plan.price}</span>
-              <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>{plan.period}</span>
+              <span style={{ fontSize: '2.4rem', fontWeight: 900, color: '#0f172a' }}>{plan.price}</span>
+              <span style={{ color: '#64748b', fontWeight: 700, marginLeft: '0.25rem' }}>{plan.period}</span>
             </div>
 
             <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 2.5rem', flex: 1 }}>
@@ -173,12 +173,12 @@ export const Pricing: React.FC = () => {
                   alignItems: 'center', 
                   gap: '0.75rem', 
                   marginBottom: '1rem',
-                  fontSize: '0.9rem',
-                  fontWeight: 500,
-                  color: 'var(--text-main)'
+                  fontSize: '0.95rem',
+                  fontWeight: 600,
+                  color: '#334155'
                 }}>
-                  <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: '#10b98120', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <Check size={12} strokeWidth={3} />
+                  <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: `${plan.color}15`, color: plan.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Check size={14} strokeWidth={3} />
                   </div>
                   <span style={{ textAlign: 'left' }}>{feature}</span>
                 </li>

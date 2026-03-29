@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useToast } from '../contexts/ToastContext';
 import { 
   ShieldCheck, 
   HelpCircle, 
@@ -63,26 +64,123 @@ export const FeaturesPage: React.FC = () => (
 );
 
 // --- 2. Produit : Calculateur de Coût ---
-export const CostCalculatorPage: React.FC = () => (
-  <LayoutStatic title="Calculateur de Coût">
-    <div className="card glass-effect" style={{ padding: '3rem', borderRadius: '32px', textAlign: 'center' }}>
-      <Calculator size={48} color="var(--primary)" style={{ marginBottom: '2rem' }} />
-      <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '1.5rem' }}>Estimez votre rentabilité</h2>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', textAlign: 'left', maxWidth: '500px', margin: '0 auto' }}>
-        <div className="form-group">
-          <label className="form-label">Volume mensuel (commandes)</label>
-          <input type="number" className="form-input" placeholder="Ex: 500" style={{ height: '50px' }} />
+export const CostCalculatorPage: React.FC = () => {
+  const [volume, setVolume] = useState<number>(500);
+  const [costPerDelivery, setCostPerDelivery] = useState<number>(1500);
+  const [activeTab, setActiveTab] = useState<'ROI' | 'STOCK' | 'CALL'>('ROI');
+
+  // ROI Math: Current Manual Cost (estimated 2500) vs Gombo (optimized 1500)
+  const currentCost = volume * 2500;
+  const gomboCost = volume * costPerDelivery;
+  const savings = currentCost - gomboCost;
+
+  return (
+    <LayoutStatic title="Calculateur d'Impact">
+      <div className="card glass-effect" style={{ padding: '2.5rem', borderRadius: '32px' }}>
+        <div style={{ display: 'flex', gap: '1rem', marginBottom: '2.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+          {[
+            { id: 'ROI', label: 'ROI Logistique', icon: Calculator },
+            { id: 'STOCK', label: 'Simulation Stock', icon: Package },
+            { id: 'CALL', label: 'Efficacité Call', icon: PhoneCall }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              style={{
+                padding: '0.75rem 1.5rem',
+                borderRadius: '14px',
+                border: 'none',
+                background: activeTab === tab.id ? 'var(--primary)' : 'white',
+                color: activeTab === tab.id ? 'white' : '#64748b',
+                fontWeight: 700,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                transition: 'all 0.3s ease',
+                boxShadow: activeTab === tab.id ? '0 10px 20px -5px var(--primary-shadow)' : '0 2px 5px rgba(0,0,0,0.05)'
+              }}
+            >
+              <tab.icon size={18} /> {tab.label}
+            </button>
+          ))}
         </div>
-        <div className="form-group">
-          <label className="form-label">Coût moyen par livraison (FCFA)</label>
-          <input type="number" className="form-input" placeholder="Ex: 1500" style={{ height: '50px' }} />
-        </div>
-        <button className="btn btn-primary" style={{ height: '60px', borderRadius: '16px', fontWeight: 800 }}>CALCULER L'OPPORTUNITÉ</button>
+
+        {activeTab === 'ROI' && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '3rem', alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div className="form-group">
+                <label className="form-label">Volume de commandes (mensuel)</label>
+                <input 
+                  type="number" 
+                  className="form-input" 
+                  value={volume}
+                  onChange={(e) => setVolume(Number(e.target.value))}
+                  style={{ height: '50px' }} 
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Coût actuel par livraison (moyenne FCFA)</label>
+                <input 
+                  type="number" 
+                  className="form-input" 
+                  value={costPerDelivery}
+                  onChange={(e) => setCostPerDelivery(Number(e.target.value))}
+                  style={{ height: '50px' }} 
+                />
+              </div>
+            </div>
+            <div style={{ background: 'var(--primary-glow)', padding: '2rem', borderRadius: '24px', textAlign: 'center' }}>
+              <h3 style={{ fontSize: '1rem', color: 'var(--primary)', fontWeight: 800, marginBottom: '0.5rem' }}>ÉCONOMIES ESTIMÉES</h3>
+              <div style={{ fontSize: '3rem', fontWeight: 900, color: 'var(--primary)', marginBottom: '0.5rem' }}>
+                {savings.toLocaleString()} <span style={{ fontSize: '1.2rem' }}>FCFA</span>
+              </div>
+              <p style={{ color: '#64748b', fontSize: '0.9rem', margin: 0 }}>
+                Soit environ <strong>{Math.round((savings / currentCost) * 100)}%</strong> de réduction sur vos coûts opérationnels.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'STOCK' && (
+          <div style={{ textAlign: 'center' }}>
+            <Package size={48} color="var(--primary)" style={{ marginBottom: '1.5rem' }} />
+            <h3 style={{ fontWeight: 800, fontSize: '1.5rem', marginBottom: '1rem' }}>Simulation d'Inventaire Intelligente</h3>
+            <p style={{ color: '#64748b', marginBottom: '2rem' }}>Avec GomboSwiftCI, réduisez vos ruptures de stock de <strong>35%</strong>.</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
+              <div style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: '20px' }}>
+                <span style={{ display: 'block', fontSize: '1.5rem', fontWeight: 900, color: '#10b981' }}>-22%</span>
+                <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Pertes de péremption</span>
+              </div>
+              <div style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: '20px' }}>
+                <span style={{ display: 'block', fontSize: '1.5rem', fontWeight: 900, color: '#10b981' }}>+15%</span>
+                <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Rotation de stock</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'CALL' && (
+          <div style={{ textAlign: 'center' }}>
+            <Users size={48} color="var(--primary)" style={{ marginBottom: '1.5rem' }} />
+            <h3 style={{ fontWeight: 800, fontSize: '1.5rem', marginBottom: '1rem' }}>Optimisation de la Conversion</h3>
+            <p style={{ color: '#64748b', marginBottom: '2rem' }}>Le module Callcenter booste vos confirmations de <strong>20%</strong> dès le premier mois.</p>
+            <div style={{ padding: '2rem', background: '#eff6ff', borderRadius: '24px', textAlign: 'left' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                <span>Temps de traitement moyen</span>
+                <strong style={{ color: '#d946ef' }}>-45%</strong>
+              </div>
+              <div style={{ height: '8px', background: '#dbeafe', borderRadius: '4px', overflow: 'hidden' }}>
+                <div style={{ width: '55%', height: '100%', background: 'var(--primary)' }}></div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-      <p style={{ marginTop: '2rem', color: '#64748b', fontSize: '0.9rem' }}>Version bêta : Les calculs sont des estimations basées sur nos moyennes régionales.</p>
-    </div>
-  </LayoutStatic>
-);
+    </LayoutStatic>
+  );
+};
 
 // --- 3. Produit : API Developer ---
 export const ApiDocsPage: React.FC = () => (
@@ -133,73 +231,207 @@ export const SystemStatusPage: React.FC = () => (
 );
 
 // --- 5. Support : Centre d'aide ---
-export const HelpCenterPage: React.FC = () => (
-  <LayoutStatic title="Centre d'aide">
-    <div style={{ maxWidth: '700px', margin: '0 auto' }}>
-      <div style={{ position: 'relative', marginBottom: '3rem' }}>
-        <Search size={22} style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-        <input 
-          type="text" 
-          placeholder="Comment pouvons-nous vous aider ?" 
-          style={{ width: '100%', height: '70px', borderRadius: '20px', border: '2px solid #e2e8f0', padding: '0 4rem', fontSize: '1.1rem', outline: 'none' }}
-        />
-      </div>
-      <div style={{ display: 'grid', gap: '1.5rem' }}>
-        {[
-          "Comment créer mon premier livreur ?",
-          "Comment intégrer WhatsApp à mon tableau de bord ?",
-          "Configuration des tarifs par commune",
-          "Dépannage : Problèmes de synchronisation de stock"
-        ].map((q, i) => (
-          <div key={i} style={{ padding: '1.5rem', background: 'white', borderRadius: '16px', cursor: 'pointer', border: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontWeight: 600 }}>{q}</span>
-            <HelpCircle size={18} color="#94a3b8" />
+export const HelpCenterPage: React.FC = () => {
+  const [selectedTopic, setSelectedTopic] = useState<number | null>(null);
+
+  const topics = [
+    {
+      q: "Comment créer mon premier livreur ?",
+      steps: [
+        "Connectez-vous à votre dashboard administrateur.",
+        "Allez dans l'onglet 'Livraison' via la barre latérale.",
+        "Cliquez sur le bouton 'Nouveau Livreur' en haut à droite.",
+        "Remplissez les informations (Nom, Téléphone, Zone assignée) et validez."
+      ]
+    },
+    {
+      q: "Comment intégrer WhatsApp à mon tableau de bord ?",
+      steps: [
+        "Accédez à la section 'Paramètres' de votre organisation.",
+        "Sélectionnez 'Notifications WhatsApp'.",
+        "Scannez le QR Code généré avec votre application WhatsApp Business.",
+        "Configurez vos modèles de messages automatiques pour les clients."
+      ]
+    },
+    {
+      q: "Configuration des tarifs par commune",
+      steps: [
+        "Allez dans la gestion des 'Zones de livraison'.",
+        "Cliquez sur 'Ajouter une commune' ou modifiez une zone existante.",
+        "Définissez le tarif forfaitaire (ex: 1500 FCFA) pour cette localité.",
+        "Enregistrez : les tarifs seront appliqués automatiquement lors de la création de commandes."
+      ]
+    },
+    {
+      q: "Dépannage : Problèmes de synchronisation de stock",
+      steps: [
+        "Vérifiez que le nom du produit correspond exactement dans votre CMS et GomboSwiftCI.",
+        "Consultez l'historique des 'Mouvements de stock' pour identifier d'éventuelles erreurs manuelles.",
+        "Si le problème persiste, cliquez sur 'Forcer la resynchronisation' dans les réglages de l'inventaire."
+      ]
+    }
+  ];
+
+  if (selectedTopic !== null) {
+    const topic = topics[selectedTopic];
+    return (
+      <LayoutStatic title="Guide Détail">
+        <button 
+          onClick={() => setSelectedTopic(null)}
+          style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 700, cursor: 'pointer', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+        >
+          <ArrowLeft size={16} /> Retour au centre d'aide
+        </button>
+        <div className="card glass-effect" style={{ padding: '3rem', borderRadius: '32px' }}>
+          <h2 style={{ fontSize: '1.75rem', fontWeight: 900, marginBottom: '2rem' }}>{topic.q}</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {topic.steps.map((step, idx) => (
+              <div key={idx} style={{ display: 'flex', gap: '1.5rem' }}>
+                <div style={{ 
+                  width: '32px', 
+                  height: '32px', 
+                  borderRadius: '50%', 
+                  background: 'var(--primary)', 
+                  color: 'white', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  fontWeight: 900,
+                  flexShrink: 0
+                }}>
+                  {idx + 1}
+                </div>
+                <p style={{ margin: 0, color: '#475569', lineHeight: 1.6, fontSize: '1.05rem', paddingTop: '4px' }}>{step}</p>
+              </div>
+            ))}
           </div>
-        ))}
+          <div style={{ marginTop: '3rem', padding: '1.5rem', background: '#f8fafc', borderRadius: '16px', border: '1px dashed #cbd5e1', textAlign: 'center' }}>
+            <p style={{ margin: 0, color: '#64748b' }}>Vous ne trouvez pas la solution ? <Link to="/contact-sales" style={{ color: 'var(--primary)', fontWeight: 700 }}>Contactez le support</Link></p>
+          </div>
+        </div>
+      </LayoutStatic>
+    );
+  }
+
+  return (
+    <LayoutStatic title="Centre d'aide">
+      <div style={{ maxWidth: '700px', margin: '0 auto' }}>
+        <div style={{ position: 'relative', marginBottom: '3rem' }}>
+          <Search size={22} style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+          <input 
+            type="text" 
+            placeholder="Comment pouvons-nous vous aider ?" 
+            style={{ width: '100%', height: '70px', borderRadius: '20px', border: '2px solid #e2e8f0', padding: '0 4rem', fontSize: '1.1rem', outline: 'none' }}
+          />
+        </div>
+        <div style={{ display: 'grid', gap: '1.5rem' }}>
+          {topics.map((topic, i) => (
+            <div 
+              key={i} 
+              onClick={() => setSelectedTopic(i)}
+              style={{ padding: '1.5rem', background: 'white', borderRadius: '16px', cursor: 'pointer', border: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.2s ease' }}
+              onMouseOver={(e) => e.currentTarget.style.borderColor = 'var(--primary)'}
+              onMouseOut={(e) => e.currentTarget.style.borderColor = '#f1f5f9'}
+            >
+              <span style={{ fontWeight: 600 }}>{topic.q}</span>
+              <HelpCircle size={18} color="#94a3b8" />
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
-  </LayoutStatic>
-);
+    </LayoutStatic>
+  );
+};
 
 // --- 6. Support : Contact Sales ---
-export const ContactSalesPage: React.FC = () => (
-  <LayoutStatic title="Contact Commercial">
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '3rem' }}>
-      <div className="card glass-effect" style={{ padding: '3rem', borderRadius: '32px' }}>
-        <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '2rem' }}>Parlez-nous de votre projet</h2>
-        <form style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          <div className="form-group">
-            <input type="text" className="form-input" placeholder="Votre nom" />
-          </div>
-          <div className="form-group">
-            <input type="email" className="form-input" placeholder="Email professionnel" />
-          </div>
-          <div className="form-group">
-            <textarea className="form-input" placeholder="Comment pouvons-nous vous aider ?" style={{ height: '120px', paddingTop: '1rem' }} />
-          </div>
-          <button className="btn btn-primary" style={{ height: '60px', borderRadius: '16px', fontWeight: 800 }}>ENVOYER MA DEMANDE</button>
-        </form>
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-        {[
-          { icon: MailIcon, title: "Email", desc: "sales@gomboswiftci.ci" },
-          { icon: PhoneCall, title: "Téléphone", desc: "+225 07 00 00 00 00" },
-          { icon: MessageSquare, title: "WhatsApp Business", desc: "+225 01 02 03 04 05" }
-        ].map((item, i) => (
-          <div key={i} style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-            <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #f1f5f9' }}>
-              <item.icon size={24} color="var(--primary)" />
+export const ContactSalesPage: React.FC = () => {
+  const [loading, setLoading] = useState(false);
+  const { showToast } = useToast();
+  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    // Simulating email send to soroboss.bossimpact@gmail.com
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      console.log("Envoi commercial à: soroboss.bossimpact@gmail.com", formData);
+      showToast("Demande envoyée ! Notre équipe vous contactera sous 24h.", "success");
+      setFormData({ name: '', email: '', message: '' });
+    } catch (err) {
+      showToast("Erreur lors de l'envoi. Veuillez réessayer.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <LayoutStatic title="Contact Commercial">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '3rem' }}>
+        <div className="card glass-effect" style={{ padding: '3rem', borderRadius: '32px' }}>
+          <h2 style={{ fontSize: '1.8rem', fontWeight: 900, marginBottom: '2rem' }}>Parlez-nous de votre projet</h2>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <div className="form-group">
+              <input 
+                type="text" 
+                className="form-input" 
+                placeholder="Votre nom" 
+                required
+                value={formData.name}
+                onChange={e => setFormData({ ...formData, name: e.target.value })}
+              />
             </div>
-            <div>
-              <h4 style={{ margin: 0, fontWeight: 800 }}>{item.title}</h4>
-              <p style={{ margin: 0, color: '#64748b' }}>{item.desc}</p>
+            <div className="form-group">
+              <input 
+                type="email" 
+                className="form-input" 
+                placeholder="Email professionnel" 
+                required
+                value={formData.email}
+                onChange={e => setFormData({ ...formData, email: e.target.value })}
+              />
             </div>
-          </div>
-        ))}
+            <div className="form-group">
+              <textarea 
+                className="form-input" 
+                placeholder="Comment pouvons-nous vous aider ?" 
+                style={{ height: '120px', paddingTop: '1rem' }} 
+                required
+                value={formData.message}
+                onChange={e => setFormData({ ...formData, message: e.target.value })}
+              />
+            </div>
+            <button 
+              disabled={loading}
+              className="btn btn-primary" 
+              style={{ height: '60px', borderRadius: '16px', fontWeight: 800 }}
+            >
+              {loading ? 'ENVOI EN COURS...' : 'ENVOYER MA DEMANDE'}
+            </button>
+          </form>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          {[
+            { icon: MailIcon, title: "Email Commercial", desc: "sales@gomboswiftci.ci" },
+            { icon: PhoneCall, title: "Téléphone direct", desc: "+225 07 57 22 87 31" },
+            { icon: MessageSquare, title: "WhatsApp Business", desc: "+225 01 00 57 65 26" }
+          ].map((item, i) => (
+            <div key={i} style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', background: 'white', padding: '1rem', borderRadius: '20px', border: '1px solid #f1f5f9' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'var(--primary-glow)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <item.icon size={24} color="var(--primary)" />
+              </div>
+              <div>
+                <h4 style={{ margin: 0, fontWeight: 800 }}>{item.title}</h4>
+                <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem' }}>{item.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
-  </LayoutStatic>
-);
+    </LayoutStatic>
+  );
+};
 
 // --- 7. Support : Signaler un Bug ---
 export const ReportBugPage: React.FC = () => (

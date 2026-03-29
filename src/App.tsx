@@ -41,6 +41,7 @@ import {
   TermsPage, 
   GdprPage 
 } from './pages/StaticPages';
+import { DemoPage } from './pages/DemoPage';
 
 const PageLoader = () => (
   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%', padding: '5rem' }}>
@@ -111,6 +112,7 @@ const AppRoutes = () => {
       <Route path="/saas/pricing" element={<Pricing />} />
 
       {/* Static Info Pages */}
+      <Route path="/demo" element={<DemoPage />} />
       <Route path="/features" element={<FeaturesPage />} />
       <Route path="/cost-calculator" element={<CostCalculatorPage />} />
       <Route path="/api-docs" element={<ApiDocsPage />} />
