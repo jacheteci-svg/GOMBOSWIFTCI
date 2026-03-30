@@ -219,30 +219,30 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
       <div className={`sidebar-overlay ${isOpen ? 'open' : ''}`} onClick={onClose} />
       <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
         
-        <div className="brand-logo" style={{ borderBottom: '1px solid rgba(0,0,0,0.04)', padding: '1.5rem 1.25rem' }}>
+        <div className="brand-logo" style={{ borderBottom: '1px solid var(--glass-border)', padding: '1.75rem 1.5rem' }}>
           <div style={{ 
-            background: 'linear-gradient(135deg, var(--primary), #818cf8)', 
-            width: 36, height: 36, 
-            borderRadius: 12, 
+            background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)', 
+            width: 40, height: 40, 
+            borderRadius: 14, 
             display: 'flex', alignItems: 'center', justifyContent: 'center', 
             color: 'white',
             flexShrink: 0,
-            boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
+            boxShadow: '0 4px 15px rgba(6, 182, 212, 0.4)'
           }}>
-            <Package size={20} />
+            <Package size={22} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             <span style={{ 
-              fontSize: '1.1rem', 
-              fontWeight: 900, 
-              color: 'var(--text-main)', 
-              letterSpacing: '-0.02em',
+              fontSize: '1.25rem', 
+              fontWeight: 950, 
+              color: 'white', 
+              letterSpacing: '-0.03em',
               lineHeight: 1
             }}>
               GomboSwift
             </span>
-            <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Logistics Pro
+            <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#06b6d4', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+              Nexus Core
             </span>
           </div>
           <button 
@@ -278,21 +278,25 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
           ))}
         </nav>
 
-        <div className="sidebar-user-card" style={{ padding: '1.25rem', borderTop: '1px solid rgba(0,0,0,0.04)' }}>
-          <div className="sidebar-user-info" style={{ marginBottom: '1rem' }}>
+        <div className="sidebar-user-card" style={{ padding: '1.5rem', borderTop: '1px solid var(--glass-border)', background: 'rgba(255,255,255,0.01)' }}>
+          <div className="sidebar-user-info" style={{ marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
             <div className="sidebar-avatar" style={{ 
-              background: 'linear-gradient(135deg, #f8fafc, #f1f5f9)',
-              border: '1px solid rgba(0,0,0,0.05)',
-              color: 'var(--primary)',
-              fontWeight: 800
+              width: 42, height: 42,
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #06b6d4, #3b82f6)',
+              color: 'white',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontWeight: 900,
+              fontSize: '0.9rem',
+              boxShadow: '0 4px 12px rgba(6, 182, 212, 0.3)'
             }}>
               {initials}
             </div>
             <div style={{ minWidth: 0 }}>
-              <p style={{ fontSize: '0.85rem', fontWeight: 750, color: 'var(--text-main)', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <p style={{ fontSize: '0.9rem', fontWeight: 850, color: 'white', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {currentUser?.nom_complet}
               </p>
-              <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600, margin: 0, textTransform: 'uppercase' }}>
+              <p style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 700, margin: 0, textTransform: 'uppercase' }}>
                 {currentUser?.role}
               </p>
             </div>

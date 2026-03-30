@@ -3,7 +3,7 @@ import { subscribeToCommandes, getTopSellingProducts } from '../services/command
 import { useSaas } from '../saas/SaasProvider';
 import { calculateLogisticalStats } from '../services/financialService';
 import type { Commande } from '../types';
-import { Activity, Percent, DollarSign, TrendingUp, Truck, AlertCircle, ShoppingBag, BarChart2, Calendar } from 'lucide-react';
+import { Activity, Percent, DollarSign, TrendingUp, Truck, ShoppingBag } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer,
   Tooltip, PieChart, Pie, Cell
@@ -218,273 +218,237 @@ export const Dashboard = () => {
   const { stats, historyData, statusData, zoneData } = memoizedAnalytics;
   const { logStats, tauxSuccesLivraison } = stats;
 
-  if (loading) return <div className="p-8 text-center">Chargement...</div>;
+  if (loading) return (
+    <div className="nexus-theme-dark" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
+      <div className="spinner"></div>
+    </div>
+  );
 
   return (
-    <div style={{ animation: 'pageEnter 0.6s ease' }}>
-      <div style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
-        <div className="mobile-stack">
-           <h1 className="text-premium" style={{ fontSize: 'clamp(1.8rem, 5vw, 2.5rem)', fontWeight: 900, margin: 0 }}>Tableau de Bord 360°</h1>
-           <p style={{ color: 'var(--text-muted)', fontSize: '1rem', marginTop: '0.4rem', fontWeight: 600 }}>Performance Analytique & Temps Réel</p>
+    <div className="nexus-theme-dark" style={{ animation: 'fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+      
+      {/* HEADER SECTION */}
+      <div style={{ marginBottom: '3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1.5rem' }}>
+        <div>
+           <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.6rem' }}>
+              <div style={{ background: 'rgba(6,182,212,0.15)', padding: '0.6rem', borderRadius: '12px', border: '1px solid rgba(6,182,212,0.3)' }}>
+                 <Activity size={24} className="nexus-neon-cyan" />
+              </div>
+              <span style={{ fontSize: '0.75rem', fontWeight: 900, color: '#06b6d4', textTransform: 'uppercase', letterSpacing: '0.15em' }}>
+                 {tenant?.nom || 'Propriétaire'} • Live Dashboard
+              </span>
+           </div>
+           <h1 style={{ fontSize: 'clamp(2rem, 5vw, 2.8rem)', fontWeight: 950, letterSpacing: '-0.04em', margin: 0, color: 'white' }}>Nexus Command Center</h1>
+           <p style={{ color: '#94a3b8', fontSize: '1.1rem', fontWeight: 500, marginTop: '0.5rem' }}>Analyse de performance logistique & financière</p>
         </div>
         
-        {/* Period Selector */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', background: 'rgba(99, 102, 255, 0.05)', padding: '0.4rem', borderRadius: '16px', border: '1px solid #e2e8f0', gap: '0.5rem' }}>
+        {/* Period Selector Elite */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', background: 'rgba(255, 255, 255, 0.03)', padding: '0.5rem', borderRadius: '18px', border: '1px solid rgba(255, 255, 255, 0.08)', gap: '0.5rem' }}>
           {(['today', '7d', '30d', 'all', 'custom'] as Period[]).map((p) => (
             <button
               key={p}
               onClick={() => setPeriod(p)}
-              className={`btn btn-sm ${period === p ? 'btn-primary' : ''}`}
+              className="btn btn-sm"
               style={{ 
-                borderRadius: '12px', 
+                borderRadius: '14px', 
                 border: 'none',
-                background: period === p ? 'var(--primary)' : 'transparent',
-                color: period === p ? 'white' : 'var(--text-muted)',
-                padding: '0.5rem 1rem',
-                fontWeight: 800,
-                fontSize: '0.75rem',
-                textTransform: 'uppercase'
+                background: period === p ? 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)' : 'transparent',
+                color: period === p ? 'white' : '#94a3b8',
+                padding: '0.6rem 1.25rem',
+                fontWeight: 900,
+                fontSize: '0.8rem',
+                textTransform: 'uppercase',
+                boxShadow: period === p ? '0 4px 15px rgba(6, 182, 212, 0.3)' : 'none'
               }}
             >
-              {p === 'today' ? "Aujourd'hui" : p === '7d' ? '7 Jours' : p === '30d' ? '30 Jours' : p === 'custom' ? 'Personnalisé' : 'Tout'}
+              {p === 'today' ? "Jour" : p === '7d' ? '7 Jours' : p === '30d' ? '30 Jours' : p === 'custom' ? 'Date' : 'Tout'}
             </button>
           ))}
-          
-          {period === 'custom' && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginLeft: '0.5rem', borderLeft: '1px solid #e2e8f0', paddingLeft: '0.8rem' }}>
-              <input 
-                type="date" 
-                value={startDate} 
-                onChange={(e) => setStartDate(e.target.value)}
-                style={{ background: 'white', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '0.2rem 0.5rem', fontSize: '0.75rem', fontWeight: 700 }}
-              />
-              <span style={{ fontSize: '0.75rem', fontWeight: 800 }}>à</span>
-              <input 
-                type="date" 
-                value={endDate} 
-                onChange={(e) => setEndDate(e.target.value)}
-                style={{ background: 'white', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '0.2rem 0.5rem', fontSize: '0.75rem', fontWeight: 700 }}
-              />
-            </div>
-          )}
         </div>
+        
+        {period === 'custom' && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', background: 'rgba(255,255,255,0.03)', padding: '0.5rem 1rem', borderRadius: '18px', border: '1px solid rgba(255,255,255,0.08)' }}>
+             <input 
+                type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} 
+                style={{ background: 'transparent', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.85rem', outline: 'none' }} 
+             />
+             <span style={{ color: '#06b6d4', fontWeight: 900 }}>→</span>
+             <input 
+                type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} 
+                style={{ background: 'transparent', border: 'none', color: 'white', fontWeight: 800, fontSize: '0.85rem', outline: 'none' }} 
+             />
+          </div>
+        )}
       </div>
 
-      {/* KPI Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
-        <div className="card glass-effect" style={{ padding: '1.75rem', borderLeft: '5px solid var(--primary)', position: 'relative' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-            <span style={{ color: 'var(--text-muted)', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase' }}>CA Net Produits</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-               {stats.diffCA !== 0 && (
-                 <span style={{ fontSize: '0.75rem', fontWeight: 900, color: stats.diffCA > 0 ? '#10b981' : '#ef4444', display: 'flex', alignItems: 'center' }}>
-                   {stats.diffCA > 0 ? '+' : ''}{stats.diffCA}%
-                 </span>
-               )}
-               <DollarSign size={20} color="var(--primary)" />
-            </div>
+      {/* KPI CARDS ELITE */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', marginBottom: '3rem' }}>
+        
+        {/* CA Net */}
+        <div className="nexus-card-elite" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+             <DollarSign size={24} className="nexus-neon-cyan" />
+             <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Revenu Net Produits</div>
+                <div style={{ fontSize: '2.4rem', fontWeight: 950, color: 'white' }}>{stats.caNetProduits.toLocaleString()}</div>
+             </div>
           </div>
-          <div style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-main)' }}>{stats.caNetProduits.toLocaleString()} <span style={{ fontSize: '0.9rem' }}>CFA</span></div>
-          <p style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500 }}>Total encaissé: {stats.totalEncaisse.toLocaleString()} CFA</p>
-          <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#10b981', fontSize: '0.85rem', fontWeight: 700 }}>
-            <TrendingUp size={14} /> <span>Potentiel : {stats.caPotentiel.toLocaleString()} CFA</span>
-          </div>
-        </div>
-
-        <div className="card glass-effect" style={{ padding: '1.75rem', borderLeft: '5px solid #6366f1' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-            <span style={{ color: 'var(--text-muted)', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase' }}>Livraison Encaissé</span>
-            <Truck size={20} color="#6366f1" />
-          </div>
-          <div style={{ fontSize: '2rem', fontWeight: 900, color: '#6366f1' }}>{stats.totalFraisLivraison.toLocaleString()} <span style={{ fontSize: '0.9rem' }}>CFA</span></div>
-          <p style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500 }}>Part destinataires finaux</p>
-        </div>
-
-        <div className="card glass-effect" style={{ padding: '1.75rem', borderLeft: '5px solid #f59e0b' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-            <span style={{ color: 'var(--text-muted)', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase' }}>Taux de Succès</span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-               {stats.diffTaux !== 0 && (
-                 <span style={{ fontSize: '0.75rem', fontWeight: 900, color: stats.diffTaux >= 0 ? '#10b981' : '#ef4444', display: 'flex', alignItems: 'center' }}>
-                   {stats.diffTaux >= 0 ? '+' : ''}{stats.diffTaux}%
-                 </span>
-               )}
-               <Percent size={20} color="#f59e0b" />
-            </div>
-          </div>
-          <div style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-main)' }}>{tauxSuccesLivraison}%</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.4rem', marginTop: '0.8rem' }}>
-             <div className="badge badge-success" style={{ borderRadius: '6px', fontSize: '0.7rem' }}>{logStats.livrees} L</div>
-             <div className="badge badge-info" style={{ borderRadius: '6px', fontSize: '0.7rem' }}>{logStats.retours} R</div>
-             <div className="badge badge-warning" style={{ borderRadius: '6px', fontSize: '0.7rem' }}>{logStats.reportees} P</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem', background: 'rgba(255,255,255,0.02)', padding: '0.8rem 1rem', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.05)' }}>
+             <span style={{ fontSize: '0.8rem', color: '#94a3b8', fontWeight: 700 }}>Brut: {stats.totalEncaisse.toLocaleString()}</span>
+             <span style={{ fontSize: '0.85rem', color: '#10b981', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <TrendingUp size={14} /> +{stats.diffCA}%
+             </span>
           </div>
         </div>
 
-
-        <div className="card glass-effect" style={{ padding: '1.75rem', borderLeft: '5px solid #ef4444' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-            <span style={{ color: 'var(--text-muted)', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase' }}>À Traiter</span>
-            <Activity size={stats.pending > 0 ? 20 : 18} color="#ef4444" />
+        {/* Taux de Succès */}
+        <div className="nexus-card-elite" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+             <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f59e0b' }}>
+                <Percent size={24} />
+             </div>
+             <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Taux de Livraison</div>
+                <div style={{ fontSize: '2.4rem', fontWeight: 950, color: 'white' }}>{tauxSuccesLivraison}%</div>
+             </div>
           </div>
-          <div style={{ fontSize: '2rem', fontWeight: 900, color: '#ef4444' }}>{stats.pending}</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.8rem', color: '#f59e0b' }}>
-             <AlertCircle size={14} />
-             <span style={{ fontSize: '0.8rem', fontWeight: 700 }}>Action requise</span>
+          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.5rem' }}>
+             <div style={{ flex: 1, height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
+                <div style={{ width: `${tauxSuccesLivraison}%`, height: '100%', background: '#f59e0b', boxShadow: '0 0 10px rgba(245, 158, 11, 0.5)' }}></div>
+             </div>
+          </div>
+          <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.5rem', fontWeight: 700 }}>{logStats.livrees} livrées / {logStats.total_sortis} expédiées</p>
+        </div>
+
+        {/* Flux de Sortie */}
+        <div className="nexus-card-elite" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+             <Activity size={24} style={{ color: '#8b5cf6' }} />
+             <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Activités de Vente</div>
+                <div style={{ fontSize: '2.4rem', fontWeight: 950, color: 'white' }}>{stats.total}</div>
+             </div>
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '1.5rem' }}>
+             <span style={{ fontSize: '0.7rem', padding: '4px 10px', borderRadius: '8px', background: 'rgba(6,182,212,0.1)', color: '#06b6d4', fontWeight: 900 }}>{stats.pending} À TRAITER</span>
+             <span style={{ fontSize: '0.7rem', padding: '4px 10px', borderRadius: '8px', background: 'rgba(236,72,153,0.1)', color: '#ec4899', fontWeight: 900 }}>{logStats.retours} RETOURS</span>
           </div>
         </div>
+
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '2rem', marginBottom: '2.5rem' }}>
-        {/* Status Distribution (Pie Chart) */}
-        <div className="card" style={{ padding: '2rem' }}>
-          <h3 style={{ marginBottom: '1.5rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <Activity size={20} color="var(--primary)" /> Répartition des Flux
-          </h3>
-          <div style={{ height: '280px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={statusData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {statusData.map((_, index) => (
-                    <Cell 
-                      key={`cell-${index}`} 
-                      fill={[
-                        '#10b981', '#6366f1', '#f59e0b', '#ef4444', 
-                        '#8b5cf6', '#ec4899', '#06b6d4', '#475569'
-                      ][index % 8]} 
-                    />
-                  ))}
-                </Pie>
-                <Tooltip 
-                   contentStyle={{ borderRadius: '14px', border: 'none', boxShadow: 'var(--shadow-premium)' }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center', marginTop: '1rem' }}>
-            {statusData.map((s, i) => (
-               <div key={s.name} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', fontWeight: 700 }}>
-                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: [
-                        '#10b981', '#6366f1', '#f59e0b', '#ef4444', 
-                        '#8b5cf6', '#ec4899', '#06b6d4', '#475569'
-                      ][i % 8] }}></div>
-                  <span style={{ color: 'var(--text-muted)' }}>{s.name} ({s.value})</span>
-               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Zone Performance Table */}
-        <div className="card" style={{ padding: '2rem' }}>
-          <h3 style={{ marginBottom: '1.5rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <Truck size={20} color="var(--primary)" /> Top Zones (Communes)
-          </h3>
-          <div className="table-container" style={{ maxHeight: '300px', overflowY: 'auto' }}>
-            <table style={{ width: '100%', fontSize: '0.9rem' }}>
-              <thead>
-                <tr>
-                  <th style={{ textAlign: 'left', background: 'transparent', padding: '0.75rem 0' }}>Zone</th>
-                  <th style={{ textAlign: 'center', background: 'transparent', padding: '0.75rem 0' }}>Colis</th>
-                  <th style={{ textAlign: 'right', background: 'transparent', padding: '0.75rem 0' }}>Rev. Net</th>
-                </tr>
-              </thead>
-              <tbody>
-                {zoneData.length === 0 ? (
-                  <tr><td colSpan={3} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>Aucun colis</td></tr>
-                ) : zoneData.map((z) => (
-                  <tr key={z.name}>
-                    <td style={{ fontWeight: 800, padding: '0.75rem 0' }}>{z.name}</td>
-                    <td style={{ textAlign: 'center', fontWeight: 600, padding: '0.75rem 0' }}>{z.count}</td>
-                    <td style={{ textAlign: 'right', fontWeight: 900, color: 'var(--primary)', padding: '0.75rem 0' }}>{z.total.toLocaleString()} CFA</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))', gap: '2rem' }}>
-        {/* Revenue Trend */}
-        <div className="card" style={{ padding: '2rem' }}>
+      {/* CHARTS GRID ELITE */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '2.5rem', marginBottom: '3rem' }} className="mobile-stack">
+        
+        {/* Area Revenue Chart */}
+        <div className="nexus-card-elite" style={{ padding: '2.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <Calendar size={20} color="var(--primary)" />
-              <h3 style={{ margin: 0, fontWeight: 800 }}>Tendance des Revenus ({period === 'all' ? '15j' : period === 'today' ? '24h' : period})</h3>
-            </div>
+             <h3 style={{ margin: 0, fontWeight: 950, fontSize: '1.4rem' }}>Optimisation de Flux</h3>
+             <div style={{ display: 'flex', gap: '1rem', fontSize: '0.8rem', fontWeight: 800 }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#10b981' }}><div style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981' }}></div> REVENU</span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#06b6d4' }}><div style={{ width: 8, height: 8, borderRadius: '50%', background: '#06b6d4' }}></div> COMMANDES</span>
+             </div>
           </div>
           <div style={{ height: '350px' }}>
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={historyData}>
                 <defs>
-                  <linearGradient id="colorCA" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.2}/>
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                  </linearGradient>
+                   <linearGradient id="nexusRev" x1="0" y1="0" x2="0" y2="1">
+                     <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                     <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="jour" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 700, fill: '#94a3b8'}} dy={10} />
+                <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.03)" />
+                <XAxis dataKey="jour" axisLine={false} tickLine={false} tick={{fontSize: 11, fontWeight: 800, fill: '#64748b'}} dy={10} />
                 <YAxis hide />
-                <Tooltip 
-                  contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 40px rgba(0,0,0,0.1)', fontWeight: 800 }}
-                  formatter={(v) => [`${Number(v).toLocaleString()} CFA`, 'Revenu Net']}
-                />
-                <Area type="monotone" dataKey="CA" stroke="#10b981" strokeWidth={4} fillOpacity={1} fill="url(#colorCA)" />
+                <Tooltip contentStyle={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', fontWeight: 900 }} />
+                <Area type="monotone" dataKey="CA" stroke="#10b981" strokeWidth={4} fill="url(#nexusRev)" />
+                <Area type="monotone" dataKey="Commandes" stroke="#06b6d4" strokeWidth={2} strokeDasharray="5 5" fill="none" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Best Sellers Section */}
-        <div className="card" style={{ padding: '2rem' }}>
-           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
-             <BarChart2 size={24} color="var(--primary)" />
-             <h3 style={{ margin: 0, fontWeight: 800 }}>Meilleurs Produits</h3>
-           </div>
-           
-           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              {topProducts.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
-                  <ShoppingBag size={40} style={{ opacity: 0.2, marginBottom: '1rem' }} />
-                  <p>Aucune donnée sur cette période.</p>
+        {/* Circular Distribution */}
+        <div className="nexus-card-elite" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <h4 style={{ margin: '0 0 2rem 0', fontWeight: 950, color: 'white', width: '100%', textAlign: 'center' }}>Répartition Logistique</h4>
+          
+          <div style={{ position: 'relative', width: '220px', height: '220px' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={statusData}
+                  cx="50%" cy="50%"
+                  innerRadius={70}
+                  outerRadius={100}
+                  paddingAngle={8}
+                  dataKey="value"
+                >
+                  {statusData.map((_, index) => (
+                    <Cell key={`cell-${index}`} fill={['#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'][index % 6]} stroke="none" />
+                  ))}
+                </Pie>
+                <Tooltip contentStyle={{ background: '#0f172a', border: 'none', borderRadius: '16px' }} />
+              </PieChart>
+            </ResponsiveContainer>
+            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
+               <div style={{ fontSize: '2.5rem', fontWeight: 950, color: 'white' }}>{stats.total}</div>
+               <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 800, textTransform: 'uppercase' }}>FLUX TOTAL</div>
+            </div>
+          </div>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', width: '100%', marginTop: '2rem' }}>
+             {statusData.slice(0, 4).map((s, i) => (
+                <div key={s.name} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.02)', padding: '0.6rem 0.8rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                   <div style={{ width: 8, height: 8, borderRadius: '50%', background: ['#06b6d4', '#10b981', '#f59e0b', '#ef4444'][i % 4] }}></div>
+                   <div style={{ overflow: 'hidden' }}>
+                      <div style={{ fontSize: '0.75rem', fontWeight: 900, color: 'white', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{s.name}</div>
+                      <div style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 800 }}>{s.value} colis</div>
+                   </div>
                 </div>
-              ) : topProducts.map((p, i) => (
-                <div key={p.nom} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      <span style={{ fontSize: '0.8rem', fontWeight: 900, color: 'var(--text-muted)', width: '20px' }}>{i+1}.</span>
-                      <span style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-main)', maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.nom}</span>
-                    </div>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 900, color: p.taux_succes >= 70 ? '#10b981' : p.taux_succes >= 40 ? '#f59e0b' : '#ef4444' }}>
-                      {p.taux_succes}%
-                    </span>
-                  </div>
-                  <div style={{ height: '8px', background: '#f1f5f9', borderRadius: '4px', overflow: 'hidden' }}>
-                    <div 
-                      style={{ 
-                        width: `${p.taux_succes}%`, 
-                        height: '100%', 
-                        background: p.taux_succes >= 70 ? '#10b981' : p.taux_succes >= 40 ? '#f59e0b' : '#ef4444', 
-                        borderRadius: '4px',
-                        transition: 'width 1s ease-out'
-                      }}
-                    ></div>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)' }}>
-                    <span>Sortis: {p.total_sorties}</span>
-                    <span>Livrées: {p.nb_ventes}</span>
-                  </div>
-                </div>
-              ))}
-           </div>
+             ))}
+          </div>
         </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2.5rem' }}>
+         <div className="nexus-card-elite">
+            <h3 style={{ marginBottom: '2rem', fontWeight: 950, display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+               <Truck size={22} className="nexus-neon-cyan" /> Livraison par Zone
+            </h3>
+            <div className="table-container" style={{ background: 'transparent', border: 'none' }}>
+               <table style={{ borderSpacing: '0 0.8rem', borderCollapse: 'separate' }}>
+                  <tbody>
+                     {zoneData.map(z => (
+                        <tr key={z.name} style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '14px' }}>
+                           <td style={{ border: 'none', borderRadius: '14px 0 0 14px', fontWeight: 850 }}>{z.name}</td>
+                           <td style={{ border: 'none', textAlign: 'center', color: '#94a3b8', fontWeight: 700 }}>{z.count} exp.</td>
+                           <td style={{ border: 'none', borderRadius: '0 14px 14px 0', textAlign: 'right', fontWeight: 950, color: '#06b6d4' }}>{z.total.toLocaleString()} F</td>
+                        </tr>
+                     ))}
+                  </tbody>
+               </table>
+            </div>
+         </div>
+
+         <div className="nexus-card-elite">
+            <h3 style={{ marginBottom: '2rem', fontWeight: 950, display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+               <ShoppingBag size={22} color="#ec4899" /> Performances Produits
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                {topProducts.slice(0, 5).map((p, i) => (
+                  <div key={p.nom}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', alignItems: 'center' }}>
+                       <span style={{ fontSize: '0.9rem', fontWeight: 900, color: 'white' }}>{i+1}. {p.nom}</span>
+                       <span style={{ fontSize: '0.9rem', fontWeight: 950, color: '#ec4899' }}>{p.taux_succes}%</span>
+                    </div>
+                    <div style={{ height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', overflow: 'hidden', position: 'relative' }}>
+                       <div style={{ width: `${p.taux_succes}%`, height: '100%', background: 'linear-gradient(90deg, #ec4899, #8b5cf6)', borderRadius: '6px' }}></div>
+                    </div>
+                  </div>
+                ))}
+            </div>
+         </div>
       </div>
     </div>
   );
