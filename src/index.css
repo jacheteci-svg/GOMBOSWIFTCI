@@ -91,7 +91,8 @@ h1, h2, h3, .brand {
   flex-direction: column;
   transition: var(--transition-smooth);
   z-index: 50;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .nav-item {
@@ -258,6 +259,7 @@ h1, h2, h3, .brand {
   display: flex;
   height: 100vh;
   height: 100dvh;
+  min-height: 100dvh;
   gap: 0;
   background: var(--bg-app);
 }
@@ -293,7 +295,7 @@ h1, h2, h3, .brand {
 /* ============================================ */
 .page-content {
   flex: 1;
-  overflow-y: auto;
+  overflow-y: auto !important;
   padding: 1.5rem;
   scroll-behavior: smooth;
   animation: pageEnter 0.35s ease;
