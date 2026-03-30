@@ -164,7 +164,7 @@ const AppRoutes = () => {
         } />
         <Route path="profil" element={<ProtectedRoute requiredPermission="PROFIL"><Profil /></ProtectedRoute>} />
         <Route path="admin" element={<ProtectedRoute requiredPermission="ADMIN"><Admin /></ProtectedRoute>} />
-        <Route path="super-admin" element={<ProtectedRoute requiredPermission="SUPER_ADMIN"><SuperAdmin /></ProtectedRoute>} />
+        <Route path="super-admin/*" element={<ProtectedRoute requiredPermission="SUPER_ADMIN"><SuperAdmin /></ProtectedRoute>} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

@@ -3,17 +3,18 @@ import { insforge } from '../lib/insforge';
 import { Tenant } from '../types';
 import {
   Building, Users, Plus, Search, CheckCircle,
-  XCircle, TrendingUp, Globe, Zap, X, Share2, MessageSquare,
+  XCircle, TrendingUp, Globe, Zap, X, MessageSquare,
   Mail, Send, AlertTriangle, CreditCard, LifeBuoy, Settings, Power, Eye
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { useToast } from '../contexts/ToastContext';
-
-// Tabs Enum
-type Tab = 'OVERVIEW' | 'TENANTS' | 'BILLING' | 'SUPPORT' | 'SETTINGS' | 'BROADCAST';
+import { useLocation, Navigate } from 'react-router-dom';
 
 export const SuperAdmin: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<Tab>('OVERVIEW');
+  const location = useLocation();
+  const pathPart = location.pathname.split('/').pop()?.toUpperCase() || 'OVERVIEW';
+  const activeTab = pathPart;
+  
   const [loading, setLoading] = useState(true);
   
   // Data
@@ -49,6 +50,16 @@ export const SuperAdmin: React.FC = () => {
     fetchData();
   }, []);
 
+  // Redirect invalid paths to overview
+  if (!['OVERVIEW', 'TENANTS', 'BILLING', 'SUPPORT', 'SETTINGS', 'BROADCAST'].includes(activeTab) && activeTab !== 'SUPER-ADMIN') {
+      return <Navigate to="/super-admin/overview" replace />;
+  }
+
+  // Auto-redirect base super-admin path
+  if (activeTab === 'SUPER-ADMIN') {
+       return <Navigate to="/super-admin/overview" replace />;
+  }
+
   return (
     <div style={{ animation: 'pageEnter 0.6s ease', paddingBottom: '3rem' }}>
       
@@ -62,15 +73,6 @@ export const SuperAdmin: React.FC = () => {
             Console d'administration globale pour GomboSwiftCI SaaS
           </p>
         </div>
-      </div>
-
-      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '3rem', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '1rem', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-        <TabButton active={activeTab === 'OVERVIEW'} onClick={() => setActiveTab('OVERVIEW')} icon={<TrendingUp size={18} />} label="Vue Globale" />
-        <TabButton active={activeTab === 'TENANTS'} onClick={() => setActiveTab('TENANTS')} icon={<Building size={18} />} label="Organisations" />
-        <TabButton active={activeTab === 'BILLING'} onClick={() => setActiveTab('BILLING')} icon={<CreditCard size={18} />} label="Facturation & MRR" />
-        <TabButton active={activeTab === 'SUPPORT'} onClick={() => setActiveTab('SUPPORT')} icon={<LifeBuoy size={18} />} label="Help Desk (Tickets)" />
-        <TabButton active={activeTab === 'BROADCAST'} onClick={() => setActiveTab('BROADCAST')} icon={<Share2 size={18} />} label="Broadcast" />
-        <TabButton active={activeTab === 'SETTINGS'} onClick={() => setActiveTab('SETTINGS')} icon={<Settings size={18} />} label="Sécurité" />
       </div>
 
       {/* TABS CONTENT */}
@@ -558,9 +560,6 @@ const BroadcastTab = ({ tenants }: { tenants: Tenant[] }) => {
 /* -------------------------------------------------------------------------- */
 /*                              UI COMPONENTS                                 */
 /* -------------------------------------------------------------------------- */
-const TabButton = ({ active, onClick, icon, label }: any) => (
-  <button onClick={onClick} style={{ background: active ? 'rgba(99,102,241,0.15)' : 'transparent', border: `1px solid ${active ? 'var(--primary)' : 'rgba(255,255,255,0.05)'}`, color: active ? 'white' : 'var(--text-muted)', padding: '0.8rem 1.2rem', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '0.75rem', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s', boxShadow: active ? '0 0 20px rgba(99,102,241,0.2)' : 'none', whiteSpace: 'nowrap' }}>{icon} {label}</button>
-);
 const StatCard = ({ title, value, sub, icon, color, trend }: any) => (
   <div className="card glass-effect" style={{ padding: '1.5rem', borderBottom: `4px solid ${color}` }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}><div style={{ background: `${color}15`, color: color, padding: '0.6rem', borderRadius: '12px' }}>{icon}</div><span style={{ color: '#10b981', fontSize: '0.8rem', fontWeight: 900, background: 'rgba(16,185,129,0.1)', padding: '2px 8px', borderRadius: '20px' }}>{trend}</span></div>

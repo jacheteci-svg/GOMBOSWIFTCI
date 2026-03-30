@@ -43,7 +43,14 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
     { path: '/historique', icon: History, label: 'Historique & Impression', permission: 'HISTORIQUE' },
     { path: '/admin', icon: Settings, label: hasPermission('ADMIN') ? 'Administration' : 'Équipe & Zones', permission: 'COMMUNES' },
     { path: '/profil', icon: UserIcon, label: 'Mon Profil', permission: 'PROFIL' },
-    { path: '/super-admin', icon: ShieldCheck, label: 'Console SuperAdmin', permission: 'SUPER_ADMIN' },
+    
+    // SuperAdmin Exclusive Navigation
+    { path: '/super-admin/overview', icon: TrendingUp, label: 'Vue Globale', permission: 'SUPER_ADMIN' },
+    { path: '/super-admin/tenants', icon: Package, label: 'Organisations', permission: 'SUPER_ADMIN' },
+    { path: '/super-admin/billing', icon: DollarSign, label: 'Facturation & MRR', permission: 'SUPER_ADMIN' },
+    { path: '/super-admin/support', icon: Headset, label: 'Help Desk', permission: 'SUPER_ADMIN' },
+    { path: '/super-admin/broadcast', icon: Activity, label: 'Broadcast', permission: 'SUPER_ADMIN' },
+    { path: '/super-admin/settings', icon: ShieldCheck, label: 'Sécurité Plateforme', permission: 'SUPER_ADMIN' },
   ];
 
   return (
