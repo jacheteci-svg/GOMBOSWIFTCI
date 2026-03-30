@@ -1171,3 +1171,75 @@ tr:hover td {
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
+/* ============================================ */
+/*           NEXUS ELITE DARK THEME             */
+/* ============================================ */
+.nexus-theme-dark {
+  --nexus-bg: #0b0f1a;
+  --nexus-card: #151b2d;
+  --nexus-border: rgba(255, 255, 255, 0.05);
+  --nexus-text: #f8fafc;
+  --nexus-muted: #94a3b8;
+  --nexus-accent: #3b82f6;
+  --nexus-cyan: #06b6d4;
+  --nexus-purple: #8b5cf6;
+  --nexus-orange: #f59e0b;
+}
+
+.nexus-card-elite {
+  background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+  padding: 1.5rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.nexus-card-elite:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.7);
+}
+
+.nexus-neon-cyan {
+  color: #06b6d4;
+  filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.4));
+}
+
+.nexus-gradient-text-cyan {
+  background: linear-gradient(135deg, #06b6d4, #3b82f6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.nexus-glow-button {
+  background: linear-gradient(135deg, #06b6d4, #3b82f6);
+  box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
+  border: none;
+  border-radius: 14px;
+  color: white;
+  font-weight: 800;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+}
+
+.nexus-chart-dark .recharts-cartesian-grid-horizontal line,
+.nexus-chart-dark .recharts-cartesian-grid-vertical line {
+  stroke: rgba(255, 255, 255, 0.05);
+}
+
+.nexus-profile-circle {
+  border: 3px solid #06b6d4;
+  box-shadow: 0 0 15px rgba(6, 182, 212, 0.3);
+}
+
+/* Animations Nexus */
+@keyframes nexusPulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.8; }
+}
+
+.nexus-pulse {
+  animation: nexusPulse 3s infinite ease-in-out;
+}

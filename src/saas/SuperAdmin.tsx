@@ -143,70 +143,165 @@ const NexusStatCard = ({ title, value, sub, icon, color, trend }: any) => (
 );
 
 /* -------------------------------------------------------------------------- */
-/*                                OVERVIEW TAB                                */
+/*                                OVERVIEW TAB (NEXUS ELITE)                  */
 /* -------------------------------------------------------------------------- */
 const OverviewTab = ({ stats, tenants }: { stats: any, tenants: Tenant[] }) => {
   return (
-    <div style={{ animation: 'fadeIn 0.3s ease' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
-        <NexusStatCard title="Organisations" value={stats.total_tenants} sub={`${stats.active_tenants} actives sur le réseau`} icon={<Building size={20} />} color="#3b82f6" trend="+4%" />
-        <NexusStatCard title="Total Utilisateurs" value={stats.total_users} sub="Administrateurs & Opérateurs" icon={<Users size={20} />} color="#8b5cf6" trend="+12%" />
-        <NexusStatCard title="Volume de Fret" value={stats.total_orders.toLocaleString()} sub="Colis traités via SaaS" icon={<Zap size={20} />} color="#6366f1" trend="+8%" />
-        <NexusStatCard title="Revenu Prévu (30j)" value={`${stats.total_revenue.toLocaleString()} F`} sub="Projection sur abonnements" icon={<DollarSign size={20} />} color="#10b981" trend="+15%" />
-      </div>
+    <div className="nexus-theme-dark" style={{ animation: 'fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+      
+      {/* SECTION 1: WELCOME & PRIMARY FEED */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '2rem', marginBottom: '2.5rem' }} className="mobile-stack">
+        
+        {/* Profile Card (BitStak Style) */}
+        <div className="nexus-card-elite" style={{ position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '150px', height: '150px', background: 'radial-gradient(circle, rgba(6,182,212,0.15) 0%, transparent 70%)', borderRadius: '50%' }}></div>
+          
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
+             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div style={{ position: 'relative' }}>
+                  <div className="nexus-profile-circle" style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem' }}>👤</div>
+                  <div style={{ position: 'absolute', bottom: '5px', right: '5px', width: '12px', height: '12px', background: '#10b981', borderRadius: '50%', border: '2px solid #1e293b' }}></div>
+                </div>
+                <div>
+                  <h4 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 900 }}>Administrateur</h4>
+                  <span style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: 800 }}>En ligne</span>
+                </div>
+             </div>
+             <div style={{ textAlign: 'right' }}>
+                <div style={{ color: '#06b6d4', fontSize: '0.9rem', fontWeight: 900 }}>Bienvenue !</div>
+             </div>
+          </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }} className="mobile-stack">
-        <div className="nexus-card" style={{ padding: '2.5rem' }}>
-          <h3 style={{ margin: 0, fontWeight: 900, fontSize: '1.4rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-             <Activity size={20} color="var(--primary)" /> Croissance du Réseau
-          </h3>
-          <div style={{ height: '350px' }}>
+          <div style={{ marginTop: '2rem' }}>
+            <div style={{ color: '#94a3b8', fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Revenu Global (30j)</div>
+            <div style={{ fontSize: '2.8rem', fontWeight: 950, marginTop: '0.5rem', color: '#f8fafc' }}>{stats.total_revenue.toLocaleString()} FCFA</div>
+          </div>
+        </div>
+
+        {/* Growth Area Chart (Glowing Curve) */}
+        <div className="nexus-card-elite">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h4 style={{ margin: 0, fontWeight: 900, fontSize: '1.1rem' }}>Croissance Réseau (30 jours)</h4>
+            <span style={{ fontSize: '0.8rem', color: '#06b6d4', fontWeight: 800, background: 'rgba(6,182,212,0.1)', padding: '4px 10px', borderRadius: '8px' }}>+ 5.27%</span>
+          </div>
+          <div style={{ height: '220px' }}>
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={[
-                { date: 'Jan', val: 5 }, { date: 'Fév', val: 12 }, { date: 'Mar', val: 18 }, 
-                { date: 'Avr', val: 24 }, { date: 'Mai', val: Math.max(stats.total_tenants, 30) }
+                { name: 'Jan', val: 5 }, { name: 'Feb', val: 12 }, { name: 'Mar', val: 18 }, { name: 'Apr', val: 24 }, { name: 'May', val: stats.total_tenants }
               ]}>
                 <defs>
-                   <linearGradient id="colorTenants" x1="0" y1="0" x2="0" y2="1">
-                     <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.4}/>
-                     <stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/>
-                   </linearGradient>
+                  <linearGradient id="nexusGrowth" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
+                  </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fill: '#cbd5e1', fontWeight: 800}} />
+                <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.03)" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12, fontWeight: 800}} />
                 <YAxis hide />
-                <Tooltip 
-                  cursor={{stroke: 'var(--primary)', strokeWidth: 2}} 
-                  contentStyle={{ background: '#020617', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '16px', boxShadow: '0 10px 40px rgba(0,0,0,0.8)', fontWeight: 900, color: 'white' }} 
-                />
-                <Area type="monotone" dataKey="val" name="Organisations" stroke="var(--primary)" strokeWidth={4} fillOpacity={1} fill="url(#colorTenants)" />
+                <Tooltip contentStyle={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }} />
+                <Area type="monotone" dataKey="val" stroke="#06b6d4" strokeWidth={4} fill="url(#nexusGrowth)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
+      </div>
 
-        <div className="nexus-card" style={{ padding: '2.5rem' }}>
-          <h3 style={{ margin: 0, fontWeight: 900, fontSize: '1.4rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-             <Crown size={20} color="#8b5cf6" /> Distribution Plans
-          </h3>
-          <div style={{ height: '350px' }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={[
-                { name: 'Free', value: tenants.filter(t => t.plan === 'FREE').length, fill: '#94a3b8' },
-                { name: 'Basic', value: tenants.filter(t => t.plan === 'BASIC').length, fill: '#3b82f6' },
-                { name: 'Premium', value: tenants.filter(t => t.plan === 'PREMIUM').length, fill: '#8b5cf6' },
-                { name: 'Ent', value: tenants.filter(t => t.plan === 'ENTERPRISE').length, fill: '#ec4899' }
-              ]}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 13, fontWeight: 800}} />
-                <YAxis hide />
-                <Tooltip cursor={{fill: 'rgba(255,255,255,0.03)'}} contentStyle={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }} />
-                <Bar dataKey="value" name="Clients" radius={[10, 10, 0, 0]} barSize={40} />
-              </BarChart>
-            </ResponsiveContainer>
+      {/* SECTION 2: GRID OF METRICS (Sparklines & Circular Gauges) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+        
+        {/* Circular Progress (Monthly Progress) */}
+        <div className="nexus-card-elite" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+          <h4 style={{ margin: '0 0 2rem 0', fontWeight: 900, color: '#f8fafc', width: '100%' }}>Progression Mensuelle</h4>
+          
+          <div style={{ position: 'relative', width: '180px', height: '180px' }}>
+             <svg width="180" height="180" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="6" />
+                <circle cx="50" cy="50" r="45" fill="none" stroke="#06b6d4" strokeWidth="8" strokeDasharray="210, 283" strokeLinecap="round" style={{ transform: 'rotate(-90deg)', transformOrigin: '50% 50%' }} />
+                <circle cx="50" cy="50" r="35" fill="none" stroke="#f59e0b" strokeWidth="8" strokeDasharray="140, 220" strokeLinecap="round" style={{ transform: 'rotate(-90deg)', transformOrigin: '50% 50%' }} />
+             </svg>
+             <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
+                <div style={{ fontSize: '2rem', fontWeight: 950 }}>{Math.round((stats.active_tenants / Math.max(stats.total_tenants, 1)) * 100)}%</div>
+                <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 800 }}>TAUX ACTIVITÉ</div>
+             </div>
+          </div>
+          
+          <div style={{ display: 'flex', gap: '1.5rem', marginTop: '2rem', width: '100%' }}>
+             <div style={{ flex: 1, textAlign: 'center' }}>
+                <div style={{ fontSize: '1.1rem', fontWeight: 900 }}>{stats.active_tenants}</div>
+                <div style={{ fontSize: '0.65rem', color: '#06b6d4', fontWeight: 800 }}>ACTIFS</div>
+             </div>
+             <div style={{ flex: 1, textAlign: 'center' }}>
+                <div style={{ fontSize: '1.1rem', fontWeight: 900 }}>{stats.total_tenants - stats.active_tenants}</div>
+                <div style={{ fontSize: '0.65rem', color: '#f59e0b', fontWeight: 800 }}>PENDANTS</div>
+             </div>
           </div>
         </div>
+
+        {/* Small Sparkline Cards Cluster */}
+        <div style={{ display: 'grid', gridTemplateRows: '1fr 1fr', gap: '1.5rem' }}>
+           <div className="nexus-card-elite" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+             <div>
+                <Activity size={24} className="nexus-neon-cyan" style={{ marginBottom: '1rem' }} />
+                <div style={{ fontSize: '1.8rem', fontWeight: 950 }}>{stats.total_users.toLocaleString()}</div>
+                <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 800 }}>UTILISATEURS TOTAL</div>
+             </div>
+             <div style={{ width: '100px', height: '60px' }}>
+                {/* Simplified Sparkline */}
+                <svg width="100" height="60" viewBox="0 0 100 60">
+                   <path d="M0,50 L20,40 L40,45 L60,20 L80,30 L100,5" fill="none" stroke="#06b6d4" strokeWidth="4" strokeLinecap="round" />
+                </svg>
+             </div>
+           </div>
+           
+           <div className="nexus-card-elite" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+             <div>
+                <DollarSign size={24} style={{ color: '#ec4899', marginBottom: '1rem' }} />
+                <div style={{ fontSize: '1.8rem', fontWeight: 950 }}>{stats.total_orders.toLocaleString()}</div>
+                <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 800 }}>EXPÉDITIONS SaaS</div>
+             </div>
+             <div style={{ width: '100px', height: '60px' }}>
+                <svg width="100" height="60" viewBox="0 0 100 60">
+                   <path d="M0,55 L20,30 L40,50 L60,35 L80,45 L100,20" fill="none" stroke="#ec4899" strokeWidth="4" strokeLinecap="round" />
+                </svg>
+             </div>
+           </div>
+        </div>
+
+        {/* Bar Chart (Distribution Plans) */}
+        <div className="nexus-card-elite">
+           <h4 style={{ margin: '0 0 1.5rem 0', fontWeight: 900 }}>Répartition Offres</h4>
+           <div style={{ height: '200px' }}>
+             <ResponsiveContainer width="100%" height="100%">
+               <BarChart data={[
+                 { name: 'Basic', val: tenants.filter(t => t.plan === 'BASIC').length, fill: '#3b82f6' },
+                 { name: 'Prem', val: tenants.filter(t => t.plan === 'PREMIUM').length, fill: '#8b5cf6' },
+                 { name: 'Ent', val: tenants.filter(t => t.plan === 'ENTERPRISE').length, fill: '#ec4899' }
+               ]}>
+                 <XAxis dataKey="name" hide />
+                 <Tooltip cursor={{fill: 'transparent'}} contentStyle={{ background: '#0f172a', border: 'none', borderRadius: '12px' }} />
+                 <Bar dataKey="val" radius={[8, 8, 0, 0]} barSize={50} />
+               </BarChart>
+             </ResponsiveContainer>
+           </div>
+           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 800, color: '#94a3b8', marginTop: '1rem' }}>
+              <span>BASIC</span>
+              <span>PREMIUM</span>
+              <span>ENTERPRISE</span>
+           </div>
+        </div>
+
       </div>
+
+      {/* SECTION 3: CTA BUTTONS (Sign In, Login, Download styles) */}
+      <div style={{ display: 'flex', gap: '1.5rem', marginTop: '2.5rem' }}>
+         <button className="nexus-glow-button" style={{ flex: 1, height: '65px', fontSize: '1.1rem' }}>
+            OPTIMISER L'INFRASTRUCTURE
+         </button>
+         <button style={{ flex: 1, height: '65px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', borderRadius: '14px', fontWeight: 800, fontSize: '1.1rem', cursor: 'pointer' }}>
+            SUPPORTS TICKETS
+         </button>
+      </div>
+
     </div>
   );
 };
