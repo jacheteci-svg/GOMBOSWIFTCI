@@ -29,6 +29,8 @@ export interface Tenant {
   plan: Plan;
   actif: boolean;
   settings?: any;
+  billing_status?: string;
+  trial_ends_at?: any;
   created_at: any;
 }
 
