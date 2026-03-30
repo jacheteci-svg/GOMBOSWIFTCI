@@ -109,6 +109,8 @@ const ProtectedRoute = ({ children, requiredPermission }: { children: React.Reac
 };
 
 const AppRoutes = () => {
+  const { currentUser } = useAuth();
+
   return (
     <Routes>
       {/* 1. Debug/Diagnostic Route */}
@@ -139,8 +141,31 @@ const AppRoutes = () => {
       <Route path="/terms" element={<TermsPage />} />
       <Route path="/gdpr" element={<GdprPage />} />
 
-      {/* Main App with Protected Layout */}
-      <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+      {/* ROOT REDIRECT */}
+      <Route path="/" element={
+        currentUser ? (
+          currentUser.role === 'SUPER_ADMIN' ? (
+            <Navigate to="/super-admin/overview" replace />
+          ) : (
+            <Navigate to={`/${currentUser.tenant_slug || 'nexus'}`} replace />
+          )
+        ) : (
+          <LandingPage />
+        )
+      } />
+
+      {/* 5. SUPER ADMIN - Specialized Path */}
+      <Route path="/super-admin/*" element={
+        <ProtectedRoute requiredPermission="SUPER_ADMIN">
+          <Layout /> 
+          <Routes>
+             <Route path="*" element={<SuperAdmin />} />
+          </Routes>
+        </ProtectedRoute>
+      } />
+
+      {/* 6. TENANT PAGES - Dynamic Slug Path */}
+      <Route path="/:tenantSlug" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route index element={<Home />} />
         <Route path="dashboard" element={<ProtectedRoute requiredPermission="DASHBOARD"><Dashboard /></ProtectedRoute>} />
         <Route path="produits" element={<ProtectedRoute requiredPermission="PRODUITS"><Produits /></ProtectedRoute>} />
@@ -170,7 +195,6 @@ const AppRoutes = () => {
         } />
         <Route path="profil" element={<ProtectedRoute requiredPermission="PROFIL"><Profil /></ProtectedRoute>} />
         <Route path="admin" element={<ProtectedRoute requiredPermission="ADMIN"><Admin /></ProtectedRoute>} />
-        <Route path="super-admin/*" element={<ProtectedRoute requiredPermission="SUPER_ADMIN"><SuperAdmin /></ProtectedRoute>} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

@@ -31,15 +31,18 @@ export const CommandeForm = ({ onClose, onSave }: { onClose: () => void, onSave:
   const [fraisLivraison, setFraisLivraison] = useState(0);
 
   useEffect(() => {
-    getCommunes().then(setCommunesDb);
-  }, []);
+    if (tenant?.id) {
+      getCommunes(tenant.id).then(setCommunesDb);
+    }
+  }, [tenant?.id]);
 
   useEffect(() => {
-    const unsubscribe = subscribeToProduits((prods: Produit[]) => {
+    if (!tenant?.id) return;
+    const unsubscribe = subscribeToProduits(tenant.id, (prods: Produit[]) => {
       setCatalogue(prods.filter(p => p.actif));
     });
     return () => unsubscribe();
-  }, []);
+  }, [tenant?.id]);
 
   const updateFraisLivraison = (communeNom: string) => {
     const commune = communesDb.find(c => c.nom === communeNom);
@@ -53,8 +56,8 @@ export const CommandeForm = ({ onClose, onSave }: { onClose: () => void, onSave:
   }, [clientRecherche.commune, communesDb]);
 
   const handleSearchClient = async () => {
-    if (!clientRecherche.telephone) return;
-    const found = await searchClientByPhone(clientRecherche.telephone);
+    if (!clientRecherche.telephone || !tenant?.id) return;
+    const found = await searchClientByPhone(tenant.id, clientRecherche.telephone);
     if (found) {
       setClientId(found.id);
       setClientRecherche(found);
@@ -135,11 +138,11 @@ export const CommandeForm = ({ onClose, onSave }: { onClose: () => void, onSave:
       const tenantId = tenant?.id || 'default';
 
       if (!finalClientId && clientRecherche.telephone) {
-        const existing = await searchClientByPhone(clientRecherche.telephone);
+        const existing = await searchClientByPhone(tenantId, clientRecherche.telephone);
         if (existing) {
           finalClientId = existing.id;
         } else {
-          finalClientId = await createClient({
+          finalClientId = await createClient(tenantId, {
             telephone: clientRecherche.telephone,
             nom_complet: clientRecherche.nom_complet!,
             email: clientRecherche.email || '',
@@ -147,8 +150,7 @@ export const CommandeForm = ({ onClose, onSave }: { onClose: () => void, onSave:
             commune: clientRecherche.commune || '',
             ville: clientRecherche.ville || 'Abidjan',
             remarques: clientRecherche.remarques || '',
-            tenant_id: tenantId
-          });
+          } as any);
         }
       }
       
@@ -170,7 +172,7 @@ export const CommandeForm = ({ onClose, onSave }: { onClose: () => void, onSave:
         tenant_id: tenantId
       };
 
-      await createCommandeBase(newCommande as any, lignes as Omit<LigneCommande, 'id' | 'commande_id'>[]);
+      await createCommandeBase(tenantId, newCommande as any, lignes as Omit<LigneCommande, 'id' | 'commande_id'>[]);
       onSave();
     } catch (error) {
       console.error(error);

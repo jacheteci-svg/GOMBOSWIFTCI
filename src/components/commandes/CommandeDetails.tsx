@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, ShoppingBag, User, MapPin, Receipt, Phone } from 'lucide-react';
 import { getCommandeWithLines } from '../../services/commandeService';
 import type { Commande, LigneCommande } from '../../types';
+import { useSaas } from '../../saas/SaasProvider';
 
 interface CommandeDetailsProps {
   commandeId: string;
@@ -9,14 +10,16 @@ interface CommandeDetailsProps {
 }
 
 export const CommandeDetails = ({ commandeId, onClose }: CommandeDetailsProps) => {
+  const { tenant } = useSaas();
   const [commande, setCommande] = useState<(Commande & { lignes: LigneCommande[] }) | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getCommandeWithLines(commandeId)
+    if (!tenant?.id) return;
+    getCommandeWithLines(tenant.id, commandeId)
       .then(setCommande)
       .finally(() => setLoading(false));
-  }, [commandeId]);
+  }, [commandeId, tenant?.id]);
 
   if (loading) {
     return (

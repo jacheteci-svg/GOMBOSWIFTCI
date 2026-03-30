@@ -1,5 +1,5 @@
-import { Menu, Home, Building2, Bell } from 'lucide-react';
-import { useLocation, Link } from 'react-router-dom';
+import { Menu, Home, Building } from 'lucide-react';
+import { useLocation, Link, useParams } from 'react-router-dom';
 import { NotificationCenter } from './NotificationCenter';
 import { useAuth } from '../../contexts/AuthContext';
 import { insforge } from '../../lib/insforge';
@@ -8,10 +8,17 @@ import { useState, useEffect } from 'react';
 export const Header = ({ onMenuClick }: { onMenuClick: () => void }) => {
   const location = useLocation();
   const { currentUser } = useAuth();
+  const { tenantSlug } = useParams();
   const [tenantName, setTenantName] = useState<string>('');
 
   useEffect(() => {
     const fetchTenantName = async () => {
+      // Prioritize name from currentUser if already fetched
+      if (currentUser?.tenant_name) {
+        setTenantName(currentUser.tenant_name);
+        return;
+      }
+
       if (currentUser?.tenant_id && currentUser.tenant_id !== 'default') {
         try {
           const { data, error } = await insforge.database
@@ -33,28 +40,29 @@ export const Header = ({ onMenuClick }: { onMenuClick: () => void }) => {
   }, [currentUser]);
 
   const getPageTitle = () => {
-    switch (location.pathname) {
-      case '/': return 'Portail';
-      case '/dashboard': return 'Business 360°';
-      case '/produits': return 'Produits & Stock';
-      case '/commandes': return 'Commandes';
-      case '/centre-appel': return 'Centre d\'Appel';
-      case '/logistique': return 'Logistique';
-      case '/livraison': return 'Mes Livraisons';
-      case '/caisse': return 'Caisse & Retours';
-      case '/rapport-financier': return 'Rapport Journalier';
-      case '/clients': return 'CRM & Clients';
-      case '/historique': return 'Historique';
-      case '/admin': return 'Administration';
-      case '/profil': return 'Mon Profil';
-      case '/net-profit': return 'Profit & Finances';
-      case '/admin/tresorerie': return 'Trésorerie';
-      case '/audit-tresorerie': return 'Audit Comptable';
-      case '/performance-staff': return 'Performance';
-      default: 
-        if (location.pathname.startsWith('/super-admin')) return 'Nexus Portal';
-        return 'GomboSwiftCI';
-    }
+    const path = location.pathname;
+    
+    // Exact matches vs suffix matches for slug paths
+    if (path === '/' || path === `/${tenantSlug}`) return 'Portail';
+    if (path.endsWith('/dashboard')) return 'Business 360°';
+    if (path.endsWith('/produits')) return 'Produits & Stock';
+    if (path.endsWith('/commandes')) return 'Commandes';
+    if (path.endsWith('/centre-appel')) return 'Centre d\'Appel';
+    if (path.endsWith('/logistique')) return 'Logistique';
+    if (path.endsWith('/livraison')) return 'Mes Livraisons';
+    if (path.endsWith('/caisse')) return 'Caisse & Retours';
+    if (path.endsWith('/rapport-financier')) return 'Rapport Journalier';
+    if (path.endsWith('/clients')) return 'CRM & Clients';
+    if (path.endsWith('/historique')) return 'Historique';
+    if (path.endsWith('/admin')) return 'Administration';
+    if (path.endsWith('/profil')) return 'Mon Profil';
+    if (path.endsWith('/net-profit')) return 'Profit & Finances';
+    if (path.endsWith('/admin/tresorerie')) return 'Trésorerie';
+    if (path.endsWith('/audit-tresorerie')) return 'Audit Comptable';
+    if (path.endsWith('/performance-staff')) return 'Performance';
+    
+    if (path.startsWith('/super-admin')) return 'Nexus Portal';
+    return 'GomboSwiftCI';
   };
 
   const initials = currentUser?.nom_complet
@@ -90,7 +98,7 @@ export const Header = ({ onMenuClick }: { onMenuClick: () => void }) => {
               gap: '0.3rem',
               opacity: 0.8
             }}>
-              <Building2 size={9} /> {tenantName}
+              <Building size={9} /> {tenantName}
             </span>
           )}
         </div>
@@ -98,7 +106,7 @@ export const Header = ({ onMenuClick }: { onMenuClick: () => void }) => {
       
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexShrink: 0 }}>
         <Link 
-          to="/" 
+          to={tenantSlug ? `/${tenantSlug}` : "/"} 
           style={{ 
             width: 36, height: 36,
             borderRadius: 10,

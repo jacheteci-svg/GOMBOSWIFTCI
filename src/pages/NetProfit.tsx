@@ -12,10 +12,12 @@ import {
   AlertCircle, ArrowUpRight, X, Calendar as CalendarIcon, Filter
 } from 'lucide-react';
 import { useToast } from '../contexts/ToastContext';
+import { useSaas } from '../saas/SaasProvider';
 import { format, subDays, startOfMonth, endOfMonth } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 export const NetProfit = () => {
+  const { tenant } = useSaas();
   const { showToast } = useToast();
   const { hasPermission } = useAuth();
   
@@ -53,9 +55,10 @@ export const NetProfit = () => {
     }
 
     try {
+      if (!tenant?.id) return;
       const [orderData, depenseData] = await Promise.all([
-        getFinancialData(start, end),
-        getDepenses().catch(() => [])
+        getFinancialData(tenant.id, start, end),
+        getDepenses(tenant.id).catch(() => [])
       ]);
       setAllCommandes(orderData || []);
       setDepenses(depenseData || []);
@@ -70,7 +73,7 @@ export const NetProfit = () => {
 
   useEffect(() => {
     fetchData();
-  }, [period, customRange]);
+  }, [period, customRange, tenant?.id]);
 
   const chartData = useMemo(() => {
     return generateTimeSeriesData(allCommandes, 'daily');
@@ -85,7 +88,8 @@ export const NetProfit = () => {
     e.preventDefault();
     if (newDepense.montant <= 0) return showToast("Montant invalide", "error");
     try {
-      await addDepense(newDepense);
+      if (!tenant?.id) return;
+      await addDepense(tenant.id, newDepense);
       showToast("Dépense enregistrée !", "success");
       setIsModalOpen(false);
       fetchData();
@@ -97,7 +101,8 @@ export const NetProfit = () => {
   const handleDeleteDepense = async (id: string) => {
     if (!window.confirm("Supprimer cette dépense ?")) return;
     try {
-      await deleteDepense(id);
+      if (!tenant?.id) return;
+      await deleteDepense(tenant.id, id);
       showToast("Dépense supprimée.", "success");
       fetchData();
     } catch (error) {

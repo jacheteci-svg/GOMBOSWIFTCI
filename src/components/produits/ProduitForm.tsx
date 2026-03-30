@@ -3,6 +3,7 @@ import { Produit } from '../../types';
 import { createProduit, updateProduit } from '../../services/produitService';
 import { X } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
+import { useSaas } from '../../saas/SaasProvider';
 
 interface ProduitFormProps {
   produit?: Produit | null;
@@ -29,6 +30,7 @@ export const ProduitForm = ({ produit, onClose, onSave }: ProduitFormProps) => {
   const [loading, setLoading] = useState(false);
   const [hasPromo, setHasPromo] = useState(false);
   const { showToast } = useToast();
+  const { tenant } = useSaas();
 
   useEffect(() => {
     if (produit) {
@@ -65,10 +67,12 @@ export const ProduitForm = ({ produit, onClose, onSave }: ProduitFormProps) => {
       }
 
       if (produit?.id) {
-        await updateProduit(produit.id, dataToSave);
+        if (!tenant?.id) return;
+        await updateProduit(tenant.id, produit.id, dataToSave);
         showToast("Configuration article mise à jour avec succès !", "success");
       } else {
-        await createProduit(dataToSave as Omit<Produit, 'id'>);
+        if (!tenant?.id) return;
+        await createProduit(tenant.id, { ...dataToSave } as Omit<Produit, 'id'>);
         showToast("Nouvel article référencé avec succès !", "success");
       }
       onSave();

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { subscribeToCommandes, getTopSellingProducts } from '../services/commandeService';
+import { useSaas } from '../saas/SaasProvider';
 import { calculateLogisticalStats } from '../services/financialService';
 import type { Commande } from '../types';
 import { Activity, Percent, DollarSign, TrendingUp, Truck, AlertCircle, ShoppingBag, BarChart2, Calendar } from 'lucide-react';
@@ -11,6 +12,7 @@ import {
 type Period = 'today' | '7d' | '30d' | 'all' | 'custom';
 
 export const Dashboard = () => {
+  const { tenant } = useSaas();
   const [commandes, setCommandes] = useState<Commande[]>([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<Period>('7d');
@@ -20,20 +22,22 @@ export const Dashboard = () => {
 
   const fetchTop = useCallback(async (p: Period, start?: string, end?: string) => {
     try {
+      if (!tenant?.id) return;
       const days = p === 'today' ? 1 : p === '7d' ? 7 : p === '30d' ? 30 : 0;
-      const top = await getTopSellingProducts(10, days, start, end);
+      const top = await getTopSellingProducts(tenant.id, 10, days, start, end);
       setTopProducts(top);
     } catch (e) { console.error(e); }
-  }, []);
+  }, [tenant?.id]);
 
   useEffect(() => {
-    const unsubscribe = subscribeToCommandes((data) => {
+    if (!tenant?.id) return;
+    const unsubscribe = subscribeToCommandes(tenant.id, (data) => {
       setCommandes(data);
       setLoading(false);
     });
     
     return () => unsubscribe();
-  }, []);
+  }, [tenant?.id]);
 
   useEffect(() => {
     if (period === 'custom') {

@@ -2,21 +2,23 @@ import { Commande, FeuilleRoute } from '../types';
 import { insforge } from '../lib/insforge';
 import { addMouvementStock } from './produitService';
 
-export const getFeuillesEnCours = async (livreurId: string): Promise<FeuilleRoute[]> => {
+export const getFeuillesEnCours = async (tenantId: string, livreurId: string): Promise<FeuilleRoute[]> => {
   const { data, error } = await insforge.database
     .from('feuilles_route')
     .select('*')
     .eq('livreur_id', livreurId)
+    .eq('tenant_id', tenantId)
     .in('statut_feuille', ['en_cours', 'cloturee']);
 
   if (error) throw error;
   return data || [];
 };
 
-export const getCloturedFeuilles = async (): Promise<FeuilleRoute[]> => {
+export const getCloturedFeuilles = async (tenantId: string): Promise<FeuilleRoute[]> => {
   const { data, error } = await insforge.database
     .from('feuilles_route')
     .select('*, livreurs:livreur_id(nom_complet)')
+    .eq('tenant_id', tenantId)
     .eq('statut_feuille', 'terminee')
     .order('date', { ascending: false });
 
@@ -29,11 +31,12 @@ export const getCloturedFeuilles = async (): Promise<FeuilleRoute[]> => {
   }));
 };
 
-export const getCommandesConcernees = async (feuilleRouteId: string): Promise<Commande[]> => {
+export const getCommandesConcernees = async (tenantId: string, feuilleRouteId: string): Promise<Commande[]> => {
   const { data, error } = await insforge.database
     .from('commandes')
     .select('*')
-    .eq('feuille_route_id', feuilleRouteId);
+    .eq('feuille_route_id', feuilleRouteId)
+    .eq('tenant_id', tenantId);
 
   if (error) throw error;
   return data || [];
@@ -46,7 +49,8 @@ export const processCaisse = async (
   ecart: number, 
   commentaire: string,
   caissiereId: string,
-  livreurId: string
+  livreurId: string,
+  tenantId: string
 ): Promise<void> => {
   // 1. Update Feuille Route status and summary financials
   const { error: frError } = await insforge.database
@@ -57,7 +61,8 @@ export const processCaisse = async (
       montant_encaisse: montantPhysique,
       ecart_caisse: ecart
     })
-    .eq('id', feuilleRouteId);
+    .eq('id', feuilleRouteId)
+    .eq('tenant_id', tenantId);
 
   if (frError) throw frError;
   
@@ -65,7 +70,8 @@ export const processCaisse = async (
   const { data: lignesCommandes, error: linesError } = await insforge.database
     .from('lignes_commandes')
     .select('*')
-    .in('commande_id', orderIds);
+    .in('commande_id', orderIds)
+    .eq('tenant_id', tenantId);
 
   if (linesError) throw linesError;
   
@@ -95,14 +101,15 @@ export const processCaisse = async (
     const { error: cmdUpdateError } = await insforge.database
       .from('commandes')
       .update(updateData)
-      .eq('id', res.id);
+      .eq('id', res.id)
+      .eq('tenant_id', tenantId);
 
     if (cmdUpdateError) throw cmdUpdateError;
 
     if (finalStatus === 'retour_stock' || finalStatus === 'annulee') {
       const lignes = lignesCommandes.filter((l: any) => l.commande_id === res.id);
       for (const l of lignes) {
-        await addMouvementStock({
+        await addMouvementStock(tenantId, {
           produit_id: l.produit_id,
           type_mouvement: 'entree',
           quantite: l.quantite,
@@ -123,13 +130,14 @@ export const processCaisse = async (
       montant_remis_par_livreur: montantPhysique, 
       montant_attendu: montantPhysique - ecart,
       ecart, 
-      commentaire_caissiere: commentaire 
+      commentaire_caissiere: commentaire,
+      tenant_id: tenantId
     }]);
 
   if (retourError) throw retourError;
 };
 
-export const reopenFeuilleRoute = async (id: string): Promise<void> => {
+export const reopenFeuilleRoute = async (tenantId: string, id: string): Promise<void> => {
   const { error } = await insforge.database
     .from('feuilles_route')
     .update({
@@ -138,12 +146,13 @@ export const reopenFeuilleRoute = async (id: string): Promise<void> => {
       ecart_caisse: 0,
       date_traitement: null
     })
-    .eq('id', id);
+    .eq('id', id)
+    .eq('tenant_id', tenantId);
 
   if (error) throw error;
 };
 
-export const getRangeFinancials = async (startDateStr: string, endDateStr?: string): Promise<any> => {
+export const getRangeFinancials = async (tenantId: string, startDateStr: string, endDateStr?: string): Promise<any> => {
   const start = new Date(startDateStr);
   start.setHours(0,0,0,0);
   
@@ -154,6 +163,7 @@ export const getRangeFinancials = async (startDateStr: string, endDateStr?: stri
   const { data: retours, error: retoursError } = await insforge.database
     .from('caisse_retours')
     .select('*')
+    .eq('tenant_id', tenantId)
     .gte('date', start.toISOString())
     .lte('date', end.toISOString());
 
@@ -165,6 +175,7 @@ export const getRangeFinancials = async (startDateStr: string, endDateStr?: stri
   const { data: commandes, error: cmdError } = await insforge.database
     .from('commandes')
     .select('id, montant_total, statut_commande, mode_paiement, frais_livraison, updated_at, date_livraison_effective, lignes:lignes_commandes(*)')
+    .eq('tenant_id', tenantId)
     .or(filterStr);
 
   if (cmdError) throw cmdError;

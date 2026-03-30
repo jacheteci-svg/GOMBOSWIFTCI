@@ -5,8 +5,10 @@ import { ProduitForm } from '../components/produits/ProduitForm';
 import { StockForm } from '../components/produits/StockForm';
 import { subscribeToProduits } from '../services/produitService';
 import { Produit } from '../types';
+import { useSaas } from '../saas/SaasProvider';
 
 export const Produits = () => {
+  const { tenant } = useSaas();
   const [produits, setProduits] = useState<Produit[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -18,13 +20,14 @@ export const Produits = () => {
   const [stockProduit, setStockProduit] = useState<Produit | null>(null);
 
   useEffect(() => {
+    if (!tenant?.id) return;
     setLoading(true);
-    const unsubscribe = subscribeToProduits((data) => {
+    const unsubscribe = subscribeToProduits(tenant.id, (data) => {
       setProduits(data);
       setLoading(false);
     });
     return () => unsubscribe();
-  }, []);
+  }, [tenant?.id]);
 
   const handleEdit = (produit: Produit) => {
     setSelectedProduit(produit);

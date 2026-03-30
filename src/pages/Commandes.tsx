@@ -7,8 +7,10 @@ import { subscribeToCommandes, deleteCommande, getCommandeWithLines, bulkUpdateC
 import { generateInvoicePDF } from '../services/pdfService';
 import type { Commande } from '../types';
 import { useToast } from '../contexts/ToastContext';
+import { useSaas } from '../saas/SaasProvider';
 
 export const Commandes = () => {
+  const { tenant } = useSaas();
   const { showToast } = useToast();
   const [commandes, setCommandes] = useState<Commande[]>([]);
   const [loading, setLoading] = useState(true);
@@ -20,8 +22,9 @@ export const Commandes = () => {
 
   const handleInvoice = async (commande: Commande) => {
     try {
+      if (!tenant?.id) return;
       showToast("Génération de la facture...", "info");
-      const fullCommande = await getCommandeWithLines(commande.id);
+      const fullCommande = await getCommandeWithLines(tenant.id, commande.id);
       generateInvoicePDF(fullCommande);
       showToast("Facture générée !", "success");
     } catch (error) {
@@ -32,7 +35,8 @@ export const Commandes = () => {
 
   const handleDelete = async (commande: Commande) => {
     try {
-      await deleteCommande(commande.id);
+      if (!tenant?.id) return;
+      await deleteCommande(tenant.id, commande.id);
       showToast("Commande supprimée.", "success");
     } catch (error) {
       console.error(error);
@@ -43,8 +47,9 @@ export const Commandes = () => {
   const handleBulkValidate = async () => {
     if (selectedIds.length === 0) return;
     try {
+      if (!tenant?.id) return;
       showToast(`Validation de ${selectedIds.length} commandes...`, "info");
-      await bulkUpdateCommandeStatus(selectedIds, 'validee');
+      await bulkUpdateCommandeStatus(tenant.id, selectedIds, 'validee');
       showToast(`${selectedIds.length} commandes validées !`, "success");
       setSelectedIds([]);
     } catch (error) {
@@ -56,8 +61,9 @@ export const Commandes = () => {
   const handleLogisticsExport = async () => {
     if (selectedIds.length === 0) return;
     try {
+      if (!tenant?.id) return;
       showToast("Préparation de l'export logistique...", "info");
-      const selectedCommandes = await Promise.all(selectedIds.map(id => getCommandeWithLines(id)));
+      const selectedCommandes = await Promise.all(selectedIds.map(id => getCommandeWithLines(tenant.id, id)));
       
       const headers = ['ID', 'Client', 'Téléphone', 'Commune', 'Adresse', 'Montant à Encaisser', 'Produits'];
       const rows = selectedCommandes.map(c => [
@@ -87,13 +93,14 @@ export const Commandes = () => {
   };
 
   useEffect(() => {
+    if (!tenant?.id) return;
     setLoading(true);
-    const unsubscribe = subscribeToCommandes((data) => {
+    const unsubscribe = subscribeToCommandes(tenant.id, (data) => {
       setCommandes(data);
       setLoading(false);
     });
     return () => unsubscribe();
-  }, []);
+  }, [tenant?.id]);
 
   const filteredCommandes = commandes.filter(c => {
     const matchesSearch = 

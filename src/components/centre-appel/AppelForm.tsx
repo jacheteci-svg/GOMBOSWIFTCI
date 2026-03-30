@@ -4,6 +4,7 @@ import { updateCommandeStatus } from '../../services/commandeService';
 import { insforge } from '../../lib/insforge';
 import { useAuth } from '../../contexts/AuthContext';
 import { getCommunes } from '../../services/adminService';
+import { useSaas } from '../../saas/SaasProvider';
 import type { Commande, AppelCommande, Commune } from '../../types';
 
 interface AppelFormProps {
@@ -14,6 +15,7 @@ interface AppelFormProps {
 
 export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
   const { currentUser } = useAuth();
+  const { tenant } = useSaas();
   const [loading, setLoading] = useState(false);
   const [resultat, setResultat] = useState<AppelCommande['resultat_appel']>('validee');
   const [commentaire, setCommentaire] = useState('');
@@ -23,8 +25,9 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
   const [communesDb, setCommunesDb] = useState<Commune[]>([]);
 
   useEffect(() => {
-    getCommunes().then(setCommunesDb);
-  }, []);
+    if (!tenant?.id) return;
+    getCommunes(tenant.id).then(setCommunesDb);
+  }, [tenant?.id]);
 
   const handleCommuneChange = (nom: string) => {
     setCommuneLocal(nom);
@@ -48,7 +51,8 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
           agent_appel_id: currentUser.id,
           date_appel: new Date(),
           resultat_appel: resultat,
-          commentaire_agent: commentaire
+          commentaire_agent: commentaire,
+          tenant_id: tenant?.id
         }]);
 
       // 2. Mettre à jour le statut de la commande
@@ -73,7 +77,8 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
         }
       }
 
-      await updateCommandeStatus(commande.id, nextStatusMap[resultat], payload);
+      if (!tenant?.id) return;
+      await updateCommandeStatus(tenant.id, commande.id, nextStatusMap[resultat], payload);
       onSave();
     } catch (error) {
       console.error("Erreur lors de la validation :", error);

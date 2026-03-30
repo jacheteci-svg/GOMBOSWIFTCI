@@ -104,7 +104,7 @@ const UsersManager = ({ showToast, tenantId }: { showToast: any, tenantId: strin
   const loadUsers = async () => {
     setLoading(true);
     try {
-      const data = await getAdminUsers();
+      const data = await getAdminUsers(tenantId);
       // Filter for non-admins if they only have GESTION_LIVREURS
       if (!isAdmin) {
         setUsers(data?.filter(u => u.role === 'LIVREUR') || []);
@@ -160,7 +160,7 @@ const UsersManager = ({ showToast, tenantId }: { showToast: any, tenantId: strin
           tenant_id: tenantId
         }, authData?.user?.id || '');
       } else if (editingId) {
-        await updateAdminUser(editingId, { ...form, telephone: sanitizedTel });
+        await updateAdminUser(tenantId, editingId, { ...form, telephone: sanitizedTel });
       }
       showToast("Enregistré.", "success");
       setEditingId(null); setForm({}); loadUsers();
@@ -323,7 +323,7 @@ const CommunesManager = ({ showToast, tenantId }: { showToast: any, tenantId: st
   const loadCommunes = async () => {
     setLoading(true);
     try {
-      const data = await getCommunes();
+      const data = await getCommunes(tenantId);
       setCommunes(data || []);
     } catch (e) {
       showToast("Erreur chargement.", "error");
@@ -347,7 +347,7 @@ const CommunesManager = ({ showToast, tenantId }: { showToast: any, tenantId: st
       if (editingId === 'new') {
         await createCommune({ nom, tarif_livraison: tarif, tenant_id: tenantId });
       } else if (editingId) {
-        await updateCommune(editingId, { nom, tarif_livraison: tarif });
+        await updateCommune(tenantId, editingId, { nom, tarif_livraison: tarif });
       }
       showToast("Enregistré.", "success");
       setEditingId(null); setForm({}); loadCommunes();
@@ -361,7 +361,7 @@ const CommunesManager = ({ showToast, tenantId }: { showToast: any, tenantId: st
   const handleDelete = async (id: string) => {
     if (window.confirm("Supprimer cette zone ?")) {
       try {
-        await deleteCommune(id);
+        await deleteCommune(tenantId, id);
         showToast("Zone supprimée.");
         loadCommunes();
       } catch (e) {

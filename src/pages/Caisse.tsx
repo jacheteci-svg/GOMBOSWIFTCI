@@ -7,12 +7,14 @@ import { Calculator, CheckCircle2, ChevronRight, Plus, Search, Eye } from 'lucid
 import { format } from 'date-fns';
 import { useToast } from '../contexts/ToastContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useSaas } from '../saas/SaasProvider';
 import { useNavigate } from 'react-router-dom';
 import { CommandeDetails } from '../components/commandes/CommandeDetails';
 
 export const Caisse = () => {
   const { showToast } = useToast();
   const { currentUser } = useAuth();
+  const { tenant } = useSaas();
   const navigate = useNavigate();
   const [livreurs, setLivreurs] = useState<User[]>([]);
   const [selectedLivreur, setSelectedLivreur] = useState<string>('');
@@ -31,8 +33,10 @@ export const Caisse = () => {
   const [commentaire, setCommentaire] = useState('');
 
   useEffect(() => {
-    getAvailableLivreurs().then(setLivreurs);
-  }, []);
+    if (tenant?.id) {
+      getAvailableLivreurs(tenant.id).then(setLivreurs);
+    }
+  }, [tenant?.id]);
 
   const loadLivreur = async (livreurId: string) => {
     setSelectedLivreur(livreurId);
@@ -43,9 +47,10 @@ export const Caisse = () => {
       setFeuilles([]);
       return;
     }
+    if (!tenant?.id) return;
     setLoading(true);
     try {
-      const fs = await getFeuillesEnCours(livreurId);
+      const fs = await getFeuillesEnCours(tenant.id, livreurId);
       setFeuilles(fs);
     } catch (e) {
       console.error(e);
@@ -55,10 +60,11 @@ export const Caisse = () => {
   };
 
   const loadFeuille = async (f: FeuilleRoute) => {
+    if (!tenant?.id) return;
     setFeuille(f);
     setLoading(true);
     try {
-      const cmds = await getCommandesConcernees(f.id);
+      const cmds = await getCommandesConcernees(tenant.id, f.id);
       setCommandes(cmds);
       
       const newRes: any = {};
@@ -100,6 +106,7 @@ export const Caisse = () => {
       const { data: results } = await insforge.database
         .from('commandes')
         .select('*, clients(nom_complet, telephone)')
+        .eq('tenant_id', tenant?.id || 'default')
         .or(`id.ilike.%${cleanId}%`)
         .limit(1);
 
@@ -123,7 +130,8 @@ export const Caisse = () => {
           livreur_id: selectedLivreur,
           statut_commande: 'en_cours_livraison' 
         })
-        .eq('id', cmd.id);
+        .eq('id', cmd.id)
+        .eq('tenant_id', tenant?.id || 'default');
 
       // 2. Add to local state
       setCommandes(prev => [...prev, fullCmd]);
@@ -184,7 +192,7 @@ export const Caisse = () => {
   const ecart = isMontantValide ? montantRemisParsed - montantAttendu : 0;
 
   const handleCloture = async () => {
-    if (!feuille || !isMontantValide) return;
+    if (!feuille || !isMontantValide || !tenant?.id) return;
     
     const resArray = Object.keys(resolutions).map(id => ({
        id,
@@ -204,7 +212,8 @@ export const Caisse = () => {
         ecart, 
         commentaire,
         currentUser.id,
-        selectedLivreur
+        selectedLivreur,
+        tenant?.id || 'default'
       );
       
       showToast("Feuille de route clôturée avec succès.", "success");

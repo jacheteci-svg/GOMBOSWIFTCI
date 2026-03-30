@@ -64,12 +64,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .single();
 
       if (!error && data) {
+        // Fetch tenant slug if not provided by RPC
+        let tenant_slug = (data as any).tenant_slug;
+        let tenant_name = (data as any).tenant_name;
+
+        if (!tenant_slug && data.tenant_id) {
+          const { data: tData } = await insforge.database
+            .from('tenants')
+            .select('slug, nom')
+            .eq('id', data.tenant_id)
+            .single();
+          if (tData) {
+            tenant_slug = tData.slug;
+            tenant_name = tData.nom;
+          }
+        }
+
         return {
           ...data,
           email: data.email || email,
           nom_complet: data.nom_complet || 'Utilisateur GomboSwiftCI',
           role: data.role || 'ADMIN',
           tenant_id: data.tenant_id ?? null,
+          tenant_slug: tenant_slug || '',
+          tenant_name: tenant_name || '',
           permissions: data.permissions?.length > 0
             ? data.permissions
             : (ROLE_PERMISSIONS[data.role as Role] || ROLE_PERMISSIONS['ADMIN'])

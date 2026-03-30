@@ -4,10 +4,12 @@ import { generateTimeSeriesData, calculateProfitMetrics, calculateLogisticalStat
 import { TrendingUp, TrendingDown, Compass, PieChart, Calendar, BarChart, Clock } from 'lucide-react';
 import { generateAnalyticalReportPDF } from '../services/pdfService';
 import { useToast } from '../contexts/ToastContext';
+import { useSaas } from '../saas/SaasProvider';
 import { Commande, LigneCommande } from '../types';
 import { startOfMonth, endOfMonth, subDays, format } from 'date-fns';
 
 export const FinancialReport = () => {
+  const { tenant } = useSaas();
   const { showToast } = useToast();
   const [data, setData] = useState<{ retours: any[], commandes: (Commande & { lignes?: LigneCommande[] })[] } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -46,10 +48,9 @@ export const FinancialReport = () => {
 
   useEffect(() => {
     const load = async () => {
-      if (!startDate || !endDate) return;
-      setLoading(true);
       try {
-        const res = await getRangeFinancials(startDate, endDate);
+        if (!tenant?.id) return;
+        const res = await getRangeFinancials(tenant.id, startDate, endDate);
         setData(res);
       } catch (e) {
         console.error(e);
@@ -59,7 +60,7 @@ export const FinancialReport = () => {
       }
     };
     load();
-  }, [startDate, endDate]);
+  }, [startDate, endDate, tenant?.id]);
 
   // Calculations
   const stats = useMemo(() => {

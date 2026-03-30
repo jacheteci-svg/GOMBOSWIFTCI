@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   LayoutDashboard,
@@ -16,31 +16,34 @@ interface BottomNavProps {
 export const BottomNav = ({ onMenuClick }: BottomNavProps) => {
   const { currentUser, hasPermission } = useAuth();
   const location = useLocation();
+  const { tenantSlug } = useParams();
 
   if (currentUser?.role === 'SUPER_ADMIN') return null;
+
+  const effectiveSlug = tenantSlug || currentUser?.tenant_slug || 'nexus';
 
   // Role-aware nav items — show only what matters most
   const getNavItems = () => {
     const base = [];
 
     if (hasPermission('DASHBOARD')) {
-      base.push({ path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard });
+      base.push({ path: `/${effectiveSlug}/dashboard`, label: 'Dashboard', icon: LayoutDashboard });
     }
 
     if (hasPermission('COMMANDES') || hasPermission('CENTRE_APPEL')) {
-      base.push({ path: '/commandes', label: 'Commandes', icon: ShoppingCart });
+      base.push({ path: `/${effectiveSlug}/commandes`, label: 'Commandes', icon: ShoppingCart });
     }
 
     if (hasPermission('LOGISTIQUE')) {
-      base.push({ path: '/logistique', label: 'Logistique', icon: Truck });
+      base.push({ path: `/${effectiveSlug}/logistique`, label: 'Logistique', icon: Truck });
     } else if (hasPermission('LIVREUR')) {
-      base.push({ path: '/livraison', label: 'Livraisons', icon: Truck });
+      base.push({ path: `/${effectiveSlug}/livraison`, label: 'Livraisons', icon: Truck });
     } else if (hasPermission('PRODUITS')) {
-      base.push({ path: '/produits', label: 'Produits', icon: Package });
+      base.push({ path: `/${effectiveSlug}/produits`, label: 'Produits', icon: Package });
     }
 
     if (hasPermission('PROFIL')) {
-      base.push({ path: '/profil', label: 'Profil', icon: UserCircle });
+      base.push({ path: `/${effectiveSlug}/profil`, label: 'Profil', icon: UserCircle });
     }
 
     return base;

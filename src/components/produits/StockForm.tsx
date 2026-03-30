@@ -3,6 +3,7 @@ import { Produit, MouvementStock } from '../../types';
 import { addMouvementStock } from '../../services/produitService';
 import { X, ArrowDownRight, ArrowUpRight, RefreshCcw, Info } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
+import { useSaas } from '../../saas/SaasProvider';
 
 interface StockFormProps {
   produit: Produit;
@@ -11,6 +12,7 @@ interface StockFormProps {
 }
 
 export const StockForm = ({ produit, onClose, onSave }: StockFormProps) => {
+  const { tenant } = useSaas();
   const { showToast } = useToast();
   const [formData, setFormData] = useState<Partial<MouvementStock>>({
     produit_id: produit.id,
@@ -32,7 +34,8 @@ export const StockForm = ({ produit, onClose, onSave }: StockFormProps) => {
 
     setLoading(true);
     try {
-      await addMouvementStock(formData as any);
+      if (!tenant?.id) return;
+      await addMouvementStock(tenant.id, formData as any);
       showToast("Mouvement de stock enregistré avec succès !", "success");
       onSave();
     } catch (error) {

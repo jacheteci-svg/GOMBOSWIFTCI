@@ -11,6 +11,7 @@ import {
   History
 } from 'lucide-react';
 import { useToast } from '../contexts/ToastContext';
+import { useSaas } from '../saas/SaasProvider';
 
 interface Transaction {
   date: Date;
@@ -21,6 +22,7 @@ interface Transaction {
 }
 
 export const AdminTresorerie = () => {
+  const { tenant } = useSaas();
   const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [startDate, setStartDate] = useState(format(subDays(new Date(), 7), 'yyyy-MM-dd'));
@@ -32,14 +34,15 @@ export const AdminTresorerie = () => {
   }>({ orders: [], expenses: [] });
 
   const loadData = async () => {
+    if (!tenant?.id) return;
     setLoading(true);
     try {
       const start = startOfDay(new Date(startDate)).toISOString();
       const end = endOfDay(new Date(endDate)).toISOString();
       
       const [orders, expenses] = await Promise.all([
-        getFinancialData(start, end),
-        getDepenses() 
+        getFinancialData(tenant.id, start, end),
+        getDepenses(tenant.id) 
       ]);
       
       const filteredExpenses = expenses.filter(d => {
@@ -49,6 +52,7 @@ export const AdminTresorerie = () => {
 
       setData({ orders, expenses: filteredExpenses });
     } catch (error) {
+      console.error(error);
       showToast("Erreur lors de la récupération des données", "error");
     } finally {
       setLoading(false);
@@ -57,7 +61,7 @@ export const AdminTresorerie = () => {
 
   useEffect(() => {
     loadData();
-  }, [startDate, endDate]);
+  }, [startDate, endDate, tenant?.id]);
 
   // Comprehensive Profit Metrics
   const metrics = useMemo(() => calculateProfitMetrics(data.orders, data.expenses), [data]);
@@ -75,22 +79,25 @@ export const AdminTresorerie = () => {
   const realProfit = metrics.profit_net - totalExtractions;
 
   // Cash Flow Logic
-  const transactions: Transaction[] = useMemo(() => [
-    ...data.orders.map(o => ({
-      date: new Date(o.date_livraison_effective || o.date_creation),
-      type: 'Entrée' as const,
-      categorie: 'Vente',
-      description: `Commande #${o.id.substring(0, 8).toUpperCase()} - ${o.nom_client}`,
-      montant: (Number(o.montant_total) || 0) - (Number(o.frais_livraison) || 0)
-    })),
-    ...data.expenses.map(e => ({
-      date: new Date(e.date),
-      type: 'Sortie' as const,
-      categorie: e.categorie,
-      description: e.description || 'Dépense diverse',
-      montant: -Math.abs(Number(e.montant) || 0)
-    }))
-  ].sort((a, b) => b.date.getTime() - a.date.getTime()), [data]);
+  const transactions: Transaction[] = useMemo(() => {
+    const t: Transaction[] = [
+      ...data.orders.map(o => ({
+        date: new Date(o.date_livraison_effective || o.date_creation),
+        type: 'Entrée' as const,
+        categorie: 'Vente',
+        description: `Commande #${o.id.substring(0, 8).toUpperCase()} - ${o.nom_client}`,
+        montant: (Number(o.montant_total) || 0) - (Number(o.frais_livraison) || 0)
+      })),
+      ...data.expenses.map(e => ({
+        date: new Date(e.date),
+        type: 'Sortie' as const,
+        categorie: e.categorie,
+        description: e.description || 'Dépense diverse',
+        montant: -Math.abs(Number(e.montant) || 0)
+      }))
+    ];
+    return t.sort((a, b) => b.date.getTime() - a.date.getTime());
+  }, [data]);
 
   const totalInflow = useMemo(() => transactions
     .filter(t => t.type === 'Entrée')
@@ -123,7 +130,7 @@ export const AdminTresorerie = () => {
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute("download", `Tresorerie_gomboswiftciCI_${format(new Date(), 'yyyy-MM-dd')}.csv`);
+    link.setAttribute("download", `Tresorerie_${tenant?.nom || 'GomboSwift'}_${format(new Date(), 'yyyy-MM-dd')}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();

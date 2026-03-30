@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useSaas } from '../saas/SaasProvider';
 import { getCurrentFeuilleRoute, getCommandesForFeuille, markCommandeLivre, markCommandeEchouee } from '../services/livraisonService';
 import type { Commande, FeuilleRoute } from '../types';
 import { 
@@ -9,6 +10,7 @@ import {
 import { CommandeDetails } from '../components/commandes/CommandeDetails';
 
 export const Livraison = () => {
+  const { tenant } = useSaas();
   const { currentUser } = useAuth();
   const [feuille, setFeuille] = useState<FeuilleRoute | null>(null);
   const [commandes, setCommandes] = useState<Commande[]>([]);
@@ -22,13 +24,13 @@ export const Livraison = () => {
   const [modeForm, setModeForm] = useState('');
 
   const fetchData = async () => {
-    if (!currentUser) return;
+    if (!currentUser || !tenant?.id) return;
     setLoading(true);
     try {
-      const route = await getCurrentFeuilleRoute(currentUser.id);
+      const route = await getCurrentFeuilleRoute(tenant.id, currentUser.id);
       if (route) {
         setFeuille(route);
-        const cmds = await getCommandesForFeuille(route.id);
+        const cmds = await getCommandesForFeuille(tenant.id, route.id);
         setCommandes(cmds);
       }
     } catch (error) {
@@ -40,17 +42,18 @@ export const Livraison = () => {
 
   useEffect(() => {
     fetchData();
-  }, [currentUser]);
+  }, [currentUser, tenant?.id]);
 
   const handleUpdate = async () => {
     if (!selectedCommande) return;
     try {
+      if (!tenant?.id) return;
       setLoading(true);
       if (statusAction === 'livree') {
         const montant = Number(selectedCommande.montant_total); // or any logic you want
-        await markCommandeLivre(selectedCommande.id, montant, noteForm);
+        await markCommandeLivre(tenant.id, selectedCommande.id, montant, noteForm);
       } else {
-        await markCommandeEchouee(selectedCommande.id, noteForm);
+        await markCommandeEchouee(tenant.id, selectedCommande.id, noteForm);
       }
       setSelectedCommande(null);
       fetchData();

@@ -3,29 +3,31 @@ import { Depense, Commande, LigneCommande } from '../types';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
-export const getDepenses = async (): Promise<Depense[]> => {
+export const getDepenses = async (tenantId: string): Promise<Depense[]> => {
   const { data, error } = await insforge.database
     .from('depenses')
     .select('*')
+    .eq('tenant_id', tenantId)
     .order('date', { ascending: false });
   
   if (error) throw error;
   return data || [];
 };
 
-export const addDepense = async (depense: Omit<Depense, 'id'>): Promise<void> => {
+export const addDepense = async (tenantId: string, depense: Omit<Depense, 'id'>): Promise<void> => {
   const { error } = await insforge.database
     .from('depenses')
-    .insert([depense]);
+    .insert([{ ...depense, tenant_id: tenantId }]);
   
   if (error) throw error;
 };
 
-export const deleteDepense = async (id: string): Promise<void> => {
+export const deleteDepense = async (tenantId: string, id: string): Promise<void> => {
   const { error } = await insforge.database
     .from('depenses')
     .delete()
-    .eq('id', id);
+    .eq('id', id)
+    .eq('tenant_id', tenantId);
   
   if (error) throw error;
 };

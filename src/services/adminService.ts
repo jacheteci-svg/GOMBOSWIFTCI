@@ -3,10 +3,11 @@ import { insforge } from '../lib/insforge';
 
 // --- USERS MANAGEMENT ---
 
-export const getAdminUsers = async (): Promise<User[]> => {
+export const getAdminUsers = async (tenantId: string): Promise<User[]> => {
   const { data, error } = await insforge.database
     .from('users')
     .select('*')
+    .eq('tenant_id', tenantId)
     .order('nom_complet', { ascending: true });
   
   if (error) throw error;
@@ -21,20 +22,22 @@ export const createAdminUser = async (user: Omit<User, 'id'>, id?: string): Prom
   if (error) throw error;
 };
 
-export const updateAdminUser = async (id: string, data: Partial<User>): Promise<void> => {
+export const updateAdminUser = async (tenantId: string, id: string, data: Partial<User>): Promise<void> => {
   const { error } = await insforge.database
     .from('users')
     .update(data)
-    .eq('id', id);
+    .eq('id', id)
+    .eq('tenant_id', tenantId);
   
   if (error) throw error;
 };
 
-export const deleteAdminUser = async (id: string): Promise<void> => {
+export const deleteAdminUser = async (tenantId: string, id: string): Promise<void> => {
   const { error } = await insforge.database
     .from('users')
     .update({ actif: false }) // Soft delete
-    .eq('id', id);
+    .eq('id', id)
+    .eq('tenant_id', tenantId);
   
   if (error) throw error;
 };
@@ -42,21 +45,27 @@ export const deleteAdminUser = async (id: string): Promise<void> => {
 
 // --- COMMUNES MANAGEMENT ---
 
-export const getCommunes = async (): Promise<Commune[]> => {
-  const { data, error } = await insforge.database
+export const getCommunes = async (tenantId?: string): Promise<Commune[]> => {
+  let query = insforge.database
     .from('communes')
-    .select('*')
-    .order('nom', { ascending: true });
+    .select('*');
+  
+  if (tenantId) {
+    query = query.eq('tenant_id', tenantId);
+  }
+
+  const { data, error } = await query.order('nom', { ascending: true });
 
   if (error) throw error;
   return data || [];
 };
 
-export const getCommuneByName = async (nom: string): Promise<Commune | undefined> => {
+export const getCommuneByName = async (tenantId: string, nom: string): Promise<Commune | undefined> => {
   const { data, error } = await insforge.database
     .from('communes')
     .select('*')
     .ilike('nom', nom)
+    .eq('tenant_id', tenantId)
     .single();
 
   if (error && error.code !== 'PGRST116') throw error;
@@ -73,20 +82,22 @@ export const createCommune = async (commune: Omit<Commune, 'id'>): Promise<strin
   return data?.[0]?.id;
 };
 
-export const updateCommune = async (id: string, data: Partial<Commune>): Promise<void> => {
+export const updateCommune = async (tenantId: string, id: string, data: Partial<Commune>): Promise<void> => {
   const { error } = await insforge.database
     .from('communes')
     .update(data)
-    .eq('id', id);
+    .eq('id', id)
+    .eq('tenant_id', tenantId);
   
   if (error) throw error;
 };
 
-export const deleteCommune = async (id: string): Promise<void> => {
+export const deleteCommune = async (tenantId: string, id: string): Promise<void> => {
   const { error } = await insforge.database
     .from('communes')
     .delete()
-    .eq('id', id);
+    .eq('id', id)
+    .eq('tenant_id', tenantId);
   
   if (error) throw error;
 };

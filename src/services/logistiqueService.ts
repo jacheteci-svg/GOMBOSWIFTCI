@@ -1,23 +1,25 @@
 import { Commande, User } from '../types';
 import { insforge } from '../lib/insforge';
 
-export const getAvailableLivreurs = async (): Promise<User[]> => {
+export const getAvailableLivreurs = async (tenantId: string): Promise<User[]> => {
   const { data, error } = await insforge.database
     .from('users')
     .select('*')
     .eq('role', 'LIVREUR')
-    .eq('actif', true);
+    .eq('actif', true)
+    .eq('tenant_id', tenantId);
   
   if (error) throw error;
   return data || [];
 };
 
-export const creerFeuilleRoute = async (livreurId: string, commandeIds: string[]): Promise<string> => {
+export const creerFeuilleRoute = async (livreurId: string, commandeIds: string[], tenantId: string): Promise<string> => {
   // 1. Fetch commands to verify they exist and get totals
   const { data: cmdData, error: cmdFetchError } = await insforge.database
     .from('commandes')
     .select('*, clients(nom_complet, telephone)')
-    .in('id', commandeIds);
+    .in('id', commandeIds)
+    .eq('tenant_id', tenantId);
 
   if (cmdFetchError) throw new Error(`Erreur lors de la récupération des commandes : ${cmdFetchError.message}`);
   if (!cmdData || cmdData.length === 0) throw new Error("Aucune commande valide trouvée pour cette feuille de route.");
@@ -40,7 +42,8 @@ export const creerFeuilleRoute = async (livreurId: string, commandeIds: string[]
       statut_feuille: 'en_cours',
       communes_couvertes: communes,
       total_commandes: cmdData.length,
-      total_montant_theorique: total_montant
+      total_montant_theorique: total_montant,
+      tenant_id: tenantId
     }])
     .select();
 
@@ -57,28 +60,31 @@ export const creerFeuilleRoute = async (livreurId: string, commandeIds: string[]
       livreur_id: livreurId, 
       feuille_route_id: feuilleId 
     })
-    .in('id', commandeIds);
+    .in('id', commandeIds)
+    .eq('tenant_id', tenantId);
   
   if (batchUpdateError) throw new Error(`Erreur lors de l'affectation des commandes : ${batchUpdateError.message}`);
 
   return feuilleId;
 };
 
-export const getFeuillesRoute = async () => {
+export const getFeuillesRoute = async (tenantId: string) => {
   const { data, error } = await insforge.database
     .from('feuilles_route')
     .select('*, users(*)')
+    .eq('tenant_id', tenantId)
     .order('date', { ascending: false });
 
   if (error) throw error;
   return data || [];
 };
 
-export const getCommandesByFeuille = async (feuilleId: string): Promise<Commande[]> => {
+export const getCommandesByFeuille = async (tenantId: string, feuilleId: string): Promise<Commande[]> => {
   const { data: orders, error: orderError } = await insforge.database
     .from('commandes')
     .select('*, clients(nom_complet, telephone)')
-    .eq('feuille_route_id', feuilleId);
+    .eq('feuille_route_id', feuilleId)
+    .eq('tenant_id', tenantId);
 
   if (orderError) throw orderError;
   if (!orders || orders.length === 0) return [];
@@ -89,7 +95,8 @@ export const getCommandesByFeuille = async (feuilleId: string): Promise<Commande
   const { data: lines, error: linesError } = await insforge.database
     .from('lignes_commandes')
     .select('*')
-    .in('commande_id', orderIds);
+    .in('commande_id', orderIds)
+    .eq('tenant_id', tenantId);
 
   if (linesError) throw linesError;
 
@@ -101,11 +108,12 @@ export const getCommandesByFeuille = async (feuilleId: string): Promise<Commande
   }));
 };
 
-export const getCommandeByReference = async (id: string): Promise<Commande | null> => {
+export const getCommandeByReference = async (tenantId: string, id: string): Promise<Commande | null> => {
   const { data, error } = await insforge.database
     .from('commandes')
     .select('*, clients(nom_complet, telephone)')
     .eq('id', id)
+    .eq('tenant_id', tenantId)
     .single();
 
   if (error) return null;
@@ -117,7 +125,7 @@ export const getCommandeByReference = async (id: string): Promise<Commande | nul
   };
 };
 
-export const supprimerFeuilleRoute = async (feuilleId: string): Promise<void> => {
+export const supprimerFeuilleRoute = async (tenantId: string, feuilleId: string): Promise<void> => {
   // 1. Reset orders that were still 'en_cours_livraison' back to 'validee'
   await insforge.database
     .from('commandes')
@@ -127,7 +135,8 @@ export const supprimerFeuilleRoute = async (feuilleId: string): Promise<void> =>
       feuille_route_id: null 
     })
     .eq('feuille_route_id', feuilleId)
-    .eq('statut_commande', 'en_cours_livraison');
+    .eq('statut_commande', 'en_cours_livraison')
+    .eq('tenant_id', tenantId);
 
   // 2. Clear feuille_route_id for any other orders
   await insforge.database
@@ -135,13 +144,15 @@ export const supprimerFeuilleRoute = async (feuilleId: string): Promise<void> =>
     .update({ 
       feuille_route_id: null 
     })
-    .eq('feuille_route_id', feuilleId);
+    .eq('feuille_route_id', feuilleId)
+    .eq('tenant_id', tenantId);
 
   // 3. Delete the sheet
   const { error } = await insforge.database
     .from('feuilles_route')
     .delete()
-    .eq('id', feuilleId);
-
+    .eq('id', feuilleId)
+    .eq('tenant_id', tenantId);
+  
   if (error) throw error;
 };

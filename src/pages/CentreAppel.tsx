@@ -3,22 +3,25 @@ import { CommandeList } from '../components/commandes/CommandeList';
 import { AppelForm } from '../components/centre-appel/AppelForm';
 import { CommandeDetails } from '../components/commandes/CommandeDetails';
 import { subscribeToCommandesByStatus } from '../services/commandeService';
+import { useSaas } from '../saas/SaasProvider';
 import type { Commande } from '../types';
 
 export const CentreAppel = () => {
+  const { tenant } = useSaas();
   const [commandes, setCommandes] = useState<Commande[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCommande, setSelectedCommande] = useState<Commande | null>(null);
   const [viewingCommandeId, setViewingCommandeId] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!tenant?.id) return;
     setLoading(true);
-    const unsubscribe = subscribeToCommandesByStatus(['en_attente_appel', 'a_rappeler'], (data) => {
+    const unsubscribe = subscribeToCommandesByStatus(tenant.id, ['en_attente_appel', 'a_rappeler'], (data) => {
       setCommandes(data);
       setLoading(false);
     });
     return () => unsubscribe();
-  }, []);
+  }, [tenant?.id]);
 
   return (
     <>

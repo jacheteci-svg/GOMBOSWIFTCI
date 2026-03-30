@@ -27,8 +27,10 @@ import {
   ResponsiveContainer 
 } from 'recharts';
 import { useToast } from '../contexts/ToastContext';
+import { useSaas } from '../saas/SaasProvider';
 
 export const AuditTresorerie = () => {
+  const { tenant } = useSaas();
   const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [startDate, setStartDate] = useState(format(subDays(new Date(), 30), 'yyyy-MM-dd'));
@@ -41,12 +43,13 @@ export const AuditTresorerie = () => {
   const loadAuditData = async () => {
     setLoading(true);
     try {
+      if (!tenant?.id) return;
       const start = startOfDay(new Date(startDate)).toISOString();
       const end = endOfDay(new Date(endDate)).toISOString();
       
       const [orders, allExpenses] = await Promise.all([
-        getFinancialData(start, end),
-        getDepenses()
+        getFinancialData(tenant.id, start, end),
+        getDepenses(tenant.id)
       ]);
 
       const filteredExpenses = allExpenses.filter(e => {
@@ -86,7 +89,7 @@ export const AuditTresorerie = () => {
 
   useEffect(() => {
     loadAuditData();
-  }, [startDate, endDate]);
+  }, [startDate, endDate, tenant?.id]);
 
   const handleJournalExport = () => {
     let balance = 0;

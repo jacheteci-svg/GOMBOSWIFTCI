@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getAvailableLivreurs } from '../services/logistiqueService';
 import { getCommandes } from '../services/commandeService';
 import { Commande, User } from '../types';
+import { useSaas } from '../saas/SaasProvider';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   Cell
@@ -24,6 +25,7 @@ interface StaffStats {
 }
 
 export const StaffPerformance = () => {
+  const { tenant } = useSaas();
   const [stats, setStats] = useState<StaffStats[]>([]);
   const [loading, setLoading] = useState(true);
   const [timeFilter, setTimeFilter] = useState<'today' | 'week' | 'month'>('month');
@@ -32,9 +34,10 @@ export const StaffPerformance = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
+        if (!tenant?.id) return;
         const [livreurs, allCmds] = await Promise.all([
-          getAvailableLivreurs(),
-          getCommandes()
+          getAvailableLivreurs(tenant.id),
+          getCommandes(tenant.id)
         ]);
 
         const now = new Date();
@@ -89,7 +92,7 @@ export const StaffPerformance = () => {
     };
 
     fetchData();
-  }, [timeFilter]);
+  }, [timeFilter, tenant?.id]);
 
   const totalGlobalCALivraison = stats.reduce((acc: number, s: StaffStats) => acc + s.ca_livraison, 0);
   const averageSuccessRate = stats.length > 0 ? Math.round(stats.reduce((acc: number, s: StaffStats) => acc + s.taux_succes, 0) / stats.length) : 0;

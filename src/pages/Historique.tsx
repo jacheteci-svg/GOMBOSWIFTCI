@@ -9,8 +9,10 @@ import { generateDeliverySlipPDF } from '../services/pdfService';
 import { useToast } from '../contexts/ToastContext';
 import { useAuth } from '../contexts/AuthContext';
 import { reopenFeuilleRoute } from '../services/caisseService';
+import { useSaas } from '../saas/SaasProvider';
 
 export const Historique = () => {
+  const { tenant } = useSaas();
   const { showToast } = useToast();
   const [feuilles, setFeuilles] = useState<FeuilleRoute[]>([]);
   const [loading, setLoading] = useState(true);
@@ -21,9 +23,10 @@ export const Historique = () => {
   const [modalLoading, setModalLoading] = useState(false);
 
   const load = async () => {
+    if (!tenant?.id) return;
     setLoading(true);
     try {
-      const data = await getCloturedFeuilles();
+      const data = await getCloturedFeuilles(tenant.id);
       setFeuilles(data);
     } catch (e) {
       console.error(e);
@@ -34,14 +37,15 @@ export const Historique = () => {
 
   useEffect(() => {
     load();
-  }, []);
+  }, [tenant?.id]);
 
   const handleReview = async (f: FeuilleRoute, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     setSelectedFeuille(f);
     setModalLoading(true);
     try {
-      const cmds = await getCommandesByFeuille(f.id);
+      if (!tenant?.id) return;
+      const cmds = await getCommandesByFeuille(tenant.id, f.id);
       setAssociatedCommandes(cmds);
     } catch (e) {
       showToast("Erreur lors du chargement des détails", "error");
@@ -148,6 +152,7 @@ export const Historique = () => {
 };
 
 const ReviewModal = ({ feuille, commandes, loading, onClose, onRefresh, showToast }: any) => {
+  const { tenant } = useSaas();
   const { currentUser } = useAuth();
   const isAdmin = currentUser?.role === 'ADMIN' || currentUser?.role === 'GESTIONNAIRE';
 
@@ -163,7 +168,8 @@ const ReviewModal = ({ feuille, commandes, loading, onClose, onRefresh, showToas
   const handleReopen = async () => {
     if (!window.confirm("Êtes-vous sûr de vouloir ré-ouvrir cette feuille ? Elle reviendra en caisse pour traitement.")) return;
     try {
-      await reopenFeuilleRoute(feuille.id);
+      if (!tenant?.id) return;
+      await reopenFeuilleRoute(tenant.id, feuille.id);
       showToast("Feuille ré-ouverte avec succès.", "success");
       onRefresh();
       onClose();

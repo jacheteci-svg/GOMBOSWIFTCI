@@ -8,8 +8,10 @@ import { CommandeDetails } from '../components/commandes/CommandeDetails';
 import type { Client, Commande } from '../types';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { useSaas } from '../saas/SaasProvider';
 
 export const Clients = () => {
+  const { tenant } = useSaas();
   const [clients, setClients] = useState<(Client & ClientFidelityStats)[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -17,14 +19,11 @@ export const Clients = () => {
   const [selectedClient, setSelectedClient] = useState<{ client: Client & ClientFidelityStats, commandes: Commande[] } | null>(null);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchClients();
-  }, []);
-
   const fetchClients = async () => {
+    if (!tenant?.id) return;
     setLoading(true);
     try {
-      const data = await getClientsWithIntelligence();
+      const data = await getClientsWithIntelligence(tenant.id);
       setClients(data);
     } catch (error) {
       console.error(error);
@@ -33,9 +32,14 @@ export const Clients = () => {
     }
   };
 
+  useEffect(() => {
+    fetchClients();
+  }, [tenant?.id]);
+
   const openClientDetails = async (client: Client & ClientFidelityStats) => {
     try {
-      const cmds = await getClientCommandes(client.id);
+      if (!tenant?.id) return;
+      const cmds = await getClientCommandes(tenant.id, client.id);
       cmds.sort((a, b) => new Date(b.date_creation).getTime() - new Date(a.date_creation).getTime());
       setSelectedClient({ client, commandes: cmds });
     } catch(e) {
@@ -213,7 +217,6 @@ export const Clients = () => {
         </div>
       </div>
 
-      {/* RENDER MODAL OUTSIDE MAIN CONTAINER STREAM TO AVOID TRANSFORM TRAPPING */}
       {selectedClient && (
         <div className="modal-backdrop" onClick={() => setSelectedClient(null)}>
           <div className="modal-content" style={{ maxWidth: '800px', padding: 0, overflow: 'hidden' }} onClick={e => e.stopPropagation()}>

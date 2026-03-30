@@ -1,6 +1,7 @@
 import { Produit } from '../../types';
 import { Edit, PackagePlus, Image as ImageIcon } from 'lucide-react';
 import { updateProduit } from '../../services/produitService';
+import { useSaas } from '../../saas/SaasProvider';
 
 interface ProduitListProps {
   produits: Produit[];
@@ -9,9 +10,11 @@ interface ProduitListProps {
 }
 
 export const ProduitList = ({ produits, onEdit, onStock }: ProduitListProps) => {
+  const { tenant } = useSaas();
   const toggleActive = async (produit: Produit) => {
     try {
-      await updateProduit(produit.id, { actif: !produit.actif });
+      if (!tenant?.id) return;
+      await updateProduit(tenant.id, produit.id, { actif: !produit.actif });
     } catch (error) {
       console.error("Error updating status", error);
     }

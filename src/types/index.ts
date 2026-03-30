@@ -74,6 +74,8 @@ export interface User {
   permissions?: string[]; // Dynamic permissions
   actif?: boolean;
   tenant_id: string;
+  tenant_slug?: string;
+  tenant_name?: string;
   tenant?: Tenant;
 }
 

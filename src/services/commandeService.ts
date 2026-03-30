@@ -2,11 +2,12 @@ import { Commande, LigneCommande } from '../types';
 import { insforge } from '../lib/insforge';
 import { addMouvementStock } from './produitService';
 
-export const getCommandeWithLines = async (id: string): Promise<Commande & { lignes: LigneCommande[] }> => {
+export const getCommandeWithLines = async (tenantId: string, id: string): Promise<Commande & { lignes: LigneCommande[] }> => {
   const { data: cmd, error: cmdError } = await insforge.database
     .from('commandes')
     .select('*, clients(*)')
     .eq('id', id)
+    .eq('tenant_id', tenantId)
     .single();
 
   if (cmdError) throw cmdError;
@@ -26,10 +27,11 @@ export const getCommandeWithLines = async (id: string): Promise<Commande & { lig
   };
 };
 
-export const getCommandes = async (): Promise<Commande[]> => {
+export const getCommandes = async (tenantId: string): Promise<Commande[]> => {
   const { data, error } = await insforge.database
     .from('commandes')
-    .select('*, clients(nom_complet, telephone)')
+    .select('*, clients(*)')
+    .eq('tenant_id', tenantId)
     .order('date_creation', { ascending: false });
   
   if (error) throw error;
@@ -41,16 +43,18 @@ export const getCommandes = async (): Promise<Commande[]> => {
   }));
 };
 
-export const subscribeToCommandes = (callback: (commandes: Commande[]) => void) => {
-  getCommandes().then(callback);
-  const interval = setInterval(() => getCommandes().then(callback), 3000);
+export const subscribeToCommandes = (tenantId: string, callback: (commandes: Commande[]) => void) => {
+  const fetchAndCallback = () => getCommandes(tenantId).then(callback);
+  fetchAndCallback();
+  const interval = setInterval(fetchAndCallback, 3000);
   return () => clearInterval(interval);
 };
 
-export const getCommandesByStatus = async (statusList: string[]): Promise<(Commande & { lignes: LigneCommande[] })[]> => {
+export const getCommandesByStatus = async (tenantId: string, statusList: string[]): Promise<(Commande & { lignes: LigneCommande[] })[]> => {
   const { data: orders, error: orderError } = await insforge.database
     .from('commandes')
     .select('*, clients(nom_complet, telephone)')
+    .eq('tenant_id', tenantId)
     .in('statut_commande', statusList)
     .order('date_creation', { ascending: false });
 
@@ -70,15 +74,17 @@ export const getCommandesByStatus = async (statusList: string[]): Promise<(Comma
   }));
 };
 
-export const subscribeToCommandesByStatus = (statusList: string[], callback: (commandes: Commande[]) => void) => {
-  getCommandesByStatus(statusList).then(callback);
-  const interval = setInterval(() => getCommandesByStatus(statusList).then(callback), 3000);
+export const subscribeToCommandesByStatus = (tenantId: string, statusList: string[], callback: (commandes: Commande[]) => void) => {
+  const fetchAndCallback = () => getCommandesByStatus(tenantId, statusList).then(callback);
+  fetchAndCallback();
+  const interval = setInterval(fetchAndCallback, 3000);
   return () => clearInterval(interval);
 };
 
-export const createCommandeBase = async (commande: Omit<Commande, 'id'>, lignes: Omit<LigneCommande, 'id' | 'commande_id'>[]): Promise<string> => {
+export const createCommandeBase = async (tenantId: string, commande: Omit<Commande, 'id'>, lignes: Omit<LigneCommande, 'id' | 'commande_id'>[]): Promise<string> => {
   commande.date_creation = new Date();
   commande.statut_commande = 'en_attente_appel'; 
+  commande.tenant_id = tenantId;
 
   const { data: cmdData, error: cmdError } = await insforge.database
     .from('commandes')
@@ -106,7 +112,8 @@ export const createCommandeBase = async (commande: Omit<Commande, 'id'>, lignes:
       .insert([{ 
         ...l, 
         commande_id: id,
-        prix_achat_unitaire: prodData?.prix_achat || 0 
+        prix_achat_unitaire: prodData?.prix_achat || 0,
+        tenant_id: tenantId
       }]);
     
     if (lineError) {
@@ -115,7 +122,7 @@ export const createCommandeBase = async (commande: Omit<Commande, 'id'>, lignes:
     }
 
     try {
-      await addMouvementStock({
+      await addMouvementStock(tenantId, {
         produit_id: l.produit_id,
         type_mouvement: 'sortie',
         quantite: l.quantite,
@@ -128,12 +135,13 @@ export const createCommandeBase = async (commande: Omit<Commande, 'id'>, lignes:
   return id;
 };
 
-export const updateCommandeStatus = async (id: string, status: string, additionalData: any = {}): Promise<void> => {
+export const updateCommandeStatus = async (tenantId: string, id: string, status: string, additionalData: any = {}): Promise<void> => {
   // 1. Fetch current status and lines
   const { data: currentCmd } = await insforge.database
     .from('commandes')
     .select('statut_commande')
     .eq('id', id)
+    .eq('tenant_id', tenantId)
     .single();
 
   if (!currentCmd) throw new Error("Commande introuvable");
@@ -156,7 +164,8 @@ export const updateCommandeStatus = async (id: string, status: string, additiona
   const { error } = await insforge.database
     .from('commandes')
     .update(updatePayload)
-    .eq('id', id);
+    .eq('id', id)
+    .eq('tenant_id', tenantId);
   
   if (error) throw error;
 
@@ -172,11 +181,12 @@ export const updateCommandeStatus = async (id: string, status: string, additiona
       const { data: lines } = await insforge.database
         .from('lignes_commandes')
         .select('*')
-        .eq('commande_id', id);
+        .eq('commande_id', id)
+        .eq('tenant_id', tenantId);
 
       if (lines && lines.length > 0) {
         for (const l of lines) {
-          await addMouvementStock({
+          await addMouvementStock(tenantId, {
             produit_id: l.produit_id,
             type_mouvement: isNowActive ? 'sortie' : 'entree',
             quantite: l.quantite,
@@ -190,20 +200,21 @@ export const updateCommandeStatus = async (id: string, status: string, additiona
   }
 };
 
-export const bulkUpdateCommandeStatus = async (ids: string[], status: string, additionalData: any = {}): Promise<void> => {
+export const bulkUpdateCommandeStatus = async (tenantId: string, ids: string[], status: string, additionalData: any = {}): Promise<void> => {
   for (const id of ids) {
     try {
-      await updateCommandeStatus(id, status, additionalData);
+      await updateCommandeStatus(tenantId, id, status, additionalData);
     } catch (e) {
       console.error(`Error updating order ${id}:`, e);
     }
   }
 };
 
-export const getTopSellingProducts = async (limit = 10, days?: number, start?: string, end?: string): Promise<{ nom: string, nb_ventes: number, total_ca: number, total_sorties: number, taux_succes: number }[]> => {
+export const getTopSellingProducts = async (tenantId: string, limit = 10, days?: number, start?: string, end?: string): Promise<any[]> => {
   let query = insforge.database
     .from('lignes_commandes')
-    .select('*, commandes!inner(statut_commande, date_creation)');
+    .select('*, commandes!inner(statut_commande, date_creation, tenant_id)')
+    .eq('commandes.tenant_id', tenantId);
 
   if (days && days > 0) {
     const startDate = new Date();
@@ -267,22 +278,24 @@ export const getTopSellingProducts = async (limit = 10, days?: number, start?: s
     .slice(0, limit);
 };
 
-export const deleteCommande = async (id: string): Promise<void> => {
+export const deleteCommande = async (tenantId: string, id: string): Promise<void> => {
   const { error } = await insforge.database
     .from('commandes')
     .delete()
-    .eq('id', id);
+    .eq('id', id)
+    .eq('tenant_id', tenantId);
   
   if (error) throw error;
 };
 
-export const getFinancialData = async (startDate?: string, endDate?: string): Promise<(Commande & { lignes: LigneCommande[] })[]> => {
+export const getFinancialData = async (tenantId: string, startDate?: string, endDate?: string): Promise<(Commande & { lignes: LigneCommande[] })[]> => {
   // Correct grouping: (date_livraison_effective IN range) OR (updated_at IN range)
   const filterString = `and(date_livraison_effective.gte.${startDate},date_livraison_effective.lte.${endDate}),and(updated_at.gte.${startDate},updated_at.lte.${endDate})`;
   
   let query = insforge.database
     .from('commandes')
     .select('*, clients(nom_complet, telephone)')
+    .eq('tenant_id', tenantId)
     .in('statut_commande', ['livree', 'terminee', 'LIVREE', 'TERMINEE'])
     .or(filterString);
 
