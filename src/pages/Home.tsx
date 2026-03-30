@@ -94,9 +94,9 @@ export const Home = () => {
         ))}
       </div>
 
-      <div style={{ marginTop: '4rem', padding: '2rem', textAlign: 'center', background: '#f8fafc', borderRadius: '24px', border: '1px solid #e2e8f0' }}>
-         <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 600 }}>
-            Votre accès est sécurisé et chiffré. Rôle actuel : <span className="badge badge-info" style={{ textTransform: 'uppercase' }}>{currentUser?.role}</span>
+      <div style={{ marginTop: '4rem', padding: '2rem', textAlign: 'center', background: 'rgba(255,255,255,0.02)', borderRadius: '24px', border: '1px solid var(--glass-border)' }}>
+         <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '1rem', fontWeight: 700 }}>
+            Session sécurisée • Nexus Pulse Active • Rôle : <span style={{ color: '#06b6d4', fontWeight: 950, textTransform: 'uppercase' }}>{currentUser?.role}</span>
          </p>
       </div>
     </div>

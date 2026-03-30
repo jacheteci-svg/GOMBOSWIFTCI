@@ -137,7 +137,7 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
       section: 'Infrastructure',
       items: [
         { path: '/super-admin/settings', icon: ShieldCheck, label: 'Sécurité & Logs', permission: 'SUPER_ADMIN' },
-        { path: '/profil', icon: UserIcon, label: 'Profil Admin', permission: 'SUPER_ADMIN' },
+        { path: '/super-admin/overview', icon: UserIcon, label: 'Profil Admin', permission: 'SUPER_ADMIN' },
       ]
     }
   ];
@@ -259,10 +259,10 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
           <div style={{ padding: '0.75rem 1.25rem' }}>
             <Link 
               to="/super-admin/overview" 
-              className="btn btn-primary btn-sm" 
-              style={{ width: '100%', borderRadius: '10px', fontSize: '0.7rem', fontWeight: 800, gap: '0.5rem' }}
+              className="btn btn-primary" 
+              style={{ width: '100%', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 950, gap: '0.75rem', height: '50px', background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)', border: 'none', boxShadow: '0 8px 20px rgba(6, 182, 212, 0.3)' }}
             >
-              <ShieldCheck size={14} /> RETOUR AU NEXUS
+              <ShieldCheck size={18} /> MISSION NEXUS
             </Link>
           </div>
         )}
