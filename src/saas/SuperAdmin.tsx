@@ -452,32 +452,48 @@ const SupportTab = () => {
 /* -------------------------------------------------------------------------- */
 const SettingsTab = () => {
   return (
-    <div style={{ animation: 'fadeIn 0.3s ease' }}>
-      <div className="card glass-effect" style={{ padding: '2rem' }}>
-        <h3 style={{ margin: 0, fontWeight: 900, fontSize: '1.2rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Settings size={18} color="var(--primary)" /> Paramètres de Sécurité SaaS
+    <div style={{ animation: 'fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1)', maxWidth: '800px', margin: '0 auto' }}>
+      
+      {/* General Settings */}
+      <div className="card glass-effect" style={{ padding: '2.5rem', marginBottom: '2.5rem', borderRadius: '16px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+        <h3 style={{ margin: 0, fontWeight: 900, fontSize: '1.4rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'white' }}>
+          <Settings size={22} color="var(--primary)" /> Configuration Globale
         </h3>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '2rem', lineHeight: 1.6 }}>
+          Paramétrez les accès publics de votre plateforme SaaS.
+        </p>
         
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <div>
-              <h4 style={{ margin: 0, color: 'white', fontWeight: 800, marginBottom: '0.3rem' }}>Bloquer les nouvelles inscriptions</h4>
-              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>Désactive temporairement le formulaire d'inscription sur la Landing Page (Maintenance).</p>
-            </div>
-            <button className="btn btn-outline" style={{ borderColor: 'rgba(255,255,255,0.2)', color: 'white' }}>Activer Verrou</button>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem', background: 'rgba(0,0,0,0.15)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.03)', transition: 'all 0.3s' }} className="hover-lift">
+          <div>
+            <h4 style={{ margin: 0, color: 'white', fontWeight: 800, fontSize: '1.05rem', marginBottom: '0.3rem' }}>Bloquer les nouvelles inscriptions</h4>
+            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)' }}>Désactive temporairement le formulaire d'inscription public.</p>
           </div>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem', background: 'rgba(239,68,68,0.05)', borderRadius: '12px', border: '1px solid rgba(239,68,68,0.2)' }}>
-            <div>
-              <h4 style={{ margin: 0, color: '#ef4444', fontWeight: 800, marginBottom: '0.3rem' }}>Coupure Totale (Kill Switch)</h4>
-              <p style={{ margin: 0, fontSize: '0.85rem', color: '#fca5a5' }}>Déconnecte instantanément TOUS les locataires et affiche une page de maintenance globale.</p>
-            </div>
-            <button className="btn" style={{ background: '#ef4444', color: 'white', fontWeight: 800 }}>DANGER ZONE <Power size={16} style={{ marginLeft: '0.5rem' }} /></button>
-          </div>
-
+          <button className="btn btn-outline" style={{ borderColor: 'rgba(255,255,255,0.2)', color: 'white', borderRadius: '8px', padding: '0.6rem 1.2rem', fontWeight: 700 }}>Activer Verrou</button>
         </div>
       </div>
+
+      {/* Danger Zone (Vercel Style) */}
+      <h3 style={{ margin: '0 0 1rem 0.5rem', fontWeight: 900, fontSize: '1.1rem', color: '#ef4444', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        Zone Critique (Danger Zone)
+      </h3>
+      <div style={{ border: '1px solid rgba(239,68,68,0.5)', borderRadius: '16px', overflow: 'hidden' }}>
+        <div style={{ padding: '2rem', background: 'rgba(2,6,23,0.6)', backdropFilter: 'blur(10px)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+            <div style={{ flex: 1, minWidth: '300px' }}>
+              <h4 style={{ margin: 0, color: '#f87171', fontWeight: 800, fontSize: '1.1rem', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Power size={18} /> Coupure Totale (Kill Switch)
+              </h4>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: '#fca5a5', lineHeight: 1.5 }}>
+                Déconnecte instantanément TOUTES les organisations et affiche une page de maintenance globale. Aucune transaction ne pourra plus passer.
+              </p>
+            </div>
+            <button className="btn" style={{ background: '#ef4444', color: 'white', fontWeight: 900, padding: '0.8rem 1.5rem', borderRadius: '8px', border: '1px solid #b91c1c', boxShadow: '0 4px 15px rgba(239,68,68,0.3)' }}>
+              DÉCLENCHER ARRÊT
+            </button>
+          </div>
+        </div>
+      </div>
+
     </div>
   );
 };
@@ -515,42 +531,89 @@ const BroadcastTab = ({ tenants }: { tenants: Tenant[] }) => {
   };
 
   return (
-    <div style={{ animation: 'fadeIn 0.3s ease', display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 2fr', gap: '2rem' }} className="mobile-stack">
-      <div className="card glass-effect" style={{ padding: '2rem', height: 'fit-content' }}>
-        <h3 style={{ margin: 0, fontWeight: 900, fontSize: '1.2rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Users size={18} color="var(--primary)" /> Audiences</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
-          <TargetOption active={target === 'ALL'} onClick={() => setTarget('ALL')} title="Toutes les entreprises" desc={`${tenants.length} tenants au total`} icon={<Globe size={18} />} />
-          <TargetOption active={target === 'ACTIVE'} onClick={() => setTarget('ACTIVE')} title="Actifs uniquement" desc="Exclut les comptes suspendus" icon={<CheckCircle size={18} />} />
-          <TargetOption active={target === 'CUSTOM'} onClick={() => setTarget('CUSTOM')} title="Sélection manuelle" desc="Choisissez précisément" icon={<Building size={18} />} />
-        </div>
-        {target === 'CUSTOM' && (
-          <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', maxHeight: '250px', overflowY: 'auto' }}>
-            {tenants.map(t => (
-              <label key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem', cursor: 'pointer', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                <input type="checkbox" checked={selectedTenants.includes(t.id)} onChange={(e) => { e.target.checked ? setSelectedTenants([...selectedTenants, t.id]) : setSelectedTenants(selectedTenants.filter(id => id !== t.id)) }} style={{ width: '16px', height: '16px', accentColor: 'var(--primary)' }} />
-                <div><div style={{ fontSize: '0.85rem', fontWeight: 700 }}>{t.nom}</div><div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{t.email_contact}</div></div>
-              </label>
-            ))}
+    <div style={{ animation: 'fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1)', display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '2.5rem', maxWidth: '1200px', margin: '0 auto' }} className="mobile-stack">
+      
+      {/* Colonne Gauche: Audience */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <div style={{ padding: '2rem', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
+          <h3 style={{ margin: 0, fontWeight: 900, fontSize: '1.25rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'white' }}>
+            <Users size={20} color="var(--primary)" /> Configuration de l'Audience
+          </h3>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+            <TargetOption active={target === 'ALL'} onClick={() => setTarget('ALL')} title="Toutes les entreprises" desc={`${tenants.length} tenants au total`} icon={<Globe size={18} />} />
+            <TargetOption active={target === 'ACTIVE'} onClick={() => setTarget('ACTIVE')} title="Actifs uniquement" desc="Exclut les comptes suspendus" icon={<CheckCircle size={18} />} />
+            <TargetOption active={target === 'CUSTOM'} onClick={() => setTarget('CUSTOM')} title="Sélection manuelle" desc="Choisissez précisément" icon={<Building size={18} />} />
           </div>
-        )}
+
+          {target === 'CUSTOM' && (
+            <div style={{ marginTop: '1rem', background: 'rgba(0,0,0,0.15)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.03)', maxHeight: '300px', overflowY: 'auto' }} className="custom-scroll">
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem', fontWeight: 600 }}>Cochez les destinataires :</p>
+              {tenants.map(t => (
+                <label key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.6rem', cursor: 'pointer', borderBottom: '1px solid rgba(255,255,255,0.02)', transition: 'background 0.2s', borderRadius: '8px' }}>
+                  <input type="checkbox" checked={selectedTenants.includes(t.id)} onChange={(e) => { e.target.checked ? setSelectedTenants([...selectedTenants, t.id]) : setSelectedTenants(selectedTenants.filter(id => id !== t.id)) }} style={{ width: '18px', height: '18px', accentColor: 'var(--primary)', cursor: 'pointer' }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'white' }}>{t.nom}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{t.email_contact}</div>
+                  </div>
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="card glass-effect" style={{ padding: '2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-          <h3 style={{ margin: 0, fontWeight: 900, fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Send size={18} color="var(--primary)" /> Éditeur</h3>
-          <span style={{ fontSize: '0.8rem', fontWeight: 800, background: 'rgba(99,102,241,0.1)', color: '#818cf8', padding: '0.4rem 0.8rem', borderRadius: '20px' }}>{recipientsCount} Destinataires</span>
-        </div>
-        <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
-          <button onClick={() => setChannels({...channels, email: !channels.email})} className={`btn ${channels.email ? 'btn-primary' : 'btn-outline'}`} style={{ flex: 1, gap: '0.5rem', background: channels.email ? '#2563eb' : 'transparent', borderColor: channels.email ? '#2563eb' : 'rgba(255,255,255,0.1)' }}><Mail size={18} /> Email</button>
-          <button onClick={() => setChannels({...channels, whatsapp: !channels.whatsapp})} className={`btn ${channels.whatsapp ? 'btn-primary' : 'btn-outline'}`} style={{ flex: 1, gap: '0.5rem', background: channels.whatsapp ? '#16a34a' : 'transparent', borderColor: channels.whatsapp ? '#16a34a' : 'rgba(255,255,255,0.1)' }}><MessageSquare size={18} /> WhatsApp</button>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {channels.email && (<div><label style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.5rem', display: 'block' }}>Objet <span style={{ color: '#ef4444' }}>*</span></label><input type="text" className="form-input" placeholder="Sujet de l'annonce..." value={subject} onChange={e => setSubject(e.target.value)} style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)' }} /></div>)}
+      {/* Colonne Droite: Composeur */}
+      <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', display: 'flex', flexDirection: 'column' }}>
+        
+        {/* Header Composeur */}
+        <div style={{ padding: '2rem 2rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.04)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
-            <label style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}><span>Corps du Message <span style={{ color: '#ef4444' }}>*</span></span><span style={{ fontWeight: 500 }}>Soutient les émojis 🎉</span></label>
-            <textarea className="form-input" placeholder="Rédigez ici..." rows={6} value={message} onChange={e => setMessage(e.target.value)} style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', resize: 'vertical' }} />
+            <h3 style={{ margin: 0, fontWeight: 900, fontSize: '1.4rem', display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'white' }}>
+              <Send size={22} color="var(--primary)" /> Composeur Principal
+            </h3>
+            <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>Envoyez des mises à jour aux locataires</p>
           </div>
-          <button onClick={handleSendBroadcast} disabled={loading || recipientsCount === 0} className="btn btn-primary" style={{ height: '56px', fontSize: '1.05rem', fontWeight: 900, background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)' }}>{loading ? 'Diffusion en cours...' : 'CONFIRMER LA DIFFUSION'} <Send size={20} /></button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(99,102,241,0.1)', padding: '0.5rem 1rem', borderRadius: '30px', border: '1px solid rgba(99,102,241,0.2)' }}>
+            <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: recipientsCount > 0 ? '#10b981' : '#f43f5e', boxShadow: `0 0 10px ${recipientsCount > 0 ? '#10b981' : '#f43f5e'}` }}></span>
+            <span style={{ fontSize: '0.9rem', fontWeight: 800, color: 'white' }}>{recipientsCount} Destinataires</span>
+          </div>
+        </div>
+
+        {/* Corps du Composeur */}
+        <div style={{ padding: '2rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          
+          {/* Sélection Canaux */}
+          <div>
+            <label style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.8rem', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Canaux de Diffusion</label>
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <button onClick={() => setChannels({...channels, email: !channels.email})} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', padding: '1rem', borderRadius: '12px', background: channels.email ? 'rgba(59,130,246,0.15)' : 'rgba(255,255,255,0.03)', border: `1px solid ${channels.email ? 'rgba(59,130,246,0.5)' : 'rgba(255,255,255,0.05)'}`, color: channels.email ? '#60a5fa' : 'var(--text-muted)', fontWeight: 800, fontSize: '1rem', cursor: 'pointer', transition: 'all 0.2s', boxShadow: channels.email ? '0 4px 15px rgba(59,130,246,0.1)' : 'none' }}>
+                <Mail size={20} /> E-Mail Direct
+              </button>
+              <button onClick={() => setChannels({...channels, whatsapp: !channels.whatsapp})} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', padding: '1rem', borderRadius: '12px', background: channels.whatsapp ? 'rgba(22,163,74,0.15)' : 'rgba(255,255,255,0.03)', border: `1px solid ${channels.whatsapp ? 'rgba(22,163,74,0.5)' : 'rgba(255,255,255,0.05)'}`, color: channels.whatsapp ? '#4ade80' : 'var(--text-muted)', fontWeight: 800, fontSize: '1rem', cursor: 'pointer', transition: 'all 0.2s', boxShadow: channels.whatsapp ? '0 4px 15px rgba(22,163,74,0.1)' : 'none' }}>
+                <MessageSquare size={20} /> WhatsApp
+              </button>
+            </div>
+          </div>
+
+          {channels.email && (
+            <div>
+              <label style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.6rem', display: 'block', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Objet de l'E-Mail <span style={{ color: '#ef4444' }}>*</span></label>
+              <input type="text" placeholder="Ex: GomboSwiftCI V2 - Nouvelle Mise à jour ! 🎉" value={subject} onChange={e => setSubject(e.target.value)} style={{ width: '100%', padding: '1rem 1.25rem', fontSize: '1rem', background: 'rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', color: 'white', outline: 'none', transition: 'border 0.2s' }} onFocus={(e) => e.target.style.borderColor = 'var(--primary)'} onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.08)'} />
+            </div>
+          )}
+
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
+              <label style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Texte de l'Annonce <span style={{ color: '#ef4444' }}>*</span></label>
+              <span style={{ fontSize: '0.75rem', color: '#8b5cf6', fontWeight: 700, background: 'rgba(139,92,246,0.1)', padding: '2px 8px', borderRadius: '10px' }}>MarkDown & Emojis supportés</span>
+            </div>
+            <textarea placeholder="Chers partenaires, nous sommes ravis de vous annoncer..." value={message} onChange={e => setMessage(e.target.value)} style={{ width: '100%', flex: 1, minHeight: '200px', padding: '1.25rem', fontSize: '1.05rem', lineHeight: 1.6, background: 'rgba(0,0,0,0.15)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', color: 'white', resize: 'vertical', outline: 'none', transition: 'border 0.2s', fontFamily: 'inherit' }} onFocus={(e) => e.target.style.borderColor = 'var(--primary)'} onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.08)'} />
+          </div>
+
+          <button onClick={handleSendBroadcast} disabled={loading || recipientsCount === 0} className="btn" style={{ width: '100%', height: '60px', fontSize: '1.1rem', fontWeight: 900, background: (loading || recipientsCount === 0) ? 'rgba(255,255,255,0.05)' : 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', color: (loading || recipientsCount === 0) ? '#64748b' : 'white', borderRadius: '12px', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', cursor: (loading || recipientsCount === 0) ? 'not-allowed' : 'pointer', boxShadow: (loading || recipientsCount === 0) ? 'none' : '0 10px 25px -5px rgba(99,102,241,0.5)', transition: 'all 0.3s' }}>
+             {loading ? <div className="spinner" style={{ width: '24px', height: '24px', borderWidth: '3px' }}></div> : <>LANCER LA DIFFUSION <Send size={22} /></>}
+          </button>
         </div>
       </div>
     </div>
