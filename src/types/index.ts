@@ -19,6 +19,25 @@ export type Permission =
 
 export type Plan = 'FREE' | 'BASIC' | 'PREMIUM' | 'ENTERPRISE' | 'CUSTOM';
 
+export interface SaasPlanDb {
+  id: string;
+  name: string;
+  price_fcfa: number;
+  period: string;
+  description: string;
+  features: string[];
+  color: string;
+  icon_name: string;
+  is_popular: boolean;
+  max_orders_month: number | null;
+  max_users: number | null;
+  module_caisse: boolean;
+  module_audit: boolean;
+  module_api: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Tenant {
   id: string;
   nom: string;

@@ -4,7 +4,7 @@ import { Tenant } from '../types';
 import {
   Building, Users, Plus, Search, CheckCircle,
   XCircle, TrendingUp, Globe, Zap, X, MessageSquare,
-  Mail, Send, AlertTriangle, CreditCard, LifeBuoy, Settings, Power, Eye
+  Mail, Send, AlertTriangle, CreditCard, LifeBuoy, Settings, Power, Eye, Crown, Save
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { useToast } from '../contexts/ToastContext';
@@ -51,7 +51,7 @@ export const SuperAdmin: React.FC = () => {
   }, []);
 
   // Redirect invalid paths to overview
-  if (!['OVERVIEW', 'TENANTS', 'BILLING', 'SUPPORT', 'SETTINGS', 'BROADCAST'].includes(activeTab) && activeTab !== 'SUPER-ADMIN') {
+  if (!['OVERVIEW', 'TENANTS', 'BILLING', 'SUPPORT', 'SETTINGS', 'BROADCAST', 'PLANS'].includes(activeTab) && activeTab !== 'SUPER-ADMIN') {
       return <Navigate to="/super-admin/overview" replace />;
   }
 
@@ -61,23 +61,70 @@ export const SuperAdmin: React.FC = () => {
   }
 
   return (
-    <div style={{ animation: 'pageEnter 0.6s ease', paddingBottom: '3rem' }}>
+    <div style={{ 
+      animation: 'pageEnter 0.6s ease', 
+      paddingBottom: '3rem',
+      background: '#020617', // Deep dark Nexus background
+      color: '#f8fafc',
+      margin: '-2rem', // Negate page-content padding
+      padding: '2rem 2rem 5rem 2rem',
+      minHeight: 'calc(100vh - 70px)'
+    }}>
       
       {/* Header & Nexus Navigation */}
-      <div style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
+      <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h1 className="text-premium" style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-0.03em', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <Zap size={36} color="var(--primary)" /> Nexus Command Center
           </h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1rem', fontWeight: 500, marginTop: '0.5rem' }}>
+          <p style={{ color: '#94a3b8', fontSize: '1rem', fontWeight: 500, marginTop: '0.5rem' }}>
             Console d'administration globale pour GomboSwiftCI SaaS
           </p>
         </div>
       </div>
 
+      {/* Horizontal Tabs Navigation */}
+      <div style={{ 
+        display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '1rem', marginBottom: '2rem',
+        borderBottom: '1px solid rgba(255,255,255,0.05)'
+      }} className="custom-scroll">
+        {[
+          { id: 'OVERVIEW', label: 'Vue Globale', icon: <TrendingUp size={16} /> },
+          { id: 'TENANTS', label: 'Organisations', icon: <Building size={16} /> },
+          { id: 'PLANS', label: 'Abonnements', icon: <Crown size={16} /> },
+          { id: 'BILLING', label: 'Facturation (MRR)', icon: <CreditCard size={16} /> },
+          { id: 'SUPPORT', label: 'Help Desk', icon: <LifeBuoy size={16} /> },
+          { id: 'BROADCAST', label: 'Broadcast', icon: <Activity size={16} /> },
+          { id: 'SETTINGS', label: 'Sécurité Plateforme', icon: <ShieldCheck size={16} /> }
+        ].map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => window.location.href = `/super-admin/${tab.id.toLowerCase()}`}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '0.5rem',
+              padding: '0.75rem 1.25rem',
+              borderRadius: '12px',
+              border: '1px solid',
+              borderColor: activeTab === tab.id ? 'rgba(99,102,241,0.5)' : 'transparent',
+              background: activeTab === tab.id ? 'rgba(99,102,241,0.1)' : 'transparent',
+              color: activeTab === tab.id ? 'white' : '#64748b',
+              fontWeight: 700,
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              transition: 'all 0.2s',
+            }}
+          >
+            <span style={{ color: activeTab === tab.id ? 'var(--primary)' : 'inherit' }}>{tab.icon}</span>
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       {/* TABS CONTENT */}
       {activeTab === 'OVERVIEW' && <OverviewTab stats={platformStats} tenants={tenants} />}
       {activeTab === 'TENANTS' && <TenantsTab tenants={tenants} fetchData={fetchData} loading={loading} />}
+      {activeTab === 'PLANS' && <PlansTab />}
       {activeTab === 'BILLING' && <BillingTab tenants={tenants} />}
       {activeTab === 'SUPPORT' && <SupportTab />}
       {activeTab === 'BROADCAST' && <BroadcastTab tenants={tenants} />}
@@ -615,6 +662,144 @@ const BroadcastTab = ({ tenants }: { tenants: Tenant[] }) => {
              {loading ? <div className="spinner" style={{ width: '24px', height: '24px', borderWidth: '3px' }}></div> : <>LANCER LA DIFFUSION <Send size={22} /></>}
           </button>
         </div>
+      </div>
+    </div>
+  );
+};
+
+/* -------------------------------------------------------------------------- */
+/*                                 PLANS TAB                                  */
+/* -------------------------------------------------------------------------- */
+const PlansTab = () => {
+  const { showToast } = useToast();
+  const [plans, setPlans] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState<string | null>(null);
+
+  const fetchPlans = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await insforge.database.from('saas_plans').select('*').order('price_fcfa', { ascending: true });
+      if (error) throw error;
+      setPlans(data || []);
+    } catch (err: any) {
+      showToast(err.message || 'Erreur chargement plans', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPlans();
+  }, []);
+
+  const handleChange = (id: string, field: string, value: any) => {
+    setPlans(prev => prev.map(p => p.id === id ? { ...p, [field]: value } : p));
+  };
+
+  const handleSave = async (plan: any) => {
+    setSaving(plan.id);
+    try {
+      const { error } = await insforge.database.from('saas_plans').update({
+        name: plan.name,
+        price_fcfa: plan.price_fcfa,
+        description: plan.description,
+        is_popular: plan.is_popular,
+        module_caisse: plan.module_caisse,
+        module_audit: plan.module_audit,
+        module_api: plan.module_api,
+        max_users: plan.max_users
+      }).eq('id', plan.id);
+      if (error) throw error;
+      showToast(`Forfait ${plan.name} mis à jour !`, 'success');
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  if (loading) {
+    return <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem' }}><div className="spinner"></div></div>;
+  }
+
+  return (
+    <div style={{ animation: 'fadeIn 0.3s ease' }}>
+      <div style={{ marginBottom: '2rem' }}>
+        <h3 style={{ margin: 0, fontWeight: 900, fontSize: '1.4rem', color: 'white', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <Crown size={24} color="var(--primary)" /> Gestion des Forfaits
+        </h3>
+        <p style={{ color: 'var(--text-muted)' }}>Mettez à jour les tarifs et fonctionnalités des forfaits SaaS qui apparaîtront publiquement.</p>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
+        {plans.map(plan => (
+          <div key={plan.id} className="card glass-effect" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem', border: plan.is_popular ? '1px solid var(--primary)' : '1px solid rgba(255,255,255,0.05)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 800, background: 'rgba(255,255,255,0.05)', padding: '4px 10px', borderRadius: '20px', color: '#94a3b8' }}>
+                ID: {plan.id}
+              </div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'white', cursor: 'pointer' }}>
+                Populaire 
+                <input type="checkbox" checked={plan.is_popular} onChange={e => handleChange(plan.id, 'is_popular', e.target.checked)} style={{ width: '16px', height: '16px' }} />
+              </label>
+            </div>
+
+            <div>
+              <label className="form-label">Nom du plan</label>
+              <input type="text" className="form-input" value={plan.name} onChange={e => handleChange(plan.id, 'name', e.target.value)} style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }} />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div>
+                <label className="form-label">Prix (FCFA)</label>
+                <input type="number" className="form-input" value={plan.price_fcfa} onChange={e => handleChange(plan.id, 'price_fcfa', parseInt(e.target.value))} style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }} />
+              </div>
+              <div>
+                <label className="form-label">Type</label>
+                <input type="text" className="form-input" disabled value={plan.period} style={{ background: 'rgba(0,0,0,0.1)', color: '#64748b', border: 'none' }} />
+              </div>
+            </div>
+
+            <div>
+              <label className="form-label">Description vitrine</label>
+              <textarea className="form-input" value={plan.description || ''} onChange={e => handleChange(plan.id, 'description', e.target.value)} rows={2} style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', resize: 'none' }} />
+            </div>
+
+            {/* Modules Access */}
+            <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '12px' }}>
+              <label className="form-label" style={{ marginBottom: '1rem' }}>Permissions & Modules</label>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.85rem', color: '#cbd5e1' }}>
+                  <span>Module Caisse / Retour</span>
+                  <input type="checkbox" checked={plan.module_caisse} onChange={e => handleChange(plan.id, 'module_caisse', e.target.checked)} style={{ accentColor: 'var(--primary)' }} />
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.85rem', color: '#cbd5e1' }}>
+                  <span>Trésorerie & Audit Expert</span>
+                  <input type="checkbox" checked={plan.module_audit} onChange={e => handleChange(plan.id, 'module_audit', e.target.checked)} style={{ accentColor: 'var(--primary)' }} />
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.85rem', color: '#cbd5e1' }}>
+                  <span>Accès API & Webhooks</span>
+                  <input type="checkbox" checked={plan.module_api} onChange={e => handleChange(plan.id, 'module_api', e.target.checked)} style={{ accentColor: 'var(--primary)' }} />
+                </label>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.85rem', color: '#cbd5e1', marginTop: '0.5rem' }}>
+                  <span>Max Utilisateurs</span>
+                  <input type="number" value={plan.max_users || 0} onChange={e => handleChange(plan.id, 'max_users', parseInt(e.target.value))} style={{ width: '80px', padding: '0.3rem', borderRadius: '6px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', textAlign: 'center' }} title="0 = Illimité" />
+                </div>
+              </div>
+            </div>
+
+            <button 
+              onClick={() => handleSave(plan)} 
+              disabled={saving === plan.id}
+              className="btn btn-primary" 
+              style={{ marginTop: 'auto', width: '100%', justifyContent: 'center' }}
+            >
+              {saving === plan.id ? <div className="spinner" style={{ width: '18px', height: '18px', borderWidth: '2px' }}></div> : <><Save size={18} /> Sauvegarder</>}
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );

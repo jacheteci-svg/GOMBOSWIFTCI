@@ -1,10 +1,11 @@
 import React from 'react';
 import { Check, Zap, Rocket, Crown, Settings } from 'lucide-react';
-import { Plan } from '../types';
 import { useNavigate } from 'react-router-dom';
+import { insforge } from '../lib/insforge';
+import { SaasPlanDb } from '../types';
 
 interface PricingPlan {
-  id: Plan;
+  id: string;
   name: string;
   price: string;
   period: string;
@@ -14,6 +15,13 @@ interface PricingPlan {
   color: string;
   popular?: boolean;
 }
+
+const iconMap: Record<string, any> = {
+  'Zap': Zap,
+  'Rocket': Rocket,
+  'Crown': Crown,
+  'Settings': Settings
+};
 
 const plans: PricingPlan[] = [
   {
@@ -86,10 +94,53 @@ const plans: PricingPlan[] = [
 
 export const Pricing: React.FC = () => {
   const navigate = useNavigate();
+  const [dbPlans, setDbPlans] = React.useState<PricingPlan[]>([]);
+  const [loading, setLoading] = React.useState(true);
 
-  const handleSelectPlan = (planId: Plan) => {
+  React.useEffect(() => {
+    const loadPlans = async () => {
+      try {
+        const { data, error } = await insforge.database.from('saas_plans').select('*');
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          // Sort by price (or a specific order, CUSTOM at end)
+          data.sort((a, b) => {
+            if (a.id === 'CUSTOM') return 1;
+            if (b.id === 'CUSTOM') return -1;
+            return a.price_fcfa - b.price_fcfa;
+          });
+
+          setDbPlans(data.map(p => ({
+            id: p.id,
+            name: p.name,
+            price: p.price_fcfa === -1 ? 'Contactez-nous' : `${p.price_fcfa.toLocaleString()} FCFA`,
+            period: p.period,
+            description: p.description,
+            features: p.features || [],
+            icon: iconMap[p.icon_name] || Zap,
+            color: p.color,
+            popular: p.is_popular
+          })));
+        }
+      } catch (err) {
+        console.error("Error loading plans:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadPlans();
+  }, []);
+
+  const handleSelectPlan = (planId: string) => {
     navigate(`/register?plan=${planId}`);
   };
+
+  const displayPlans = dbPlans.length > 0 ? dbPlans : plans;
+
+  if (loading) {
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60vh' }}><div className="spinner"></div></div>;
+  }
 
   return (
     <div style={{ padding: '4rem 2rem', maxWidth: '1280px', margin: '0 auto' }}>
@@ -108,7 +159,7 @@ export const Pricing: React.FC = () => {
         gap: '2rem',
         alignItems: 'stretch'
       }}>
-        {plans.map((plan) => (
+        {displayPlans.map((plan) => (
           <div 
             key={plan.id}
             className={`card glass-effect ${plan.popular ? 'popular-card' : ''}`}
