@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { insforge } from '../lib/insforge';
 import { Tenant } from '../types';
 import {
-  Building, Users, Plus, Search, MoreVertical, CheckCircle,
+  Building, Users, Plus, Search, CheckCircle,
   XCircle, TrendingUp, Globe, Zap, X, Share2, MessageSquare,
-  Mail, Send, AlertTriangle, ShieldAlert
+  Mail, Send, AlertTriangle
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { useToast } from '../contexts/ToastContext';
