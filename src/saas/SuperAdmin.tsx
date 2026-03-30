@@ -3,9 +3,9 @@ import { insforge } from '../lib/insforge';
 import { Tenant } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import {
-  Building, Users, Plus, Search, CheckCircle,
-  Globe, Zap, X, MessageSquare,
-  Mail, Send, AlertTriangle, CreditCard, LifeBuoy, Crown, Save, Activity, DollarSign, ShieldCheck, Eye, Power
+  Users, Plus, Search,
+  Zap, X,
+  Send, CreditCard, Activity, ShieldCheck, Eye, Power
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { useToast } from '../contexts/ToastContext';
