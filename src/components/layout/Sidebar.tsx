@@ -1,5 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useSaas } from '../../saas/SaasProvider';
+import { useToast } from '../../contexts/ToastContext';
 import {
   LayoutDashboard,
   Package,
@@ -19,11 +21,14 @@ import {
   Wallet,
   ShieldCheck,
   Crown,
-  X
+  X,
+  Lock
 } from 'lucide-react';
 
 export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
   const { currentUser, logout, hasPermission } = useAuth();
+  const { hasModule } = useSaas();
+  const { showToast } = useToast();
   const location = useLocation();
 
   const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN';
@@ -45,11 +50,11 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
     { path: '/livraison', label: 'Mes Livraisons', icon: UserIcon, permission: 'LIVREUR' },
     
     { section: 'Finance' },
-    { path: '/caisse', icon: Calculator, label: 'Caisse / Retour', permission: 'CAISSE' },
+    { path: '/caisse', icon: Calculator, label: 'Caisse / Retour', permission: 'CAISSE', requiredModule: 'module_caisse' },
     { path: '/rapport-financier', icon: TrendingUp, label: 'Rapport Journalier', permission: 'FINANCE' },
     { path: '/net-profit', icon: DollarSign, label: 'Profit & Finances', permission: 'ADMIN' },
     { path: '/admin/tresorerie', icon: Wallet, label: 'Trésorerie Admin', permission: 'TRESORERIE' },
-    { path: '/audit-tresorerie', icon: ShieldCheck, label: 'Expertise Comptable', permission: 'ADMIN' },
+    { path: '/audit-tresorerie', icon: ShieldCheck, label: 'Expertise Comptable', permission: 'ADMIN', requiredModule: 'module_audit' },
     
     { section: 'Système' },
     { path: '/historique', icon: History, label: 'Historique', permission: 'HISTORIQUE' },
@@ -156,18 +161,30 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
               const isActive = location.pathname === navItem.path || 
                 (navItem.path !== '/' && location.pathname.startsWith(navItem.path));
               const IconComponent = navItem.icon;
+              const isLocked = navItem.requiredModule ? !hasModule(navItem.requiredModule as any) : false;
+              
+              const handleClick = (e: React.MouseEvent) => {
+                if (isLocked) {
+                  e.preventDefault();
+                  showToast("Ce module nécessite un abonnement supérieur.", "error");
+                } else {
+                  onClose();
+                }
+              };
               
               return (
                 <li key={navItem.path}>
                   <Link
-                    to={navItem.path}
-                    onClick={onClose}
-                    className={`nav-item ${isActive ? 'active' : ''}`}
+                    to={isLocked ? '#' : navItem.path}
+                    onClick={handleClick}
+                    className={`nav-item ${isActive && !isLocked ? 'active' : ''} ${isLocked ? 'locked' : ''}`}
+                    style={{ opacity: isLocked ? 0.6 : 1 }}
                   >
                     <span className="nav-icon">
-                      <IconComponent size={18} strokeWidth={isActive ? 2.5 : 1.8} />
+                      <IconComponent size={18} strokeWidth={isActive && !isLocked ? 2.5 : 1.8} />
                     </span>
-                    {navItem.label}
+                    <span style={{ flex: 1 }}>{navItem.label}</span>
+                    {isLocked && <Lock size={14} color="#f59e0b" />}
                   </Link>
                 </li>
               );
