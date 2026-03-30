@@ -84,10 +84,24 @@ export const FinancialReport = () => {
     return calculateLogisticalStats(data.commandes);
   }, [data]);
 
-  if (loading || !data) {
+  if (!tenant) {
+    return <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+      <div className="spinner" style={{ margin: '0 auto 1.5rem' }}></div>
+      <p style={{ fontWeight: 600 }}>Chargement de l'espace boutique...</p>
+    </div>;
+  }
+
+  if (loading) {
     return <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
       <div className="spinner" style={{ margin: '0 auto 1.5rem' }}></div>
       <p style={{ fontWeight: 600 }}>Analyse des flux financiers en cours...</p>
+    </div>;
+  }
+
+  if (!data) {
+    return <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+      <p style={{ fontWeight: 600, fontSize: '1.2rem', marginBottom: '0.5rem' }}>Aucune donnée disponible</p>
+      <p style={{ fontSize: '0.9rem' }}>Sélectionnez une période différente pour voir les résultats.</p>
     </div>;
   }
 

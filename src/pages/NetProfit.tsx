@@ -113,11 +113,29 @@ export const NetProfit = () => {
     }
   };
 
-  if (loading || !metrics) {
+  if (!tenant) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
-        <div className="loading-spinner"></div>
+        <div className="spinner"></div>
+        <p style={{ marginTop: '1.5rem', fontWeight: 600, color: 'var(--text-muted)' }}>Chargement de l'espace boutique...</p>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
+        <div className="spinner"></div>
         <p style={{ marginTop: '1.5rem', fontWeight: 600, color: 'var(--text-muted)' }}>Analyse des flux financiers...</p>
+      </div>
+    );
+  }
+
+  if (!metrics) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
+        <p style={{ fontWeight: 600, fontSize: '1.2rem', marginBottom: '0.5rem' }}>Aucune donnée disponible</p>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Aucune commande trouvée sur cette période.</p>
       </div>
     );
   }
