@@ -137,7 +137,7 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
       section: 'Infrastructure',
       items: [
         { path: '/super-admin/settings', icon: ShieldCheck, label: 'Sécurité & Logs', permission: 'SUPER_ADMIN' },
-        { path: '/super-admin/overview', icon: UserIcon, label: 'Profil Admin', permission: 'SUPER_ADMIN' },
+        { path: '/super-admin/profile', icon: UserIcon, label: 'Profil Admin', permission: 'SUPER_ADMIN' },
       ]
     }
   ];

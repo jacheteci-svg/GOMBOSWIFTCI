@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { insforge } from '../lib/insforge';
 import { Tenant } from '../types';
+import { useAuth } from '../contexts/AuthContext';
 import {
   Building, Users, Plus, Search, CheckCircle,
   Globe, Zap, X, MessageSquare,
@@ -51,7 +52,7 @@ export const SuperAdmin: React.FC = () => {
   }, []);
 
   // Redirect invalid paths to overview
-  if (!['OVERVIEW', 'TENANTS', 'BILLING', 'SUPPORT', 'SETTINGS', 'BROADCAST', 'PLANS'].includes(activeTab) && activeTab !== 'SUPER-ADMIN') {
+  if (!['OVERVIEW', 'TENANTS', 'BILLING', 'SUPPORT', 'SETTINGS', 'BROADCAST', 'PLANS', 'PROFILE'].includes(activeTab) && activeTab !== 'SUPER-ADMIN') {
       return <Navigate to="/super-admin/overview" replace />;
   }
 
@@ -106,6 +107,7 @@ export const SuperAdmin: React.FC = () => {
         {activeTab === 'SUPPORT' && <SupportTab />}
         {activeTab === 'BROADCAST' && <BroadcastTab tenants={tenants} />}
         {activeTab === 'SETTINGS' && <SecurityLogsTab />}
+        {activeTab === 'PROFILE' && <ProfileTab />}
       </div>
 
     </div>
@@ -720,7 +722,111 @@ const SupportTab = () => {
                 ))}
              </div>
           )}
-       </div>
+        </div>
+     </div>
+  );
+};
+
+/* -------------------------------------------------------------------------- */
+/*                                PROFILE TAB                                 */
+/* -------------------------------------------------------------------------- */
+const ProfileTab = () => {
+  const { currentUser, showToast } = useAuth() as any;
+  const [loading, setLoading] = useState(false);
+  const [name, setName] = useState(currentUser?.nom_complet || '');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  const handleUpdateName = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const { error } = await insforge.database
+        .from('users')
+        .update({ nom_complet: name })
+        .eq('id', currentUser.id);
+      
+      if (error) throw error;
+      showToast("Nom mis à jour avec succès. Veuillez recharger pour voir le changement.", "success");
+    } catch (err: any) {
+      showToast(err.message || "Erreur lors de la mise à jour", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword !== confirmPassword) {
+      return showToast("Les mots de passe ne correspondent pas", "error");
+    }
+    setLoading(true);
+    try {
+      const { error } = (await (insforge.auth as any).updateAccount({ password: newPassword })) as any;
+      if (error) throw error;
+      showToast("Mot de passe mis à jour avec succès", "success");
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (err: any) {
+      showToast(err.message || "Erreur lors de la mise à jour", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={{ animation: 'fadeIn 0.3s ease', maxWidth: '800px' }}>
+      <div className="nexus-card-lite" style={{ padding: '2.5rem', marginBottom: '2rem' }}>
+        <h3 className="nexus-neon-text" style={{ margin: 0, fontWeight: 950, fontSize: '1.8rem', marginBottom: '2rem' }}>Mon Profil Nexus</h3>
+        
+        <form onSubmit={handleUpdateName} style={{ display: 'grid', gap: '1.5rem' }}>
+           <div>
+             <label style={{ display: 'block', color: '#94a3b8', fontSize: '0.75rem', fontWeight: 800, marginBottom: '0.75rem' }}>NOM COMPLET</label>
+             <input 
+               type="text" 
+               className="form-input" 
+               value={name} 
+               onChange={(e) => setName(e.target.value)} 
+               style={{ width: '100%' }}
+             />
+           </div>
+           <button type="submit" className="btn btn-primary" disabled={loading} style={{ width: 'fit-content' }}>
+             {loading ? 'MISE À JOUR...' : 'METTRE À JOUR LE NOM'}
+           </button>
+        </form>
+      </div>
+
+      <div className="nexus-card-lite" style={{ padding: '2.5rem' }}>
+        <h3 style={{ margin: 0, fontWeight: 950, fontSize: '1.8rem', marginBottom: '0.5rem', color: '#f43f5e' }}>Sécurité</h3>
+        <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '2rem' }}>Mettez à jour votre mot de passe pour sécuriser l'accès à Nexus Core.</p>
+        
+        <form onSubmit={handleUpdatePassword} style={{ display: 'grid', gap: '1.5rem' }}>
+           <div>
+             <label style={{ display: 'block', color: '#94a3b8', fontSize: '0.75rem', fontWeight: 800, marginBottom: '0.75rem' }}>NOUVEAU MOT DE PASSE</label>
+             <input 
+               type="password" 
+               className="form-input" 
+               value={newPassword} 
+               onChange={(e) => setNewPassword(e.target.value)} 
+               placeholder="Minimum 6 caractères"
+               style={{ width: '100%' }}
+             />
+           </div>
+           <div>
+             <label style={{ display: 'block', color: '#94a3b8', fontSize: '0.75rem', fontWeight: 800, marginBottom: '0.75rem' }}>CONFIRMER LE MOT DE PASSE</label>
+             <input 
+               type="password" 
+               className="form-input" 
+               value={confirmPassword} 
+               onChange={(e) => setConfirmPassword(e.target.value)} 
+               style={{ width: '100%' }}
+             />
+           </div>
+           <button type="submit" className="btn btn-primary" disabled={loading} style={{ background: '#f43f5e', boxShadow: '0 8px 20px rgba(244,63,94,0.3)', width: 'fit-content' }}>
+             {loading ? 'MISE À JOUR...' : 'CHANGER LE MOT DE PASSE'}
+           </button>
+        </form>
+      </div>
     </div>
   );
 };
