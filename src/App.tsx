@@ -90,6 +90,7 @@ const ProtectedRoute = ({ children, requiredPermission }: { children: React.Reac
   
   if (!currentUser) {
     if (window.location.pathname === '/') return <LandingPage />;
+    if (window.location.pathname.startsWith('/super-admin')) return <Navigate to="/platform/login" replace />;
     return <Navigate to="/login" replace />;
   }
 

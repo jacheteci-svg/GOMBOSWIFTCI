@@ -119,11 +119,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const logout = async () => {
+    const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN';
     const { error } = await insforge.auth.signOut();
     if (!error) {
       setCurrentUser(null);
       showToast('Déconnexion réussie.', 'success');
-      window.location.href = '/login';
+      window.location.href = isSuperAdmin ? '/platform/login' : '/login';
     } else {
       showToast('Erreur lors de la déconnexion.', 'error');
     }
@@ -133,9 +134,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (!currentUser) return false;
     if (currentUser.role === 'SUPER_ADMIN' || currentUser.role === 'ADMIN') return true;
 
-    const userPerms = currentUser.permissions?.length > 0
+    // Safely check length using optional chaining and fallback to empty array
+    const userPerms = (currentUser.permissions && currentUser.permissions.length > 0)
       ? currentUser.permissions
-      : ROLE_PERMISSIONS[currentUser.role] || [];
+      : (ROLE_PERMISSIONS[currentUser.role] || []);
 
     const required = Array.isArray(perms) ? perms : [perms];
     return required.some(p => userPerms.includes(p));
