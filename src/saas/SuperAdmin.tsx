@@ -4,7 +4,7 @@ import { Tenant } from '../types';
 import {
   Building, Users, Plus, Search, CheckCircle,
   XCircle, TrendingUp, Globe, Zap, X, MessageSquare,
-  Mail, Send, AlertTriangle, CreditCard, LifeBuoy, Settings, Power, Eye, Crown, Save
+  Mail, Send, AlertTriangle, CreditCard, LifeBuoy, Settings, Power, Eye, Crown, Save, Activity, ShieldCheck
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { useToast } from '../contexts/ToastContext';
@@ -732,60 +732,73 @@ const PlansTab = () => {
         <p style={{ color: 'var(--text-muted)' }}>Mettez à jour les tarifs et fonctionnalités des forfaits SaaS qui apparaîtront publiquement.</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
         {plans.map(plan => (
-          <div key={plan.id} className="card glass-effect" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem', border: plan.is_popular ? '1px solid var(--primary)' : '1px solid rgba(255,255,255,0.05)' }}>
+          <div key={plan.id} className="card glass-effect" style={{ 
+            padding: '2.5rem', 
+            display: 'flex', 
+            flexDirection: 'column', 
+            gap: '1.5rem', 
+            background: plan.is_popular ? 'linear-gradient(145deg, rgba(99,102,241,0.05) 0%, rgba(2,6,23,0.8) 100%)' : 'rgba(2,6,23,0.6)',
+            border: plan.is_popular ? '1px solid var(--primary)' : '1px solid rgba(255,255,255,0.08)',
+            boxShadow: plan.is_popular ? '0 0 30px -10px var(--primary-glow)' : '0 10px 30px -10px rgba(0,0,0,0.5)',
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            {/* Background Accent */}
+            {plan.is_popular && <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: 'var(--primary)' }}></div>}
+
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ fontSize: '0.75rem', fontWeight: 800, background: 'rgba(255,255,255,0.05)', padding: '4px 10px', borderRadius: '20px', color: '#94a3b8' }}>
-                ID: {plan.id}
+              <div style={{ fontSize: '0.75rem', fontWeight: 900, background: plan.is_popular ? 'var(--primary)' : 'rgba(255,255,255,0.08)', padding: '6px 14px', borderRadius: '30px', color: plan.is_popular ? 'white' : '#94a3b8', letterSpacing: '0.05em' }}>
+                {plan.id}
               </div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'white', cursor: 'pointer' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.85rem', color: plan.is_popular ? '#a5b4fc' : '#94a3b8', cursor: 'pointer', fontWeight: 700 }}>
                 Populaire 
-                <input type="checkbox" checked={plan.is_popular} onChange={e => handleChange(plan.id, 'is_popular', e.target.checked)} style={{ width: '16px', height: '16px' }} />
+                <input type="checkbox" checked={plan.is_popular} onChange={e => handleChange(plan.id, 'is_popular', e.target.checked)} style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }} />
               </label>
             </div>
 
             <div>
-              <label className="form-label">Nom du plan</label>
-              <input type="text" className="form-input" value={plan.name} onChange={e => handleChange(plan.id, 'name', e.target.value)} style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }} />
+              <label className="form-label" style={{ color: '#cbd5e1' }}>Nom du forfait</label>
+              <input type="text" className="form-input" value={plan.name} onChange={e => handleChange(plan.id, 'name', e.target.value)} style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', fontSize: '1.1rem', fontWeight: 800 }} />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
               <div>
-                <label className="form-label">Prix (FCFA)</label>
-                <input type="number" className="form-input" value={plan.price_fcfa} onChange={e => handleChange(plan.id, 'price_fcfa', parseInt(e.target.value))} style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }} />
+                <label className="form-label" style={{ color: '#cbd5e1' }}>Prix (FCFA)</label>
+                <input type="number" className="form-input" value={plan.price_fcfa} onChange={e => handleChange(plan.id, 'price_fcfa', parseInt(e.target.value))} style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.15)', color: '#4ade80', fontSize: '1.1rem', fontWeight: 900 }} />
               </div>
               <div>
-                <label className="form-label">Type</label>
-                <input type="text" className="form-input" disabled value={plan.period} style={{ background: 'rgba(0,0,0,0.1)', color: '#64748b', border: 'none' }} />
+                <label className="form-label" style={{ color: '#cbd5e1' }}>Période</label>
+                <input type="text" className="form-input" disabled value={plan.period} style={{ background: 'rgba(255,255,255,0.03)', color: '#64748b', border: '1px solid rgba(255,255,255,0.05)' }} />
               </div>
             </div>
 
             <div>
-              <label className="form-label">Description vitrine</label>
-              <textarea className="form-input" value={plan.description || ''} onChange={e => handleChange(plan.id, 'description', e.target.value)} rows={2} style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', resize: 'none' }} />
+              <label className="form-label" style={{ color: '#cbd5e1' }}>Description vitrine</label>
+              <textarea className="form-input" value={plan.description || ''} onChange={e => handleChange(plan.id, 'description', e.target.value)} rows={2} style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.15)', color: '#e2e8f0', resize: 'none' }} />
             </div>
 
             {/* Modules Access */}
-            <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '12px' }}>
-              <label className="form-label" style={{ marginBottom: '1rem' }}>Permissions & Modules</label>
+            <div style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.05)', padding: '1.5rem', borderRadius: '16px' }}>
+              <label className="form-label" style={{ marginBottom: '1.2rem', color: '#f8fafc', fontSize: '0.9rem' }}>Permissions & Modules</label>
               
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.85rem', color: '#cbd5e1' }}>
-                  <span>Module Caisse / Retour</span>
-                  <input type="checkbox" checked={plan.module_caisse} onChange={e => handleChange(plan.id, 'module_caisse', e.target.checked)} style={{ accentColor: 'var(--primary)' }} />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.9rem', color: '#cbd5e1', fontWeight: 600 }}>
+                  <span>📦 Caisse & Retours</span>
+                  <input type="checkbox" checked={plan.module_caisse} onChange={e => handleChange(plan.id, 'module_caisse', e.target.checked)} style={{ width: '18px', height: '18px', accentColor: '#10b981' }} />
                 </label>
-                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.85rem', color: '#cbd5e1' }}>
-                  <span>Trésorerie & Audit Expert</span>
-                  <input type="checkbox" checked={plan.module_audit} onChange={e => handleChange(plan.id, 'module_audit', e.target.checked)} style={{ accentColor: 'var(--primary)' }} />
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.9rem', color: '#cbd5e1', fontWeight: 600 }}>
+                  <span>📊 Audit Expert</span>
+                  <input type="checkbox" checked={plan.module_audit} onChange={e => handleChange(plan.id, 'module_audit', e.target.checked)} style={{ width: '18px', height: '18px', accentColor: '#3b82f6' }} />
                 </label>
-                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.85rem', color: '#cbd5e1' }}>
-                  <span>Accès API & Webhooks</span>
-                  <input type="checkbox" checked={plan.module_api} onChange={e => handleChange(plan.id, 'module_api', e.target.checked)} style={{ accentColor: 'var(--primary)' }} />
+                <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.9rem', color: '#cbd5e1', fontWeight: 600 }}>
+                  <span>🤖 Accès API Externe</span>
+                  <input type="checkbox" checked={plan.module_api} onChange={e => handleChange(plan.id, 'module_api', e.target.checked)} style={{ width: '18px', height: '18px', accentColor: '#8b5cf6' }} />
                 </label>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.85rem', color: '#cbd5e1', marginTop: '0.5rem' }}>
-                  <span>Max Utilisateurs</span>
-                  <input type="number" value={plan.max_users || 0} onChange={e => handleChange(plan.id, 'max_users', parseInt(e.target.value))} style={{ width: '80px', padding: '0.3rem', borderRadius: '6px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', textAlign: 'center' }} title="0 = Illimité" />
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.9rem', color: '#cbd5e1', marginTop: '0.5rem', fontWeight: 600 }}>
+                  <span>👥 Utilisateurs Max</span>
+                  <input type="number" value={plan.max_users || 0} onChange={e => handleChange(plan.id, 'max_users', parseInt(e.target.value))} style={{ width: '80px', padding: '0.5rem', borderRadius: '8px', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', textAlign: 'center', fontWeight: 900 }} title="0 = Illimité" />
                 </div>
               </div>
             </div>
@@ -793,10 +806,19 @@ const PlansTab = () => {
             <button 
               onClick={() => handleSave(plan)} 
               disabled={saving === plan.id}
-              className="btn btn-primary" 
-              style={{ marginTop: 'auto', width: '100%', justifyContent: 'center' }}
+              className="btn" 
+              style={{ 
+                marginTop: 'auto', 
+                width: '100%', 
+                height: '52px',
+                justifyContent: 'center',
+                background: plan.is_popular ? 'var(--primary)' : 'rgba(255,255,255,0.05)',
+                color: 'white',
+                border: plan.is_popular ? 'none' : '1px solid rgba(255,255,255,0.1)',
+                fontWeight: 800
+              }}
             >
-              {saving === plan.id ? <div className="spinner" style={{ width: '18px', height: '18px', borderWidth: '2px' }}></div> : <><Save size={18} /> Sauvegarder</>}
+              {saving === plan.id ? <div className="spinner" style={{ width: '20px', height: '20px', borderWidth: '2px' }}></div> : <><Save size={18} /> ENREGISTRER</>}
             </button>
           </div>
         ))}

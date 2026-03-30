@@ -2,7 +2,6 @@ import React from 'react';
 import { Check, Zap, Rocket, Crown, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { insforge } from '../lib/insforge';
-import { SaasPlanDb } from '../types';
 
 interface PricingPlan {
   id: string;
