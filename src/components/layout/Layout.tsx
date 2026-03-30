@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
+import { BottomNav } from './BottomNav';
 
 export const Layout = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -15,6 +16,7 @@ export const Layout = () => {
           <Outlet />
         </div>
       </main>
+      <BottomNav onMenuClick={() => setIsMobileMenuOpen(true)} />
     </div>
   );
 };
