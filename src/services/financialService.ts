@@ -3,12 +3,16 @@ import { Depense, Commande, LigneCommande } from '../types';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
-export const getDepenses = async (tenantId: string): Promise<Depense[]> => {
-  const { data, error } = await insforge.database
+export const getDepenses = async (tenantId: string, startDate?: string, endDate?: string): Promise<Depense[]> => {
+  let query = insforge.database
     .from('depenses')
     .select('*')
-    .eq('tenant_id', tenantId)
-    .order('date', { ascending: false });
+    .eq('tenant_id', tenantId);
+  
+  if (startDate) query = query.gte('date', startDate);
+  if (endDate) query = query.lte('date', endDate);
+
+  const { data, error } = await query.order('date', { ascending: false });
   
   if (error) throw error;
   return data || [];

@@ -112,7 +112,7 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     fetchSaasData();
-  }, [currentUser]);
+  }, [currentUser, window.location.pathname]);
 
   const isPlanAtLeast = (requiredPlan: Plan) => {
     const currentPlan = (tenant?.plan || 'FREE') as Plan;

@@ -48,8 +48,12 @@ export const FinancialReport = () => {
 
   useEffect(() => {
     const load = async () => {
+      if (!tenant?.id) {
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
       try {
-        if (!tenant?.id) return;
         const res = await getRangeFinancials(tenant.id, startDate, endDate);
         setData(res);
       } catch (e) {

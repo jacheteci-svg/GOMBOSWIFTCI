@@ -55,10 +55,13 @@ export const NetProfit = () => {
     }
 
     try {
-      if (!tenant?.id) return;
+      if (!tenant?.id) {
+        setLoading(false);
+        return;
+      }
       const [orderData, depenseData] = await Promise.all([
         getFinancialData(tenant.id, start, end),
-        getDepenses(tenant.id).catch(() => [])
+        getDepenses(tenant.id, start, end)
       ]);
       setAllCommandes(orderData || []);
       setDepenses(depenseData || []);

@@ -65,7 +65,14 @@ export const Admin = () => {
       </div>
 
       <div>
-        {activeTab === 'utilisateurs' ? <UsersManager showToast={showToast} tenantId={tenant?.id || 'default'} /> : <CommunesManager showToast={showToast} tenantId={tenant?.id || 'default'} />}
+        {!tenant ? (
+          <div className="card glass-effect" style={{ padding: '3rem', textAlign: 'center' }}>
+            <div className="spinner" style={{ margin: '0 auto 1.5rem' }}></div>
+            <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Chargement de l'espace boutique...</p>
+          </div>
+        ) : (
+          activeTab === 'utilisateurs' ? <UsersManager showToast={showToast} tenantId={tenant.id} /> : <CommunesManager showToast={showToast} tenantId={tenant.id} />
+        )}
       </div>
     </div>
   );
