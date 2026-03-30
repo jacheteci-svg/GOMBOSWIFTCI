@@ -30,7 +30,10 @@ export const Dashboard = () => {
   }, [tenant?.id]);
 
   useEffect(() => {
-    if (!tenant?.id) return;
+    if (!tenant?.id) {
+      setLoading(false);
+      return;
+    }
     const unsubscribe = subscribeToCommandes(tenant.id, (data) => {
       setCommandes(data);
       setLoading(false);

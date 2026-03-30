@@ -41,21 +41,38 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   const fetchSaasData = async () => {
-    if (!currentUser || !currentUser.tenant_id) {
+    // Determine the target tenant slug from the URL if current user is admin OR if we're on a tenant route
+    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    const urlSlug = pathParts[0]; 
+    const isSpecialPath = ['super-admin', 'platform', 'login', 'register'].includes(urlSlug);
+    const targetSlug = (!isSpecialPath && urlSlug && urlSlug !== 'nexus') ? urlSlug : (urlSlug === 'nexus' ? 'nexus' : null);
+
+    // If no user and no slug, we can't do anything
+    if (!currentUser && !targetSlug) {
       setTenant(null);
-      setSubscription(null);
-      setPlanConfig(null);
       setLoading(false);
       return;
     }
 
     try {
-      // 1. Fetch Tenant details
-      const { data: tenantData } = await insforge.database
-        .from('tenants')
-        .select('*')
-        .eq('id', currentUser.tenant_id)
-        .single();
+      let tenantData = null;
+
+      // 1. Fetch Tenant details (Priority: URL Slug for SuperAdmins, else Current User's ID)
+      if (currentUser?.role === 'SUPER_ADMIN' && targetSlug) {
+        const { data } = await insforge.database
+          .from('tenants')
+          .select('*')
+          .eq('slug', targetSlug)
+          .single();
+        tenantData = data;
+      } else if (currentUser?.tenant_id) {
+        const { data } = await insforge.database
+          .from('tenants')
+          .select('*')
+          .eq('id', currentUser.tenant_id)
+          .single();
+        tenantData = data;
+      }
 
       if (tenantData) {
         setTenant(tenantData as Tenant);
@@ -69,18 +86,22 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
             .single();
           if (planData) setPlanConfig(planData as SaasPlanDb);
         }
-      }
 
-      // 2. Fetch Subscription details
-      const { data: subData } = await insforge.database
-        .from('subscriptions')
-        .select('*')
-        .eq('tenant_id', currentUser.tenant_id)
-        .eq('status', 'active')
-        .single();
+        // 2. Fetch Subscription details
+        const { data: subData } = await insforge.database
+          .from('subscriptions')
+          .select('*')
+          .eq('tenant_id', tenantData.id)
+          .eq('status', 'active')
+          .single();
 
-      if (subData) {
-        setSubscription(subData as Subscription);
+        if (subData) {
+          setSubscription(subData as Subscription);
+        }
+      } else {
+        setTenant(null);
+        setSubscription(null);
+        setPlanConfig(null);
       }
     } catch (error) {
       console.error("Error fetching SaaS data:", error);
