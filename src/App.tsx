@@ -166,7 +166,8 @@ const AppRoutes = () => {
 
       {/* 6. TENANT PAGES - Dynamic Slug Path */}
       <Route path="/:tenantSlug" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-        <Route index element={<Home />} />
+        <Route index element={<Dashboard />} />
+        <Route path="home" element={<Home />} />
         <Route path="dashboard" element={<ProtectedRoute requiredPermission="DASHBOARD"><Dashboard /></ProtectedRoute>} />
         <Route path="produits" element={<ProtectedRoute requiredPermission="PRODUITS"><Produits /></ProtectedRoute>} />
         <Route path="commandes" element={<ProtectedRoute requiredPermission="COMMANDES"><Commandes /></ProtectedRoute>} />

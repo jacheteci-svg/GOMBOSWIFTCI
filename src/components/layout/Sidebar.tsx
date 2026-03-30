@@ -57,8 +57,8 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
     {
       section: 'Principal',
       items: [
-        { path: `/${effectiveSlug}`, label: 'Accueil', icon: HomeIcon, permission: 'PROFIL' },
-        { path: `/${effectiveSlug}/dashboard`, label: 'Tableau de bord', icon: LayoutDashboard, permission: 'DASHBOARD' },
+        { path: `/${effectiveSlug}`, label: 'Tableau de Bord', icon: LayoutDashboard, permission: 'DASHBOARD' },
+        { path: `/${effectiveSlug}/home`, label: 'Menu de Navigation', icon: HomeIcon, permission: 'PROFIL' },
       ]
     },
     {
