@@ -99,7 +99,10 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const hasModule = (moduleName: keyof SaasPlanDb) => {
-    // If we have dynamic config, use it
+    // 1. SuperAdmin bypass: total access to all modules
+    if (currentUser?.role === 'SUPER_ADMIN') return true;
+
+    // 2. If we have dynamic config, use it
     if (planConfig) {
       return !!planConfig[moduleName as keyof SaasPlanDb];
     }

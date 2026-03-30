@@ -142,7 +142,8 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
     }
   ];
 
-  const sections = isSuperAdmin ? superAdminNavSections : tenantNavSections;
+  const isPlatformView = location.pathname.startsWith('/super-admin');
+  const sections = isPlatformView ? superAdminNavSections : tenantNavSections;
 
   const toggleGroup = (label: string) => {
     setExpandedGroups(prev => 
@@ -252,6 +253,19 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
             <X size={20} />
           </button>
         </div>
+
+        {/* --- SuperAdmin Quick Access --- */}
+        {isSuperAdmin && !isPlatformView && (
+          <div style={{ padding: '0.75rem 1.25rem' }}>
+            <Link 
+              to="/super-admin/overview" 
+              className="btn btn-primary btn-sm" 
+              style={{ width: '100%', borderRadius: '10px', fontSize: '0.7rem', fontWeight: 800, gap: '0.5rem' }}
+            >
+              <ShieldCheck size={14} /> RETOUR AU NEXUS
+            </Link>
+          </div>
+        )}
 
         <nav className="sidebar-nav custom-scroll">
           {sections.map((section) => (

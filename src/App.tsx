@@ -155,14 +155,14 @@ const AppRoutes = () => {
       } />
 
       {/* 5. SUPER ADMIN - Specialized Path */}
-      <Route path="/super-admin/*" element={
+      <Route path="/super-admin" element={
         <ProtectedRoute requiredPermission="SUPER_ADMIN">
           <Layout /> 
-          <Routes>
-             <Route path="*" element={<SuperAdmin />} />
-          </Routes>
         </ProtectedRoute>
-      } />
+      }>
+        <Route index element={<Navigate to="overview" replace />} />
+        <Route path="*" element={<SuperAdmin />} />
+      </Route>
 
       {/* 6. TENANT PAGES - Dynamic Slug Path */}
       <Route path="/:tenantSlug" element={<ProtectedRoute><Layout /></ProtectedRoute>}>

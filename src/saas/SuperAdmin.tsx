@@ -62,11 +62,9 @@ export const SuperAdmin: React.FC = () => {
 
   return (
     <div className="nexus-container" style={{ 
-      animation: 'pageEnter 0.6s ease', 
-      paddingBottom: '3rem',
-      margin: '-1.5rem', // Negate default page padding
-      padding: '2rem 1.5rem 5rem 1.5rem',
-      minHeight: 'calc(100vh - 64px)'
+      animation: 'pageEnter 0.35s ease', 
+      paddingBottom: '4rem',
+      minHeight: '100%'
     }}>
       
       {/* Header Nexus */}
