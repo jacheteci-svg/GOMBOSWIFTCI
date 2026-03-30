@@ -55,25 +55,16 @@ export const PlatformPortal: React.FC<PlatformPortalProps> = ({ mode: propMode }
       const userId = data?.user?.id;
       if (!userId) throw new Error('Session invalide après vérification.');
 
-      /* Create SUPER_ADMIN profile */
-      const profilePayload = {
-        id: userId,
-        email,
-        role: 'SUPER_ADMIN',
-        nom_complet: name,
-        tenant_id: null,
-        actif: true
-      };
+      /* Create SUPER_ADMIN profile securely using RPC */
+      const { error: rpcErr } = await insforge.database.rpc('force_create_superadmin', {
+        p_id: userId,
+        p_email: email,
+        p_nom: name
+      });
 
-      /* Try upsert (insert or update) */
-      const { error: upsertErr } = await insforge.database
-        .from('users')
-        .upsert([profilePayload], { onConflict: 'id' });
-
-      if (upsertErr) {
-        console.warn('Upsert failed, trying insert:', upsertErr.message);
-        /* Last resort: plain insert */
-        await insforge.database.from('users').insert([profilePayload]);
+      if (rpcErr) {
+        console.error('RPC Error when creating SuperAdmin profile:', rpcErr);
+        throw new Error('Erreur lors de la création du profil admin: ' + rpcErr.message);
       }
 
       setStep('success');
