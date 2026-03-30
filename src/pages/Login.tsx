@@ -38,7 +38,22 @@ export const Login = () => {
       }
 
       showToast('Compte vérifié avec succès !', 'success');
-      window.location.href = '/';
+      
+      // Fetch tenant slug for redirection
+      const { data: profile } = await insforge.database
+        .from('users')
+        .select('tenant_id, tenants(slug)')
+        .eq('id', userId)
+        .single();
+
+      const tenantObj = profile?.tenants as any;
+      const slug = Array.isArray(tenantObj) ? tenantObj[0]?.slug : tenantObj?.slug;
+
+      if (slug) {
+        window.location.href = `/${slug}`;
+      } else {
+        window.location.href = '/';
+      }
     } catch (err: any) {
       showToast(err.message || 'Code incorrect', 'error');
     } finally {
@@ -99,7 +114,30 @@ export const Login = () => {
         if (error) {
           showToast('Identifiant ou mot de passe incorrect.', 'error');
         } else {
-          window.location.href = '/';
+          // Fetch user profile and tenant slug for redirection
+          const { data: userProfile } = await insforge.database
+            .from('users')
+            .select('role, tenant_id')
+            .eq('email', finalEmail)
+            .single();
+
+          if (userProfile?.role === 'SUPER_ADMIN') {
+            window.location.href = '/super-admin/overview';
+          } else if (userProfile?.tenant_id) {
+            const { data: tenant } = await insforge.database
+              .from('tenants')
+              .select('slug')
+              .eq('id', userProfile.tenant_id)
+              .single();
+            
+            if (tenant?.slug) {
+              window.location.href = `/${tenant.slug}`;
+            } else {
+              window.location.href = '/';
+            }
+          } else {
+            window.location.href = '/';
+          }
         }
       }
     } catch (err: any) {

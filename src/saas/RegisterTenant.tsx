@@ -233,7 +233,7 @@ export const RegisterTenant: React.FC = () => {
               </div>
 
               <button 
-                onClick={() => window.location.href = '/dashboard'}
+                onClick={() => window.location.href = `/${tenantSlug}`}
                 className="btn btn-primary"
                 style={{ height: '60px', borderRadius: '16px', fontWeight: 900, fontSize: '1.1rem', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}
               >
