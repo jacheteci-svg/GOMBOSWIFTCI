@@ -1,21 +1,25 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Tenant, Subscription, Plan } from '../types';
+import { Tenant, Subscription, Plan, SaasPlanDb } from '../types';
 import { insforge } from '../lib/insforge';
 
 interface SaasContextType {
   tenant: Tenant | null;
   subscription: Subscription | null;
+  planConfig: SaasPlanDb | null;
   loading: boolean;
   isPlanAtLeast: (plan: Plan) => boolean;
+  hasModule: (moduleName: keyof SaasPlanDb) => boolean;
   refreshSaasData: () => Promise<void>;
 }
 
 const SaasContext = createContext<SaasContextType>({
   tenant: null,
   subscription: null,
+  planConfig: null,
   loading: true,
   isPlanAtLeast: () => false,
+  hasModule: () => false,
   refreshSaasData: async () => {},
 });
 
@@ -33,12 +37,14 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { currentUser } = useAuth();
   const [tenant, setTenant] = useState<Tenant | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [planConfig, setPlanConfig] = useState<SaasPlanDb | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchSaasData = async () => {
     if (!currentUser || !currentUser.tenant_id) {
       setTenant(null);
       setSubscription(null);
+      setPlanConfig(null);
       setLoading(false);
       return;
     }
@@ -53,6 +59,16 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (tenantData) {
         setTenant(tenantData as Tenant);
+        
+        // 1.5 Fetch SaaS Plan details
+        if (tenantData.plan) {
+          const { data: planData } = await insforge.database
+            .from('saas_plans')
+            .select('*')
+            .eq('id', tenantData.plan)
+            .single();
+          if (planData) setPlanConfig(planData as SaasPlanDb);
+        }
       }
 
       // 2. Fetch Subscription details
@@ -82,13 +98,28 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return PLAN_HIERARCHY[currentPlan] >= PLAN_HIERARCHY[requiredPlan];
   };
 
+  const hasModule = (moduleName: keyof SaasPlanDb) => {
+    // If we have dynamic config, use it
+    if (planConfig) {
+      return !!planConfig[moduleName as keyof SaasPlanDb];
+    }
+    // Fallback if db is empty or migration pending: map based on hierarchy
+    if (moduleName === 'module_caisse' || moduleName === 'module_audit' || moduleName === 'module_api') {
+        const p = (tenant?.plan || 'FREE') as Plan;
+        if (p === 'CUSTOM' || p === 'PREMIUM') return true;
+        if (p === 'BASIC' && moduleName === 'module_caisse') return true;
+        return false;
+    }
+    return false;
+  };
+
   const refreshSaasData = async () => {
     setLoading(true);
     await fetchSaasData();
   };
 
   return (
-    <SaasContext.Provider value={{ tenant, subscription, loading, isPlanAtLeast, refreshSaasData }}>
+    <SaasContext.Provider value={{ tenant, subscription, planConfig, loading, isPlanAtLeast, hasModule, refreshSaasData }}>
       {children}
     </SaasContext.Provider>
   );

@@ -1,24 +1,26 @@
 import { useSaas } from './SaasProvider';
-import { Plan } from '../types';
+import { SaasPlanDb } from '../types';
 import { Crown, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface SubscriptionGuardProps {
   children: React.ReactNode;
-  requiredPlan: Plan;
+  requiredModule: keyof SaasPlanDb;
+  moduleNameFriendly: string;
   fallback?: React.ReactNode;
 }
 
 export const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({ 
   children, 
-  requiredPlan, 
+  requiredModule,
+  moduleNameFriendly,
   fallback 
 }) => {
-  const { isPlanAtLeast, loading } = useSaas();
+  const { hasModule, loading } = useSaas();
 
   if (loading) return null;
 
-  if (isPlanAtLeast(requiredPlan)) {
+  if (hasModule(requiredModule)) {
     return <>{children}</>;
   }
 
@@ -52,11 +54,11 @@ export const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
       </div>
       
       <h2 style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--text-main)' }}>
-        Fonctionnalité Premium
+        Module {moduleNameFriendly} Verrouillé
       </h2>
       
       <p style={{ color: 'var(--text-muted)', lineHeight: 1.6 }}>
-        Cette section nécessite un abonnement <strong>{requiredPlan}</strong>. 
+        Cette section nécessite l'activation du module <strong>{moduleNameFriendly}</strong>. 
         Mettez à jour votre forfait pour débloquer ces fonctionnalités avancées et booster votre productivité.
       </p>
 

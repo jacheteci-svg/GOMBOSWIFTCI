@@ -148,7 +148,13 @@ const AppRoutes = () => {
         <Route path="centre-appel" element={<ProtectedRoute requiredPermission="CENTRE_APPEL"><CentreAppel /></ProtectedRoute>} />
         <Route path="logistique" element={<ProtectedRoute requiredPermission="LOGISTIQUE"><Logistique /></ProtectedRoute>} />
         <Route path="livraison" element={<ProtectedRoute requiredPermission="LIVREUR"><Livraison /></ProtectedRoute>} />
-        <Route path="caisse" element={<ProtectedRoute requiredPermission="CAISSE"><Caisse /></ProtectedRoute>} />
+        <Route path="caisse" element={
+          <ProtectedRoute requiredPermission="CAISSE">
+            <SubscriptionGuard requiredModule="module_caisse" moduleNameFriendly="Caisse & Retours">
+              <Caisse />
+            </SubscriptionGuard>
+          </ProtectedRoute>
+        } />
         <Route path="rapport-financier" element={<ProtectedRoute requiredPermission="FINANCE"><FinancialReport /></ProtectedRoute>} />
         <Route path="historique" element={<ProtectedRoute requiredPermission="HISTORIQUE"><Historique /></ProtectedRoute>} />
         <Route path="clients" element={<ProtectedRoute requiredPermission="CLIENTS"><Clients /></ProtectedRoute>} />
@@ -157,7 +163,7 @@ const AppRoutes = () => {
         <Route path="admin/tresorerie" element={<ProtectedRoute requiredPermission="TRESORERIE"><AdminTresorerie /></ProtectedRoute>} />
         <Route path="audit-tresorerie" element={
           <ProtectedRoute requiredPermission="ADMIN">
-            <SubscriptionGuard requiredPlan="PREMIUM">
+            <SubscriptionGuard requiredModule="module_audit" moduleNameFriendly="Audit Expert">
               <AuditTresorerie />
             </SubscriptionGuard>
           </ProtectedRoute>

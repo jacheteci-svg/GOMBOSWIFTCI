@@ -96,7 +96,10 @@ const UsersManager = ({ showToast, tenantId }: { showToast: any, tenantId: strin
   const [form, setForm] = useState<Partial<User>>({});
 
   const { hasPermission } = useAuth();
+  const { planConfig } = useSaas();
   const isAdmin = hasPermission('ADMIN');
+
+  const isLimitReached = planConfig?.max_users && planConfig.max_users > 0 ? users.length >= planConfig.max_users : false;
 
   const loadUsers = async () => {
     setLoading(true);
@@ -175,13 +178,18 @@ const UsersManager = ({ showToast, tenantId }: { showToast: any, tenantId: strin
         <button 
           className="btn btn-primary" 
           onClick={() => { 
+            if (isLimitReached) {
+              showToast(`Limite atteinte (${planConfig?.max_users} max). Veuillez mettre à niveau votre forfait.`, 'error');
+              return;
+            }
             setEditingId('new'); 
             setForm({ 
               role: isAdmin ? 'AGENT_APPEL' : 'LIVREUR', 
               permissions: isAdmin ? ['DASHBOARD', 'PRODUITS', 'COMMANDES', 'CENTRE_APPEL'] : ['LIVREUR', 'PROFIL'] 
             }); 
           }}
-          disabled={loading}
+          disabled={loading || isLimitReached}
+          title={isLimitReached ? "Limite d'utilisateurs atteinte pour votre forfait." : ""}
         >
           <Plus size={18} /> Nouvel Utilisateur
         </button>
