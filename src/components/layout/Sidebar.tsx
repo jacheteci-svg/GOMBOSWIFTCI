@@ -59,7 +59,13 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
 
         <nav style={{ flex: 1, padding: '1rem 0', overflowY: 'auto' }}>
           <ul style={{ listStyle: 'none', padding: '0 0.75rem' }}>
-            {navItems.filter(item => hasPermission(item.permission)).map(item => {
+            {navItems.filter(item => {
+              if (currentUser?.role === 'SUPER_ADMIN') {
+                return item.permission === 'SUPER_ADMIN';
+              }
+              if (item.permission === 'SUPER_ADMIN') return false;
+              return hasPermission(item.permission);
+            }).map(item => {
               const isActive = location.pathname === item.path;
               return (
                 <li key={item.path} style={{ marginBottom: '0.25rem' }}>
