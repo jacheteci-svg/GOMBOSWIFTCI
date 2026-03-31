@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { insforge } from '../lib/insforge';
 import { useToast } from '../contexts/ToastContext';
-import { LogIn, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const Login = () => {
