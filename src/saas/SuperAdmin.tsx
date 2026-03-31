@@ -564,6 +564,19 @@ const PlansTab = () => {
               module_livreurs: plan.module_livreurs,
               module_rapport_avance: plan.module_rapport_avance,
               module_white_label: plan.module_white_label,
+              // NEW GRANULAR
+              module_crm_clients: !!plan.module_crm_clients,
+              module_suivi_terrain: !!plan.module_suivi_terrain,
+              module_logistique_pro: !!plan.module_logistique_pro,
+              module_staff_perf: !!plan.module_staff_perf,
+              module_livraisons_app: !!plan.module_livraisons_app,
+              module_tresorerie_audit: !!plan.module_tresorerie_audit,
+              module_caisse_retour_expert: !!plan.module_caisse_retour_expert,
+              module_rapport_journalier: !!plan.module_rapport_journalier,
+              module_profit_finances: !!plan.module_profit_finances,
+              module_tresorerie_admin: !!plan.module_tresorerie_admin,
+              module_expertise_comptable: !!plan.module_expertise_comptable,
+              max_products: plan.max_products === undefined ? -1 : Number(plan.max_products),
             })
             .eq('id', plan.id)
             .select();
