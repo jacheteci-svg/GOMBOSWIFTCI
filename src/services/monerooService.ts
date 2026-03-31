@@ -53,19 +53,27 @@ export const monerooService = {
             if (txError) throw txError;
 
             // 2. Call Moneroo API to get checkout URL
-            // SECURITY NOTE: Ideally this happens in an Edge Function with the Secret Key
-            // For now, we use the Standard Integration pattern
+            // Moneroo usually requires first_name, last_name, email in the customer object.
+            const nameParts = (req.customer.name || '').trim().split(' ');
+            const firstName = nameParts[0] || 'Client';
+            const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : 'Nexus';
+
             const response = await fetch(`${MONEROO_API_BASE}/payments/initialize`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${PUBLIC_KEY}`, // Note: Moneroo docs say use public key for frontend? No, docs usually want Secret Key on server side.
+                    'Authorization': `Bearer ${PUBLIC_KEY}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    amount: req.amount,
-                    currency: req.currency,
-                    customer: req.customer,
-                    metadata: {
+                    amount: Number(req.amount),
+                    currency: req.currency || 'XOF',
+                    description: `Abonnement SaaS GomboSwiftCI - Plan ${req.reference_id}`,
+                    customer: {
+                        first_name: firstName,
+                        last_name: lastName,
+                        email: req.customer.email
+                    },
+                    meta: {
                         tx_id: localTx.id,
                         tenant_id: req.tenant_id,
                         plan_id: req.reference_id
