@@ -596,7 +596,7 @@ const PlansTab = () => {
       title: 'Logistique & Terrain',
       modules: [
         { key: 'module_suivi_terrain', label: 'Suivi Terrain', color: '#10b981', icon: '📍' },
-        { key: 'module_logistique_pro', label: 'Logistique', color: '#06b6d4', icon: '🚚' },
+        { key: 'module_logistique_pro', label: 'Logistique Pro', color: '#06b6d4', icon: '🚚' },
         { key: 'module_staff_perf', label: 'Performance Staff', color: '#8b5cf6', icon: '🏆' },
         { key: 'module_livraisons_app', label: 'Mes Livraisons', color: '#ec4899', icon: '📱' },
       ]
@@ -616,8 +616,8 @@ const PlansTab = () => {
       title: 'Technique & White label',
       modules: [
         { key: 'module_api', label: 'API & Intégrations', color: '#8b5cf6', icon: '🔌' },
-        { key: 'module_whatsapp', label: 'WhatsApp Auto', color: '#25d366', icon: '💬' },
-        { key: 'module_white_label', label: 'White Label', color: '#f8fafc', icon: '🎨' },
+        { key: 'module_whatsapp', label: 'Notifications WhatsApp', color: '#25d366', icon: '💬' },
+        { key: 'module_white_label', label: 'Logiciel White Label', color: '#f8fafc', icon: '🎨' },
       ]
     }
   ];

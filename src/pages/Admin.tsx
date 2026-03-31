@@ -575,11 +575,37 @@ const SubscriptionManager = ({ showToast, tenant }: { showToast: any, tenant: an
               </div>
 
               <div style={{ flex: 1 }}>
-                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-                  {plan.module_caisse && <li style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.9rem', fontWeight: 600 }}><CheckCircle size={16} color="#10b981" /> Module Caisse</li>}
-                  {plan.module_audit && <li style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.9rem', fontWeight: 600 }}><CheckCircle size={16} color="#10b981" /> Audit Financier</li>}
-                  {plan.module_whatsapp && <li style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.9rem', fontWeight: 600 }}><CheckCircle size={16} color="#10b981" /> WhatsApp Pro</li>}
-                  {plan.module_livreurs && <li style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.9rem', fontWeight: 600 }}><CheckCircle size={16} color="#10b981" /> Gestion Livreurs</li>}
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {(() => {
+                    const MODULE_LABELS: Record<string, string> = {
+                      module_crm_clients: 'CRM & Clients',
+                      module_suivi_terrain: 'Suivi Terrain',
+                      module_logistique_pro: 'Logistique Pro',
+                      module_staff_perf: 'Performance Staff',
+                      module_livraisons_app: 'Mes Livraisons',
+                      module_tresorerie_audit: 'Trésorerie & Audit',
+                      module_caisse_retour_expert: 'Caisse / Retour',
+                      module_rapport_journalier: 'Rapport Journalier',
+                      module_profit_finances: 'Profit & Finances',
+                      module_tresorerie_admin: 'Trésorerie Admin',
+                      module_expertise_comptable: 'Expertise Comptable',
+                      module_api: 'API & Intégrations',
+                      module_whatsapp: 'Notifications WhatsApp',
+                      module_white_label: 'Logiciel White Label',
+                    };
+                    
+                    const activeFeatures = Object.entries(MODULE_LABELS)
+                      .filter(([key]) => plan[key] === true)
+                      .map(([, label]) => label);
+                      
+                    if (activeFeatures.length === 0) return <li style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Accès de base à la plateforme</li>;
+                    
+                    return activeFeatures.map((label, i) => (
+                      <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', fontSize: '0.95rem', fontWeight: 650, color: 'var(--text-main)' }}>
+                        <CheckCircle size={16} color="#10b981" strokeWidth={3} /> {label}
+                      </li>
+                    ));
+                  })()}
                 </ul>
               </div>
 
