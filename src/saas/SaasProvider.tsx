@@ -11,6 +11,7 @@ interface SaasContextType {
   isPlanAtLeast: (plan: Plan) => boolean;
   hasModule: (moduleName: keyof SaasPlanDb) => boolean;
   refreshSaasData: () => Promise<void>;
+  isActive: boolean;
 }
 
 const SaasContext = createContext<SaasContextType>({
@@ -21,6 +22,7 @@ const SaasContext = createContext<SaasContextType>({
   isPlanAtLeast: () => false,
   hasModule: () => false,
   refreshSaasData: async () => {},
+  isActive: true,
 });
 
 export const useSaas = () => useContext(SaasContext);
@@ -143,7 +145,10 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <SaasContext.Provider value={{ tenant, subscription, planConfig, loading, isPlanAtLeast, hasModule, refreshSaasData }}>
+    <SaasContext.Provider value={{ 
+      tenant, subscription, planConfig, loading, isPlanAtLeast, hasModule, refreshSaasData,
+      isActive: tenant?.actif ?? true 
+    }}>
       {children}
     </SaasContext.Provider>
   );

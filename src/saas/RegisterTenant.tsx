@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { insforge } from '../lib/insforge';
 import { useToast } from '../contexts/ToastContext';
-import { Building, User, Mail, Lock, Globe, Loader2, ArrowRight, ShieldCheck, CheckCircle2, Rocket, ExternalLink } from 'lucide-react';
+import { Building, User, Mail, Lock, Globe, Loader2, ArrowRight, ShieldCheck, CheckCircle2, Rocket, ExternalLink, CreditCard } from 'lucide-react';
+import { monerooService } from '../services/monerooService';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Plan } from '../types';
 
@@ -65,7 +66,7 @@ export const RegisterTenant: React.FC = () => {
           slug: normalizedSlug,
           email_contact: email,
           plan: selectedPlan,
-          actif: true
+          actif: selectedPlan === 'FREE' // Inactif par défaut pour les plans payants
         }])
         .select()
         .single();
@@ -123,6 +124,44 @@ export const RegisterTenant: React.FC = () => {
       showToast("Compte vérifié et prêt ! Bienvenue.", "success");
     } catch (err: any) {
       showToast(err.message || "Code incorrect ou erreur de profil.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePayment = async () => {
+    setLoading(true);
+    try {
+      const { data: planData } = await insforge.database
+        .from('saas_plans')
+        .select('*')
+        .eq('id', selectedPlan)
+        .maybeSingle();
+      
+      const price = planData?.price_fcfa || 0;
+      
+      if (price === 0) {
+          window.location.href = `/${tenantSlug}`;
+          return;
+      }
+
+      const checkoutUrl = await monerooService.initializeSubscription({
+        amount: price,
+        currency: 'XOF',
+        customer: {
+          name: adminName,
+          email: email
+        },
+        reference_id: selectedPlan,
+        type: 'SUBSCRIPTION',
+        tenant_id: createdTenantId
+      });
+
+      if (checkoutUrl) {
+          window.location.href = checkoutUrl;
+      }
+    } catch (error: any) {
+      showToast(error.message || "Erreur paiement", "error");
     } finally {
       setLoading(false);
     }
@@ -232,13 +271,26 @@ export const RegisterTenant: React.FC = () => {
                 </code>
               </div>
 
-              <button 
-                onClick={() => window.location.href = `/${tenantSlug}`}
-                className="btn btn-primary"
-                style={{ height: '60px', borderRadius: '16px', fontWeight: 900, fontSize: '1.1rem', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}
-              >
-                LANCER LE DASHBOARD <ExternalLink size={20} />
-              </button>
+              {selectedPlan === 'FREE' ? (
+                <button 
+                  onClick={() => window.location.href = `/${tenantSlug}`}
+                  className="btn btn-primary"
+                  style={{ height: '60px', borderRadius: '16px', fontWeight: 900, fontSize: '1.1rem', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}
+                >
+                  LANCER LE DASHBOARD <ExternalLink size={20} />
+                </button>
+              ) : (
+                <button 
+                  onClick={handlePayment}
+                  disabled={loading}
+                  className="btn btn-primary"
+                  style={{ height: '60px', borderRadius: '16px', fontWeight: 900, fontSize: '1.1rem', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem', background: 'linear-gradient(135deg, #fbbf24 0%, #d97706 100%)', border: 'none' }}
+                >
+                  {loading ? <Loader2 className="animate-spin" /> : (
+                    <> PAYER & ACTIVER MON ESPACE <CreditCard size={20} /> </>
+                  )}
+                </button>
+              )}
             </div>
           ) : (
             <>

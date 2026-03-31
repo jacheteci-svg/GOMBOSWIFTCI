@@ -50,8 +50,8 @@ CREATE TRIGGER update_moneroo_transactions_updated_at
 CREATE OR REPLACE FUNCTION process_subscription_payment(t_id TEXT, p_plan TEXT)
 RETURNS VOID AS $$
 BEGIN
-    -- Update Tenant Plan
-    UPDATE tenants SET plan = p_plan WHERE id = t_id::UUID;
+    -- Update Tenant Status
+    UPDATE tenants SET plan = p_plan, actif = true WHERE id = t_id::UUID;
     
     -- Update or Insert Subscription
     INSERT INTO subscriptions (tenant_id, plan, status, current_period_start, current_period_end)
