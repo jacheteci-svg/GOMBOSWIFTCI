@@ -159,13 +159,31 @@ export const ProduitForm = ({ produit, onClose, onSave }: ProduitFormProps) => {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
               <div className="form-group">
                 <label className="form-label" style={{ fontWeight: 700 }}>Coût d'Achat (Unit.) *</label>
-                <input type="number" className="form-input" required min="0" style={{ height: '52px', borderRadius: '14px', fontWeight: 700 }} value={formData.prix_achat} onChange={e => setFormData({...formData, prix_achat: Number(e.target.value)})} />
+                <input 
+                  type="number" 
+                  className="form-input" 
+                  required 
+                  min="0" 
+                  style={{ height: '52px', borderRadius: '14px', fontWeight: 700 }} 
+                  value={formData.prix_achat || ''} 
+                  onFocus={() => formData.prix_achat === 0 && setFormData({...formData, prix_achat: '' as any})}
+                  onChange={e => setFormData({...formData, prix_achat: e.target.value === '' ? 0 : Number(e.target.value)})} 
+                />
               </div>
               
               <div className="form-group">
                 <label className="form-label" style={{ fontWeight: 700 }}>Prix de Vente Public *</label>
                 <div style={{ display: 'flex', gap: '0.75rem' }}>
-                  <input type="number" className="form-input" required min="0" style={{ height: '52px', borderRadius: '14px', fontWeight: 900, color: 'var(--primary)', fontSize: '1.2rem' }} value={formData.prix_vente} onChange={e => setFormData({...formData, prix_vente: Number(e.target.value)})} />
+                  <input 
+                    type="number" 
+                    className="form-input" 
+                    required 
+                    min="0" 
+                    style={{ height: '52px', borderRadius: '14px', fontWeight: 900, color: 'var(--primary)', fontSize: '1.2rem' }} 
+                    value={formData.prix_vente || ''} 
+                    onFocus={() => formData.prix_vente === 0 && setFormData({...formData, prix_vente: '' as any})}
+                    onChange={e => setFormData({...formData, prix_vente: e.target.value === '' ? 0 : Number(e.target.value)})} 
+                  />
                   <select className="form-select" style={{ width: '100px', height: '52px', borderRadius: '14px', fontWeight: 800 }} value={formData.devise} onChange={e => setFormData({...formData, devise: e.target.value})}>
                     <option value="CFA">CFA</option>
                     <option value="EUR">€</option>
@@ -210,7 +228,16 @@ export const ProduitForm = ({ produit, onClose, onSave }: ProduitFormProps) => {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
               <div className="form-group">
                 <label className="form-label" style={{ fontWeight: 700 }}>Inventaire initial {produit && '(Scellé)'}</label>
-                <input type="number" className="form-input" min="0" style={{ height: '52px', borderRadius: '14px', fontWeight: 800, background: produit ? '#f8fafc' : 'white' }} value={formData.stock_actuel} disabled={!!produit} onChange={e => setFormData({...formData, stock_actuel: Number(e.target.value)})} />
+                <input 
+                  type="number" 
+                  className="form-input" 
+                  min="0" 
+                  style={{ height: '52px', borderRadius: '14px', fontWeight: 800, background: produit ? 'rgba(0,0,0,0.05)' : 'transparent' }} 
+                  value={formData.stock_actuel || ''} 
+                  disabled={!!produit} 
+                  onFocus={() => formData.stock_actuel === 0 && setFormData({...formData, stock_actuel: '' as any})}
+                  onChange={e => setFormData({...formData, stock_actuel: e.target.value === '' ? 0 : Number(e.target.value)})} 
+                />
               </div>
               <div className="form-group">
                 <label className="form-label" style={{ fontWeight: 700 }}>Seuil d'alerte critique *</label>

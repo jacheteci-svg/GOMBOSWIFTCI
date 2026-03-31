@@ -44,7 +44,10 @@ export const getCommandes = async (tenantId: string): Promise<Commande[]> => {
 };
 
 export const subscribeToCommandes = (tenantId: string, callback: (commandes: Commande[]) => void) => {
-  const fetchAndCallback = () => getCommandes(tenantId).then(callback);
+  const fetchAndCallback = () => getCommandes(tenantId).then(callback).catch(e => {
+    console.error("Error in subscribeToCommandes:", e);
+    callback([]); 
+  });
   fetchAndCallback();
   const interval = setInterval(fetchAndCallback, 3000);
   return () => clearInterval(interval);

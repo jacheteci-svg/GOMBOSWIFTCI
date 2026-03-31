@@ -16,6 +16,7 @@ import { Pricing } from './Pricing';
 export const LandingPage: React.FC = () => {
   console.log("LandingPage rendering on path:", window.location.pathname);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Scroll Reveal Logic
   React.useEffect(() => {
@@ -65,8 +66,40 @@ export const LandingPage: React.FC = () => {
             <a href="#faq" className="premium-link">FAQ</a>
           </div>
           <Link to="/login" style={{ textDecoration: 'none', color: '#fff', fontWeight: 700, fontSize: '0.9rem' }} className="mobile-hide hover-glow">Connexion</Link>
-          <Link to="/register" className="btn-premium">Essai Gratuit</Link>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <Link to="/register" className="btn-premium">Essai Gratuit</Link>
+            <button 
+              className="desktop-hide" 
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              style={{ background: 'transparent', border: 'none', color: 'white', cursor: 'pointer', padding: '0.5rem' }}
+            >
+              {isMenuOpen ? <ArrowRight style={{ transform: 'rotate(-90deg)' }} /> : <Layout size={28} />}
+            </button>
+          </div>
         </div>
+
+        {/* Mobile Menu Overlay */}
+        {isMenuOpen && (
+          <div style={{ 
+            position: 'absolute', 
+            top: '100%', 
+            left: 0, 
+            right: 0, 
+            background: '#020617', 
+            borderBottom: '1px solid rgba(255,255,255,0.1)', 
+            padding: '2rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1.5rem',
+            zIndex: 999,
+            animation: 'fadeIn 0.3s ease'
+          }}>
+            <a href="#features" onClick={() => setIsMenuOpen(false)} style={{ textDecoration: 'none', color: '#fff', fontSize: '1.2rem', fontWeight: 800 }}>Produit</a>
+            <a href="#pricing" onClick={() => setIsMenuOpen(false)} style={{ textDecoration: 'none', color: '#fff', fontSize: '1.2rem', fontWeight: 800 }}>Tarifs</a>
+            <a href="#faq" onClick={() => setIsMenuOpen(false)} style={{ textDecoration: 'none', color: '#fff', fontSize: '1.2rem', fontWeight: 800 }}>FAQ</a>
+            <Link to="/login" onClick={() => setIsMenuOpen(false)} style={{ textDecoration: 'none', color: '#fff', fontSize: '1.2rem', fontWeight: 800 }}>Connexion</Link>
+          </div>
+        )}
       </nav>
 
       {/* Immersive Hero Section */}
@@ -480,8 +513,14 @@ export const LandingPage: React.FC = () => {
         }
         @media (max-width: 768px) {
           .mobile-hide { display: none !important; }
-          h1 { font-size: 3.5rem !important; }
+          .desktop-hide { display: block !important; }
+          h1 { font-size: 3rem !important; }
+          .hero-cta { padding: 1rem 1.5rem !important; font-size: 0.9rem !important; }
           .reveal { opacity: 1 !important; transform: none !important; pointer-events: auto !important; }
+          .mobile-stack { grid-template-columns: 1fr !important; }
+        }
+        @media (min-width: 769px) {
+          .desktop-hide { display: none !important; }
         }
       `}</style>
     </div>
