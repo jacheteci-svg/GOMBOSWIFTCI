@@ -519,6 +519,18 @@ const PlansTab = () => {
         p_module_livreurs: !!plan.module_livreurs,
         p_module_rapport_avance: !!plan.module_rapport_avance,
         p_module_white_label: !!plan.module_white_label,
+        // NEW GRANULAR
+        p_module_crm_clients: !!plan.module_crm_clients,
+        p_module_suivi_terrain: !!plan.module_suivi_terrain,
+        p_module_logistique_pro: !!plan.module_logistique_pro,
+        p_module_staff_perf: !!plan.module_staff_perf,
+        p_module_livraisons_app: !!plan.module_livraisons_app,
+        p_module_tresorerie_audit: !!plan.module_tresorerie_audit,
+        p_module_caisse_retour_expert: !!plan.module_caisse_retour_expert,
+        p_module_rapport_journalier: !!plan.module_rapport_journalier,
+        p_module_profit_finances: !!plan.module_profit_finances,
+        p_module_tresorerie_admin: !!plan.module_tresorerie_admin,
+        p_module_expertise_comptable: !!plan.module_expertise_comptable,
       });
 
       if (error) throw error;
@@ -573,15 +585,41 @@ const PlansTab = () => {
   };
 
 
-  const ALL_MODULES = [
-    { key: 'module_caisse',         label: 'Caisse Expert',       color: '#10b981', icon: '🏦' },
-    { key: 'module_audit',          label: 'Audit & Trésorerie',  color: '#06b6d4', icon: '📊' },
-    { key: 'module_api',            label: 'API & Intégrations',  color: '#8b5cf6', icon: '🔌' },
-    { key: 'module_whatsapp',       label: 'WhatsApp Auto',       color: '#25d366', icon: '💬' },
-    { key: 'module_multi_depot',    label: 'Multi-Entrepôts',     color: '#f59e0b', icon: '🏭' },
-    { key: 'module_livreurs',       label: 'Livreurs Pro',        color: '#ec4899', icon: '🛵' },
-    { key: 'module_rapport_avance', label: 'Rapports Avancés',    color: '#3b82f6', icon: '📈' },
-    { key: 'module_white_label',    label: 'White Label',         color: '#a855f7', icon: '🎨' },
+  const MODULE_CATEGORIES = [
+    {
+      title: 'CRM & Clients',
+      modules: [
+        { key: 'module_crm_clients', label: 'CRM & Clients', color: '#f59e0b', icon: '👥' },
+      ]
+    },
+    {
+      title: 'Logistique & Terrain',
+      modules: [
+        { key: 'module_suivi_terrain', label: 'Suivi Terrain', color: '#10b981', icon: '📍' },
+        { key: 'module_logistique_pro', label: 'Logistique', color: '#06b6d4', icon: '🚚' },
+        { key: 'module_staff_perf', label: 'Performance Staff', color: '#8b5cf6', icon: '🏆' },
+        { key: 'module_livraisons_app', label: 'Mes Livraisons', color: '#ec4899', icon: '📱' },
+      ]
+    },
+    {
+      title: 'Administration & Finance',
+      modules: [
+        { key: 'module_tresorerie_audit', label: 'Trésorerie & Audit', color: '#6366f1', icon: '🛡️' },
+        { key: 'module_caisse_retour_expert', label: 'Caisse / Retour', color: '#10b981', icon: '💸' },
+        { key: 'module_rapport_journalier', label: 'Rapport Journalier', color: '#3b82f6', icon: '📊' },
+        { key: 'module_profit_finances', label: 'Profit & Finances', color: '#10b981', icon: '📈' },
+        { key: 'module_tresorerie_admin', label: 'Trésorerie Admin', color: '#06b6d4', icon: '💼' },
+        { key: 'module_expertise_comptable', label: 'Expertise Comptable', color: '#a855f7', icon: '🕯️' },
+      ]
+    },
+    {
+      title: 'Technique & White label',
+      modules: [
+        { key: 'module_api', label: 'API & Intégrations', color: '#8b5cf6', icon: '🔌' },
+        { key: 'module_whatsapp', label: 'WhatsApp Auto', color: '#25d366', icon: '💬' },
+        { key: 'module_white_label', label: 'White Label', color: '#f8fafc', icon: '🎨' },
+      ]
+    }
   ];
 
   return (
@@ -661,36 +699,40 @@ const PlansTab = () => {
 
               {/* 8 Modules Grid */}
               <div style={{ marginBottom: '2rem' }}>
-                <div style={{ fontSize: '0.65rem', fontWeight: 900, color: '#475569', textTransform: 'uppercase', marginBottom: '0.75rem', letterSpacing: '0.1em' }}>
-                  Modules ({ALL_MODULES.filter(m => plan[m.key]).length}/8 activés)
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem' }}>
-                  {ALL_MODULES.map(mod => (
-                    <label
-                      key={mod.key}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        padding: '0.65rem 0.85rem',
-                        background: plan[mod.key] ? `${mod.color}12` : 'rgba(255,255,255,0.02)',
-                        border: plan[mod.key] ? `1px solid ${mod.color}35` : '1px solid rgba(255,255,255,0.04)',
-                        borderRadius: '10px',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s'
-                      }}
-                    >
-                      <span style={{ fontSize: '0.9rem' }}>{mod.icon}</span>
-                      <span style={{ fontSize: '0.72rem', fontWeight: 800, color: plan[mod.key] ? mod.color : '#475569', flex: 1, lineHeight: 1.2 }}>{mod.label}</span>
-                      <input
-                        type="checkbox"
-                        checked={!!plan[mod.key]}
-                        onChange={e => handleChange(plan.id, mod.key, e.target.checked)}
-                        style={{ accentColor: mod.color, width: '14px', height: '14px', flexShrink: 0 }}
-                      />
-                    </label>
-                  ))}
-                </div>
+                {MODULE_CATEGORIES.map(cat => (
+                  <div key={cat.title} style={{ marginBottom: '1.5rem' }}>
+                    <div style={{ fontSize: '0.65rem', fontWeight: 900, color: '#475569', textTransform: 'uppercase', marginBottom: '0.75rem', letterSpacing: '0.1em' }}>
+                      {cat.title}
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem' }}>
+                      {cat.modules.map(mod => (
+                        <label
+                          key={mod.key}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            padding: '0.65rem 0.85rem',
+                            background: plan[mod.key] ? `${mod.color}12` : 'rgba(255,255,255,0.02)',
+                            border: plan[mod.key] ? `1px solid ${mod.color}35` : '1px solid rgba(255,255,255,0.04)',
+                            borderRadius: '10px',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s'
+                          }}
+                        >
+                          <span style={{ fontSize: '0.9rem' }}>{mod.icon}</span>
+                          <span style={{ fontSize: '0.72rem', fontWeight: 800, color: plan[mod.key] ? mod.color : '#475569', flex: 1, lineHeight: 1.2 }}>{mod.label}</span>
+                          <input
+                            type="checkbox"
+                            checked={!!plan[mod.key]}
+                            onChange={e => handleChange(plan.id, mod.key, e.target.checked)}
+                            style={{ accentColor: mod.color, width: '14px', height: '14px', flexShrink: 0 }}
+                          />
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
 
               {/* Save */}

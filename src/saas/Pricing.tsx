@@ -94,14 +94,20 @@ const FALLBACK_PLANS: PricingPlan[] = [
 
 // Map DB module columns to human-readable labels
 const MODULE_LABELS: Record<string, string> = {
-  module_caisse: 'Module Caisse Expert',
-  module_audit: 'Audit & Trésorerie',
+  module_crm_clients: 'CRM & Clients',
+  module_suivi_terrain: 'Suivi Terrain',
+  module_logistique_pro: 'Logistique Pro',
+  module_staff_perf: 'Performance Staff',
+  module_livraisons_app: 'Mes Livraisons',
+  module_tresorerie_audit: 'Trésorerie & Audit',
+  module_caisse_retour_expert: 'Caisse / Retour',
+  module_rapport_journalier: 'Rapport Journalier',
+  module_profit_finances: 'Profit & Finances',
+  module_tresorerie_admin: 'Trésorerie Admin',
+  module_expertise_comptable: 'Expertise Comptable',
   module_api: 'API & Intégrations',
   module_whatsapp: 'Notifications WhatsApp',
-  module_multi_depot: 'Multi-Entrepôts',
-  module_livreurs: 'Gestion Livreurs Pro',
-  module_rapport_avance: 'Rapports Avancés',
-  module_white_label: 'White Label & Branding',
+  module_white_label: 'Logiciel White Label',
 };
 
 function buildFeaturesFromDB(plan: any): string[] {

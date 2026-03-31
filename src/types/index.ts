@@ -34,6 +34,23 @@ export interface SaasPlanDb {
   module_caisse: boolean;
   module_audit: boolean;
   module_api: boolean;
+  module_whatsapp: boolean;
+  module_multi_depot: boolean;
+  module_livreurs: boolean;
+  module_rapport_avance: boolean;
+  module_white_label: boolean;
+  // NEW GRANULAR
+  module_crm_clients: boolean;
+  module_suivi_terrain: boolean;
+  module_logistique_pro: boolean;
+  module_staff_perf: boolean;
+  module_livraisons_app: boolean;
+  module_tresorerie_audit: boolean;
+  module_caisse_retour_expert: boolean;
+  module_rapport_journalier: boolean;
+  module_profit_finances: boolean;
+  module_tresorerie_admin: boolean;
+  module_expertise_comptable: boolean;
   created_at: string;
   updated_at: string;
 }

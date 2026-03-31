@@ -71,7 +71,7 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
             { path: `/${effectiveSlug}/produits`, label: 'Produits & Stock', icon: Package, permission: 'PRODUITS' },
             { path: `/${effectiveSlug}/commandes`, label: 'Commandes', icon: ShoppingCart, permission: 'COMMANDES' },
             { path: `/${effectiveSlug}/centre-appel`, label: 'Centre d\'Appel', icon: Headset, permission: 'CENTRE_APPEL' },
-            { path: `/${effectiveSlug}/clients`, label: 'CRM & Clients', icon: Users, permission: 'CLIENTS' },
+            { path: `/${effectiveSlug}/clients`, label: 'CRM & Clients', icon: Users, permission: 'CLIENTS', requiredModule: 'module_crm_clients' },
           ]
         }
       ]
@@ -83,9 +83,9 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
           label: 'Suivi Terrain',
           icon: Truck,
           children: [
-            { path: `/${effectiveSlug}/logistique`, label: 'Logistique', icon: Truck, permission: 'LOGISTIQUE' },
-            { path: `/${effectiveSlug}/performance-staff`, label: 'Performance Staff', icon: Activity, permission: 'GESTION_LIVREURS' },
-            { path: `/${effectiveSlug}/livraison`, label: 'Mes Livraisons', icon: UserIcon, permission: 'LIVREUR' },
+            { path: `/${effectiveSlug}/logistique`, label: 'Logistique', icon: Truck, permission: 'LOGISTIQUE', requiredModule: 'module_logistique_pro' },
+            { path: `/${effectiveSlug}/performance-staff`, label: 'Performance Staff', icon: Activity, permission: 'GESTION_LIVREURS', requiredModule: 'module_staff_perf' },
+            { path: `/${effectiveSlug}/livraison`, label: 'Mes Livraisons', icon: UserIcon, permission: 'LIVREUR', requiredModule: 'module_livraisons_app' },
           ]
         }
       ]
@@ -97,11 +97,11 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
           label: 'Trésorerie & Audit',
           icon: Wallet,
           children: [
-            { path: `/${effectiveSlug}/caisse`, label: 'Caisse / Retour', icon: Calculator, permission: 'CAISSE', requiredModule: 'module_caisse' },
-            { path: `/${effectiveSlug}/rapport-financier`, label: 'Rapport Journalier', icon: TrendingUp, permission: 'FINANCE' },
-            { path: `/${effectiveSlug}/net-profit`, label: 'Profit & Finances', icon: DollarSign, permission: 'ADMIN' },
-            { path: `/${effectiveSlug}/admin/tresorerie`, label: 'Trésorerie Admin', icon: Wallet, permission: 'TRESORERIE' },
-            { path: `/${effectiveSlug}/audit-tresorerie`, label: 'Expertise Comptable', icon: ShieldCheck, permission: 'ADMIN', requiredModule: 'module_audit' },
+            { path: `/${effectiveSlug}/caisse`, label: 'Caisse / Retour', icon: Calculator, permission: 'CAISSE', requiredModule: 'module_caisse_retour_expert' },
+            { path: `/${effectiveSlug}/rapport-financier`, label: 'Rapport Journalier', icon: TrendingUp, permission: 'FINANCE', requiredModule: 'module_rapport_journalier' },
+            { path: `/${effectiveSlug}/net-profit`, label: 'Profit & Finances', icon: DollarSign, permission: 'ADMIN', requiredModule: 'module_profit_finances' },
+            { path: `/${effectiveSlug}/admin/tresorerie`, label: 'Trésorerie Admin', icon: Wallet, permission: 'TRESORERIE', requiredModule: 'module_tresorerie_admin' },
+            { path: `/${effectiveSlug}/audit-tresorerie`, label: 'Expertise Comptable', icon: ShieldCheck, permission: 'ADMIN', requiredModule: 'module_expertise_comptable' },
             { path: `/${effectiveSlug}/admin?tab=abonnement`, label: 'Abonnement & Forfait', icon: Crown, permission: 'ADMIN' },
           ]
         }
