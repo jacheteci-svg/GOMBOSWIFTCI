@@ -107,7 +107,7 @@ export const Layout = () => {
           
           <div style={{ marginTop: '2.5rem', padding: '1rem', borderTop: '1px solid #e2e8f0' }}>
             <p style={{ fontSize: '0.85rem', color: '#94a3b8', margin: 0, fontWeight: 600 }}>
-              Besoin d'aide ? Contactez <span style={{ color: 'var(--primary)' }}>finance@gomboswiftci.com</span>
+              Besoin d'aide ? Contactez <a href="mailto:finance@gomboswiftci.app" style={{ color: 'var(--primary)', textDecoration: 'none' }}>finance@gomboswiftci.app</a>
             </p>
           </div>
         </div>
