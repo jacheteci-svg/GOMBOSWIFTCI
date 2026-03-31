@@ -62,11 +62,12 @@ export const monerooService = {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${PUBLIC_KEY}`,
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify({
                     amount: Number(req.amount),
-                    currency: req.currency || 'XOF',
+                    currency: (req.currency || 'XOF').toUpperCase(),
                     description: `Abonnement SaaS GomboSwiftCI - Plan ${req.reference_id}`,
                     customer: {
                         first_name: firstName,
