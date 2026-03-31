@@ -190,7 +190,7 @@ export const ApiDocsPage: React.FC = () => (
       <h2 style={{ color: 'white', fontWeight: 800 }}>Intégrez GomboSwiftCI partout</h2>
       <p style={{ color: '#94a3b8', marginTop: '1rem' }}>Notre API RESTful vous permet de connecter vos propres outils.</p>
       <div style={{ marginTop: '2.5rem', background: '#1e293b', padding: '1.5rem', borderRadius: '12px' }}>
-        <code style={{ fontSize: '0.9rem' }}>GET https://api.gomboswiftci.ci/v1/orders</code>
+        <code style={{ fontSize: '0.9rem' }}>GET https://api.gomboswiftci.app/v1/orders</code>
         <div style={{ marginTop: '1rem', color: '#94a3b8' }}>{`{ "status": "operational", "version": "2.4.0" }`}</div>
       </div>
       <button className="btn btn-primary" style={{ marginTop: '2rem', background: 'white', color: '#0f172a', fontWeight: 800 }}>ACCÉDER À LA DOC COMPLÈTE</button>
@@ -413,7 +413,7 @@ export const ContactSalesPage: React.FC = () => {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           {[
-            { icon: MailIcon, title: "Email Commercial", desc: "sales@gomboswiftci.ci" },
+            { icon: MailIcon, title: "Email Commercial", desc: "sales@gomboswiftci.app" },
             { icon: PhoneCall, title: "Téléphone direct", desc: "+225 07 57 22 87 31" },
             { icon: MessageSquare, title: "WhatsApp Business", desc: "+225 01 00 57 65 26" }
           ].map((item, i) => (

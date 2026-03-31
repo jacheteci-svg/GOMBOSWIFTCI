@@ -373,7 +373,7 @@ export const RegisterTenant: React.FC = () => {
                       <div style={{ marginTop: '0.5rem', padding: '0.75rem', background: '#f8fafc', borderRadius: '10px', border: '1px dashed #e2e8f0' }}>
                         <span style={{ fontSize: '0.8rem', color: '#64748b', display: 'block', marginBottom: '0.25rem' }}>Votre lien personnalisé :</span>
                         <code style={{ fontSize: '0.95rem', color: 'var(--primary)', fontWeight: 700 }}>
-                          https://{tenantSlug}.gomboswiftci.ci
+                          https://{tenantSlug}.gomboswiftci.app
                         </code>
                       </div>
                     )}
@@ -392,7 +392,7 @@ export const RegisterTenant: React.FC = () => {
                         onChange={e => setTenantSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
                       />
                       <span style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', fontSize: '0.8rem', color: '#94a3b8', fontWeight: 600 }}>
-                        .gomboswiftci.ci
+                        .gomboswiftci.app
                       </span>
                     </div>
                   </div>
