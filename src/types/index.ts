@@ -31,6 +31,7 @@ export interface SaasPlanDb {
   is_popular: boolean;
   max_orders_month: number | null;
   max_users: number | null;
+  max_products: number | null;
   module_caisse: boolean;
   module_audit: boolean;
   module_api: boolean;

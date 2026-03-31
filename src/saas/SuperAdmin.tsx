@@ -531,6 +531,8 @@ const PlansTab = () => {
         p_module_profit_finances: !!plan.module_profit_finances,
         p_module_tresorerie_admin: !!plan.module_tresorerie_admin,
         p_module_expertise_comptable: !!plan.module_expertise_comptable,
+        // NEW LIMITS
+        p_max_products: plan.max_products === undefined ? -1 : Number(plan.max_products),
       });
 
       if (error) throw error;
@@ -694,7 +696,22 @@ const PlansTab = () => {
                   onChange={e => handleChange(plan.id, 'price_fcfa', parseInt(e.target.value))}
                   style={{ background: 'transparent', border: 'none', color: '#10b981', fontWeight: 950, fontSize: '2rem', width: '100%', outline: 'none' }}
                 />
-                <span style={{ fontSize: '1rem', color: '#64748b', fontWeight: 900, whiteSpace: 'nowrap' }}>FCFA / mois</span>
+              </div>
+
+              {/* Limits Configuration */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+                <div className="form-group">
+                  <label className="form-label" style={{ fontSize: '0.65rem', fontWeight: 950, color: '#475569', textTransform: 'uppercase' }}>Utilisateurs Max</label>
+                  <input type="number" className="form-input" value={plan.max_users || ''} placeholder="Ex: 5 (-1=illimité)" onChange={e => handleChange(plan.id, 'max_users', Number(e.target.value))} style={{ height: '44px', borderRadius: '10px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'white', padding: '0 0.75rem', fontWeight: 700 }} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label" style={{ fontSize: '0.65rem', fontWeight: 950, color: '#475569', textTransform: 'uppercase' }}>Commandes / Mois</label>
+                  <input type="number" className="form-input" value={plan.max_orders_month || ''} placeholder="Ex: 50 (-1=illimité)" onChange={e => handleChange(plan.id, 'max_orders_month', Number(e.target.value))} style={{ height: '44px', borderRadius: '10px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'white', padding: '0 0.75rem', fontWeight: 700 }} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label" style={{ fontSize: '0.65rem', fontWeight: 950, color: '#475569', textTransform: 'uppercase' }}>Produits Max</label>
+                  <input type="number" className="form-input" value={plan.max_products || -1} placeholder="Ex: 10 (-1=illimité)" onChange={e => handleChange(plan.id, 'max_products', Number(e.target.value))} style={{ height: '44px', borderRadius: '10px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'white', padding: '0 0.75rem', fontWeight: 700 }} />
+                </div>
               </div>
 
               {/* 8 Modules Grid */}

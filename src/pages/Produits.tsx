@@ -8,7 +8,7 @@ import { Produit } from '../types';
 import { useSaas } from '../saas/SaasProvider';
 
 export const Produits = () => {
-  const { tenant } = useSaas();
+  const { tenant, planConfig } = useSaas();
   const [produits, setProduits] = useState<Produit[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -47,7 +47,26 @@ export const Produits = () => {
             <h1 className="text-premium" style={{ fontSize: '2.2rem', fontWeight: 800, margin: 0 }}>Catalogue Inventaire</h1>
             <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', marginTop: '0.4rem', fontWeight: 500 }}>Gérez vos articles, prix de vente et niveaux de stock en temps réel.</p>
           </div>
-          <button className="btn btn-primary" style={{ height: '56px', padding: '0 2rem', borderRadius: '18px', fontWeight: 800, fontSize: '1.05rem', boxShadow: '0 10px 15px -3px rgba(99, 102, 255, 0.3)' }} onClick={() => { setSelectedProduit(null); setIsProduitFormOpen(true); }}>
+          <button 
+            className="btn btn-primary" 
+            style={{ 
+                height: '56px', 
+                padding: '0 2rem', 
+                borderRadius: '18px', 
+                fontWeight: 800, 
+                fontSize: '1.05rem', 
+                boxShadow: '0 10px 15px -3px rgba(99, 102, 255, 0.3)',
+                opacity: (planConfig?.max_products && planConfig.max_products !== -1 && produits.length >= planConfig.max_products) ? 0.6 : 1
+            }} 
+            onClick={() => { 
+                if (planConfig?.max_products && planConfig.max_products !== -1 && produits.length >= planConfig.max_products) {
+                    alert(`Limite de produits atteinte (${planConfig.max_products} pour votre forfait ${planConfig.name}). Veuillez passer au forfait supérieur.`);
+                    return;
+                }
+                setSelectedProduit(null); 
+                setIsProduitFormOpen(true); 
+            }}
+          >
             <Plus size={22} strokeWidth={3} style={{ marginRight: '0.5rem' }} />
             Nouveau Produit
           </button>
