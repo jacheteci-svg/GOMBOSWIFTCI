@@ -221,16 +221,8 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
       <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
         
         <div className="brand-logo" style={{ borderBottom: '1px solid var(--glass-border)', padding: '1.75rem 1.5rem' }}>
-          <div style={{ 
-            background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)', 
-            width: 40, height: 40, 
-            borderRadius: 14, 
-            display: 'flex', alignItems: 'center', justifyContent: 'center', 
-            color: 'white',
-            flexShrink: 0,
-            boxShadow: '0 4px 15px rgba(6, 182, 212, 0.4)'
-          }}>
-            <Package size={22} />
+          <div style={{ flexShrink: 0 }}>
+            <img src="/favicon.png" alt="Logo" style={{ width: 44, height: 44, borderRadius: 12, objectFit: 'cover', boxShadow: '0 4px 15px rgba(6, 182, 212, 0.4)' }} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             <span style={{ 

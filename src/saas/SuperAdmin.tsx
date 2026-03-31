@@ -72,8 +72,8 @@ export const SuperAdmin: React.FC = () => {
       <div style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.5rem' }}>
-            <div style={{ background: 'rgba(99,102,241,0.2)', padding: '0.6rem', borderRadius: '12px', border: '1px solid rgba(99,102,241,0.3)' }}>
-              <Zap size={24} className="nexus-neon-text" />
+            <div style={{ flexShrink: 0 }}>
+              <img src="/favicon.png" alt="Nexus Logo" style={{ width: 32, height: 32, borderRadius: 8, objectFit: 'cover' }} />
             </div>
             <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>
               Nexus Core v4.0.2

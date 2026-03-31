@@ -54,8 +54,8 @@ export const LandingPage: React.FC = () => {
         boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div style={{ background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', padding: '0.6rem', borderRadius: '14px', color: 'white', boxShadow: '0 0 20px rgba(99, 102, 241, 0.3)' }}>
-            <Truck size={24} strokeWidth={2.5} />
+          <div style={{ padding: '0.2rem', flexShrink: 0 }}>
+            <img src="/favicon.png" alt="Logo" style={{ width: 44, height: 44, borderRadius: 12, objectFit: 'cover' }} />
           </div>
           <span style={{ fontSize: '1.6rem', fontWeight: 950, letterSpacing: '-0.04em', background: 'linear-gradient(to right, #fff, #94a3b8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>GomboSwiftCI</span>
         </div>
@@ -355,7 +355,9 @@ export const LandingPage: React.FC = () => {
         <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '6rem' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
-              <div style={{ background: '#6366f1', padding: '0.4rem', borderRadius: '8px' }}><Truck size={20} color="white"/></div>
+              <div style={{ padding: '0.2rem', flexShrink: 0 }}>
+                <img src="/favicon.png" alt="Logo" style={{ width: 32, height: 32, borderRadius: 8, objectFit: 'cover' }} />
+              </div>
               <span style={{ fontSize: '1.4rem', fontWeight: 950 }}>GomboSwiftCI</span>
             </div>
             <p style={{ color: '#64748b', fontSize: '1rem', lineHeight: 1.7, marginBottom: '2.5rem' }}>

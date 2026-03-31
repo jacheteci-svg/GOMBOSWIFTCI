@@ -173,19 +173,8 @@ export const Login = () => {
       }}>
         {/* LOGO & TITRE FUTURISTE */}
         <div style={{ textAlign: 'center', marginBottom: '3.5rem', position: 'relative', zIndex: 2 }}>
-          <div style={{ 
-            width: '80px', 
-            height: '80px', 
-            background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', 
-            borderRadius: '22px', 
-            margin: '0 auto 1.5rem', 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            boxShadow: '0 0 40px rgba(99, 102, 255, 0.5), inset 0 0 15px rgba(255,255,255,0.4)',
-            border: '1px solid rgba(255,255,255,0.3)'
-          }}>
-            <LogIn size={38} color="white" strokeWidth={2.5} />
+          <div style={{ padding: '0.2rem', marginBottom: '2rem', display: 'flex', justifyContent: 'center' }}>
+            <img src="/logo.png" alt="Logo" style={{ width: 100, height: 'auto', borderRadius: 20, boxShadow: '0 20px 40px rgba(99, 102, 255, 0.4)' }} />
           </div>
           
           <h1 className="text-neon" style={{ 

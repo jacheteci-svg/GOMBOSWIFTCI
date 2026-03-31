@@ -196,8 +196,8 @@ export const RegisterTenant: React.FC = () => {
         {/* Left Side: Brand & Info */}
         <div style={{ padding: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2.5rem' }}>
-            <div style={{ background: 'var(--primary)', padding: '0.6rem', borderRadius: '14px', color: 'white' }}>
-              <Rocket size={32} strokeWidth={2.5} />
+            <div style={{ flexShrink: 0 }}>
+              <img src="/favicon.png" alt="Logo" style={{ width: 50, height: 50, borderRadius: 14, objectFit: 'cover' }} />
             </div>
             <span style={{ fontSize: '1.8rem', fontWeight: 900, letterSpacing: '-0.04em' }}>GomboSwiftCI SaaS</span>
           </div>
