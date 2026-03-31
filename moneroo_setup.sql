@@ -23,11 +23,19 @@ ALTER TABLE moneroo_transactions ENABLE ROW LEVEL SECURITY;
 
 -- 3. RLS Policies
 -- Users can see their own transactions
+DROP POLICY IF EXISTS "Users can view their own transactions" ON moneroo_transactions;
 CREATE POLICY "Users can view their own transactions" ON moneroo_transactions
     FOR SELECT TO authenticated
     USING (tenant_id = (SELECT tenant_id FROM users WHERE users.id = auth.uid()));
 
--- SuperAdmins can see everything
+-- Users can INSERT their own transactions (for payment initialization)
+DROP POLICY IF EXISTS "Users can insert their own transactions" ON moneroo_transactions;
+CREATE POLICY "Users can insert their own transactions" ON moneroo_transactions
+    FOR INSERT TO authenticated
+    WITH CHECK (tenant_id = (SELECT tenant_id FROM users WHERE users.id = auth.uid()));
+
+-- SuperAdmins can do everything
+DROP POLICY IF EXISTS "SuperAdmins can view all transactions" ON moneroo_transactions;
 CREATE POLICY "SuperAdmins can view all transactions" ON moneroo_transactions
     FOR ALL TO authenticated
     USING (EXISTS (SELECT 1 FROM users WHERE id = auth.uid() AND role = 'SUPER_ADMIN'));

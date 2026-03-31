@@ -112,9 +112,20 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const [lastSlug, setLastSlug] = useState<string | null>(null);
+  
   useEffect(() => {
-    fetchSaasData();
-  }, [currentUser, window.location.pathname]);
+    // Optimization: only refetch if current user changes or if we navigate to a DIFFERENT tenant store
+    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    const urlSlug = pathParts[0];
+    const isSpecialPath = ['super-admin', 'platform', 'login', 'register'].includes(urlSlug);
+    const targetSlug = (!isSpecialPath && urlSlug && urlSlug !== 'nexus') ? urlSlug : (urlSlug === 'nexus' ? 'nexus' : null);
+
+    if (currentUser?.id || targetSlug !== lastSlug) {
+      setLastSlug(targetSlug);
+      fetchSaasData();
+    }
+  }, [currentUser?.id, window.location.pathname.split('/')[1]]); // Detect only base slug change
 
   const isPlanAtLeast = (requiredPlan: Plan) => {
     const currentPlan = (tenant?.plan || 'FREE') as Plan;
