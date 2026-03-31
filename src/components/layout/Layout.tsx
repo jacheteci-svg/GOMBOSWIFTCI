@@ -5,28 +5,52 @@ import { Header } from './Header';
 import { BottomNav } from './BottomNav';
 import { useSaas } from '../../saas/SaasProvider';
 import { monerooService } from '../../services/monerooService';
-import { Lock, CreditCard, LogOut } from 'lucide-react';
+import { Lock, CreditCard, LogOut, Loader2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
 
 export const Layout = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { tenant, isActive, planConfig, loading: saasLoading } = useSaas();
   const { logout, currentUser } = useAuth();
+  const { showToast } = useToast();
+  const [paying, setPaying] = useState(false);
 
   const handlePayActivation = async () => {
-    if (!tenant || !planConfig) return;
+    console.log("Triggering payment for tenant:", tenant?.nom, "Plan:", planConfig?.id);
+    
+    if (!tenant) {
+      showToast("Erreur : Données du compte introuvables.", "error");
+      return;
+    }
+
+    setPaying(true);
     try {
+      // Use fallback price if planConfig is missing
+      const amount = planConfig?.price_fcfa || (tenant.plan === 'BASIC' ? 15000 : 25000);
+      
+      console.log("Initializing Moneroo with amount:", amount);
+
       const checkoutUrl = await monerooService.initializeSubscription({
-        amount: planConfig.price_fcfa,
+        amount: amount,
         currency: 'XOF',
         customer: { name: tenant.nom, email: tenant.email_contact },
         reference_id: tenant.plan || 'BASIC',
         type: 'SUBSCRIPTION',
         tenant_id: tenant.id
       });
-      if (checkoutUrl) window.location.href = checkoutUrl;
-    } catch (e) {
-      console.error(e);
+
+      if (checkoutUrl) {
+        console.log("Checkout URL created:", checkoutUrl);
+        window.location.href = checkoutUrl;
+      } else {
+        showToast("Impossible de générer le lien de paiement.", "error");
+      }
+    } catch (e: any) {
+      console.error("Payment initialization failed:", e);
+      showToast("Erreur d'initialisation : " + (e.message || "vérifiez votre connexion"), "error");
+    } finally {
+      setPaying(false);
     }
   };
 
@@ -61,6 +85,7 @@ export const Layout = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <button 
               onClick={handlePayActivation}
+              disabled={paying}
               className="btn btn-primary"
               style={{ 
                 height: '65px', borderRadius: '18px', fontWeight: 850, fontSize: '1.1rem',
@@ -68,7 +93,7 @@ export const Layout = () => {
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem'
               }}
             >
-              RÉGLER MA FACTURE <CreditCard size={20} />
+              {paying ? <Loader2 className="animate-spin" /> : <>RÉGLER MA FACTURE <CreditCard size={20} /></>}
             </button>
             
             <button 
