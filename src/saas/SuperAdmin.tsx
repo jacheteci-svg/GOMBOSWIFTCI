@@ -504,72 +504,206 @@ const PlansTab = () => {
   const handleSave = async (plan: any) => {
     setSavingId(plan.id);
     try {
-      const { error } = await insforge.database.from('saas_plans').update({
-        name: plan.name,
-        price_fcfa: plan.price_fcfa,
-        description: plan.description,
-        is_popular: plan.is_popular,
-        module_caisse: plan.module_caisse,
-        module_audit: plan.module_audit,
-        module_api: plan.module_api
-      }).eq('id', plan.id);
+      // Use RPC with SECURITY DEFINER to bypass RLS silent failures
+      const { data: rpcResult, error } = await insforge.database.rpc('update_saas_plan', {
+        p_id: plan.id,
+        p_name: plan.name,
+        p_price_fcfa: plan.price_fcfa,
+        p_description: plan.description || '',
+        p_is_popular: !!plan.is_popular,
+        p_module_caisse: !!plan.module_caisse,
+        p_module_audit: !!plan.module_audit,
+        p_module_api: !!plan.module_api,
+        p_module_whatsapp: !!plan.module_whatsapp,
+        p_module_multi_depot: !!plan.module_multi_depot,
+        p_module_livreurs: !!plan.module_livreurs,
+        p_module_rapport_avance: !!plan.module_rapport_avance,
+        p_module_white_label: !!plan.module_white_label,
+      });
+
       if (error) throw error;
-      showToast(`Offre ${plan.name} actualisée au catalogue.`, 'success');
+
+      // RPC returns { success: true/false, error?: string }
+      const result = rpcResult as any;
+      if (result && result.success === false) {
+        throw new Error(result.error || 'Échec de la mise à jour en base de données');
+      }
+
+      showToast(`✅ Offre "${plan.name}" publiée sur la landing page !`, 'success');
       fetchPlans();
     } catch (err: any) {
-      showToast(err.message, 'error');
+      // Fallback: try direct update if RPC doesn't exist yet
+      if (err?.message?.includes('Could not find') || err?.code === 'PGRST202') {
+        try {
+          const { data: updateData, error: updateError } = await (insforge.database
+            .from('saas_plans') as any)
+            .update({
+              name: plan.name,
+              price_fcfa: plan.price_fcfa,
+              description: plan.description,
+              is_popular: plan.is_popular,
+              module_caisse: plan.module_caisse,
+              module_audit: plan.module_audit,
+              module_api: plan.module_api,
+              module_whatsapp: plan.module_whatsapp,
+              module_multi_depot: plan.module_multi_depot,
+              module_livreurs: plan.module_livreurs,
+              module_rapport_avance: plan.module_rapport_avance,
+              module_white_label: plan.module_white_label,
+            })
+            .eq('id', plan.id)
+            .select();
+
+          if (updateError) throw updateError;
+          if (!updateData || updateData.length === 0) {
+            showToast(`⚠️ Mise à jour bloquée par RLS. Exécutez fix_plans_update.sql`, 'error');
+          } else {
+            showToast(`✅ Offre "${plan.name}" mise à jour !`, 'success');
+            fetchPlans();
+          }
+        } catch (fallbackErr: any) {
+          showToast(fallbackErr.message || 'Erreur lors de la mise à jour', 'error');
+        }
+      } else {
+        showToast(err.message || 'Erreur lors de la mise à jour', 'error');
+      }
     } finally {
       setSavingId(null);
     }
   };
 
+
+  const ALL_MODULES = [
+    { key: 'module_caisse',         label: 'Caisse Expert',       color: '#10b981', icon: '🏦' },
+    { key: 'module_audit',          label: 'Audit & Trésorerie',  color: '#06b6d4', icon: '📊' },
+    { key: 'module_api',            label: 'API & Intégrations',  color: '#8b5cf6', icon: '🔌' },
+    { key: 'module_whatsapp',       label: 'WhatsApp Auto',       color: '#25d366', icon: '💬' },
+    { key: 'module_multi_depot',    label: 'Multi-Entrepôts',     color: '#f59e0b', icon: '🏭' },
+    { key: 'module_livreurs',       label: 'Livreurs Pro',        color: '#ec4899', icon: '🛵' },
+    { key: 'module_rapport_avance', label: 'Rapports Avancés',    color: '#3b82f6', icon: '📈' },
+    { key: 'module_white_label',    label: 'White Label',         color: '#a855f7', icon: '🎨' },
+  ];
+
   return (
     <div style={{ animation: 'fadeIn 0.3s ease' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-         <h3 className="nexus-neon-text" style={{ margin: 0, fontWeight: 950, fontSize: '1.8rem' }}>Catalogue des Offres SaaS</h3>
-         <button className="btn btn-primary" style={{ padding: '0.8rem 1.5rem', borderRadius: '12px', fontWeight: 900 }}><Plus size={20} /> NOUVELLE OFFRE</button>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <h3 className="nexus-neon-text" style={{ margin: 0, fontWeight: 950, fontSize: '1.8rem' }}>Catalogue des Offres SaaS</h3>
       </div>
 
-      {loading ? <div className="spinner"></div> : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: '2rem' }}>
-           {plans.map(plan => (
-             <div key={plan.id} className="nexus-card-elite" style={{ border: plan.is_popular ? '1px solid var(--primary)' : '1px solid rgba(255,255,255,0.05)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                   <div style={{ background: `${plan.color}20`, color: plan.color, padding: '0.6rem', borderRadius: '12px' }}><Zap size={24} /></div>
-                   <input 
-                    type="text" 
-                    value={plan.name} 
+      {/* Sync Banner */}
+      <div style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '14px', padding: '1rem 1.5rem', marginBottom: '2.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <span style={{ fontSize: '1.3rem' }}>🔄</span>
+        <div>
+          <div style={{ fontWeight: 900, color: '#10b981', fontSize: '0.85rem' }}>SYNCHRONISATION AUTOMATIQUE AVEC LA LANDING PAGE</div>
+          <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.2rem' }}>Toute modification publiée ici est immédiatement visible sur la page de tarification publique.</div>
+        </div>
+      </div>
+
+      {loading ? <div className="spinner" /> : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(420px, 1fr))', gap: '2rem' }}>
+          {plans.map(plan => (
+            <div key={plan.id} className="nexus-card-elite" style={{
+              border: plan.is_popular ? '1px solid rgba(99,102,241,0.5)' : '1px solid rgba(255,255,255,0.05)',
+              position: 'relative'
+            }}>
+              {plan.is_popular && (
+                <div style={{ position: 'absolute', top: '-1px', right: '1.5rem', background: 'linear-gradient(135deg, #6366f1, #a855f7)', color: 'white', padding: '0.3rem 1rem', borderRadius: '0 0 12px 12px', fontSize: '0.65rem', fontWeight: 900 }}>
+                  ⭐ POPULAIRE
+                </div>
+              )}
+
+              {/* Name + Popular toggle */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div style={{ background: `${plan.color || '#6366f1'}20`, color: plan.color || '#6366f1', padding: '0.6rem', borderRadius: '12px', border: `1px solid ${plan.color || '#6366f1'}30` }}>
+                    <Zap size={22} />
+                  </div>
+                  <input
+                    type="text"
+                    value={plan.name}
                     onChange={e => handleChange(plan.id, 'name', e.target.value)}
-                    style={{ background: 'transparent', border: 'none', color: 'white', fontWeight: 950, fontSize: '1.4rem', textAlign: 'right', outline: 'none' }}
-                   />
+                    style={{ background: 'transparent', border: 'none', color: 'white', fontWeight: 950, fontSize: '1.3rem', outline: 'none', width: '170px' }}
+                  />
                 </div>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 900, color: plan.is_popular ? '#6366f1' : '#475569' }}>
+                  <input
+                    type="checkbox"
+                    checked={!!plan.is_popular}
+                    onChange={e => handleChange(plan.id, 'is_popular', e.target.checked)}
+                    style={{ accentColor: '#6366f1' }}
+                  />
+                  POPULAIRE
+                </label>
+              </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem', padding: '1.25rem', background: 'rgba(255,255,255,0.03)', borderRadius: '14px' }}>
-                   <input 
-                    type="number" 
-                    value={plan.price_fcfa}
-                    onChange={e => handleChange(plan.id, 'price_fcfa', parseInt(e.target.value))}
-                    style={{ background: 'transparent', border: 'none', color: '#10b981', fontWeight: 950, fontSize: '2.4rem', width: '100%', outline: 'none' }}
-                   />
-                   <span style={{ fontSize: '1.2rem', color: '#64748b', fontWeight: 900 }}>FCFA</span>
+              {/* Description */}
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{ fontSize: '0.65rem', fontWeight: 900, color: '#475569', textTransform: 'uppercase', display: 'block', marginBottom: '0.5rem' }}>Description (landing page)</label>
+                <input
+                  type="text"
+                  value={plan.description || ''}
+                  onChange={e => handleChange(plan.id, 'description', e.target.value)}
+                  placeholder="Description visible sur la page tarifaire..."
+                  style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.75rem 1rem', color: '#cbd5e1', fontWeight: 700, fontSize: '0.85rem', outline: 'none', boxSizing: 'border-box' }}
+                />
+              </div>
+
+              {/* Price */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem', padding: '1.25rem', background: 'rgba(255,255,255,0.03)', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <input
+                  type="number"
+                  value={plan.price_fcfa}
+                  onChange={e => handleChange(plan.id, 'price_fcfa', parseInt(e.target.value))}
+                  style={{ background: 'transparent', border: 'none', color: '#10b981', fontWeight: 950, fontSize: '2rem', width: '100%', outline: 'none' }}
+                />
+                <span style={{ fontSize: '1rem', color: '#64748b', fontWeight: 900, whiteSpace: 'nowrap' }}>FCFA / mois</span>
+              </div>
+
+              {/* 8 Modules Grid */}
+              <div style={{ marginBottom: '2rem' }}>
+                <div style={{ fontSize: '0.65rem', fontWeight: 900, color: '#475569', textTransform: 'uppercase', marginBottom: '0.75rem', letterSpacing: '0.1em' }}>
+                  Modules ({ALL_MODULES.filter(m => plan[m.key]).length}/8 activés)
                 </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2.5rem' }}>
-                   <FeatureToggle checked={plan.module_caisse} onChange={(e: any) => handleChange(plan.id, 'module_caisse', e.target.checked)} label="Module Caisse Expert" color="#10b981" />
-                   <FeatureToggle checked={plan.module_audit} onChange={(e: any) => handleChange(plan.id, 'module_audit', e.target.checked)} label="Audit & Trésorerie" color="#06b6d4" />
-                   <FeatureToggle checked={plan.module_api} onChange={(e: any) => handleChange(plan.id, 'module_api', e.target.checked)} label="API Infrastructure" color="#8b5cf6" />
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem' }}>
+                  {ALL_MODULES.map(mod => (
+                    <label
+                      key={mod.key}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        padding: '0.65rem 0.85rem',
+                        background: plan[mod.key] ? `${mod.color}12` : 'rgba(255,255,255,0.02)',
+                        border: plan[mod.key] ? `1px solid ${mod.color}35` : '1px solid rgba(255,255,255,0.04)',
+                        borderRadius: '10px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      <span style={{ fontSize: '0.9rem' }}>{mod.icon}</span>
+                      <span style={{ fontSize: '0.72rem', fontWeight: 800, color: plan[mod.key] ? mod.color : '#475569', flex: 1, lineHeight: 1.2 }}>{mod.label}</span>
+                      <input
+                        type="checkbox"
+                        checked={!!plan[mod.key]}
+                        onChange={e => handleChange(plan.id, mod.key, e.target.checked)}
+                        style={{ accentColor: mod.color, width: '14px', height: '14px', flexShrink: 0 }}
+                      />
+                    </label>
+                  ))}
                 </div>
+              </div>
 
-                <button 
-                  onClick={() => handleSave(plan)} 
-                  disabled={savingId === plan.id}
-                  className="btn btn-primary" 
-                  style={{ width: '100%', height: '56px', borderRadius: '16px', fontWeight: 950, fontSize: '1rem' }}
-                >
-                  {savingId === plan.id ? <div className="spinner"></div> : "PUBLIER LES MODIFICATIONS"}
-                </button>
-             </div>
-           ))}
+              {/* Save */}
+              <button
+                onClick={() => handleSave(plan)}
+                disabled={savingId === plan.id}
+                className="btn btn-primary"
+                style={{ width: '100%', height: '52px', borderRadius: '14px', fontWeight: 950, fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+              >
+                {savingId === plan.id ? <div className="spinner" /> : <><Send size={16} /> PUBLIER SUR LA LANDING PAGE</>}
+              </button>
+            </div>
+          ))}
         </div>
       )}
     </div>
@@ -883,13 +1017,3 @@ const SecurityLogsTab = () => {
 /* -------------------------------------------------------------------------- */
 /*                               HELPERS                                      */
 /* -------------------------------------------------------------------------- */
-
-const FeatureToggle = ({ label, checked, onChange, color }: any) => (
-  <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1.25rem', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.04)', cursor: 'pointer', transition: 'all 0.2s' }} className="hover-lift">
-    <span style={{ fontSize: '0.95rem', fontWeight: 800, color: checked ? 'white' : '#64748b' }}>{label}</span>
-    <div style={{ position: 'relative', width: '48px', height: '26px', background: checked ? color : 'rgba(255,255,255,0.1)', borderRadius: '30px', transition: 'all 0.3s' }}>
-       <input type="checkbox" checked={checked} onChange={onChange} style={{ position: 'absolute', opacity: 0, width: '100%', height: '100%', zIndex: 2, cursor: 'pointer' }} />
-       <div style={{ position: 'absolute', top: '3px', left: checked ? '25px' : '3px', width: '20px', height: '20px', background: 'white', borderRadius: '50%', transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)', boxShadow: '0 2px 4px rgba(0,0,0,0.3)' }} />
-    </div>
-  </label>
-);

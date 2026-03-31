@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { User, Commune, Permission } from '../types';
 import { getAdminUsers, createAdminUser, updateAdminUser, getCommunes, createCommune, updateCommune, deleteCommune } from '../services/adminService';
-import { Plus, Trash2, Users as UsersIcon, Map as MapIcon } from 'lucide-react';
+import { Plus, Trash2, Users as UsersIcon, Map as MapIcon, CreditCard, CheckCircle } from 'lucide-react';
+import { monerooService } from '../services/monerooService';
 import { useToast } from '../contexts/ToastContext';
 import { insforge } from '../lib/insforge';
 import { useAuth } from '../contexts/AuthContext';
@@ -15,8 +17,13 @@ export const Admin = () => {
   const canManageUsers = hasPermission('ADMIN') || hasPermission('GESTION_LIVREURS');
   const canManageCommunes = hasPermission('ADMIN') || hasPermission('COMMUNES');
 
-  const [activeTab, setActiveTab] = useState<'utilisateurs' | 'communes'>(
-    canManageUsers ? 'utilisateurs' : 'communes'
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab') as any;
+
+  const [activeTab, setActiveTab] = useState<'utilisateurs' | 'communes' | 'abonnement'>(
+    (tabParam && ['utilisateurs', 'communes', 'abonnement'].includes(tabParam)) 
+      ? tabParam 
+      : (canManageUsers ? 'utilisateurs' : 'communes')
   );
 
   return (
@@ -62,6 +69,18 @@ export const Admin = () => {
             <MapIcon size={18} strokeWidth={activeTab === 'communes' ? 2.5 : 2} /> Zones & Tarifs
           </button>
         )}
+        <button 
+          className="btn"
+          onClick={() => setActiveTab('abonnement')}
+          style={{ 
+            background: activeTab === 'abonnement' ? 'white' : 'transparent',
+            color: activeTab === 'abonnement' ? 'var(--primary)' : 'var(--text-muted)',
+            boxShadow: activeTab === 'abonnement' ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
+            border: 'none', padding: '0.7rem 1.5rem', borderRadius: '12px', fontWeight: 700, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem'
+          }}
+        >
+          <CreditCard size={18} strokeWidth={activeTab === 'abonnement' ? 2.5 : 2} /> Mon Abonnement
+        </button>
       </div>
 
       <div>
@@ -71,7 +90,9 @@ export const Admin = () => {
             <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Chargement de l'espace boutique...</p>
           </div>
         ) : (
-          activeTab === 'utilisateurs' ? <UsersManager showToast={showToast} tenantId={tenant.id} /> : <CommunesManager showToast={showToast} tenantId={tenant.id} />
+          activeTab === 'utilisateurs' ? <UsersManager showToast={showToast} tenantId={tenant.id} /> : 
+          activeTab === 'communes' ? <CommunesManager showToast={showToast} tenantId={tenant.id} /> :
+          <SubscriptionManager showToast={showToast} tenant={tenant} />
         )}
       </div>
     </div>
@@ -435,6 +456,148 @@ const CommunesManager = ({ showToast, tenantId }: { showToast: any, tenantId: st
             ))}
           </tbody>
         </table>
+      </div>
+    </div>
+  );
+};
+
+// --- SUBSCRIPTION MANAGER COMPONENT ---
+const SubscriptionManager = ({ showToast, tenant }: { showToast: any, tenant: any }) => {
+  const [plans, setPlans] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { planConfig } = useSaas();
+
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const { data, error } = await insforge.database
+          .from('saas_plans')
+          .select('*')
+          .order('price_fcfa', { ascending: true });
+        if (error) throw error;
+        setPlans(data || []);
+      } catch (e) {
+        showToast("Erreur plans.", "error");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPlans();
+  }, []);
+
+  const handleUpgrade = async (plan: any) => {
+    if (plan.id === tenant.plan) {
+      showToast("Vous utilisez déjà ce forfait.", "info");
+      return;
+    }
+
+    if (plan.price_fcfa === 0) {
+        showToast("Veuillez contacter le support pour passer sur le plan Gratuit.", "info");
+        return;
+    }
+
+    try {
+      showToast("Initialisation du paiement...", "info");
+      const checkoutUrl = await monerooService.initializeSubscription({
+        amount: plan.price_fcfa,
+        currency: 'XOF',
+        customer: {
+          name: tenant.nom,
+          email: tenant.email_contact
+        },
+        reference_id: plan.id, // Target Plan ID
+        type: 'SUBSCRIPTION',
+        tenant_id: tenant.id
+      });
+
+      if (checkoutUrl) {
+          window.location.href = checkoutUrl;
+      }
+    } catch (error: any) {
+      showToast(error.message || "Erreur de paiement", "error");
+    }
+  };
+
+  return (
+    <div style={{ animation: 'fadeIn 0.4s' }}>
+      <div className="card glass-effect" style={{ padding: '2.5rem', marginBottom: '2.5rem', borderLeft: '5px solid var(--primary)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.5rem' }}>
+          <div>
+            <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Forfait Actuel</span>
+            <h2 style={{ fontSize: '2.2rem', fontWeight: 850, margin: '0.4rem 0' }}>{planConfig?.name || tenant.plan}</h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#10b981', fontWeight: 700 }}>
+              <CheckCircle size={18} /> Statut : ACTIF
+            </div>
+          </div>
+          <div style={{ background: 'rgba(255,255,255,0.4)', padding: '1.25rem', borderRadius: '20px', textAlign: 'right' }}>
+            <p style={{ margin: 0, fontWeight: 700, color: 'var(--text-muted)' }}>Prochain renouvellement</p>
+            <p style={{ margin: 0, fontSize: '1.25rem', fontWeight: 850, color: 'var(--text-main)' }}>Dans 30 jours (Auto)</p>
+          </div>
+        </div>
+      </div>
+
+      <h3 style={{ fontSize: '1.4rem', fontWeight: 850, marginBottom: '2rem' }}>Débloquez plus de puissance 🚀</h3>
+
+      {loading ? <div className="spinner" /> : (
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+          gap: '2rem' 
+        }}>
+          {plans.filter(p => !p.id.includes('CUSTOM') && p.price_fcfa >= 0).map(plan => (
+            <div 
+                key={plan.id} 
+                className={`card ${plan.id === tenant.plan ? 'active-plan' : ''}`}
+                style={{ 
+                    padding: '2.5rem', 
+                    position: 'relative', 
+                    transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                    border: plan.id === tenant.plan ? '2px solid var(--primary)' : '1px solid #e2e8f0',
+                    boxShadow: plan.is_popular ? '0 20px 40px rgba(99,102,241,0.1)' : 'none',
+                    display: 'flex',
+                    flexDirection: 'column'
+                }}
+            >
+              {plan.is_popular && (
+                <div style={{ position: 'absolute', top: '-15px', left: '50%', transform: 'translateX(-50%)', background: 'var(--primary)', color: 'white', padding: '0.4rem 1rem', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 800 }}>
+                   RECOMMANDÉ 
+                </div>
+              )}
+              
+              <div style={{ marginBottom: '1.5rem' }}>
+                <h4 style={{ fontSize: '1.4rem', fontWeight: 850, margin: 0 }}>{plan.name}</h4>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.5rem', fontWeight: 500, minHeight: '3em' }}>{plan.description}</p>
+              </div>
+
+              <div style={{ marginBottom: '2rem' }}>
+                <span style={{ fontSize: '2.2rem', fontWeight: 950, color: 'var(--text-main)' }}>{plan.price_fcfa.toLocaleString()}</span>
+                <span style={{ color: 'var(--text-muted)', fontWeight: 700 }}> F / mois</span>
+              </div>
+
+              <div style={{ flex: 1 }}>
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                  {plan.module_caisse && <li style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.9rem', fontWeight: 600 }}><CheckCircle size={16} color="#10b981" /> Module Caisse</li>}
+                  {plan.module_audit && <li style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.9rem', fontWeight: 600 }}><CheckCircle size={16} color="#10b981" /> Audit Financier</li>}
+                  {plan.module_whatsapp && <li style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.9rem', fontWeight: 600 }}><CheckCircle size={16} color="#10b981" /> WhatsApp Pro</li>}
+                  {plan.module_livreurs && <li style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.9rem', fontWeight: 600 }}><CheckCircle size={16} color="#10b981" /> Gestion Livreurs</li>}
+                </ul>
+              </div>
+
+              <button 
+                onClick={() => handleUpgrade(plan)}
+                disabled={plan.id === tenant.plan}
+                className={plan.id === tenant.plan ? "btn btn-outline" : "btn btn-primary"}
+                style={{ width: '100%', marginTop: '2.5rem', height: '52px', borderRadius: '12px', fontWeight: 800 }}
+              >
+                {plan.id === tenant.plan ? 'Forfait Actuel' : 'Choisir ce forfait'}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      
+      <div className="card" style={{ marginTop: '3rem', padding: '2rem', background: '#f8fafc', border: '1px dashed #cbd5e1', textAlign: 'center' }}>
+        <p style={{ fontWeight: 600, color: '#64748b', margin: 0 }}>Besoin d'un plan custom (Multi-entrepôts, White-label) ? 📧 Contactez support@gomboswiftci.com</p>
       </div>
     </div>
   );

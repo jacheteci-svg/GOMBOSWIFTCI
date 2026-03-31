@@ -44,6 +44,7 @@ import {
   GdprPage 
 } from './pages/StaticPages';
 import { DemoPage } from './pages/DemoPage';
+import { SubscriptionCallback } from './pages/SubscriptionCallback';
 
 const PageLoader = () => {
   console.log("Routing to:", window.location.pathname);
@@ -140,6 +141,8 @@ const AppRoutes = () => {
       <Route path="/privacy" element={<PrivacyPage />} />
       <Route path="/terms" element={<TermsPage />} />
       <Route path="/gdpr" element={<GdprPage />} />
+      <Route path="/subscription-done" element={<SubscriptionCallback />} />
+      <Route path="/subscription-cancel" element={<Navigate to="/" replace />} />
 
       {/* ROOT REDIRECT */}
       <Route path="/" element={

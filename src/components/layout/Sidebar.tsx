@@ -102,6 +102,7 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
             { path: `/${effectiveSlug}/net-profit`, label: 'Profit & Finances', icon: DollarSign, permission: 'ADMIN' },
             { path: `/${effectiveSlug}/admin/tresorerie`, label: 'Trésorerie Admin', icon: Wallet, permission: 'TRESORERIE' },
             { path: `/${effectiveSlug}/audit-tresorerie`, label: 'Expertise Comptable', icon: ShieldCheck, permission: 'ADMIN', requiredModule: 'module_audit' },
+            { path: `/${effectiveSlug}/admin?tab=abonnement`, label: 'Abonnement & Forfait', icon: Crown, permission: 'ADMIN' },
           ]
         }
       ]
