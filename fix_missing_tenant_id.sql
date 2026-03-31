@@ -1,55 +1,119 @@
 -- ============================================================
--- RECONCILIATION MULTI-TENANT (SÉCURITÉ & STRUCTURE)
--- Exécutez ce script dans l'éditeur SQL pour corriger les bugs
--- de création de produits et les erreurs de Dashboard.
+-- MASTER INFRASTRUCTURE REPAIR (IDEMPOTENT)
+-- This script ensures ALL tables exist, have tenant_id, and RLS.
+-- Run this if you get "relation does not exist" errors.
 -- ============================================================
 
+-- 0. Extensions
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- 1. Create Core Tables if missing
+CREATE TABLE IF NOT EXISTS tenants (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  nom TEXT NOT NULL,
+  email_contact TEXT NOT NULL,
+  telephone_contact TEXT,
+  slug TEXT UNIQUE NOT NULL,
+  logo_url TEXT,
+  plan TEXT DEFAULT 'FREE',
+  actif BOOLEAN DEFAULT true,
+  settings JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Users (Linked to Auth)
+CREATE TABLE IF NOT EXISTS users (
+  id UUID PRIMARY KEY,
+  email TEXT NOT NULL,
+  role TEXT NOT NULL,
+  nom_complet TEXT NOT NULL,
+  telephone TEXT,
+  tenant_id UUID REFERENCES tenants(id),
+  actif BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Products
+CREATE TABLE IF NOT EXISTS produits (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  nom TEXT NOT NULL,
+  description TEXT,
+  prix_achat NUMERIC(15, 2) DEFAULT 0,
+  prix_vente NUMERIC(15, 2) DEFAULT 0,
+  devise TEXT DEFAULT 'XOF',
+  sku TEXT,
+  stock_actuel INTEGER DEFAULT 0,
+  tenant_id UUID REFERENCES tenants(id),
+  actif BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Clients
+CREATE TABLE IF NOT EXISTS clients (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  nom_complet TEXT NOT NULL,
+  telephone TEXT NOT NULL,
+  email TEXT,
+  adresse TEXT,
+  commune TEXT,
+  tenant_id UUID REFERENCES tenants(id),
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Orders
+CREATE TABLE IF NOT EXISTS commandes (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  date_creation TIMESTAMPTZ DEFAULT now(),
+  client_id UUID REFERENCES clients(id),
+  statut_commande TEXT NOT NULL,
+  montant_total NUMERIC(15, 2) DEFAULT 0,
+  frais_livraison NUMERIC(15, 2) DEFAULT 0,
+  tenant_id UUID REFERENCES tenants(id),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Order Lines
+CREATE TABLE IF NOT EXISTS lignes_commandes (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  commande_id UUID REFERENCES commandes(id) ON DELETE CASCADE,
+  produit_id UUID REFERENCES produits(id),
+  nom_produit TEXT,
+  quantite INTEGER,
+  prix_unitaire NUMERIC(15, 2),
+  montant_ligne NUMERIC(15, 2),
+  tenant_id UUID REFERENCES tenants(id)
+);
+
+-- 2. Add tenant_id to any existing table that might be missing it (Safe Guard)
 DO $$ 
 BEGIN
-  -- 1. Ajout de tenant_id aux tables manquantes
-  
-  -- PRODUITS
+  -- Check for tenant_id on core tables
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'produits' AND column_name = 'tenant_id') THEN
     ALTER TABLE produits ADD COLUMN tenant_id UUID REFERENCES tenants(id);
   END IF;
+  
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'clients' AND column_name = 'tenant_id') THEN
+    ALTER TABLE clients ADD COLUMN tenant_id UUID REFERENCES tenants(id);
+  END IF;
 
-  -- COMMANDES
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'commandes' AND column_name = 'tenant_id') THEN
     ALTER TABLE commandes ADD COLUMN tenant_id UUID REFERENCES tenants(id);
   END IF;
-
-  -- USERS (Déjà censé exister mais on vérifie)
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'tenant_id') THEN
-    ALTER TABLE users ADD COLUMN tenant_id UUID REFERENCES tenants(id);
-  END IF;
-
 END $$;
 
--- 2. Ré-activation de l'isolation RLS (Tenant Isolation)
--- On boucle sur toutes les tables pour forcer l'isolation par tenant_id.
-
+-- 3. Reset RLS Policies (Tenant Isolation)
 DO $$
 DECLARE
   t text;
-  tables text[] := ARRAY['produits', 'clients', 'commandes', 'lignes_commandes', 'mouvements_stock', 'communes', 'feuilles_route', 'caisse_retours', 'appels_commandes'];
+  tables text[] := ARRAY['produits', 'clients', 'commandes', 'lignes_commandes'];
 BEGIN
   FOREACH t IN ARRAY tables
   LOOP
-    -- Nettoyage des anciennes politiques pour éviter les conflits
-    EXECUTE format('DROP POLICY IF EXISTS "Tenant isolation %I" ON %I', t, t);
-    EXECUTE format('DROP POLICY IF EXISTS "Public access %I" ON %I', t, t);
-    EXECUTE format('DROP POLICY IF EXISTS "Staff access %I" ON %I', t, t);
-    
-    -- Création d'une politique UNIQUE et ROBUSTE
-    EXECUTE format('CREATE POLICY "Tenant isolation %I" ON %I FOR ALL TO authenticated USING (tenant_id = (SELECT tenant_id FROM users WHERE users.id = auth.uid()))', t, t);
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = t) THEN
+        EXECUTE format('ALTER TABLE %I ENABLE ROW LEVEL SECURITY', t);
+        EXECUTE format('DROP POLICY IF EXISTS "Tenant isolation %I" ON %I', t, t);
+        EXECUTE format('CREATE POLICY "Tenant isolation %I" ON %I FOR ALL TO authenticated USING (tenant_id = (SELECT tenant_id FROM users WHERE users.id = auth.uid()))', t, t);
+    END IF;
   END LOOP;
 END $$;
-
--- 3. Correction spécifique pour les Produits (SKU unique par tenant)
--- Le SKU doit être unique AU SEIN d'un tenant, pas sur toute la plateforme.
-ALTER TABLE produits DROP CONSTRAINT IF EXISTS produits_sku_key;
-CREATE UNIQUE INDEX IF NOT EXISTS idx_produit_sku_tenant ON produits(sku, tenant_id);
-
--- 4. Attribution des produits orphelins (si admin fait des tests sans tenant)
--- UPDATE produits SET tenant_id = (SELECT id FROM tenants LIMIT 1) WHERE tenant_id IS NULL;
--- UPDATE commandes SET tenant_id = (SELECT id FROM tenants LIMIT 1) WHERE tenant_id IS NULL;

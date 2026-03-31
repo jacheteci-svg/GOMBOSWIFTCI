@@ -13,9 +13,12 @@ export const getProduits = async (tenantId: string): Promise<Produit[]> => {
 };
 
 export const subscribeToProduits = (tenantId: string, callback: (produits: Produit[]) => void) => {
-  getProduits(tenantId).then(callback);
-  // We can implement a simple interval for now or just wait for triggers
-  const interval = setInterval(() => getProduits(tenantId).then(callback), 3000);
+  const fetchAndCallback = () => getProduits(tenantId).then(callback).catch(e => {
+    console.error("Error in subscribeToProduits:", e);
+    callback([]); 
+  });
+  fetchAndCallback();
+  const interval = setInterval(fetchAndCallback, 3000);
   return () => clearInterval(interval);
 };
 

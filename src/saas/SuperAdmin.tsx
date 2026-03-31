@@ -339,7 +339,7 @@ const TenantsTab = ({ tenants, fetchData, loading }: { tenants: Tenant[], fetchD
   const handleImpersonate = (tenant: Tenant) => {
     showToast(`Session sécurisée : Tunnel Nexus vers ${tenant.nom}...`, 'info');
     setTimeout(() => {
-       window.open(`https://gomboswiftci.vercel.app/${tenant.slug}`, '_blank');
+       window.open(`https://${tenant.slug}.gomboswiftci.app`, '_blank');
     }, 1500);
   };
 
@@ -456,7 +456,7 @@ const TenantsTab = ({ tenants, fetchData, loading }: { tenants: Tenant[], fetchD
               <div>
                 <label style={{ fontSize: '0.7rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.6rem', display: 'block' }}>Identifiant URL (Slug)</label>
                 <input type="text" className="form-input" placeholder="ex: gombo-ci" required value={newTenant.slug} onChange={e => setNewTenant({...newTenant, slug: e.target.value})} style={{ background: 'rgba(255,255,255,0.03)', height: '52px' }} />
-                <span style={{ fontSize: '0.7rem', color: 'var(--primary)', marginTop: '0.5rem', display: 'block', fontWeight: 900 }}>URL: https://gomboswiftci.vercel.app/{newTenant.slug || 'slug'}</span>
+                <span style={{ fontSize: '0.7rem', color: 'var(--primary)', marginTop: '0.5rem', display: 'block', fontWeight: 900 }}>URL: https://{newTenant.slug || 'slug'}.gomboswiftci.app</span>
               </div>
               <div>
                 <label style={{ fontSize: '0.7rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.6rem', display: 'block' }}>E-mail de Contact</label>
