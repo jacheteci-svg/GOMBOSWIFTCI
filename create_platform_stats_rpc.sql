@@ -9,6 +9,8 @@ DECLARE
   v_total_orders INT;
   v_total_revenue NUMERIC;
   v_saas_revenue NUMERIC;
+  v_pending_saas_revenue NUMERIC;
+  v_growth_chart JSON;
   v_result JSON;
 BEGIN
   -- Vérifier que l'utilisateur est SuperAdmin
@@ -35,6 +37,18 @@ BEGIN
   -- On somme les transactions Moneroo réussies
   SELECT COALESCE(sum(montant), 0) INTO v_saas_revenue FROM moneroo_transactions WHERE statut = 'success';
 
+  -- 7. Revenu en attente (Pending)
+  SELECT COALESCE(sum(montant), 0) INTO v_pending_saas_revenue FROM moneroo_transactions WHERE statut = 'pending';
+
+  -- 8. Données réelles pour la croissance (30 derniers jours) groupées par jour
+  SELECT COALESCE(json_agg(row_to_json(t)), '[]'::json) INTO v_growth_chart FROM (
+      SELECT to_char(date_trunc('day', created_at), 'DD/MM') as name, count(*) as val
+      FROM tenants
+      WHERE created_at >= NOW() - INTERVAL '30 days'
+      GROUP BY date_trunc('day', created_at)
+      ORDER BY date_trunc('day', created_at) ASC
+  ) t;
+
   -- Construire l'objet JSON
   v_result := json_build_object(
     'total_tenants', COALESCE(v_total_tenants, 0),
@@ -42,7 +56,9 @@ BEGIN
     'total_users', COALESCE(v_total_users, 0),
     'total_orders', COALESCE(v_total_orders, 0),
     'total_revenue', COALESCE(v_saas_revenue, 0), -- Pour l'admin, le revenu 'global' est son CA SaaS
-    'tenant_gmv', COALESCE(v_total_revenue, 0)   -- On garde le volume client en bonus
+    'pending_revenue', COALESCE(v_pending_saas_revenue, 0),
+    'tenant_gmv', COALESCE(v_total_revenue, 0),   -- On garde le volume client en bonus
+    'growth_chart', v_growth_chart
   );
 
   RETURN v_result;

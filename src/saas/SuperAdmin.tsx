@@ -211,14 +211,18 @@ const OverviewTab = ({ stats, tenants }: { stats: any, tenants: Tenant[] }) => {
                 </div>
              </div>
           </div>
-          <div style={{ marginTop: '2rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div style={{ marginTop: '2rem', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
             <div>
               <div style={{ color: '#94a3b8', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>REVENU SaaS (30J)</div>
-              <div style={{ fontSize: '2rem', fontWeight: 950, marginTop: '0.2rem', color: '#10b981' }}>{stats.total_revenue.toLocaleString()} FCFA</div>
+              <div style={{ fontSize: '1.8rem', fontWeight: 950, marginTop: '0.2rem', color: '#10b981' }}>{stats.total_revenue?.toLocaleString()} F</div>
+            </div>
+            <div>
+              <div style={{ color: '#f59e0b', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>EN ATTENTE</div>
+              <div style={{ fontSize: '1.8rem', fontWeight: 950, marginTop: '0.2rem', color: '#fbbf24', opacity: 0.9 }}>{stats.pending_revenue?.toLocaleString() || 0} F</div>
             </div>
             <div>
               <div style={{ color: '#94a3b8', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>GMV CLIENTS (EST.)</div>
-              <div style={{ fontSize: '1.2rem', fontWeight: 950, marginTop: '0.5rem', color: '#f8fafc', opacity: 0.8 }}>{stats.tenant_gmv?.toLocaleString() || 0} F</div>
+              <div style={{ fontSize: '1.8rem', fontWeight: 950, marginTop: '0.2rem', color: '#f8fafc', opacity: 0.8 }}>{stats.tenant_gmv?.toLocaleString() || 0} F</div>
             </div>
           </div>
         </div>
@@ -231,9 +235,7 @@ const OverviewTab = ({ stats, tenants }: { stats: any, tenants: Tenant[] }) => {
           </div>
           <div style={{ height: '220px' }}>
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={[
-                { name: 'Jan', val: 5 }, { name: 'Feb', val: 12 }, { name: 'Mar', val: 18 }, { name: 'Apr', val: 24 }, { name: 'May', val: totalTenants }
-              ]}>
+              <AreaChart data={stats.growth_chart || []}>
                 <defs>
                   <linearGradient id="nexusGrowth" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3}/>
@@ -841,6 +843,7 @@ const BroadcastTab = ({ tenants }: { tenants: Tenant[] }) => {
   const [message, setMessage] = useState('');
   const [subject, setSubject] = useState('');
   const [dispatchType, setDispatchType] = useState<'EMAIL' | 'WHATSAPP' | 'BOTH'>('BOTH');
+  const [selectedTenants, setSelectedTenants] = useState<string[]>(['ALL']);
   const { showToast } = useToast();
 
   const handleSendFull = async () => {
@@ -852,6 +855,7 @@ const BroadcastTab = ({ tenants }: { tenants: Tenant[] }) => {
     try {
       // Logic for bulk sending
       for (const tenant of tenants) {
+        if (!selectedTenants.includes('ALL') && !selectedTenants.includes(tenant.id)) continue;
         if (!tenant.email_contact) continue;
         
         // 1. Send via Mailzeet
@@ -892,6 +896,21 @@ const BroadcastTab = ({ tenants }: { tenants: Tenant[] }) => {
     }
   };
 
+  const toggleTenant = (id: string) => {
+     if (id === 'ALL') {
+        setSelectedTenants(['ALL']);
+        return;
+     }
+     let newSelection = selectedTenants.filter(t => t !== 'ALL');
+     if (newSelection.includes(id)) {
+        newSelection = newSelection.filter(t => t !== id);
+        if (newSelection.length === 0) newSelection = ['ALL'];
+     } else {
+        newSelection.push(id);
+     }
+     setSelectedTenants(newSelection);
+  };
+
   return (
     <div style={{ animation: 'fadeIn 0.3s ease', maxWidth: '1000px', margin: '0 auto' }}>
        <div className="nexus-card-elite" style={{ padding: '3rem' }}>
@@ -900,6 +919,31 @@ const BroadcastTab = ({ tenants }: { tenants: Tenant[] }) => {
           </h3>
 
           <div style={{ display: 'grid', gap: '1.5rem', marginBottom: '2.5rem' }}>
+             <div>
+                <label style={{ fontSize: '0.7rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.75rem', display: 'block' }}>Destinataires ciblés</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                   <div 
+                      onClick={() => toggleTenant('ALL')}
+                      style={{ padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 800, 
+                         background: selectedTenants.includes('ALL') ? 'var(--primary)' : 'rgba(255,255,255,0.05)', 
+                         color: selectedTenants.includes('ALL') ? 'white' : '#94a3b8' 
+                      }}>
+                      TOUS LES TENANTS
+                   </div>
+                   {tenants.map(t => (
+                      <div 
+                         key={t.id} 
+                         onClick={() => toggleTenant(t.id)}
+                         style={{ padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 800, 
+                            background: selectedTenants.includes(t.id) ? 'rgba(6,182,212,0.8)' : 'rgba(255,255,255,0.05)', 
+                            color: selectedTenants.includes(t.id) ? 'white' : '#94a3b8' 
+                         }}>
+                         {t.nom}
+                      </div>
+                   ))}
+                </div>
+             </div>
+
              <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
                 {['EMAIL', 'WHATSAPP', 'BOTH'].map(t => (
                   <button 
@@ -955,12 +999,12 @@ const BillingTab = ({ tenants }: { tenants: Tenant[] }) => {
     <div style={{ animation: 'fadeIn 0.3s ease' }}>
        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginBottom: '3rem' }}>
           <NexusStatCard title="MRR ENCAISSÉ" value={`${mrr.toLocaleString()} F`} sub="Revenu confirmé (billing_status: paid)" icon={<CreditCard size={22} />} color="#10b981" trend="Actuel" />
-          <NexusStatCard title="MRR PRÉVISIONNEL" value={`${potentialMrr.toLocaleString()} F`} sub="Potentiel total des actifs" icon={<TrendingUp size={22} />} color="#8b5cf6" trend={`+${Math.round(((potentialMrr - mrr) / (mrr || 1)) * 100)}%`} />
+          <NexusStatCard title="MRR PRÉVISIONNEL" value={`${potentialMrr.toLocaleString()} F`} sub="Potentiel total des actifs" icon={<TrendingUp size={22} />} color="#8b5cf6" trend={mrr > 0 ? `+${Math.round(((potentialMrr - mrr) / mrr) * 100)}%` : potentialMrr > 0 ? '+100%' : '0%'} />
        </div>
 
        <div className="nexus-card-elite" style={{ padding: '2.5rem' }}>
           <h3 style={{ margin: 0, fontWeight: 950, fontSize: '1.4rem', marginBottom: '2rem' }}>Paiement & Facturation Tenants</h3>
-          <div className="table-container">
+          <div className="table-responsive-cards px-0">
              <table className="nexus-table">
                 <thead>
                    <tr>
@@ -968,18 +1012,34 @@ const BillingTab = ({ tenants }: { tenants: Tenant[] }) => {
                       <th>PLAN</th>
                       <th>STATUS BILLE</th>
                       <th style={{ textAlign: 'right' }}>VALEUR BILLE</th>
+                      <th style={{ textAlign: 'center' }}>ACTIONS</th>
                    </tr>
                 </thead>
                 <tbody>
                    {tenants.map(t => (
                       <tr key={t.id}>
-                         <td style={{ fontWeight: 800 }}>{t.nom}</td>
-                         <td><span className="nexus-badge" style={{ background: 'rgba(255,255,255,0.05)', color: '#94a3b8' }}>{t.plan}</span></td>
-                         <td style={{ color: t.billing_status === 'paid' ? '#10b981' : '#f59e0b', fontWeight: 900 }}>
-                            {t.billing_status === 'paid' ? ' encaissé' : ' en attente'}
+                         <td data-label="CLIENT" style={{ fontWeight: 800 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                               <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: 'rgba(99, 102, 241, 0.1)', color: '#818cf8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                                  {t.nom.charAt(0).toUpperCase()}
+                               </div>
+                               <div>
+                                  <div>{t.nom}</div>
+                                  <div style={{ fontSize: '0.7rem', color: '#64748b' }}>{t.email}</div>
+                               </div>
+                            </div>
+                         </td>
+                         <td data-label="PLAN"><span className="nexus-badge" style={{ background: 'rgba(255,255,255,0.05)', color: '#94a3b8' }}>{t.plan}</span></td>
+                         <td data-label="STATUS" style={{ color: t.billing_status === 'paid' ? '#10b981' : '#f59e0b', fontWeight: 900 }}>
+                            {t.billing_status === 'paid' ? ' Encaissé' : ' En attente'}
                           </td>
-                         <td style={{ textAlign: 'right', fontWeight: 950 }}>
-                            {t.plan === 'FREE' ? '0' : t.plan === 'BASIC' ? '15 000' : t.plan === 'PREMIUM' ? '30 000' : '75 000'} F
+                         <td data-label="VALEUR" style={{ textAlign: 'right', fontWeight: 950 }}>
+                            {t.plan === 'FREE' ? '0' : t.plan === 'BASIC' ? '15 000' : t.plan === 'PREMIUM' ? '30 000' : t.plan === 'ENTERPRISE' ? '75 000' : '0'} F
+                         </td>
+                         <td data-label="ACTIONS" style={{ textAlign: 'center' }}>
+                            <button className="nexus-card" style={{ padding: '0.4rem 0.8rem', fontSize: '0.7rem', background: 'rgba(99, 102, 241, 0.05)', border: '1px solid rgba(99, 102, 241, 0.2)', color: '#818cf8', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                               <Eye size={12} /> Inspecter
+                            </button>
                          </td>
                       </tr>
                    ))}

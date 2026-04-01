@@ -106,21 +106,34 @@ export const BlogTab = () => {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1.25rem' }}>
             <div className="form-group">
               <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Catégorie</label>
-              <input type="text" className="form-input" style={{ background: 'rgba(255,255,255,0.03)', height: '52px' }} value={currentPost?.category || 'Logistique'} onChange={e => setCurrentPost({...currentPost, category: e.target.value})} />
+              <select className="form-input" style={{ background: 'rgba(255,255,255,0.03)', height: '52px', appearance: 'none', cursor: 'pointer' }} value={currentPost?.category || 'Logistique'} onChange={e => setCurrentPost({...currentPost, category: e.target.value})}>
+                <option value="Logistique" style={{ color: '#000' }}>Logistique</option>
+                <option value="E-commerce" style={{ color: '#000' }}>E-commerce</option>
+                <option value="Tutoriels" style={{ color: '#000' }}>Tutoriels</option>
+                <option value="Mises à jour SaaS" style={{ color: '#000' }}>Mises à jour SaaS</option>
+                <option value="Étude de cas" style={{ color: '#000' }}>Étude de cas</option>
+              </select>
             </div>
             <div className="form-group">
               <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Auteur</label>
-              <input type="text" className="form-input" style={{ background: 'rgba(255,255,255,0.03)', height: '52px' }} value={currentPost?.author || 'Admin'} onChange={e => setCurrentPost({...currentPost, author: e.target.value})} />
+              <select className="form-input" style={{ background: 'rgba(255,255,255,0.03)', height: '52px', appearance: 'none', cursor: 'pointer' }} value={currentPost?.author || 'Admin'} onChange={e => setCurrentPost({...currentPost, author: e.target.value})}>
+                <option value="Admin" style={{ color: '#000' }}>Admin</option>
+                <option value="L'Équipe GomboSwiftCI" style={{ color: '#000' }}>L'Équipe GomboSwiftCI</option>
+                <option value="Support Technique" style={{ color: '#000' }}>Support Technique</option>
+              </select>
             </div>
             <div className="form-group">
               <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Image URL</label>
-              <input type="text" className="form-input" style={{ background: 'rgba(255,255,255,0.03)', height: '52px' }} value={currentPost?.image || ''} onChange={e => setCurrentPost({...currentPost, image: e.target.value})} />
+              <input type="text" className="form-input" style={{ background: 'rgba(255,255,255,0.03)', height: '52px' }} value={currentPost?.image || ''} onChange={e => setCurrentPost({...currentPost, image: e.target.value})} placeholder="https://..." />
             </div>
           </div>
 
           <div className="form-group">
-            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', marginBottom: '0.5rem', textTransform: 'uppercase' }}>Extrait (SEO)</label>
-            <textarea className="form-input" style={{ background: 'rgba(255,255,255,0.03)', height: '80px', paddingTop: '0.75rem' }} value={currentPost?.excerpt || ''} onChange={e => setCurrentPost({...currentPost, excerpt: e.target.value})} />
+             <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', fontWeight: 800, color: '#94a3b8', marginBottom: '0.5rem', textTransform: 'uppercase' }}>
+                 <span>Extrait (Optimisation SEO)</span>
+                 <span style={{ color: (currentPost?.excerpt?.length || 0) > 160 ? '#ef4444' : '#10b981' }}>{currentPost?.excerpt?.length || 0}/160</span>
+             </label>
+             <textarea className="form-input" style={{ background: 'rgba(6, 182, 212, 0.05)', border: '1px solid rgba(6, 182, 212, 0.2)', height: '80px', paddingTop: '0.75rem', resize: 'none' }} placeholder="Texte court et percutant pour les moteurs de recherche..." value={currentPost?.excerpt || ''} onChange={e => setCurrentPost({...currentPost, excerpt: e.target.value})} />
           </div>
 
           <div className="form-group">
