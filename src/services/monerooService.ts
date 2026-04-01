@@ -85,20 +85,21 @@ export const monerooService = {
             });
 
             const monerooData = await response.json();
+            const payload = monerooData.data || monerooData;
 
-            if (monerooData.checkout_url) {
+            if (payload && payload.checkout_url) {
                 // 3. Update the local transaction with Moneroo's ID
                 await insforge.database
                     .from('moneroo_transactions')
                     .update({ 
-                        moneroo_id: monerooData.id, 
-                        checkout_url: monerooData.checkout_url 
+                        moneroo_id: payload.id, 
+                        checkout_url: payload.checkout_url 
                     })
                     .eq('id', localTx.id);
 
-                return monerooData.checkout_url;
+                return payload.checkout_url;
             } else {
-                throw new Error(monerooData.message || 'Échec de l\'initialisation du paiement');
+                throw new Error(monerooData.message || (payload && payload.message) || 'Échec de l\'initialisation du paiement');
             }
         } catch (error: any) {
             console.error("Moneroo initialization error:", error);
