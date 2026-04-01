@@ -8,6 +8,7 @@ DECLARE
   v_total_users INT;
   v_total_orders INT;
   v_total_revenue NUMERIC;
+  v_saas_revenue NUMERIC;
   v_result JSON;
 BEGIN
   -- Vérifier que l'utilisateur est SuperAdmin
@@ -24,12 +25,15 @@ BEGIN
   -- 3. Nombre total d'utilisateurs sur la plateforme
   SELECT count(*) INTO v_total_users FROM users;
 
-  -- 4. Nombre total de commandes livrées (historique global)
-  -- On assume que le statut 'livree' existe dans commandes
+  -- 4. Nombre total de commandes livrées (en tant qu'indicateur de trafic clients)
   SELECT count(*) INTO v_total_orders FROM commandes WHERE statut_commande = 'livree';
 
-  -- 5. Revenu global généré (somme des montants de toutes les commandes livrées)
+  -- 5. Revenu cumulé des TENANTS (GMV - Volume d'affaires brut)
   SELECT COALESCE(sum(montant_total), 0) INTO v_total_revenue FROM commandes WHERE statut_commande = 'livree';
+
+  -- 6. Revenu réel de la PLATEFORME (SaaS Fees / Subscriptions)
+  -- On somme les transactions Moneroo complétées
+  SELECT COALESCE(sum(amount_fcfa), 0) INTO v_saas_revenue FROM moneroo_transactions WHERE status = 'completed';
 
   -- Construire l'objet JSON
   v_result := json_build_object(
@@ -37,7 +41,8 @@ BEGIN
     'active_tenants', COALESCE(v_active_tenants, 0),
     'total_users', COALESCE(v_total_users, 0),
     'total_orders', COALESCE(v_total_orders, 0),
-    'total_revenue', COALESCE(v_total_revenue, 0)
+    'total_revenue', COALESCE(v_saas_revenue, 0), -- Pour l'admin, le revenu 'global' est son CA SaaS
+    'tenant_gmv', COALESCE(v_total_revenue, 0)   -- On garde le volume client en bonus
   );
 
   RETURN v_result;
