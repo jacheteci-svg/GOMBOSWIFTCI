@@ -1025,7 +1025,7 @@ const BillingTab = ({ tenants }: { tenants: Tenant[] }) => {
                                </div>
                                <div>
                                   <div>{t.nom}</div>
-                                  <div style={{ fontSize: '0.7rem', color: '#64748b' }}>{t.email}</div>
+                                  <div style={{ fontSize: '0.7rem', color: '#64748b' }}>{t.email_contact}</div>
                                </div>
                             </div>
                          </td>
