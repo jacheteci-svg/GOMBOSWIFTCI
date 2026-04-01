@@ -7,21 +7,26 @@ import App from './App.tsx'
 // SECURITY & PERFORMANCE FORCE 🛡️⚡
 // ============================================================
 
-// 1. PRO-ANTI COPIE (Désactive le clic droit et les raccourcis devtools)
+// 1. PRO-ANTI COPIE (Désactive le clic droit et les raccourcis devtools sauf pour les admins)
 if (import.meta.env.PROD) {
-  document.addEventListener('contextmenu', (e) => e.preventDefault());
-  document.addEventListener('keydown', (e) => {
-    if (
-      e.key === 'F12' || 
-      (e.ctrlKey && e.shiftKey && e.key === 'I') || 
-      (e.ctrlKey && e.shiftKey && e.key === 'J') || 
-      (e.ctrlKey && e.key === 'U') ||
-      (e.ctrlKey && e.key === 'S')
-    ) {
-      e.preventDefault();
-      return false;
-    }
-  });
+  const isSuperAdminPath = window.location.pathname.startsWith('/super-admin');
+  const hasBypass = localStorage.getItem('gombo_debug_bypass') === 'true';
+
+  if (!isSuperAdminPath && !hasBypass) {
+    document.addEventListener('contextmenu', (e) => e.preventDefault());
+    document.addEventListener('keydown', (e) => {
+      if (
+        e.key === 'F12' || 
+        (e.ctrlKey && e.shiftKey && e.key === 'I') || 
+        (e.ctrlKey && e.shiftKey && e.key === 'J') || 
+        (e.ctrlKey && e.key === 'U') ||
+        (e.ctrlKey && e.key === 'S')
+      ) {
+        e.preventDefault();
+        return false;
+      }
+    });
+  }
 }
 
 // 2. FORCE CACHE CLEAN (Hashed assets handled by Vite)
