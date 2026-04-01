@@ -7,15 +7,13 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
 
-// Configure these entries in your platform's dashboard secret management
-const MONEROO_SECRET_KEY = Deno.env.get("MONEROO_SECRET_KEY") || "";
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-
-Deno.serve(async (req) => {
+export default async function handler(req: Request): Promise<Response> {
     try {
+        // Configure these entries in your platform's dashboard secret management
+        const MONEROO_SECRET_KEY = Deno.env.get("MONEROO_SECRET_KEY") || "";
+        const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
+        const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+        const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
         // 1. We receive the POST from Moneroo
         if (req.method !== "POST") return new Response("Méthode non autorisée", { status: 405 });
 
@@ -90,4 +88,4 @@ Deno.serve(async (req) => {
         console.error("Webhook Error:", err);
         return new Response(JSON.stringify({ error: err.message }), { status: 500 });
     }
-});
+}

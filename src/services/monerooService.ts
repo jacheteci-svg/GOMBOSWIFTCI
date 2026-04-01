@@ -117,45 +117,37 @@ export const monerooService = {
     /**
      * Step 2: Verify the payment status (manually or after redirection)
      */
-    verifyPayment: async (monerooId: string) => {
+    verifyPayment: async (monerooId: string, maxRetries = 15) => {
         try {
-            const response = await fetch(`${MONEROO_API_BASE}/payments/${monerooId}`, {
-                headers: {
-                    'Authorization': `Bearer ${PUBLIC_KEY}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            
-            const monerooData = await response.json();
-            if (!response.ok) throw new Error(monerooData.message || 'Erreur verification Moneroo');
-
-            const payment = monerooData.data || monerooData;
-
-            if (payment.status === 'success') {
-                // Update local transaction
-                const { data: updatedTx, error: txError } = await insforge.database
+            // Polling: on interroge notre BDD locale jusqu'à ce que le Webhook ait fait l'UPDATE.
+            // On vérifie 15 fois, avec 2 secondes de pause => 30 secondes d'attente maximum.
+            for (let i = 0; i < maxRetries; i++) {
+                const { data: tx, error } = await insforge.database
                     .from('moneroo_transactions')
-                    .update({ statut: 'success' })
+                    .select('statut, type_transaction, tenant_id, reference_id')
                     .eq('moneroo_id', monerooId)
-                    .select()
-                    .single();
-                
-                if (txError) throw txError;
+                    .maybeSingle();
 
-                // Sync the plan automatically in the database (via helper function)
-                if (updatedTx.type_transaction === 'SUBSCRIPTION') {
-                    await insforge.database.rpc('process_subscription_payment', {
-                        t_id: updatedTx.tenant_id,
-                        p_plan: updatedTx.reference_id
-                    });
+                if (error) throw error;
+                if (!tx) throw new Error("Transaction introuvable dans la base de données.");
+
+                if (tx.statut === 'success') {
+                    return { success: true, data: tx };
+                }
+                
+                if (tx.statut === 'failed') {
+                    return { success: false, data: tx, message: "Paiement échoué ou annulé." };
                 }
 
-                return { success: true, data: payment };
+                // Pause de 2 secondes
+                await new Promise(resolve => setTimeout(resolve, 2000));
             }
+            
+            // Timeout : Le webhook n'a pas encore répondu
+            throw new Error("L'opérateur met du temps à confirmer. Vérifiez votre abonnement dans quelques minutes.");
 
-            return { success: false, data: payment };
-        } catch (error) {
-            console.error("Moneroo verification error:", error);
+        } catch (error: any) {
+            console.error("Erreur Verification Webhook Moneroo:", error);
             throw error;
         }
     }
