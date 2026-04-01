@@ -502,6 +502,9 @@ const PlansTab = () => {
   };
 
   const handleSave = async (plan: any) => {
+    // 1. Instantly update local state (optimistic update)
+    setPlans(pList => pList.map(p => p.id === plan.id ? { ...plan } : p));
+    
     setSavingId(plan.id);
     try {
       // Use RPC with SECURITY DEFINER to bypass RLS silent failures
@@ -544,7 +547,7 @@ const PlansTab = () => {
       }
 
       showToast(`✅ Offre "${plan.name}" publiée sur la landing page !`, 'success');
-      fetchPlans();
+      await fetchPlans(); // Ensure fresh data from DB
     } catch (err: any) {
       // Fallback: try direct update if RPC doesn't exist yet
       if (err?.message?.includes('Could not find') || err?.code === 'PGRST202') {

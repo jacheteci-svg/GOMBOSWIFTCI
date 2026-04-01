@@ -92,24 +92,7 @@ const FALLBACK_PLANS: PricingPlan[] = [
   }
 ];
 
-// Map DB module columns to human-readable labels
-const MODULE_LABELS: Record<string, string> = {
-  module_crm_clients: 'CRM & Clients',
-  module_suivi_terrain: 'Suivi Terrain',
-  module_logistique_pro: 'Logistique Pro',
-  module_staff_perf: 'Performance Staff',
-  module_livraisons_app: 'Mes Livraisons',
-  module_tresorerie_audit: 'Trésorerie & Audit',
-  module_caisse_retour_expert: 'Caisse / Retour',
-  module_rapport_journalier: 'Rapport Journalier',
-  module_profit_finances: 'Profit & Finances',
-  module_tresorerie_admin: 'Trésorerie Admin',
-  module_expertise_comptable: 'Expertise Comptable',
-  module_api: 'API & Intégrations',
-  module_whatsapp: 'Notifications WhatsApp',
-  module_white_label: 'Logiciel White Label',
-};
-
+// Build features list from DB plan modules
 function buildFeaturesFromDB(plan: any): string[] {
   const features: string[] = [];
 
@@ -119,24 +102,27 @@ function buildFeaturesFromDB(plan: any): string[] {
   }
 
   // Build from module toggles
-  Object.entries(MODULE_LABELS).forEach(([key, label]) => {
-    if (plan[key] === true) {
-      features.push(label);
-    }
-  });
+  if (plan.module_crm_clients) features.push('CRM & Clients');
+  if (plan.module_suivi_terrain) features.push('Suivi Terrain');
+  if (plan.module_logistique_pro) features.push('Logistique Pro');
+  if (plan.module_staff_perf) features.push('Performance Staff');
+  if (plan.module_livraisons_app) features.push('Mes Livraisons');
+  if (plan.module_tresorerie_audit) features.push('Trésorerie & Audit');
+  if (plan.module_caisse_retour_expert) features.push('Caisse / Retour');
+  if (plan.module_rapport_journalier) features.push('Rapport Journalier');
+  if (plan.module_profit_finances) features.push('Profit & Finances');
+  if (plan.module_tresorerie_admin) features.push('Trésorerie Admin');
+  if (plan.module_expertise_comptable) features.push('Expertise Comptable');
+  if (plan.module_caisse) features.push('Gestion Caisse');
+  if (plan.module_audit) features.push('Module Audit');
+  if (plan.module_api) features.push('API & Intégrations');
+  if (plan.module_whatsapp) features.push('Notifications WhatsApp');
 
   // Add user limits
   if (plan.max_users === -1) {
     features.push('Utilisateurs illimités');
   } else if (plan.max_users) {
     features.push(`Jusqu'à ${plan.max_users} Utilisateurs`);
-  }
-
-  // Add order limits
-  if (plan.max_orders_per_month === -1) {
-    features.push('Commandes illimitées');
-  } else if (plan.max_orders_per_month) {
-    features.push(`Jusqu'à ${plan.max_orders_per_month} commandes/mois`);
   }
 
   return features.length > 0 ? features : ['Accès de base à la plateforme'];
