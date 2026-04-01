@@ -43,7 +43,7 @@ export const monerooService = {
                     reference_id: req.reference_id,
                     type_transaction: req.type,
                     montant: req.amount,
-                    devise: req.currency,
+                    devise: req.currency || 'XOF',
                     customer_email: req.customer.email,
                     statut: 'pending'
                 })
@@ -53,7 +53,6 @@ export const monerooService = {
             if (txError) throw txError;
 
             // 2. Call Moneroo API to get checkout URL
-            // Moneroo usually requires first_name, last_name, email in the customer object.
             const nameParts = (req.customer.name || '').trim().split(' ');
             const firstName = nameParts[0] || 'Client';
             const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : 'Nexus';
@@ -61,12 +60,14 @@ export const monerooService = {
             const response = await fetch(`${MONEROO_API_BASE}/payments/initialize`, {
                 method: 'POST',
                 headers: {
+                    // ATTENTION: Moneroo usually requires the SECRET KEY for initialization.
+                    // If you get a 401, ensure VITE_MONEROO_PUBLIC_KEY is actually your secret key OR move this to an Edge Function.
                     'Authorization': `Bearer ${PUBLIC_KEY}`,
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
                 body: JSON.stringify({
-                    amount: Number(req.amount),
+                    amount: Math.round(Number(req.amount)),
                     currency: (req.currency || 'XOF').toUpperCase(),
                     description: `Abonnement SaaS GomboSwiftCI - Plan ${req.reference_id}`,
                     customer: {
@@ -85,6 +86,12 @@ export const monerooService = {
             });
 
             const monerooData = await response.json();
+            
+            if (!response.ok) {
+                const errorMsg = monerooData.message || monerooData.error || 'Erreur API Moneroo';
+                throw new Error(errorMsg);
+            }
+
             const payload = monerooData.data || monerooData;
 
             if (payload && payload.checkout_url) {
@@ -99,7 +106,7 @@ export const monerooService = {
 
                 return payload.checkout_url;
             } else {
-                throw new Error(monerooData.message || (payload && payload.message) || 'Échec de l\'initialisation du paiement');
+                throw new Error('Url de paiement non reçue de Moneroo');
             }
         } catch (error: any) {
             console.error("Moneroo initialization error:", error);
@@ -112,16 +119,19 @@ export const monerooService = {
      */
     verifyPayment: async (monerooId: string) => {
         try {
-            // Note: In a production app, this should be done in an Edge Function
             const response = await fetch(`${MONEROO_API_BASE}/payments/${monerooId}`, {
                 headers: {
                     'Authorization': `Bearer ${PUBLIC_KEY}`,
                     'Content-Type': 'application/json'
                 }
             });
-            const data = await response.json();
+            
+            const monerooData = await response.json();
+            if (!response.ok) throw new Error(monerooData.message || 'Erreur verification Moneroo');
 
-            if (data.status === 'success') {
+            const payment = monerooData.data || monerooData;
+
+            if (payment.status === 'success') {
                 // Update local transaction
                 const { data: updatedTx, error: txError } = await insforge.database
                     .from('moneroo_transactions')
@@ -140,10 +150,10 @@ export const monerooService = {
                     });
                 }
 
-                return { success: true, data };
+                return { success: true, data: payment };
             }
 
-            return { success: false, data };
+            return { success: false, data: payment };
         } catch (error) {
             console.error("Moneroo verification error:", error);
             throw error;

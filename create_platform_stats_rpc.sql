@@ -32,8 +32,8 @@ BEGIN
   SELECT COALESCE(sum(montant_total), 0) INTO v_total_revenue FROM commandes WHERE statut_commande = 'livree';
 
   -- 6. Revenu réel de la PLATEFORME (SaaS Fees / Subscriptions)
-  -- On somme les transactions Moneroo complétées
-  SELECT COALESCE(sum(amount_fcfa), 0) INTO v_saas_revenue FROM moneroo_transactions WHERE status = 'completed';
+  -- On somme les transactions Moneroo réussies
+  SELECT COALESCE(sum(montant), 0) INTO v_saas_revenue FROM moneroo_transactions WHERE statut = 'success';
 
   -- Construire l'objet JSON
   v_result := json_build_object(
