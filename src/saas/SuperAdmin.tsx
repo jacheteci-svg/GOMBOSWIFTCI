@@ -4,7 +4,7 @@ import { Tenant } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { 
   Activity, ShieldCheck, Eye, Power, X, Search, Send, 
-  CreditCard, Zap, Users, Plus, TrendingUp, BarChart3
+  CreditCard, Zap, Users, Plus, TrendingUp
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useToast } from '../contexts/ToastContext';
