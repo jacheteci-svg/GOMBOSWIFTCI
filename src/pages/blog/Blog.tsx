@@ -1,28 +1,59 @@
-import React, { useState } from 'react';
-import { BLOG_POSTS } from './blogData';
-import { ArrowRight, Calendar, User, Search } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { insforge } from '../../lib/insforge';
+import { LandingNavbar } from '../../components/layout/LandingNavbar';
+import { ArrowRight, Calendar, User, Search, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const Blog: React.FC = () => {
+  const [posts, setPosts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
 
-  const categories = ['All', ...new Set(BLOG_POSTS.map(p => p.category))];
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const { data, error } = await insforge.database
+          .from('blog_posts')
+          .select('*')
+          .eq('published', true)
+          .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        setPosts(data || []);
+      } catch (err) {
+        console.error("Error fetching blog posts:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPosts();
+  }, []);
+
+  const categories = ['All', ...new Set(posts.map(p => p.category))];
   
-  const filteredPosts = BLOG_POSTS.filter(p => {
+  const filteredPosts = posts.filter(p => {
     const matchesSearch = p.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          p.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
+                          (p.excerpt?.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesCat = activeCategory === 'All' || p.category === activeCategory;
     return matchesSearch && matchesCat;
   });
 
   return (
     <div style={{ background: '#020617', minHeight: '100vh', color: 'white', fontFamily: 'Inter, sans-serif' }}>
-      {/* Header SEO Header */}
-      <div style={{ padding: '8rem 2rem 5rem', textAlign: 'center', background: 'radial-gradient(circle at 50% -20%, rgba(99, 102, 241, 0.15) 0%, transparent 50%)' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99,102,241,0.2)', padding: '0.6rem 1.25rem', borderRadius: '50px', fontSize: '0.8rem', fontWeight: 800, color: '#818cf8', marginBottom: '2rem', letterSpacing: '0.05em' }}>
-           📚 LOGISTIQUE INSIGHTS & STRATÉGIES
+      <LandingNavbar />
+      
+      {loading ? (
+        <div style={{ height: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Loader2 size={48} className="animate-spin" color="#6366f1" />
         </div>
+      ) : (
+        <>
+          {/* Header SEO Header */}
+          <div style={{ padding: '8rem 2rem 5rem', textAlign: 'center', background: 'radial-gradient(circle at 50% -20%, rgba(99, 102, 241, 0.15) 0%, transparent 50%)' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(99, 102, 241, 0.1)', border: '1px solid rgba(99,102,241,0.2)', padding: '0.6rem 1.25rem', borderRadius: '50px', fontSize: '0.8rem', fontWeight: 800, color: '#818cf8', marginBottom: '2rem', letterSpacing: '0.05em' }}>
+               📚 LOGISTIQUE INSIGHTS & STRATÉGIES
+            </div>
         <h1 style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', fontWeight: 950, letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: '1.5rem', background: 'linear-gradient(to bottom, #ffffff, #94a3b8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
            Maîtrisez la Logistique<br/>E-commerce en Afrique
         </h1>
@@ -105,6 +136,9 @@ export const Blog: React.FC = () => {
           ))}
         </div>
       </div>
+
+        </>
+      )}
 
       <style>{`
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }

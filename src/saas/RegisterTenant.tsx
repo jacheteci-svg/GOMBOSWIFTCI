@@ -120,6 +120,15 @@ export const RegisterTenant: React.FC = () => {
 
       if (profileError) throw profileError;
 
+      // Facebook Pixel: Track successful registration
+      if ((window as any).fbq) {
+        (window as any).fbq('track', 'CompleteRegistration', {
+          content_name: 'Tenant Registration',
+          status: 'success',
+          predicted_ltv: createdTenantId // usage of ID as reference
+        });
+      }
+
       setIsSuccess(true);
       showToast("Compte vérifié et prêt ! Bienvenue.", "success");
     } catch (err: any) {

@@ -1,11 +1,41 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { BLOG_POSTS } from './blogData';
-import { ArrowLeft, Clock, Share2, Facebook, Twitter, Linkedin } from 'lucide-react';
+import { insforge } from '../../lib/insforge';
+import { LandingNavbar } from '../../components/layout/LandingNavbar';
+import { ArrowLeft, Clock, Share2, Facebook, Twitter, Linkedin, Loader2, ArrowRight } from 'lucide-react';
 
 export const BlogPostDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
-  const post = BLOG_POSTS.find(p => p.slug === slug);
+  const [post, setPost] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        const { data, error } = await insforge.database
+          .from('blog_posts')
+          .select('*')
+          .eq('slug', slug)
+          .maybeSingle();
+        
+        if (error) throw error;
+        setPost(data);
+      } catch (err) {
+        console.error("Error fetching post:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPost();
+  }, [slug]);
+
+  if (loading) {
+    return (
+      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#020617' }}>
+        <Loader2 size={48} className="animate-spin" color="#6366f1" />
+      </div>
+    );
+  }
 
   if (!post) {
     return (
@@ -18,6 +48,8 @@ export const BlogPostDetail: React.FC = () => {
 
   return (
     <div style={{ background: '#020617', minHeight: '100vh', color: 'white', fontFamily: 'Inter, sans-serif' }}>
+      <LandingNavbar />
+      
       {/* Hero Section */}
       <div style={{ position: 'relative', height: '60vh', width: '100%', overflow: 'hidden' }}>
         <img src={post.image} alt={post.title} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.4 }} />
@@ -33,8 +65,8 @@ export const BlogPostDetail: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', opacity: 0.8, fontSize: '1rem', fontWeight: 600 }}>
              <span>{post.author}</span>
              <span style={{ height: '4px', width: '4px', borderRadius: '50%', background: '#94a3b8' }} />
-             <span>{new Date(post.date).toLocaleDateString('fr-FR', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
-             <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Clock size={16} /> 5 min de lecture</span>
+             <span>{new Date(post.created_at).toLocaleDateString('fr-FR', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+             <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Clock size={16} /> Lecteur IA Active</span>
           </div>
         </div>
       </div>
@@ -46,10 +78,26 @@ export const BlogPostDetail: React.FC = () => {
            </Link>
            
            <div dangerouslySetInnerHTML={{ __html: post.content }} />
+
+           {/* Call To Actions */}
+           <div style={{ marginTop: '5rem', padding: '4rem 3rem', background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%)', borderRadius: '32px', border: '1px solid rgba(99, 102, 241, 0.2)', textAlign: 'center' }}>
+              <h2 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '1.5rem', color: 'white' }}>Prêt à optimiser votre logistique ?</h2>
+              <p style={{ fontSize: '1.2rem', color: '#94a3b8', marginBottom: '3rem', maxWidth: '700px', margin: '0 auto 3rem' }}>
+                Rejoignez l'élite des e-commerçants ivoiriens. Centralisez vos stocks, livreurs et paiements dès aujourd'hui.
+              </p>
+              <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+                 <Link to="/register" style={{ padding: '1.25rem 2.5rem', borderRadius: '16px', background: '#6366f1', color: 'white', textDecoration: 'none', fontWeight: 900, fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.75rem', boxShadow: '0 20px 40px -10px rgba(99, 102, 241, 0.4)' }}>
+                    ESSAYER GRATUITEMENT <ArrowRight size={20} />
+                 </Link>
+                 <Link to="/#pricing" style={{ padding: '1.25rem 2.5rem', borderRadius: '16px', background: 'rgba(255,255,255,0.05)', color: 'white', textDecoration: 'none', fontWeight: 900, fontSize: '1.1rem', border: '1px solid rgba(255,255,255,0.1)' }}>
+                    VOIR LES TARIFS
+                 </Link>
+              </div>
+           </div>
            
            <div style={{ marginTop: '5rem', padding: '3rem', background: 'rgba(255,255,255,0.02)', borderRadius: '32px', border: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
-              <h3 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '1.5rem' }}>Cet article vous a été utile ?</h3>
-              <p style={{ color: '#94a3b8', marginBottom: '2.5rem' }}>Partagez vos nouvelles connaissances logistiques avec votre réseau.</p>
+              <h3 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '1.5rem' }}>Partagez cet article</h3>
+              <p style={{ color: '#94a3b8', marginBottom: '2.5rem' }}>Aidez d'autres entrepreneurs à réussir leur logistique.</p>
               <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
                  {[
                    { icon: <Facebook size={24} />, name: 'Facebook', url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}` },

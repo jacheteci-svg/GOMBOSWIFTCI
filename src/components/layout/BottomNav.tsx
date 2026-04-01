@@ -18,7 +18,7 @@ export const BottomNav = ({ onMenuClick }: BottomNavProps) => {
   const location = useLocation();
   const { tenantSlug } = useParams();
 
-  if (currentUser?.role === 'SUPER_ADMIN') return null;
+  const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN';
 
   const effectiveSlug = tenantSlug || currentUser?.tenant_slug || 'nexus';
 
@@ -42,8 +42,17 @@ export const BottomNav = ({ onMenuClick }: BottomNavProps) => {
       base.push({ path: `/${effectiveSlug}/produits`, label: 'Produits', icon: Package });
     }
 
-    if (hasPermission('PROFIL')) {
-      base.push({ path: `/${effectiveSlug}/profil`, label: 'Profil', icon: UserCircle });
+    if (hasPermission('PROFIL') || isSuperAdmin) {
+      base.push({ path: isSuperAdmin ? '/super-admin/profile' : `/${effectiveSlug}/profil`, label: 'Profil', icon: UserCircle });
+    }
+
+    if (isSuperAdmin) {
+      return [
+        { path: '/super-admin/overview', label: 'Nexus', icon: LayoutDashboard },
+        { path: '/super-admin/tenants', label: 'Clients', icon: Package },
+        { path: '/super-admin/blog', label: 'Blog', icon: Package }, // Use Package or FileText for blog
+        { path: '/super-admin/billing', label: 'Finance', icon: ShoppingCart },
+      ];
     }
 
     return base;

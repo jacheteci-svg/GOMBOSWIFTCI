@@ -10,6 +10,7 @@ import {
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { useToast } from '../contexts/ToastContext';
 import { useLocation, Navigate, useNavigate } from 'react-router-dom';
+import { BlogTab } from './BlogTab';
 
 export const SuperAdmin: React.FC = () => {
   const location = useLocation();
@@ -41,7 +42,8 @@ export const SuperAdmin: React.FC = () => {
       if (tenantsData) setTenants(tenantsData);
       if (statsData) setPlatformStats(statsData);
     } catch (err: any) {
-      showToast(err.message || 'Erreur lors du chargement des données', 'error');
+      console.error("SuperAdmin fetchData error:", err);
+      showToast(err.message || 'Échec de synchronisation Nexus', 'error');
     } finally {
       setLoading(false);
     }
@@ -52,7 +54,7 @@ export const SuperAdmin: React.FC = () => {
   }, []);
 
   // Redirect invalid paths to overview
-  if (!['OVERVIEW', 'TENANTS', 'BILLING', 'SUPPORT', 'SETTINGS', 'BROADCAST', 'PLANS', 'PROFILE'].includes(activeTab) && activeTab !== 'SUPER-ADMIN') {
+  if (!['OVERVIEW', 'TENANTS', 'BILLING', 'SUPPORT', 'SETTINGS', 'BROADCAST', 'PLANS', 'PROFILE', 'BLOG'].includes(activeTab) && activeTab !== 'SUPER-ADMIN') {
       return <Navigate to="/super-admin/overview" replace />;
   }
 
@@ -88,13 +90,29 @@ export const SuperAdmin: React.FC = () => {
         </div>
         
         <div style={{ display: 'flex', gap: '1rem' }}>
-           <div className="nexus-card" style={{ padding: '0.8rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <Activity size={18} color="#10b981" />
+           <button 
+             onClick={fetchData}
+             disabled={loading}
+             className="nexus-card" 
+             style={{ 
+               padding: '0.8rem 1.5rem', 
+               display: 'flex', 
+               alignItems: 'center', 
+               gap: '1rem',
+               cursor: 'pointer',
+               border: '1px solid var(--nexus-border)',
+               background: 'rgba(99, 102, 241, 0.1)',
+               transition: 'all 0.3s'
+             }}
+           >
+              <Activity size={18} color={loading ? "#94a3b8" : "#10b981"} className={loading ? "animate-spin" : ""} />
               <div>
                 <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Statut Nexus</div>
-                <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#10b981' }}>SYSTÈME OPTIMAL</div>
+                <div style={{ fontSize: '0.9rem', fontWeight: 800, color: loading ? '#94a3b8' : '#10b981' }}>
+                  {loading ? 'SYNCHRONISATION...' : 'SYSTÈME OPTIMAL'}
+                </div>
               </div>
-           </div>
+           </button>
         </div>
       </div>
 
@@ -106,6 +124,7 @@ export const SuperAdmin: React.FC = () => {
         {activeTab === 'BILLING' && <BillingTab tenants={tenants} />}
         {activeTab === 'SUPPORT' && <SupportTab />}
         {activeTab === 'BROADCAST' && <BroadcastTab tenants={tenants} />}
+        {activeTab === 'BLOG' && <BlogTab />}
         {activeTab === 'SETTINGS' && <SecurityLogsTab />}
         {activeTab === 'PROFILE' && <ProfileTab />}
       </div>
@@ -147,7 +166,7 @@ const NexusStatCard = ({ title, value, sub, icon, color, trend }: any) => (
 /* -------------------------------------------------------------------------- */
 /*                                OVERVIEW TAB                                */
 /* -------------------------------------------------------------------------- */
-const OverviewTab = ({ stats }: { stats: any, tenants: Tenant[] }) => {
+const OverviewTab = ({ stats, tenants }: { stats: any, tenants: Tenant[] }) => {
   const { showToast } = useToast();
   const navigate = useNavigate();
 
@@ -271,11 +290,11 @@ const OverviewTab = ({ stats }: { stats: any, tenants: Tenant[] }) => {
            <h4 style={{ margin: '0 0 1.5rem 0', fontWeight: 900 }}>Répartition par Offre</h4>
            <div style={{ height: '220px' }}>
              <ResponsiveContainer width="100%" height="100%">
-               <BarChart data={[
-                 { name: 'Basic', val: 8, fill: '#06b6d4' },
-                 { name: 'Prem', val: 5, fill: '#8b5cf6' },
-                 { name: 'Ent', val: 2, fill: '#ec4899' }
-               ]}>
+                <BarChart data={[
+                  { name: 'Basic', val: tenants.filter(t => t.plan === 'BASIC').length, fill: '#06b6d4' },
+                  { name: 'Prem', val: tenants.filter(t => t.plan === 'PREMIUM').length, fill: '#8b5cf6' },
+                  { name: 'Ent', val: tenants.filter(t => t.plan === 'ENTERPRISE' || t.plan === 'CUSTOM').length, fill: '#ec4899' }
+                ]}>
                  <Bar dataKey="val" radius={[8, 8, 0, 0]} barSize={50} />
                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 10, fontWeight: 900}} />
                  <Tooltip cursor={{fill: 'rgba(255,255,255,0.05)'}} contentStyle={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }} />
@@ -392,7 +411,7 @@ const TenantsTab = ({ tenants, fetchData, loading }: { tenants: Tenant[], fetchD
       {loading ? (
         <div style={{ display: 'flex', justifyContent: 'center', padding: '5rem' }}><div className="spinner"></div></div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '1.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 400px), 1fr))', gap: '1.5rem' }}>
           {filteredTenants.map(tenant => (
             <div key={tenant.id} className="nexus-card-elite" style={{ borderLeft: `4px solid ${tenant.actif ? '#06b6d4' : '#f43f5e'}`, padding: '1.5rem' }}>
                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>

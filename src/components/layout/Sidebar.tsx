@@ -129,6 +129,7 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
     {
       section: 'Opérations SaaS',
       items: [
+        { path: '/super-admin/blog', icon: Package, label: 'Gestion du Blog', permission: 'SUPER_ADMIN' },
         { path: '/super-admin/billing', icon: DollarSign, label: 'Finance & MRR', permission: 'SUPER_ADMIN' },
         { path: '/super-admin/broadcast', icon: Activity, label: 'Mission Control', permission: 'SUPER_ADMIN' },
         { path: '/super-admin/support', icon: Headset, label: 'Centre de Support', permission: 'SUPER_ADMIN' },
