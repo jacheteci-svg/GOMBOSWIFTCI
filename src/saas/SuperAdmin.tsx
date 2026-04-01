@@ -4,13 +4,14 @@ import { Tenant } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { 
   Activity, ShieldCheck, Eye, Power, X, Search, Send, 
-  CreditCard, Zap, Users, Plus
+  CreditCard, Zap, Users, Plus, TrendingUp, BarChart3
 } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useToast } from '../contexts/ToastContext';
 import { useLocation, Navigate, useNavigate } from 'react-router-dom';
 import { BlogTab } from './BlogTab';
 import { EmailLogsTab } from './EmailLogsTab';
+import { emailService } from '../services/emailService';
 
 export const SuperAdmin: React.FC = () => {
   const location = useLocation();
@@ -171,6 +172,19 @@ const OverviewTab = ({ stats, tenants }: { stats: any, tenants: Tenant[] }) => {
   const { showToast } = useToast();
   const navigate = useNavigate();
 
+  // Calculs statistiques
+  const totalTenants = tenants.length;
+  const activeTenants = tenants.filter(t => t.actif).length;
+  const inactiveTenants = totalTenants - activeTenants;
+
+  const planStats = {
+    FREE: tenants.filter(t => t.plan === 'FREE').length,
+    BASIC: tenants.filter(t => t.plan === 'BASIC').length,
+    PREMIUM: tenants.filter(t => t.plan === 'PREMIUM').length,
+    ENTERPRISE: tenants.filter(t => t.plan === 'ENTERPRISE').length,
+    CUSTOM: tenants.filter(t => t.plan === 'CUSTOM').length
+  };
+
   const handleAudit = () => {
     showToast("Analyse de l'infrastructure en cours...", "info");
     setTimeout(() => {
@@ -197,9 +211,15 @@ const OverviewTab = ({ stats, tenants }: { stats: any, tenants: Tenant[] }) => {
                 </div>
              </div>
           </div>
-          <div style={{ marginTop: '2rem' }}>
-            <div style={{ color: '#94a3b8', fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>REVENU GLOBAL (30J)</div>
-            <div style={{ fontSize: '2.8rem', fontWeight: 950, marginTop: '0.5rem', color: '#f8fafc' }}>{stats.total_revenue.toLocaleString()} FCFA</div>
+          <div style={{ marginTop: '2rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div>
+              <div style={{ color: '#94a3b8', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>REVENU SaaS (30J)</div>
+              <div style={{ fontSize: '2rem', fontWeight: 950, marginTop: '0.2rem', color: '#10b981' }}>{stats.total_revenue.toLocaleString()} FCFA</div>
+            </div>
+            <div>
+              <div style={{ color: '#94a3b8', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>GMV CLIENTS (EST.)</div>
+              <div style={{ fontSize: '1.2rem', fontWeight: 950, marginTop: '0.5rem', color: '#f8fafc', opacity: 0.8 }}>{stats.tenant_gmv?.toLocaleString() || 0} F</div>
+            </div>
           </div>
         </div>
 
@@ -212,7 +232,7 @@ const OverviewTab = ({ stats, tenants }: { stats: any, tenants: Tenant[] }) => {
           <div style={{ height: '220px' }}>
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={[
-                { name: 'Jan', val: 5 }, { name: 'Feb', val: 12 }, { name: 'Mar', val: 18 }, { name: 'Apr', val: 24 }, { name: 'May', val: stats.total_tenants }
+                { name: 'Jan', val: 5 }, { name: 'Feb', val: 12 }, { name: 'Mar', val: 18 }, { name: 'Apr', val: 24 }, { name: 'May', val: totalTenants }
               ]}>
                 <defs>
                   <linearGradient id="nexusGrowth" x1="0" y1="0" x2="0" y2="1">
@@ -235,25 +255,29 @@ const OverviewTab = ({ stats, tenants }: { stats: any, tenants: Tenant[] }) => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
         {/* Activity Gauge */}
         <div className="nexus-card-elite" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          <h4 style={{ margin: '0 0 2rem 0', fontWeight: 900, color: '#f8fafc', width: '100%' }}>Progression Mensuelle</h4>
+          <h4 style={{ margin: '0 0 2rem 0', fontWeight: 900, color: '#f8fafc', width: '100%' }}>Statut des Clients (Tenants)</h4>
           <div style={{ position: 'relative', width: '180px', height: '180px' }}>
              <svg width="180" height="180" viewBox="0 0 100 100">
                 <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="6" />
-                <circle cx="50" cy="50" r="45" fill="none" stroke="#06b6d4" strokeWidth="8" strokeDasharray="210, 283" strokeLinecap="round" style={{ transform: 'rotate(-90deg)', transformOrigin: '50% 50%' }} />
+                <circle cx="50" cy="50" r="45" fill="none" stroke="#10b981" strokeWidth="8" strokeDasharray={`${(activeTenants / Math.max(totalTenants, 1)) * 283}, 283`} strokeLinecap="round" style={{ transform: 'rotate(-90deg)', transformOrigin: '50% 50%' }} />
              </svg>
              <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
-                <div style={{ fontSize: '2.2rem', fontWeight: 950 }}>{Math.round((stats.active_tenants / Math.max(stats.total_tenants, 1)) * 100)}%</div>
-                <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 800 }}>ACTIVITÉ RÉSEAU</div>
+                <div style={{ fontSize: '2.2rem', fontWeight: 950 }}>{Math.round((activeTenants / Math.max(totalTenants, 1)) * 100)}%</div>
+                <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 800 }}>TAUX D'ACTIVITÉ</div>
              </div>
           </div>
           <div style={{ display: 'flex', gap: '1.5rem', marginTop: '2rem', width: '100%' }}>
              <div style={{ flex: 1, textAlign: 'center' }}>
-                <div style={{ fontSize: '1.2rem', fontWeight: 950 }}>{stats.active_tenants}</div>
-                <div style={{ fontSize: '0.65rem', color: '#06b6d4', fontWeight: 800 }}>TENANTS ACTIFS</div>
+                <div style={{ fontSize: '1.2rem', fontWeight: 950, color: '#10b981' }}>{activeTenants}</div>
+                <div style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 800 }}>ACTIFS</div>
              </div>
              <div style={{ flex: 1, textAlign: 'center' }}>
-                <div style={{ fontSize: '1.2rem', fontWeight: 950 }}>{stats.total_tenants}</div>
-                <div style={{ fontSize: '0.65rem', color: '#94a3b8', fontWeight: 800 }}>TOTAL PARTENAIRES</div>
+                <div style={{ fontSize: '1.2rem', fontWeight: 950, color: '#ef4444' }}>{inactiveTenants}</div>
+                <div style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 800 }}>SUSPENDUS</div>
+             </div>
+             <div style={{ flex: 1, textAlign: 'center' }}>
+                <div style={{ fontSize: '1.2rem', fontWeight: 950 }}>{totalTenants}</div>
+                <div style={{ fontSize: '0.65rem', color: '#94a3b8', fontWeight: 800 }}>TOTAL</div>
              </div>
           </div>
         </div>
@@ -287,20 +311,24 @@ const OverviewTab = ({ stats, tenants }: { stats: any, tenants: Tenant[] }) => {
         </div>
 
         {/* Global Distribution */}
-        <div className="nexus-card-elite">
+        <div className="nexus-card-elite" style={{ display: 'flex', flexDirection: 'column' }}>
            <h4 style={{ margin: '0 0 1.5rem 0', fontWeight: 900 }}>Répartition par Offre</h4>
-           <div style={{ height: '220px' }}>
-             <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={[
-                  { name: 'Basic', val: tenants.filter(t => t.plan === 'BASIC').length, fill: '#06b6d4' },
-                  { name: 'Prem', val: tenants.filter(t => t.plan === 'PREMIUM').length, fill: '#8b5cf6' },
-                  { name: 'Ent', val: tenants.filter(t => t.plan === 'ENTERPRISE' || t.plan === 'CUSTOM').length, fill: '#ec4899' }
-                ]}>
-                 <Bar dataKey="val" radius={[8, 8, 0, 0]} barSize={50} />
-                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 10, fontWeight: 900}} />
-                 <Tooltip cursor={{fill: 'rgba(255,255,255,0.05)'}} contentStyle={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }} />
-               </BarChart>
-             </ResponsiveContainer>
+           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+              {[
+                { name: 'Gratuit', val: planStats.FREE, fill: '#64748b', key: 'FREE' },
+                { name: 'Basique', val: planStats.BASIC, fill: '#06b6d4', key: 'BASIC' },
+                { name: 'Premium', val: planStats.PREMIUM, fill: '#8b5cf6', key: 'PREMIUM' },
+                { name: 'Business', val: planStats.ENTERPRISE, fill: '#ec4899', key: 'ENTERPRISE' },
+                { name: 'Sur-mesure', val: planStats.CUSTOM, fill: '#f59e0b', key: 'CUSTOM' }
+              ].map(plan => (
+                <div key={plan.key} style={{ background: 'rgba(255,255,255,0.02)', padding: '0.75rem 1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: plan.fill }}></div>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#f8fafc' }}>{plan.name}</span>
+                   </div>
+                   <div style={{ fontSize: '1.1rem', fontWeight: 950 }}>{plan.val}</div>
+                </div>
+              ))}
            </div>
         </div>
       </div>
@@ -812,33 +840,77 @@ const BroadcastTab = ({ tenants }: { tenants: Tenant[] }) => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [subject, setSubject] = useState('');
+  const [dispatchType, setDispatchType] = useState<'EMAIL' | 'WHATSAPP' | 'BOTH'>('BOTH');
   const { showToast } = useToast();
 
   const handleSendFull = async () => {
     if (!message.trim()) return showToast("Message requis.", "error");
     setLoading(true);
-    try {
-      await insforge.database.from('admin_audit_logs').insert({ action: 'BROADCAST_LAUNCHED', details: { subject, tenants_count: tenants.length } });
-      await new Promise(r => setTimeout(r, 2000));
-      showToast("Diffusion réseau terminée avec succès.", "success");
-      setMessage(''); setSubject('');
-    } catch (err: any) { showToast(err.message, 'error'); } 
-    finally { setLoading(false); }
-  };
+    let successCount = 0;
+    let failCount = 0;
 
-  const handleTestRun = (type: string) => {
-    showToast(`Lancement du test ${type}...`, 'info');
-    setTimeout(() => showToast(`Test ${type} validé. Routage optimal.`, 'success'), 1500);
+    try {
+      // Logic for bulk sending
+      for (const tenant of tenants) {
+        if (!tenant.email_contact) continue;
+        
+        // 1. Send via Mailzeet
+        if (dispatchType === 'EMAIL' || dispatchType === 'BOTH') {
+            const res = await emailService.sendEmail(tenant.email_contact, subject || "Nexus System Update", {
+              body: `<div style="font-family: sans-serif; padding: 20px;">
+                <h2 style="color: #6366f1;">Annonce Nexus Core</h2>
+                <p>${message.replace(/\n/g, '<br/>')}</p>
+                <hr/>
+                <small>Diffusé par : Root Admin GomboSwift</small>
+              </div>`,
+              tenantId: tenant.id
+            });
+            if (res.success) successCount++; else failCount++;
+        }
+
+        // 2. Mock WhatsApp (Requires WhatsApp API Integration)
+        if (dispatchType === 'WHATSAPP' || dispatchType === 'BOTH') {
+            // Here we would call a WhatsApp API service
+            // console.log(`[WhatsApp Broadcast] To ${tenant.telephone_contact}: ${message}`);
+            // Since we don't have the API configured yet, we just log and audit
+        }
+      }
+
+      await insforge.database.from('admin_audit_logs').insert({ 
+        action: 'BROADCAST_COMPLETED', 
+        details: { subject, tenants_reached: successCount, dispatchType } 
+      });
+
+      showToast(`Diffusion terminée : ${successCount} emails envoyés.`, "success");
+      if (failCount > 0) showToast(`${failCount} échecs détectés.`, "error");
+      
+      setMessage(''); setSubject('');
+    } catch (err: any) { 
+      showToast(err.message, 'error'); 
+    } finally { 
+      setLoading(false); 
+    }
   };
 
   return (
     <div style={{ animation: 'fadeIn 0.3s ease', maxWidth: '1000px', margin: '0 auto' }}>
        <div className="nexus-card-elite" style={{ padding: '3rem' }}>
           <h3 className="nexus-neon-text" style={{ margin: 0, fontWeight: 950, fontSize: '1.8rem', marginBottom: '2.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-             <Send size={28} color="var(--primary)" /> Mission Control Suite
+             <Send size={28} color="var(--primary)" /> Nexus Mission Control
           </h3>
 
           <div style={{ display: 'grid', gap: '1.5rem', marginBottom: '2.5rem' }}>
+             <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                {['EMAIL', 'WHATSAPP', 'BOTH'].map(t => (
+                  <button 
+                    key={t}
+                    onClick={() => setDispatchType(t as any)}
+                    style={{ flex: 1, height: '48px', borderRadius: '12px', border: dispatchType === t ? '2px solid var(--primary)' : '1px solid rgba(255,255,255,0.1)', background: dispatchType === t ? 'rgba(99,102,241,0.1)' : 'transparent', color: dispatchType === t ? 'var(--primary)' : '#94a3b8', fontWeight: 900, transition: 'all 0.2s', cursor: 'pointer' }}
+                  >
+                    {t}
+                  </button>
+                ))}
+             </div>
              <div>
                 <label style={{ fontSize: '0.7rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.75rem', display: 'block' }}>Objet de la Notification</label>
                 <input type="text" value={subject} onChange={e => setSubject(e.target.value)} placeholder="Nexus Update / Information Critique..." style={{ width: '100%', height: '56px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '0 1.5rem', color: 'white', fontWeight: 800 }} />
@@ -847,11 +919,6 @@ const BroadcastTab = ({ tenants }: { tenants: Tenant[] }) => {
                 <label style={{ fontSize: '0.7rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.75rem', display: 'block' }}>Cœur du Message</label>
                 <textarea value={message} onChange={e => setMessage(e.target.value)} placeholder="Votre annonce aux partenaires..." style={{ width: '100%', minHeight: '180px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px', padding: '1.5rem', color: 'white', fontWeight: 700, lineHeight: 1.6 }} />
              </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
-             <button onClick={() => handleTestRun('EMAIL')} style={{ height: '52px', border: '1px solid rgba(59,130,246,0.3)', background: 'rgba(59,130,246,0.1)', color: '#3b82f6', borderRadius: '14px', fontWeight: 950, cursor: 'pointer' }}>TESTER PAR E-MAIL</button>
-             <button onClick={() => handleTestRun('WHATSAPP')} style={{ height: '52px', border: '1px solid rgba(16,185,129,0.3)', background: 'rgba(16,185,129,0.1)', color: '#10b981', borderRadius: '14px', fontWeight: 950, cursor: 'pointer' }}>TESTER PAR WHATSAPP</button>
           </div>
 
           <button onClick={handleSendFull} disabled={loading} style={{ width: '100%', height: '70px', borderRadius: '20px', background: 'linear-gradient(135deg, #06b6d4, #3b82f6)', color: 'white', border: 'none', fontWeight: 950, fontSize: '1.2rem', cursor: 'pointer', boxShadow: '0 10px 40px rgba(6,182,212,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
@@ -866,7 +933,17 @@ const BroadcastTab = ({ tenants }: { tenants: Tenant[] }) => {
 /*                               BILLING TAB                                  */
 /* -------------------------------------------------------------------------- */
 const BillingTab = ({ tenants }: { tenants: Tenant[] }) => {
+  // Calcul du MRR réel basé sur les facturations confirmées ('paid')
   const mrr = tenants.reduce((total, t) => {
+    if (!t.actif || t.billing_status !== 'paid') return total;
+    if (t.plan === 'BASIC') return total + 15000;
+    if (t.plan === 'PREMIUM') return total + 30000;
+    if (t.plan === 'ENTERPRISE') return total + 75000;
+    return total;
+  }, 0);
+
+  // Potentiel MRR (Total des actifs même si non payé ce mois)
+  const potentialMrr = tenants.reduce((total, t) => {
     if (!t.actif) return total;
     if (t.plan === 'BASIC') return total + 15000;
     if (t.plan === 'PREMIUM') return total + 30000;
@@ -877,27 +954,33 @@ const BillingTab = ({ tenants }: { tenants: Tenant[] }) => {
   return (
     <div style={{ animation: 'fadeIn 0.3s ease' }}>
        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginBottom: '3rem' }}>
-          <NexusStatCard title="MRR (Global)" value={`${mrr.toLocaleString()} F`} sub="Revenu Menuel Récurrent Actuel" icon={<CreditCard size={22} />} color="#8b5cf6" trend="+12.4%" />
-          <NexusStatCard title="Prochain Cycle" value="15 Avril" sub="Facturation Automatisée" icon={<Activity size={22} />} color="#06b6d4" trend="Optimal" />
+          <NexusStatCard title="MRR ENCAISSÉ" value={`${mrr.toLocaleString()} F`} sub="Revenu confirmé (billing_status: paid)" icon={<CreditCard size={22} />} color="#10b981" trend="Actuel" />
+          <NexusStatCard title="MRR PRÉVISIONNEL" value={`${potentialMrr.toLocaleString()} F`} sub="Potentiel total des actifs" icon={<TrendingUp size={22} />} color="#8b5cf6" trend={`+${Math.round(((potentialMrr - mrr) / (mrr || 1)) * 100)}%`} />
        </div>
 
        <div className="nexus-card-elite" style={{ padding: '2.5rem' }}>
-          <h3 style={{ margin: 0, fontWeight: 950, fontSize: '1.4rem', marginBottom: '2rem' }}>Audit Récent des Paiements</h3>
+          <h3 style={{ margin: 0, fontWeight: 950, fontSize: '1.4rem', marginBottom: '2rem' }}>Paiement & Facturation Tenants</h3>
           <div className="table-container">
              <table className="nexus-table">
                 <thead>
                    <tr>
                       <th>CLIENT</th>
                       <th>PLAN</th>
-                      <th style={{ textAlign: 'right' }}>STATUT</th>
+                      <th>STATUS BILLE</th>
+                      <th style={{ textAlign: 'right' }}>VALEUR BILLE</th>
                    </tr>
                 </thead>
                 <tbody>
-                   {tenants.slice(0, 8).map(t => (
+                   {tenants.map(t => (
                       <tr key={t.id}>
                          <td style={{ fontWeight: 800 }}>{t.nom}</td>
                          <td><span className="nexus-badge" style={{ background: 'rgba(255,255,255,0.05)', color: '#94a3b8' }}>{t.plan}</span></td>
-                         <td style={{ textAlign: 'right', color: '#10b981', fontWeight: 950 }}>VALIDÉ</td>
+                         <td style={{ color: t.billing_status === 'paid' ? '#10b981' : '#f59e0b', fontWeight: 900 }}>
+                            {t.billing_status === 'paid' ? ' encaissé' : ' en attente'}
+                          </td>
+                         <td style={{ textAlign: 'right', fontWeight: 950 }}>
+                            {t.plan === 'FREE' ? '0' : t.plan === 'BASIC' ? '15 000' : t.plan === 'PREMIUM' ? '30 000' : '75 000'} F
+                         </td>
                       </tr>
                    ))}
                 </tbody>
