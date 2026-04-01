@@ -39,7 +39,7 @@ export const BlogPostDetail: React.FC = () => {
         </div>
       </div>
 
-      <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 100px', gap: '4rem', padding: '5rem 2rem 8rem' }}>
+      <div className="blog-main-grid" style={{ maxWidth: '1000px', margin: '0 auto', gap: '4rem', padding: '5rem 2rem 8rem' }}>
         <div className="blog-content" style={{ fontSize: '1.2rem', lineHeight: 1.8, color: '#e2e8f0', fontWeight: 500 }}>
            <Link to="/blog" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.75rem', color: '#6366f1', textDecoration: 'none', fontWeight: 800, marginBottom: '4rem', fontSize: '1rem' }}>
               <ArrowLeft size={18} /> RETOUR AU BLOG
@@ -50,22 +50,24 @@ export const BlogPostDetail: React.FC = () => {
            <div style={{ marginTop: '5rem', padding: '3rem', background: 'rgba(255,255,255,0.02)', borderRadius: '32px', border: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
               <h3 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '1.5rem' }}>Cet article vous a été utile ?</h3>
               <p style={{ color: '#94a3b8', marginBottom: '2.5rem' }}>Partagez vos nouvelles connaissances logistiques avec votre réseau.</p>
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
                  {[
                    { icon: <Facebook size={24} />, name: 'Facebook', url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}` },
                    { icon: <Twitter size={24} />, name: 'Twitter', url: `https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(post.title)}` },
                    { icon: <Linkedin size={24} />, name: 'LinkedIn', url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}` }
                  ].map((social, idx) => (
-                   <button 
+                   <a 
                      key={idx}
-                     onClick={() => window.open(social.url, '_blank', 'width=600,height=400')}
+                     href={social.url}
+                     target="_blank"
+                     rel="noopener noreferrer"
                      title={`Partager sur ${social.name}`}
-                     style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.3s' }}
+                     style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.3s', textDecoration: 'none' }}
                      onMouseOver={e => (e.currentTarget.style.background = '#6366f1')}
                      onMouseOut={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
                    >
                      {social.icon}
-                   </button>
+                   </a>
                  ))}
                  <button 
                    onClick={() => {
@@ -91,6 +93,12 @@ export const BlogPostDetail: React.FC = () => {
         .blog-content h2 { font-size: 2.2rem; font-weight: 950; margin: 3.5rem 0 1.5rem; color: white; letter-spacing: -0.03em; }
         .blog-content h3 { font-size: 1.6rem; font-weight: 900; margin: 2.5rem 0 1.25rem; color: #818cf8; }
         .blog-content p { margin-bottom: 2rem; opacity: 0.9; }
+        .blog-main-grid { display: grid; grid-template-columns: minmax(0, 1fr) 100px; }
+        @media (max-width: 768px) {
+          .blog-main-grid { grid-template-columns: 1fr; padding-top: 2rem !important; }
+          .blog-content h2 { font-size: 1.8rem; margin: 2rem 0 1rem; }
+          .blog-content p { font-size: 1.1rem; line-height: 1.65; }
+        }
       `}</style>
     </div>
   );

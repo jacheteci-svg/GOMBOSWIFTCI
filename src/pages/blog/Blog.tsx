@@ -64,7 +64,7 @@ export const Blog: React.FC = () => {
         </div>
 
         {/* Blog Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '3rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem' }}>
           {filteredPosts.map((post) => (
             <Link 
               key={post.id} 
