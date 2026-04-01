@@ -51,10 +51,32 @@ export const BlogPostDetail: React.FC = () => {
               <h3 style={{ fontSize: '1.5rem', fontWeight: 900, marginBottom: '1.5rem' }}>Cet article vous a été utile ?</h3>
               <p style={{ color: '#94a3b8', marginBottom: '2.5rem' }}>Partagez vos nouvelles connaissances logistiques avec votre réseau.</p>
               <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem' }}>
-                 <button style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><Facebook size={24} /></button>
-                 <button style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><Twitter size={24} /></button>
-                 <button style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><Linkedin size={24} /></button>
-                 <button style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><Share2 size={24} /></button>
+                 {[
+                   { icon: <Facebook size={24} />, name: 'Facebook', url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}` },
+                   { icon: <Twitter size={24} />, name: 'Twitter', url: `https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(post.title)}` },
+                   { icon: <Linkedin size={24} />, name: 'LinkedIn', url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}` }
+                 ].map((social, idx) => (
+                   <button 
+                     key={idx}
+                     onClick={() => window.open(social.url, '_blank', 'width=600,height=400')}
+                     title={`Partager sur ${social.name}`}
+                     style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.3s' }}
+                     onMouseOver={e => (e.currentTarget.style.background = '#6366f1')}
+                     onMouseOut={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
+                   >
+                     {social.icon}
+                   </button>
+                 ))}
+                 <button 
+                   onClick={() => {
+                     navigator.clipboard.writeText(window.location.href);
+                     alert('Lien copié dans le presse-papier !');
+                   }}
+                   title="Copier le lien"
+                   style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                 >
+                   <Share2 size={24} />
+                 </button>
               </div>
            </div>
         </div>
