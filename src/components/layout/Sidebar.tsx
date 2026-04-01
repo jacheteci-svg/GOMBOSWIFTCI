@@ -25,7 +25,8 @@ import {
   X,
   Lock,
   ChevronRight,
-  Building
+  Building,
+  Mail
 } from 'lucide-react';
 
 interface NavItem {
@@ -131,6 +132,7 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
       items: [
         { path: '/super-admin/blog', icon: Package, label: 'Gestion du Blog', permission: 'SUPER_ADMIN' },
         { path: '/super-admin/billing', icon: DollarSign, label: 'Finance & MRR', permission: 'SUPER_ADMIN' },
+        { path: '/super-admin/emails', icon: Mail, label: 'Journal des Emails', permission: 'SUPER_ADMIN' },
         { path: '/super-admin/broadcast', icon: Activity, label: 'Mission Control', permission: 'SUPER_ADMIN' },
         { path: '/super-admin/support', icon: Headset, label: 'Centre de Support', permission: 'SUPER_ADMIN' },
       ]

@@ -2,15 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { insforge } from '../lib/insforge';
 import { Tenant } from '../types';
 import { useAuth } from '../contexts/AuthContext';
-import {
-  Users, Plus, Search,
-  Zap, X,
-  Send, CreditCard, Activity, ShieldCheck, Eye, Power
+import { 
+  Activity, ShieldCheck, Eye, Power, X, Search, Mail, Send, 
+  CreditCard, Zap, Users, Plus
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { useToast } from '../contexts/ToastContext';
 import { useLocation, Navigate, useNavigate } from 'react-router-dom';
 import { BlogTab } from './BlogTab';
+import { EmailLogsTab } from './EmailLogsTab';
 
 export const SuperAdmin: React.FC = () => {
   const location = useLocation();
@@ -125,6 +125,7 @@ export const SuperAdmin: React.FC = () => {
         {activeTab === 'SUPPORT' && <SupportTab />}
         {activeTab === 'BROADCAST' && <BroadcastTab tenants={tenants} />}
         {activeTab === 'BLOG' && <BlogTab />}
+        {activeTab === 'EMAILS' && <EmailLogsTab />}
         {activeTab === 'SETTINGS' && <SecurityLogsTab />}
         {activeTab === 'PROFILE' && <ProfileTab />}
       </div>
