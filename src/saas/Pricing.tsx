@@ -125,6 +125,13 @@ function buildFeaturesFromDB(plan: any): string[] {
     features.push(`Jusqu'à ${plan.max_users} Utilisateurs`);
   }
 
+  // Promise of Bonus Days
+  if (plan.id === 'BASIC' || plan.name?.toLowerCase().includes('croissance')) {
+    features.push('🎁 +10 Jours Bonus (1er mois)');
+  } else if (plan.id === 'PREMIUM' || plan.id === 'ELITE' || plan.name?.toLowerCase().includes('elite')) {
+    features.push('💎 +15 Jours Bonus (1er mois)');
+  }
+
   return features.length > 0 ? features : ['Accès de base à la plateforme'];
 }
 
