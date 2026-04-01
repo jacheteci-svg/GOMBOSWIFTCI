@@ -3,7 +3,7 @@ import { insforge } from '../lib/insforge';
 import { Tenant } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { 
-  Activity, ShieldCheck, Eye, Power, X, Search, Mail, Send, 
+  Activity, ShieldCheck, Eye, Power, X, Search, Send, 
   CreditCard, Zap, Users, Plus
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
