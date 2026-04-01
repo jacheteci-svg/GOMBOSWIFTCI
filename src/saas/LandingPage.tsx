@@ -63,6 +63,7 @@ export const LandingPage: React.FC = () => {
           <div style={{ display: 'flex', gap: '2rem', marginRight: '2rem' }} className="nav-links mobile-hide">
             <a href="#features" className="premium-link">Produit</a>
             <a href="#pricing" className="premium-link">Tarifs</a>
+            <Link to="/blog" className="premium-link" style={{ textDecoration: 'none', color: 'inherit' }}>Blog</Link>
             <a href="#faq" className="premium-link">FAQ</a>
           </div>
           <Link to="/login" style={{ textDecoration: 'none', color: '#fff', fontWeight: 700, fontSize: '0.9rem' }} className="mobile-hide hover-glow">Connexion</Link>
@@ -96,6 +97,7 @@ export const LandingPage: React.FC = () => {
           }}>
             <a href="#features" onClick={() => setIsMenuOpen(false)} style={{ textDecoration: 'none', color: '#fff', fontSize: '1.2rem', fontWeight: 800 }}>Produit</a>
             <a href="#pricing" onClick={() => setIsMenuOpen(false)} style={{ textDecoration: 'none', color: '#fff', fontSize: '1.2rem', fontWeight: 800 }}>Tarifs</a>
+            <Link to="/blog" onClick={() => setIsMenuOpen(false)} style={{ textDecoration: 'none', color: '#fff', fontSize: '1.2rem', fontWeight: 800 }}>Blog</Link>
             <a href="#faq" onClick={() => setIsMenuOpen(false)} style={{ textDecoration: 'none', color: '#fff', fontSize: '1.2rem', fontWeight: 800 }}>FAQ</a>
             <Link to="/login" onClick={() => setIsMenuOpen(false)} style={{ textDecoration: 'none', color: '#fff', fontSize: '1.2rem', fontWeight: 800 }}>Connexion</Link>
           </div>
