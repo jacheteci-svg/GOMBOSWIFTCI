@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Allow: /blog
+Allow: /pricing
+Disallow: /admin
+Disallow: /super-admin
+
+Sitemap: https://gomboswiftci.app/sitemap.xml
