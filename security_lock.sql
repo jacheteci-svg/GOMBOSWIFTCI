@@ -1,6 +1,6 @@
-// ============================================================
-// GOMBOSWIFTCI INFRASTRUCTURE SECURITY REINFORCEMENT
-// ============================================================
+-- ============================================================
+-- GOMBOSWIFTCI INFRASTRUCTURE SECURITY REINFORCEMENT
+-- ============================================================
 
 -- 1. CLEANING THE CACHE (FORCE SCHEMA RELOAD FOR POSTGREST)
 NOTIFY pgrst, 'reload schema';
