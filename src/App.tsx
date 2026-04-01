@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastProvider } from './contexts/ToastContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -11,8 +11,7 @@ import { SuperAdmin } from './saas/SuperAdmin';
 import { RegisterTenant } from './saas/RegisterTenant';
 import { PlatformPortal } from './saas/PlatformPortal';
 
-
-// --- Direct Imports to prevent Lazy Loading crashes on Vercel Delta ---
+// --- Core Imports (Snappy) ---
 import { Dashboard } from './pages/Dashboard';
 import { Produits } from './pages/Produits';
 import { Commandes } from './pages/Commandes';
@@ -31,25 +30,24 @@ import { StaffPerformance } from './pages/StaffPerformance';
 import { NetProfit } from './pages/NetProfit';
 import { AdminTresorerie } from './pages/AdminTresorerie';
 import { AuditTresorerie } from './pages/AuditTresorerie';
-import { 
-  FeaturesPage, 
-  CostCalculatorPage, 
-  ApiDocsPage, 
-  SystemStatusPage, 
-  HelpCenterPage, 
-  ContactSalesPage, 
-  ReportBugPage, 
-  PrivacyPage, 
-  TermsPage, 
-  GdprPage 
-} from './pages/StaticPages';
-import { DemoPage } from './pages/DemoPage';
 import { SubscriptionCallback } from './pages/SubscriptionCallback';
-import { Blog } from './pages/blog/Blog';
-import { BlogPostDetail } from './pages/blog/BlogPostDetail';
+
+// --- Lazy Loaded Pages ---
+const FeaturesPage = lazy(() => import('./pages/StaticPages').then(m => ({ default: m.FeaturesPage })));
+const CostCalculatorPage = lazy(() => import('./pages/StaticPages').then(m => ({ default: m.CostCalculatorPage })));
+const ApiDocsPage = lazy(() => import('./pages/StaticPages').then(m => ({ default: m.ApiDocsPage })));
+const SystemStatusPage = lazy(() => import('./pages/StaticPages').then(m => ({ default: m.SystemStatusPage })));
+const HelpCenterPage = lazy(() => import('./pages/StaticPages').then(m => ({ default: m.HelpCenterPage })));
+const ContactSalesPage = lazy(() => import('./pages/StaticPages').then(m => ({ default: m.ContactSalesPage })));
+const ReportBugPage = lazy(() => import('./pages/StaticPages').then(m => ({ default: m.ReportBugPage })));
+const PrivacyPage = lazy(() => import('./pages/StaticPages').then(m => ({ default: m.PrivacyPage })));
+const TermsPage = lazy(() => import('./pages/StaticPages').then(m => ({ default: m.TermsPage })));
+const GdprPage = lazy(() => import('./pages/StaticPages').then(m => ({ default: m.GdprPage })));
+const DemoPage = lazy(() => import('./pages/DemoPage').then(m => ({ default: m.DemoPage })));
+const Blog = lazy(() => import('./pages/blog/Blog').then(m => ({ default: m.Blog })));
+const BlogPostDetail = lazy(() => import('./pages/blog/BlogPostDetail').then(m => ({ default: m.BlogPostDetail })));
 
 const PageLoader = () => {
-  console.log("Routing to:", window.location.pathname);
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%', padding: '5rem' }}>
       <div className="spinner"></div>
@@ -64,6 +62,11 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
     this.state = { hasError: false, error: null };
   }
   static getDerivedStateFromError(error: any) {
+    // Si c'est un problème de chargement de chunk (fréquent lors d'un déploiement Vercel), on tente de recharger.
+    if (error && (error.name === 'ChunkLoadError' || error.message?.includes('Loading chunk'))) {
+      window.location.reload();
+      return { hasError: false, error: null };
+    }
     return { hasError: true, error };
   }
   componentDidCatch(error: any, errorInfo: any) {
@@ -72,15 +75,20 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ padding: '2rem', textAlign: 'center', background: '#fef2f2', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          <h1 style={{ color: '#991b1b' }}>Une erreur critique est survenue</h1>
-          <p>L'application GomboSwiftCI a rencontré un problème inattendu au rendu.</p>
-          <pre style={{ background: '#fee2e2', padding: '1rem', borderRadius: '8px', overflow: 'auto', maxWidth: '90%', fontSize: '0.8rem' }}>
-            {this.state.error?.toString()}
-          </pre>
-          <button onClick={() => window.location.reload()} className="btn btn-primary" style={{ marginTop: '1rem' }}>
-            Recharger l'application
-          </button>
+        <div style={{ padding: '2rem', textAlign: 'center', background: '#0f172a', color: 'white', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontFamily: 'Inter, sans-serif' }}>
+          <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '3rem', borderRadius: '32px', border: '1px solid rgba(239, 68, 68, 0.2)', maxWidth: '600px' }}>
+            <h1 style={{ color: '#ef4444', fontWeight: 900, fontSize: '2rem', marginBottom: '1rem' }}>Oups ! Une erreur est survenue</h1>
+            <p style={{ color: '#94a3b8', marginBottom: '2rem' }}>Le système Nexus a rencontré une anomalie au rendu. Cela peut arriver lors d'une mise à jour du logiciel.</p>
+            <pre style={{ background: 'rgba(0,0,0,0.3)', padding: '1.25rem', borderRadius: '16px', overflow: 'auto', fontSize: '0.75rem', textAlign: 'left', border: '1px solid rgba(255,255,255,0.1)', color: '#fca5a5' }}>
+              {this.state.error?.toString()}
+            </pre>
+            <button 
+              onClick={() => window.location.reload()} 
+              style={{ marginTop: '2rem', padding: '1rem 2rem', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '14px', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.75rem', margin: '2rem auto 0' }}
+            >
+              🔄 ACTUALISER ET RÉPARER
+            </button>
+          </div>
         </div>
       );
     }
