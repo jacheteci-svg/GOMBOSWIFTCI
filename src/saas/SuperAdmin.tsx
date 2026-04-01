@@ -55,7 +55,7 @@ export const SuperAdmin: React.FC = () => {
   }, []);
 
   // Redirect invalid paths to overview
-  if (!['OVERVIEW', 'TENANTS', 'BILLING', 'SUPPORT', 'SETTINGS', 'BROADCAST', 'PLANS', 'PROFILE', 'BLOG'].includes(activeTab) && activeTab !== 'SUPER-ADMIN') {
+  if (!['OVERVIEW', 'TENANTS', 'BILLING', 'SUPPORT', 'SETTINGS', 'BROADCAST', 'PLANS', 'PROFILE', 'BLOG', 'EMAILS'].includes(activeTab) && activeTab !== 'SUPER-ADMIN') {
       return <Navigate to="/super-admin/overview" replace />;
   }
 
