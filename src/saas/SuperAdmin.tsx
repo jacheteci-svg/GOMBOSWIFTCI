@@ -299,7 +299,7 @@ const OverviewTab = ({ stats, tenants }: { stats: any, tenants: Tenant[] }) => {
                 </svg>
              </div>
            </div>
-           <div className="nexus-card-elite px-6 py-8" style={{ display: 'flex', alignItems: 'center', justifyBetween: 'space-between' }}>
+           <div className="nexus-card-elite px-6 py-8" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
              <div>
                 <Activity size={20} style={{ color: '#ec4899', marginBottom: '0.6rem' }} />
                 <div style={{ fontSize: '1.5rem', fontWeight: 950 }}>{stats.total_orders.toLocaleString()}</div>
