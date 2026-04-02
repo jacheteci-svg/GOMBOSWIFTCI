@@ -141,25 +141,25 @@ export const SuperAdmin: React.FC = () => {
 /* -------------------------------------------------------------------------- */
 
 const NexusStatCard = ({ title, value, sub, icon, color, trend }: any) => (
-  <div className="nexus-card nexus-stat-card">
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
-      <div style={{ background: `${color}25`, padding: '0.75rem', borderRadius: '14px', border: `1px solid ${color}40`, color: color }}>
-        {icon}
+  <div className="nexus-card nexus-stat-card px-6 py-8">
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+      <div style={{ background: `${color}20`, padding: '0.6rem', borderRadius: '12px', border: `1px solid ${color}30`, color: color }}>
+        {React.cloneElement(icon, { size: 20 })}
       </div>
       {trend && (
-        <div style={{ fontSize: '0.75rem', fontWeight: 800, color: trend.startsWith('+') ? '#10b981' : trend === 'Stable' ? '#94a3b8' : '#6366f1', background: 'rgba(255,255,255,0.05)', padding: '4px 8px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
+        <div style={{ fontSize: '0.65rem', fontWeight: 900, color: trend.startsWith('+') ? '#10b981' : trend === 'Stable' ? '#94a3b8' : '#6366f1', background: 'rgba(255,255,255,0.05)', padding: '3px 7px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)' }}>
           {trend}
         </div>
       )}
     </div>
     <div>
-      <div style={{ fontSize: '0.75rem', fontWeight: 900, color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>
+      <div style={{ fontSize: '0.65rem', fontWeight: 900, color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.4rem' }}>
         {title}
       </div>
-      <div style={{ fontSize: '2rem', fontWeight: 950, color: 'white', letterSpacing: '-0.02em', lineHeight: 1 }}>
+      <div style={{ fontSize: '1.75rem', fontWeight: 950, color: 'white', letterSpacing: '-0.02em', lineHeight: 1 }}>
         {value}
       </div>
-      <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '0.6rem', fontWeight: 700 }}>
+      <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.5rem', fontWeight: 700 }}>
         {sub}
       </div>
     </div>
@@ -198,32 +198,32 @@ const OverviewTab = ({ stats, tenants }: { stats: any, tenants: Tenant[] }) => {
       {/* SECTION 1: WELCOME & PRIMARY FEED */}
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 1.5fr', gap: '2rem', marginBottom: '2.5rem' }} className="mobile-stack">
         {/* Profile Card */}
-        <div className="nexus-card-elite" style={{ position: 'relative', overflow: 'hidden' }}>
+        <div className="nexus-card-elite px-8 py-10" style={{ position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '150px', height: '150px', background: 'radial-gradient(circle, rgba(6,182,212,0.15) 0%, transparent 70%)', borderRadius: '50%' }}></div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <div style={{ position: 'relative' }}>
-                  <div className="nexus-profile-circle" style={{ width: '80px', height: '80px', borderRadius: '50%', background: '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem' }}>💎</div>
-                  <div style={{ position: 'absolute', bottom: '5px', right: '5px', width: '12px', height: '12px', background: '#10b981', borderRadius: '50%', border: '2px solid #1e293b' }}></div>
+                  <div className="nexus-profile-circle" style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem' }}>💎</div>
+                  <div style={{ position: 'absolute', bottom: '2px', right: '2px', width: '10px', height: '10px', background: '#10b981', borderRadius: '50%', border: '2px solid #1e293b' }}></div>
                 </div>
                 <div>
-                  <h4 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 950 }}>Root Admin</h4>
-                  <span style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: 800 }}>Nexus Core Active</span>
+                  <h4 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 950 }}>Root Admin</h4>
+                  <span style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 800 }}>Nexus Core Active</span>
                 </div>
              </div>
           </div>
-          <div style={{ marginTop: '2rem', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+          <div style={{ marginTop: '1.5rem', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
             <div>
-              <div style={{ color: '#94a3b8', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>REVENU SaaS (30J)</div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 950, marginTop: '0.2rem', color: '#10b981' }}>{stats.total_revenue?.toLocaleString()} F</div>
+              <div style={{ color: '#94a3b8', fontSize: '0.6rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>REVENU SaaS (30J)</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 950, marginTop: '0.1rem', color: '#10b981' }}>{stats.total_revenue?.toLocaleString()} F</div>
             </div>
             <div>
-              <div style={{ color: '#f59e0b', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>EN ATTENTE</div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 950, marginTop: '0.2rem', color: '#fbbf24', opacity: 0.9 }}>{stats.pending_revenue?.toLocaleString() || 0} F</div>
+              <div style={{ color: '#f59e0b', fontSize: '0.6rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>EN ATTENTE</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 950, marginTop: '0.1rem', color: '#fbbf24', opacity: 0.9 }}>{stats.pending_revenue?.toLocaleString() || 0} F</div>
             </div>
             <div>
-              <div style={{ color: '#94a3b8', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>GMV CLIENTS (EST.)</div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 950, marginTop: '0.2rem', color: '#f8fafc', opacity: 0.8 }}>{stats.tenant_gmv?.toLocaleString() || 0} F</div>
+              <div style={{ color: '#94a3b8', fontSize: '0.6rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>GMV CLIENTS</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 950, marginTop: '0.1rem', color: '#f8fafc', opacity: 0.8 }}>{stats.tenant_gmv?.toLocaleString() || 0} F</div>
             </div>
           </div>
         </div>
@@ -295,19 +295,19 @@ const OverviewTab = ({ stats, tenants }: { stats: any, tenants: Tenant[] }) => {
              </div>
              <div style={{ width: '100px', height: '60px' }}>
                 <svg width="100" height="60" viewBox="0 0 100 60">
-                   <path d="M0,50 L20,40 L40,45 L60,20 L80,30 L100,5" fill="none" stroke="#06b6d4" strokeWidth="4" strokeLinecap="round" />
+                   <path d="M0,50 L20,40 L40,45 L60,20 L80,30 L100,5" fill="none" stroke="#06b6d4" strokeWidth="5" strokeLinecap="round" />
                 </svg>
              </div>
            </div>
-           <div className="nexus-card-elite" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+           <div className="nexus-card-elite px-6 py-8" style={{ display: 'flex', alignItems: 'center', justifyBetween: 'space-between' }}>
              <div>
-                <Activity size={24} style={{ color: '#ec4899', marginBottom: '0.75rem' }} />
-                <div style={{ fontSize: '1.8rem', fontWeight: 950 }}>{stats.total_orders.toLocaleString()}</div>
-                <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 800 }}>TRAFIC SaaS (ORDERS)</div>
+                <Activity size={20} style={{ color: '#ec4899', marginBottom: '0.6rem' }} />
+                <div style={{ fontSize: '1.5rem', fontWeight: 950 }}>{stats.total_orders.toLocaleString()}</div>
+                <div style={{ fontSize: '0.65rem', color: '#94a3b8', fontWeight: 900 }}>TRAFIC SaaS (ORDERS)</div>
              </div>
-             <div style={{ width: '100px', height: '60px' }}>
-                <svg width="100" height="60" viewBox="0 0 100 60">
-                   <path d="M0,55 L20,30 L40,50 L60,35 L80,45 L100,20" fill="none" stroke="#ec4899" strokeWidth="4" strokeLinecap="round" />
+             <div style={{ width: '120px', height: '70px', marginLeft: 'auto' }}>
+                <svg width="120" height="70" viewBox="0 0 100 60">
+                   <path d="M0,55 L20,30 L40,50 L60,35 L80,45 L100,20" fill="none" stroke="#ec4899" strokeWidth="5" strokeLinecap="round" />
                 </svg>
              </div>
            </div>
@@ -406,12 +406,12 @@ const PerformanceHub = ({ tenants, stats }: { tenants: Tenant[], stats: any }) =
         </div>
       </div>
       
-      <div className="nexus-card-lite p-8">
-         <h3 className="text-xl font-black mb-6">Visualisation de l'Infrastructure</h3>
-         <div style={{ height: 300 }}>
+      <div className="nexus-card-lite p-6">
+         <h3 className="text-lg font-black mb-6">Visualisation de l'Infrastructure</h3>
+         <div style={{ height: 260 }}>
             <ResponsiveContainer width="100%" height="100%">
                <AreaChart data={stats.growth_chart || []}>
-                  <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
+                  <XAxis dataKey="name" stroke="#64748b" fontSize={11} tickLine={false} axisLine={false} />
                   <YAxis hide />
                   <Tooltip contentStyle={{ background: '#0f172a', border: 'none', borderRadius: '12px' }} />
                   <Area type="monotone" dataKey="val" stroke="var(--primary)" strokeWidth={4} fill="rgba(99, 102, 241, 0.1)" />
