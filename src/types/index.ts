@@ -68,6 +68,12 @@ export interface Tenant {
   settings?: any;
   billing_status?: string;
   trial_ends_at?: any;
+  metrics?: {
+    total_orders?: number;
+    total_revenue?: number;
+    active_users?: number;
+    last_order_at?: string;
+  };
   created_at: any;
 }
 
@@ -113,6 +119,7 @@ export interface Produit {
   actif: boolean;
   images?: string[];
   image_url?: string;
+  created_by?: string;
   tenant_id: string;
 }
 
@@ -155,6 +162,7 @@ export interface Commande {
   adresse_livraison: string;
   notes_client?: string;
   agent_appel_id?: string;
+  agent_id?: string;
   livreur_id?: string;
   feuille_route_id?: string;
   date_validation_appel?: Date | any;

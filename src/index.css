@@ -1198,3 +1198,14 @@ tr:hover td {
 .nexus-pulse {
   animation: nexusPulse 3s infinite ease-in-out;
 }
+
+/* Fix product row hover text issue */
+.hover-row-premium:hover td {
+  background-color: rgba(6, 182, 212, 0.05) !important;
+  color: var(--text-main) !important;
+}
+
+.hover-row-premium:hover td * {
+  /* Prevent child elements inheriting incorrect colors */
+  opacity: 1 !important;
+}

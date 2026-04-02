@@ -43,11 +43,34 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   const fetchSaasData = async () => {
-    // Determine the target tenant slug from the URL if current user is admin OR if we're on a tenant route
+    // Determine the target tenant slug from: 
+    // 1. Path (e.g. gomboswiftci.app/slug)
+    // 2. Subdomain (e.g. slug.gomboswiftci.app)
+    const hostname = window.location.hostname;
     const pathParts = window.location.pathname.split('/').filter(Boolean);
     const urlSlug = pathParts[0]; 
+    
+    let targetSlug: string | null = null;
     const isSpecialPath = ['super-admin', 'platform', 'login', 'register'].includes(urlSlug);
-    const targetSlug = (!isSpecialPath && urlSlug && urlSlug !== 'nexus') ? urlSlug : (urlSlug === 'nexus' ? 'nexus' : null);
+    
+    // Check path first
+    if (!isSpecialPath && urlSlug && urlSlug !== 'nexus') {
+      targetSlug = urlSlug;
+    } 
+    // Then check subdomain if no path slug
+    else {
+      const parts = hostname.split('.');
+      // Check if it's something like slug.gomboswiftci.app or slug.localhost
+      if (parts.length >= 2) {
+        const sub = parts[0];
+        const isDomainPart = ['gomboswiftci', 'localhost', 'www', 'vercel', 'app'].includes(sub.toLowerCase());
+        if (!isDomainPart) {
+          targetSlug = sub;
+        }
+      }
+    }
+
+    if (urlSlug === 'nexus') targetSlug = 'nexus';
 
     // If no user and no slug, we can't do anything
     if (!currentUser && !targetSlug) {
@@ -116,10 +139,23 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [lastUserId, setLastUserId] = useState<string | undefined>(undefined);
   
   useEffect(() => {
+    const hostname = window.location.hostname;
     const pathParts = window.location.pathname.split('/').filter(Boolean);
     const urlSlug = pathParts[0];
     const isSpecialPath = ['super-admin', 'platform', 'login', 'register'].includes(urlSlug);
-    const targetSlug = (!isSpecialPath && urlSlug && urlSlug !== 'nexus') ? urlSlug : (urlSlug === 'nexus' ? 'nexus' : null);
+    
+    let targetSlug: string | null = null;
+    if (!isSpecialPath && urlSlug && urlSlug !== 'nexus') {
+      targetSlug = urlSlug;
+    } else {
+      const parts = hostname.split('.');
+      if (parts.length >= 2) {
+        const sub = parts[0];
+        const isDomainPart = ['gomboswiftci', 'localhost', 'www', 'vercel', 'app'].includes(sub.toLowerCase());
+        if (!isDomainPart) targetSlug = sub;
+      }
+    }
+    if (urlSlug === 'nexus') targetSlug = 'nexus';
 
     // Only fetch if slug changed OR user session changed
     if (targetSlug !== lastSlug || currentUser?.id !== lastUserId) {
@@ -127,7 +163,7 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLastUserId(currentUser?.id);
       fetchSaasData();
     }
-  }, [window.location.pathname, currentUser?.id]); // Re-run check on path or user change
+  }, [window.location.pathname, window.location.hostname, currentUser?.id]); // Re-run check on path, host or user change
 
   const isPlanAtLeast = (requiredPlan: Plan) => {
     const currentPlan = (tenant?.plan || 'FREE') as Plan;

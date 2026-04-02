@@ -247,7 +247,7 @@ export const Caisse = () => {
               <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem' }}>1</span>
               Sélection du Livreur
             </h3>
-            <select className="form-select" style={{ height: '52px', fontWeight: 700, fontSize: '1.05rem' }} value={selectedLivreur} onChange={(e) => loadLivreur(e.target.value)}>
+            <select className="form-select" style={{ height: '52px', fontWeight: 700, fontSize: '1.05rem', background: 'rgba(0,0,0,0.2)', border: '2px solid rgba(255,255,255,0.1)', color: 'white' }} value={selectedLivreur} onChange={(e) => loadLivreur(e.target.value)}>
               <option value="">Renseignez l'agent...</option>
               {livreurs.map(l => (
                 <option key={l.id} value={l.id}>{l.nom_complet}</option>
@@ -262,7 +262,7 @@ export const Caisse = () => {
                 Choisir une feuille active
               </h3>
                {feuilles.length === 0 ? (
-                 <div style={{ padding: '2rem', textAlign: 'center', background: '#f8fafc', borderRadius: '20px', border: '2px dashed #e2e8f0' }}>
+                 <div style={{ padding: '2rem', textAlign: 'center', background: 'rgba(255,255,255,0.01)', borderRadius: '20px', border: '2px dashed rgba(255,255,255,0.05)' }}>
                    <p style={{ color: 'var(--text-muted)', fontWeight: 600, margin: 0 }}>Aucune feuille de route en cours trouvée.</p>
                  </div>
                ) : (
@@ -304,9 +304,9 @@ export const Caisse = () => {
         {feuille && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))', gap: '2.5rem', alignItems: 'start' }}>
             
-            <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
-              <div style={{ padding: '1.5rem 2.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc' }}>
-                  <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800 }}>
+            <div className="card" style={{ padding: '0', overflow: 'hidden', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ padding: '1.5rem 2.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)' }}>
+                  <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)' }}>
                     Contrôle des encaissements
                     <span style={{ marginLeft: '1rem', padding: '0.2rem 0.6rem', background: 'rgba(99, 102, 255, 0.1)', borderRadius: '8px', fontSize: '0.8rem', color: 'var(--primary)' }}>
                       #{feuille.id.slice(0, 8).toUpperCase()}
@@ -326,23 +326,23 @@ export const Caisse = () => {
 
               {/* RESTOCK SUMMARY */}
               {Object.values(resolutions).some(r => r.statut === 'retour_livreur') && (
-                <div style={{ padding: '1rem 2.5rem', background: '#fff1f2', borderBottom: '1px solid #fee2e2', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                   <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#ef4444' }}></div>
-                   <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#991b1b' }}>
+                <div style={{ padding: '1rem 2.5rem', background: 'rgba(244,63,94,0.1)', borderBottom: '1px solid rgba(244,63,94,0.2)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                   <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#f43f5e' }}></div>
+                   <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#f43f5e' }}>
                      {Object.values(resolutions).filter(r => r.statut === 'retour_livreur').length} colis à réintégrer en stock après clôture.
                    </span>
                 </div>
               )}
 
               {/* QUICK ADD EXTRA ORDERS */}
-              <div style={{ padding: '1.5rem 2.5rem', borderBottom: '1px solid #f1f5f9', background: '#fffef0', display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <div style={{ padding: '1.5rem 2.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(245,158,11,0.05)', display: 'flex', gap: '1rem', alignItems: 'center' }}>
                  <div style={{ position: 'relative', flex: 1 }}>
                     <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                     <input 
                       type="text" 
                       className="form-input" 
                       placeholder="Ajouter un colis hors-bordereau (Ref #...)"
-                      style={{ paddingLeft: '2.75rem', height: '44px', borderRadius: '12px', border: '2px solid #fef3c7' }}
+                      style={{ paddingLeft: '2.75rem', height: '44px', borderRadius: '12px', border: '1px solid rgba(245,158,11,0.2)', background: 'rgba(0,0,0,0.2)', color: 'white' }}
                       value={extraSearch}
                       onChange={e => setExtraSearch(e.target.value)}
                       onKeyPress={e => e.key === 'Enter' && handleAddExtraOrder()}
@@ -371,7 +371,7 @@ export const Caisse = () => {
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                             <button 
                               className="btn btn-outline" 
-                              style={{ padding: '0.4rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}
+                              style={{ padding: '0.4rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)', color: 'white' }}
                               onClick={() => setSelectedOrderId(c.id)}
                             >
                               <Eye size={14} />
@@ -383,17 +383,18 @@ export const Caisse = () => {
                           <div style={{ fontWeight: 800, color: 'var(--text-main)' }}>{c.nom_client || `Anonyme`}</div>
                           <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>{c.commune_livraison}</div>
                         </td>
-                        <td style={{ fontWeight: 900, textAlign: 'right', fontSize: '1.05rem' }}>{Number(c.montant_total).toLocaleString()}</td>
+                        <td style={{ fontWeight: 900, textAlign: 'right', fontSize: '1.05rem', color: 'var(--primary)' }}>{Number(c.montant_total).toLocaleString()}</td>
                         <td>
                           <select 
                             className="form-select" 
                             style={{ 
                               padding: '0.4rem 0.75rem', 
                               borderRadius: '10px',
-                              fontWeight: 700,
-                              fontSize: '0.85rem',
-                              backgroundColor: resolutions[c.id]?.statut === 'livree' ? '#dcfce7' : resolutions[c.id]?.statut === 'retour_livreur' ? '#fee2e2' :resolutions[c.id]?.statut === 'a_rappeler' ? '#fef3c7' : '#f3f4f6',
-                              border: 'none'
+                              fontWeight: 800,
+                              fontSize: '0.8rem',
+                              backgroundColor: resolutions[c.id]?.statut === 'livree' ? 'rgba(16, 185, 129, 0.15)' : resolutions[c.id]?.statut === 'retour_livreur' ? 'rgba(244, 63, 94, 0.15)' : resolutions[c.id]?.statut === 'a_rappeler' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(255,255,255,0.05)',
+                              color: resolutions[c.id]?.statut === 'livree' ? '#10b981' : resolutions[c.id]?.statut === 'retour_livreur' ? '#f43f5e' : resolutions[c.id]?.statut === 'a_rappeler' ? '#f59e0b' : 'white',
+                              border: '1px solid rgba(255,255,255,0.05)'
                             }}
                             value={resolutions[c.id]?.statut || 'retour_livreur'}
                             onChange={(e) => updateResolution(c.id, 'statut', e.target.value)}
@@ -410,7 +411,7 @@ export const Caisse = () => {
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                               <select 
                                 className="form-select" 
-                                style={{ padding: '0.4rem 0.75rem', borderRadius: '10px', fontSize: '0.85rem', fontWeight: 700 }}
+                                style={{ padding: '0.4rem 0.75rem', borderRadius: '10px', fontSize: '0.8rem', fontWeight: 800, background: 'rgba(0,0,0,0.3)', color: 'white', border: '1px solid rgba(255,255,255,0.1)' }}
                                 value={resolutions[c.id]?.mode_paiement}
                                 onChange={(e) => updateResolution(c.id, 'mode_paiement', e.target.value)}
                               >
@@ -439,14 +440,14 @@ export const Caisse = () => {
                 <h3 style={{ fontSize: '1.4rem', fontWeight: 900, margin: 0 }}>Calculateur</h3>
               </div>
               
-              <div style={{ marginBottom: '2rem', padding: '1.75rem', background: '#f1f5f9', borderRadius: '24px', border: '1px solid #e2e8f0' }}>
+              <div style={{ marginBottom: '2rem', padding: '1.75rem', background: 'rgba(255,255,255,0.02)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.25rem', alignItems: 'center' }}>
-                  <span style={{ color: 'var(--text-muted)', fontWeight: 800, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Attendu en Cash :</span>
-                  <span className="brand-glow" style={{ fontWeight: 900, fontSize: '1.6rem', color: 'var(--primary)' }}>{montantAttendu.toLocaleString()} <span style={{ fontSize: '0.8rem' }}>CFA</span></span>
+                   <span style={{ color: 'var(--text-muted)', fontWeight: 800, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Attendu en Cash :</span>
+                   <span className="brand-glow" style={{ fontWeight: 900, fontSize: '1.6rem', color: 'var(--primary)' }}>{montantAttendu.toLocaleString()} <span style={{ fontSize: '0.8rem' }}>CFA</span></span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '1rem', borderTop: '1px solid #e2e8f0' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                   <span style={{ color: 'var(--text-muted)', fontWeight: 700, fontSize: '0.85rem' }}>Mobile Money (Digital) :</span>
-                  <span style={{ fontWeight: 800, color: '#64748b' }}>{montantMobileMoney.toLocaleString()} <span style={{ fontSize: '0.7rem' }}>CFA</span></span>
+                  <span style={{ fontWeight: 800, color: 'var(--text-muted)' }}>{montantMobileMoney.toLocaleString()} <span style={{ fontSize: '0.7rem' }}>CFA</span></span>
                 </div>
               </div>
 
@@ -465,9 +466,9 @@ export const Caisse = () => {
                       textAlign: 'center', 
                       height: '64px', 
                       borderRadius: '16px', 
-                      border: '2px solid #e2e8f0', 
+                      border: '2px solid rgba(255,255,255,0.1)', 
                       color: 'var(--primary)',
-                      background: 'rgba(255,255,255,0.6)',
+                      background: 'rgba(0,0,0,0.2)',
                       width: '100%'
                     }}
                     value={montantRemisStr}
@@ -496,7 +497,7 @@ export const Caisse = () => {
                 <textarea 
                   className="form-input" 
                   rows={2} 
-                  style={{ borderRadius: '16px', padding: '1rem', background: '#f8fafc' }}
+                  style={{ borderRadius: '16px', padding: '1rem', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
                   value={commentaire}
                   onChange={e => setCommentaire(e.target.value)}
                   placeholder="Justifiez toute différence de centime..."

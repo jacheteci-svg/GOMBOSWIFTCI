@@ -151,14 +151,14 @@ export const AdminTresorerie = () => {
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', background: 'white', padding: '0.75rem 1.5rem', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', background: 'rgba(255,255,255,0.05)', padding: '0.75rem 1.5rem', borderRadius: '16px', border: '1px solid var(--glass-border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Filter size={18} color="var(--primary)" />
-            <input type="date" className="form-input" style={{ width: '130px', padding: '0.4rem' }} value={startDate} onChange={e => setStartDate(e.target.value)} />
+            <input type="date" className="form-input" style={{ width: '130px', padding: '0.4rem', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }} value={startDate} onChange={e => setStartDate(e.target.value)} />
             <span style={{ color: 'var(--text-muted)' }}>au</span>
-            <input type="date" className="form-input" style={{ width: '130px', padding: '0.4rem' }} value={endDate} onChange={e => setEndDate(e.target.value)} />
+            <input type="date" className="form-input" style={{ width: '130px', padding: '0.4rem', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }} value={endDate} onChange={e => setEndDate(e.target.value)} />
           </div>
-          <button className="btn btn-outline" onClick={exportToExcel} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <button className="btn btn-outline" onClick={exportToExcel} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', border: '1px solid var(--primary)', color: 'var(--primary)' }}>
             <Download size={18} /> Excel
           </button>
         </div>
@@ -264,18 +264,18 @@ export const AdminTresorerie = () => {
           </div>
 
           {/* Business Rules Card */}
-          <div className="card" style={{ padding: '1.5rem' }}>
-            <h4 style={{ margin: 0, marginBottom: '1rem', fontSize: '0.9rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div className="card glass-effect" style={{ padding: '1.5rem' }}>
+            <h4 style={{ margin: 0, marginBottom: '1rem', fontSize: '0.9rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)' }}>
               <History size={16} /> Barème d'Extractions
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem', background: '#f8fafc', borderRadius: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Frais Admin</span>
-                <span style={{ fontWeight: 700, fontSize: '0.85rem' }}>250 F / v</span>
+                <span style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-main)' }}>250 F / v</span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem', background: '#f8fafc', borderRadius: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Frais Logistique</span>
-                <span style={{ fontWeight: 700, fontSize: '0.85rem' }}>500 F / v</span>
+                <span style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--text-main)' }}>500 F / v</span>
               </div>
             </div>
             <p style={{ marginTop: '1rem', fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>

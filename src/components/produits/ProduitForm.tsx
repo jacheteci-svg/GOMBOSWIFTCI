@@ -3,6 +3,7 @@ import { Produit } from '../../types';
 import { createProduit, updateProduit } from '../../services/produitService';
 import { X } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { useSaas } from '../../saas/SaasProvider';
 
 interface ProduitFormProps {
@@ -31,6 +32,7 @@ export const ProduitForm = ({ produit, onClose, onSave }: ProduitFormProps) => {
   const [hasPromo, setHasPromo] = useState(false);
   const { showToast } = useToast();
   const { tenant } = useSaas();
+  const { currentUser } = useAuth();
 
   useEffect(() => {
     if (produit) {
@@ -72,7 +74,7 @@ export const ProduitForm = ({ produit, onClose, onSave }: ProduitFormProps) => {
         showToast("Configuration article mise à jour avec succès !", "success");
       } else {
         if (!tenant?.id) return;
-        await createProduit(tenant.id, { ...dataToSave } as Omit<Produit, 'id'>);
+        await createProduit(tenant.id, { ...dataToSave, created_by: currentUser?.id } as Omit<Produit, 'id'>);
         showToast("Nouvel article référencé avec succès !", "success");
       }
       onSave();
@@ -110,21 +112,21 @@ export const ProduitForm = ({ produit, onClose, onSave }: ProduitFormProps) => {
               Identité de l'article
             </h3>
             <div className="form-group">
-              <label className="form-label" style={{ fontWeight: 700 }}>Désignation commerciale *</label>
-              <input type="text" className="form-input" required placeholder="Ex: iPhone 15 Pro Max - 256GB" style={{ height: '52px', borderRadius: '14px', fontSize: '1.05rem', fontWeight: 600 }} value={formData.nom} onChange={e => setFormData({...formData, nom: e.target.value})} />
+              <label className="form-label" style={{ fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.5rem', display: 'block' }}>Désignation commerciale *</label>
+              <input type="text" className="form-input" required placeholder="Ex: iPhone 15 Pro Max - 256GB" style={{ height: '52px', borderRadius: '14px', fontSize: '1.05rem', fontWeight: 600, border: '2px solid rgba(255, 255, 255, 0.1)', background: 'rgba(255, 255, 255, 0.03)', color: 'white' }} value={formData.nom} onChange={e => setFormData({...formData, nom: e.target.value})} />
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '1.5rem', marginTop: '1.5rem' }}>
               <div className="form-group">
-                <label className="form-label" style={{ fontWeight: 700 }}>Référence SKU (Unique) *</label>
-                <input type="text" className="form-input" required placeholder="PROD-001" style={{ height: '52px', borderRadius: '14px', fontWeight: 700, letterSpacing: '0.05em' }} value={formData.sku} onChange={e => setFormData({...formData, sku: e.target.value})} />
+                <label className="form-label" style={{ fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.5rem', display: 'block' }}>Référence SKU (Unique) *</label>
+                <input type="text" className="form-input" required placeholder="PROD-001" style={{ height: '52px', borderRadius: '14px', fontWeight: 700, letterSpacing: '0.05em', border: '2px solid rgba(255, 255, 255, 0.1)', background: 'rgba(255, 255, 255, 0.03)', color: 'white' }} value={formData.sku} onChange={e => setFormData({...formData, sku: e.target.value})} />
               </div>
               <div className="form-group">
-                <label className="form-label" style={{ fontWeight: 700 }}>Lien Image Haute Définition</label>
+                <label className="form-label" style={{ fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.5rem', display: 'block' }}>Lien Image Haute Définition</label>
                 <div style={{ position: 'relative' }}>
-                  <input type="url" className="form-input" placeholder="https://cdn.example.com/photo.jpg" style={{ height: '52px', borderRadius: '14px', paddingRight: '120px' }} value={formData.image_url || ''} onChange={e => setFormData({...formData, image_url: e.target.value})} />
+                  <input type="url" className="form-input" placeholder="https://cdn.example.com/photo.jpg" style={{ height: '52px', borderRadius: '14px', width: '100%', border: '2px solid rgba(255, 255, 255, 0.1)', background: 'rgba(255, 255, 255, 0.03)', color: 'white' }} value={formData.image_url || ''} onChange={e => setFormData({...formData, image_url: e.target.value})} />
                   {formData.image_url && (
-                    <div style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', width: '100px', height: '40px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0', background: '#f8fafc' }}>
+                    <div style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', width: '100px', height: '40px', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)', background: '#000' }}>
                       <img 
                         src={formData.image_url} 
                         alt="Preview" 
@@ -137,8 +139,8 @@ export const ProduitForm = ({ produit, onClose, onSave }: ProduitFormProps) => {
               </div>
             </div>
             {formData.image_url && (
-              <div style={{ marginTop: '1rem', padding: '1rem', borderRadius: '16px', background: 'rgba(99, 102, 255, 0.05)', border: '1px dashed var(--primary)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                 <div style={{ width: '60px', height: '60px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0 }}>
+              <div style={{ marginTop: '1rem', padding: '1rem', borderRadius: '16px', background: 'rgba(6, 182, 212, 0.05)', border: '1px dashed var(--primary)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                 <div style={{ width: '60px', height: '60px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0, background: '#000' }}>
                     <img src={formData.image_url} alt="Large Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => (e.currentTarget.src = 'https://placehold.co/100x100?text=Format+Invalide')} />
                  </div>
                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
@@ -150,7 +152,7 @@ export const ProduitForm = ({ produit, onClose, onSave }: ProduitFormProps) => {
           </div>
 
           {/* SECTION 2: ECONOMIE */}
-          <div style={{ marginBottom: '2.5rem', padding: '2rem', background: 'rgba(99, 102, 255, 0.03)', borderRadius: '24px', border: '1px solid rgba(99, 102, 255, 0.1)' }}>
+          <div style={{ marginBottom: '2.5rem', padding: '2rem', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '24px', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
             <h3 style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'currentColor' }}></div>
               Modèle Économique & Prix
@@ -158,60 +160,60 @@ export const ProduitForm = ({ produit, onClose, onSave }: ProduitFormProps) => {
             
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
               <div className="form-group">
-                <label className="form-label" style={{ fontWeight: 700 }}>Coût d'Achat (Unit.) *</label>
+                <label className="form-label" style={{ fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.5rem', display: 'block' }}>Coût d'Achat (Unit.) *</label>
                 <input 
-                  type="number" 
-                  className="form-input" 
-                  required 
-                  min="0" 
-                  style={{ height: '52px', borderRadius: '14px', fontWeight: 700 }} 
-                  value={formData.prix_achat || ''} 
-                  onFocus={() => formData.prix_achat === 0 && setFormData({...formData, prix_achat: '' as any})}
-                  onChange={e => setFormData({...formData, prix_achat: e.target.value === '' ? 0 : Number(e.target.value)})} 
+                   type="number" 
+                   className="form-input" 
+                   required 
+                   min="0" 
+                   style={{ height: '52px', borderRadius: '14px', fontWeight: 700, width: '100%', border: '2px solid rgba(255, 255, 255, 0.1)', background: 'rgba(255, 255, 255, 0.03)', color: 'white' }} 
+                   value={formData.prix_achat || ''} 
+                   onFocus={() => formData.prix_achat === 0 && setFormData({...formData, prix_achat: '' as any})}
+                   onChange={e => setFormData({...formData, prix_achat: e.target.value === '' ? 0 : Number(e.target.value)})} 
                 />
               </div>
               
               <div className="form-group">
-                <label className="form-label" style={{ fontWeight: 700 }}>Prix de Vente Public *</label>
+                <label className="form-label" style={{ fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.5rem', display: 'block' }}>Prix de Vente Public *</label>
                 <div style={{ display: 'flex', gap: '0.75rem' }}>
-                  <input 
-                    type="number" 
-                    className="form-input" 
-                    required 
-                    min="0" 
-                    style={{ height: '52px', borderRadius: '14px', fontWeight: 900, color: 'var(--primary)', fontSize: '1.2rem' }} 
-                    value={formData.prix_vente || ''} 
-                    onFocus={() => formData.prix_vente === 0 && setFormData({...formData, prix_vente: '' as any})}
-                    onChange={e => setFormData({...formData, prix_vente: e.target.value === '' ? 0 : Number(e.target.value)})} 
-                  />
-                  <select className="form-select" style={{ width: '100px', height: '52px', borderRadius: '14px', fontWeight: 800 }} value={formData.devise} onChange={e => setFormData({...formData, devise: e.target.value})}>
-                    <option value="CFA">CFA</option>
-                    <option value="EUR">€</option>
-                  </select>
+                   <input 
+                     type="number" 
+                     className="form-input" 
+                     required 
+                     min="0" 
+                     style={{ height: '52px', borderRadius: '14px', fontWeight: 900, color: 'var(--primary)', fontSize: '1.2rem', border: '3px solid var(--primary)', background: 'rgba(0,0,0,0.2)', width: '100%' }} 
+                     value={formData.prix_vente || ''} 
+                     onFocus={() => formData.prix_vente === 0 && setFormData({...formData, prix_vente: '' as any})}
+                     onChange={e => setFormData({...formData, prix_vente: e.target.value === '' ? 0 : Number(e.target.value)})} 
+                   />
+                   <select className="form-select" style={{ width: '100px', height: '52px', borderRadius: '14px', fontWeight: 800, border: '2px solid rgba(255, 255, 255, 0.1)', background: 'rgba(0,0,0,0.2)', color: 'white' }} value={formData.devise} onChange={e => setFormData({...formData, devise: e.target.value})}>
+                     <option value="CFA">CFA</option>
+                     <option value="EUR">€</option>
+                   </select>
                 </div>
               </div>
             </div>
 
-            <div style={{ marginTop: '1rem', padding: '1.25rem', background: hasPromo ? '#f0fdf4' : 'white', borderRadius: '18px', border: `2px solid ${hasPromo ? '#22c55e' : '#f1f5f9'}`, transition: 'all 0.3s ease' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontWeight: 800, color: hasPromo ? '#166534' : 'var(--text-muted)' }}>
-                <input type="checkbox" style={{ width: '20px', height: '20px', accentColor: '#22c55e' }} checked={hasPromo} onChange={e => setHasPromo(e.target.checked)} />
+            <div style={{ marginTop: '1.5rem', padding: '1.5rem', background: 'rgba(0,0,0,0.2)', borderRadius: '18px', border: `2px solid ${hasPromo ? '#10b981' : 'rgba(255,255,255,0.1)'}`, transition: 'all 0.3s ease' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontWeight: 800, color: hasPromo ? '#10b981' : 'var(--text-muted)' }}>
+                <input type="checkbox" style={{ width: '22px', height: '22px', accentColor: '#10b981' }} checked={hasPromo} onChange={e => setHasPromo(e.target.checked)} />
                 Appliquer un tarif promotionnel temporaire
               </label>
               
               {hasPromo && (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1.25rem', marginTop: '1.5rem', animation: 'pageEnter 0.3s ease' }}>
                   <div className="form-group" style={{ marginBottom: 0 }}>
-                    <label className="form-label" style={{ fontWeight: 700, color: '#166534' }}>Prix Promo *</label>
-                    <input type="number" className="form-input" required min="0" style={{ height: '48px', borderRadius: '12px', borderColor: '#bbf7d0', fontWeight: 900, color: '#16a34a' }} value={formData.prix_promo || ''} onChange={e => setFormData({...formData, prix_promo: Number(e.target.value)})} />
+                    <label className="form-label" style={{ fontWeight: 800, color: '#10b981' }}>Prix Promo *</label>
+                    <input type="number" className="form-input" required min="0" style={{ height: '48px', borderRadius: '12px', borderColor: '#10b981', border: '2px solid #10b981', fontWeight: 900, color: '#10b981', background: 'rgba(0,0,0,0.2)', width: '100%' }} value={formData.prix_promo || ''} onChange={e => setFormData({...formData, prix_promo: Number(e.target.value)})} />
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                     <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label className="form-label" style={{ fontWeight: 700, color: '#166534' }}>Début</label>
-                      <input type="datetime-local" className="form-input" style={{ height: '48px', borderRadius: '12px', borderColor: '#bbf7d0', fontSize: '0.8rem' }} value={formData.promo_debut || ''} onChange={e => setFormData({...formData, promo_debut: e.target.value})} />
+                      <label className="form-label" style={{ fontWeight: 800, color: '#10b981' }}>Début</label>
+                      <input type="datetime-local" className="form-input" style={{ height: '48px', borderRadius: '12px', border: '2px solid rgba(255,255,255,0.1)', fontSize: '0.8rem', background: 'rgba(0,0,0,0.2)', color: 'white', width: '100%' }} value={formData.promo_debut || ''} onChange={e => setFormData({...formData, promo_debut: e.target.value})} />
                     </div>
                     <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label className="form-label" style={{ fontWeight: 700, color: '#166534' }}>Fin</label>
-                      <input type="datetime-local" className="form-input" style={{ height: '48px', borderRadius: '12px', borderColor: '#bbf7d0', fontSize: '0.8rem' }} value={formData.promo_fin || ''} onChange={e => setFormData({...formData, promo_fin: e.target.value})} />
+                      <label className="form-label" style={{ fontWeight: 800, color: '#10b981' }}>Fin</label>
+                      <input type="datetime-local" className="form-input" style={{ height: '48px', borderRadius: '12px', border: '2px solid rgba(255,255,255,0.1)', fontSize: '0.8rem', background: 'rgba(0,0,0,0.2)', color: 'white', width: '100%' }} value={formData.promo_fin || ''} onChange={e => setFormData({...formData, promo_fin: e.target.value})} />
                     </div>
                   </div>
                 </div>
@@ -227,12 +229,12 @@ export const ProduitForm = ({ produit, onClose, onSave }: ProduitFormProps) => {
             </h3>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
               <div className="form-group">
-                <label className="form-label" style={{ fontWeight: 700 }}>Inventaire initial {produit && '(Scellé)'}</label>
+                <label className="form-label" style={{ fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.5rem', display: 'block' }}>Inventaire initial {produit && '(Scellé)'}</label>
                 <input 
                   type="number" 
                   className="form-input" 
                   min="0" 
-                  style={{ height: '52px', borderRadius: '14px', fontWeight: 800, background: produit ? 'rgba(0,0,0,0.05)' : 'transparent' }} 
+                  style={{ height: '52px', borderRadius: '14px', fontWeight: 800, background: 'rgba(255, 255, 255, 0.03)', border: '2px solid rgba(255, 255, 255, 0.1)', color: 'white', width: '100%' }} 
                   value={formData.stock_actuel || ''} 
                   disabled={!!produit} 
                   onFocus={() => formData.stock_actuel === 0 && setFormData({...formData, stock_actuel: '' as any})}
@@ -240,23 +242,23 @@ export const ProduitForm = ({ produit, onClose, onSave }: ProduitFormProps) => {
                 />
               </div>
               <div className="form-group">
-                <label className="form-label" style={{ fontWeight: 700 }}>Seuil d'alerte critique *</label>
-                <input type="number" className="form-input" required min="1" style={{ height: '52px', borderRadius: '14px', fontWeight: 800, color: '#ef4444', borderColor: '#fee2e2' }} value={formData.stock_minimum} onChange={e => setFormData({...formData, stock_minimum: Number(e.target.value)})} />
+                <label className="form-label" style={{ fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.5rem', display: 'block' }}>Seuil d'alerte critique *</label>
+                <input type="number" className="form-input" required min="1" style={{ height: '52px', borderRadius: '14px', fontWeight: 800, color: '#f43f5e', border: '2px solid rgba(244, 63, 94, 0.3)', background: 'rgba(244, 63, 94, 0.05)', width: '100%' }} value={formData.stock_minimum} onChange={e => setFormData({...formData, stock_minimum: Number(e.target.value)})} />
               </div>
             </div>
 
-            <label style={{ display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', marginTop: '1rem', padding: '1.25rem', borderRadius: '18px', background: formData.actif ? 'rgba(16, 185, 129, 0.05)' : '#f8fafc', border: `1px solid ${formData.actif ? '#10b981' : '#e2e8f0'}`, transition: 'all 0.3s ease' }}>
-              <input type="checkbox" style={{ width: '22px', height: '22px', accentColor: '#10b981' }} checked={formData.actif} onChange={e => setFormData({...formData, actif: e.target.checked})} />
+            <label style={{ display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', marginTop: '1.5rem', padding: '1.5rem', borderRadius: '18px', background: formData.actif ? 'rgba(16, 185, 129, 0.05)' : 'rgba(255,255,255,0.02)', border: `2px solid ${formData.actif ? '#10b981' : 'rgba(255,255,255,0.1)'}`, transition: 'all 0.3s ease' }}>
+              <input type="checkbox" style={{ width: '24px', height: '24px', accentColor: '#10b981' }} checked={formData.actif} onChange={e => setFormData({...formData, actif: e.target.checked})} />
               <div>
-                <div style={{ fontWeight: 900, color: formData.actif ? '#059669' : 'var(--text-muted)' }}>Produit Actif / En Vente</div>
+                <div style={{ fontWeight: 900, color: formData.actif ? '#10b981' : 'var(--text-muted)' }}>Produit Actif / En Vente</div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Si décoché, l'article sera masqué des formulaires de commande.</div>
               </div>
             </label>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '2rem', borderTop: '2px solid #f1f5f9', paddingTop: '2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '2rem' }}>
             <button type="button" className="btn btn-outline" style={{ height: '56px', padding: '0 2rem', borderRadius: '16px', fontWeight: 800 }} onClick={onClose} disabled={loading}>Annuler</button>
-            <button type="submit" className="btn btn-primary" style={{ height: '56px', padding: '0 3rem', borderRadius: '16px', fontWeight: 900, fontSize: '1.1rem', boxShadow: '0 10px 15px -3px rgba(99, 102, 255, 0.4)' }} disabled={loading}>
+            <button type="submit" className="btn btn-primary" style={{ height: '56px', padding: '0 3rem', borderRadius: '16px', fontWeight: 900, fontSize: '1.1rem', boxShadow: '0 10px 15px -3px rgba(6, 182, 212, 0.4)' }} disabled={loading}>
               {loading ? 'SYNCHRONISATION...' : 'VALIDER LA FICHE'}
             </button>
           </div>
