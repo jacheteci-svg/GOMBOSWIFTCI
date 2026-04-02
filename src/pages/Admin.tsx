@@ -27,31 +27,46 @@ export const Admin = () => {
   );
 
   return (
-    <div style={{ animation: 'pageEnter 0.6s ease' }}>
-      <div style={{ marginBottom: '2.5rem' }}>
-        <h1 className="text-premium" style={{ fontSize: '2.2rem', fontWeight: 800, margin: 0 }}>
-          {hasPermission('ADMIN') ? 'Administration' : 'Gestion Équipe & Zones'}
+    <div className="animate-pageEnter">
+      <div style={{ marginBottom: '3rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+          <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--primary)', boxShadow: '0 0 10px var(--primary)' }}></div>
+          <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.2em' }}>Platform Control</span>
+        </div>
+        <h1 className="text-premium" style={{ fontSize: '2.8rem', fontWeight: 950, margin: 0, letterSpacing: '-0.02em' }}>
+          {hasPermission('ADMIN') ? 'Console Administration' : 'Gestion Équipe & Zones'}
         </h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', marginTop: '0.4rem', fontWeight: 500 }}>
+        <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginTop: '0.5rem', fontWeight: 600 }}>
           {hasPermission('ADMIN') 
-            ? 'Gestion globale du système et des accès.' 
-            : 'Gestion des zones de livraison et de l\'équipe.'}
+            ? 'Architecture globale du système, permissions et configuration du forfait.' 
+            : 'Pilotez votre équipe de livreurs et vos zones de chalandise.'}
         </p>
       </div>
 
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2.5rem', padding: '0.4rem', background: '#f1f5f9', borderRadius: '16px', width: 'fit-content' }}>
+      <div style={{ 
+        display: 'flex', 
+        gap: '0.5rem', 
+        marginBottom: '3rem', 
+        padding: '0.5rem', 
+        background: 'rgba(255,255,255,0.02)', 
+        borderRadius: '20px', 
+        width: 'fit-content', 
+        border: '1px solid rgba(255,255,255,0.05)',
+        backdropFilter: 'blur(10px)'
+      }}>
         {canManageUsers && (
           <button 
             className="btn"
             onClick={() => setActiveTab('utilisateurs')}
             style={{ 
-              background: activeTab === 'utilisateurs' ? 'white' : 'transparent',
-              color: activeTab === 'utilisateurs' ? 'var(--primary)' : 'var(--text-muted)',
-              boxShadow: activeTab === 'utilisateurs' ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
-              border: 'none', padding: '0.7rem 1.5rem', borderRadius: '12px', fontWeight: 700, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem'
+              background: activeTab === 'utilisateurs' ? 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)' : 'transparent',
+              color: activeTab === 'utilisateurs' ? 'white' : 'var(--text-muted)',
+              boxShadow: activeTab === 'utilisateurs' ? '0 10px 20px rgba(6, 182, 212, 0.3)' : 'none',
+              border: 'none', padding: '0.8rem 1.8rem', borderRadius: '16px', fontWeight: 800, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.75rem',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
           >
-            <UsersIcon size={18} strokeWidth={activeTab === 'utilisateurs' ? 2.5 : 2} /> 
+            <UsersIcon size={18} strokeWidth={activeTab === 'utilisateurs' ? 3 : 2} /> 
             {hasPermission('ADMIN') ? 'Utilisateurs' : 'Équipe Livreurs'}
           </button>
         )}
@@ -60,34 +75,36 @@ export const Admin = () => {
             className="btn"
             onClick={() => setActiveTab('communes')}
             style={{ 
-              background: activeTab === 'communes' ? 'white' : 'transparent',
-              color: activeTab === 'communes' ? 'var(--primary)' : 'var(--text-muted)',
-              boxShadow: activeTab === 'communes' ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
-              border: 'none', padding: '0.7rem 1.5rem', borderRadius: '12px', fontWeight: 700, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem'
+              background: activeTab === 'communes' ? 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)' : 'transparent',
+              color: activeTab === 'communes' ? 'white' : 'var(--text-muted)',
+              boxShadow: activeTab === 'communes' ? '0 10px 20px rgba(6, 182, 212, 0.3)' : 'none',
+              border: 'none', padding: '0.8rem 1.8rem', borderRadius: '16px', fontWeight: 800, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.75rem',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
           >
-            <MapIcon size={18} strokeWidth={activeTab === 'communes' ? 2.5 : 2} /> Zones & Tarifs
+            <MapIcon size={18} strokeWidth={activeTab === 'communes' ? 3 : 2} /> Zones & Tarifs
           </button>
         )}
         <button 
           className="btn"
           onClick={() => setActiveTab('abonnement')}
           style={{ 
-            background: activeTab === 'abonnement' ? 'white' : 'transparent',
-            color: activeTab === 'abonnement' ? 'var(--primary)' : 'var(--text-muted)',
-            boxShadow: activeTab === 'abonnement' ? '0 4px 12px rgba(0,0,0,0.05)' : 'none',
-            border: 'none', padding: '0.7rem 1.5rem', borderRadius: '12px', fontWeight: 700, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem'
+            background: activeTab === 'abonnement' ? 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)' : 'transparent',
+            color: activeTab === 'abonnement' ? 'white' : 'var(--text-muted)',
+            boxShadow: activeTab === 'abonnement' ? '0 10px 20px rgba(6, 182, 212, 0.3)' : 'none',
+            border: 'none', padding: '0.8rem 1.8rem', borderRadius: '16px', fontWeight: 800, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.75rem',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
           }}
         >
-          <CreditCard size={18} strokeWidth={activeTab === 'abonnement' ? 2.5 : 2} /> Mon Abonnement
+          <CreditCard size={18} strokeWidth={activeTab === 'abonnement' ? 3 : 2} /> Forfait SaaS
         </button>
       </div>
 
-      <div>
+      <div className="nexus-main-area">
         {!tenant ? (
-          <div className="card glass-effect" style={{ padding: '3rem', textAlign: 'center' }}>
-            <div className="spinner" style={{ margin: '0 auto 1.5rem' }}></div>
-            <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Chargement de l'espace boutique...</p>
+          <div className="card glass-effect animate-pulse" style={{ padding: '5rem', textAlign: 'center', borderRadius: '40px' }}>
+            <div className="spinner" style={{ margin: '0 auto 2rem', width: '50px', height: '50px', borderTopColor: 'var(--primary)' }}></div>
+            <p style={{ color: 'var(--text-main)', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Initialisation du Nexus...</p>
           </div>
         ) : (
           activeTab === 'utilisateurs' ? <UsersManager showToast={showToast} tenantId={tenant.id} /> : 
@@ -172,37 +189,94 @@ const UsersManager = ({ showToast, tenantId }: { showToast: any, tenantId: strin
     setLoading(true);
     try {
       if (editingId === 'new') {
-        const { data: authData, error } = await insforge.auth.signUp({ 
+        const { data: currentSession } = await insforge.auth.getCurrentUser();
+        const adminAccessToken = (currentSession as any)?.session?.access_token;
+        const adminRefreshToken = (currentSession as any)?.session?.refresh_token;
+
+        let userId = '';
+
+        const { data: authData, error: signUpError } = await insforge.auth.signUp({ 
           email: email as string, 
           password: password as string
         });
-        if (error) throw error;
+
+        if (signUpError) {
+          const msg = signUpError.message || '';
+          if (msg.includes('already registered') || msg.includes('already been registered')) {
+            // Check if user is already in Auth but missing from our DB
+            const { data: existingUsers } = await insforge.database
+              .from('users')
+              .select('id')
+              .eq('email', email)
+              .eq('tenant_id', tenantId)
+              .single();
+            
+            if (existingUsers?.id) {
+               throw new Error("Cet email/téléphone est déjà utilisé.");
+            } else {
+               // User exists in Auth but NOT in our 'users' table. 
+               // We don't have the Auth ID here because signUp failed, 
+               // and we shouldn't guess it. Best we can do is ask the user to use a different email or fix it.
+               // However, in InsForge, if a user is created in Auth, they MUST be in 'users'.
+               throw signUpError; 
+            }
+          } else {
+            throw signUpError;
+          }
+        } else {
+          userId = authData?.user?.id || '';
+        }
         
-        await createAdminUser({
-          nom_complet: form.nom_complet || '',
-          email: email as string,
-          role: form.role as any,
-          telephone: sanitizedTel,
-          permissions: form.permissions || [],
-          actif: true,
-          tenant_id: tenantId
-        }, authData?.user?.id || '');
+        // Restore admin session immediately after user creation
+        if (adminAccessToken && adminRefreshToken) {
+          await (insforge.auth as any).setSession({ access_token: adminAccessToken, refresh_token: adminRefreshToken });
+        }
+        
+        if (userId) {
+          await createAdminUser({
+            nom_complet: form.nom_complet || '',
+            email: email as string,
+            role: form.role as any,
+            telephone: sanitizedTel,
+            permissions: form.permissions || [],
+            actif: true,
+            tenant_id: tenantId
+          }, userId);
+        }
       } else if (editingId) {
-        await updateAdminUser(tenantId, editingId, { ...form, telephone: sanitizedTel });
+        // Clean form data for update: remove fields that shouldn't be sent
+        const updateData: any = {
+          nom_complet: form.nom_complet,
+          role: form.role,
+          telephone: sanitizedTel,
+          permissions: form.permissions,
+          actif: form.actif
+        };
+        if (form.email) updateData.email = form.email;
+        await updateAdminUser(tenantId, editingId, updateData);
       }
-      showToast("Enregistré.", "success");
+      showToast("Enregistré avec succès !", "success");
       setEditingId(null); setForm({}); loadUsers();
     } catch (e: any) { 
-      showToast(e.message || "Erreur.", "error"); 
+      console.error('User save error:', e);
+      const msg = e?.message || '';
+      if (msg.includes('already registered') || msg.includes('already been registered')) {
+        showToast("Cet email/téléphone est déjà utilisé. Modifiez les informations.", "error");
+      } else {
+        showToast(msg || "Erreur lors de l'enregistrement.", "error");
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="card table-responsive-cards" style={{ padding: '2rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-        <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>Liste des Utilisateurs</h3>
+    <div className="card glass-effect" style={{ padding: '2.5rem', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '32px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2.5rem', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
+        <div>
+          <h3 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 900, color: 'white' }}>Membres de l'Organisation</h3>
+          <p style={{ color: 'var(--text-muted)', fontWeight: 600, fontSize: '0.9rem' }}>{users.length} compte(s) actif(s) sur cette instance.</p>
+        </div>
         <button 
           className="btn btn-primary" 
           onClick={() => { 
@@ -217,91 +291,77 @@ const UsersManager = ({ showToast, tenantId }: { showToast: any, tenantId: strin
             }); 
           }}
           disabled={loading || isLimitReached}
+          style={{ height: '54px', borderRadius: '14px', padding: '0 2rem' }}
           title={isLimitReached ? "Limite d'utilisateurs atteinte pour votre forfait." : ""}
         >
-          <Plus size={18} /> Nouvel Utilisateur
+          <Plus size={20} strokeWidth={3} /> Créer un Profil
         </button>
       </div>
 
-      <div className="table-container">
-        <table>
+      <div className="table-container" style={{ background: 'rgba(0,0,0,0.1)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px' }}>
+        <table className="table-responsive-cards">
           <thead>
             <tr>
-              <th>Nom & Tel</th>
-              <th>Rôle / Email</th>
-              <th>Permissions</th>
-              <th style={{ textAlign: 'right', width: '120px' }}>Actions</th>
+              <th style={{ padding: '1.5rem' }}>Agent & Identité</th>
+              <th style={{ padding: '1.5rem' }}>Rôle Système</th>
+              <th style={{ padding: '1.5rem' }}>Niveau d'Accès</th>
+              <th style={{ textAlign: 'right', width: '120px', padding: '1.5rem' }}>Gérer</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-white/5">
             {(editingId === 'new' || (editingId && users.find(u => u.id === editingId))) && (
-              <tr style={{ background: '#f8fafc' }}>
+              <tr style={{ background: 'rgba(6, 182, 212, 0.05)' }}>
                 <td colSpan={4}>
-                  <div style={{ padding: '2rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
+                  <div style={{ padding: '2.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '2rem' }}>
                     <div className="form-group">
-                      <label className="form-label">Nom Complet</label>
-                      <input className="form-input" value={form.nom_complet || ''} onChange={e => setForm({...form, nom_complet: e.target.value})} />
+                      <label className="form-label" style={{ color: 'white', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Nom Complet</label>
+                      <input className="form-input" value={form.nom_complet || ''} onChange={e => setForm({...form, nom_complet: e.target.value})} style={{ borderRadius: '12px' }} />
                     </div>
                     <div className="form-group">
-                      <label className="form-label">Téléphone</label>
-                      <input className="form-input" value={form.telephone || ''} onChange={e => setForm({...form, telephone: e.target.value})} />
+                      <label className="form-label" style={{ color: 'white', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Contact Téléphonique</label>
+                      <input className="form-input" value={form.telephone || ''} onChange={e => setForm({...form, telephone: e.target.value})} style={{ borderRadius: '12px' }} />
                     </div>
                     <div className="form-group">
-                      <label className="form-label">Rôle</label>
-                      <select className="form-select" value={form.role || ''} onChange={e => setForm({...form, role: e.target.value as any})}>
+                      <label className="form-label" style={{ color: 'white', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Rôle Opérationnel</label>
+                      <select className="form-select" value={form.role || ''} onChange={e => setForm({...form, role: e.target.value as any})} style={{ borderRadius: '12px' }}>
                         {isAdmin && (
                           <>
                             <option value="ADMIN">Administrateur</option>
-                            <option value="GESTIONNAIRE">Gestionnaire</option>
-                            <option value="AGENT_APPEL">Call Center (Appels)</option>
-                            <option value="LOGISTIQUE">Logistique</option>
+                            <option value="GESTIONNAIRE">Gestionnaire Office</option>
+                            <option value="AGENT_APPEL">Agent Call Center</option>
+                            <option value="LOGISTIQUE">Superviseur Logistique</option>
                           </>
                         )}
-                        <option value="LIVREUR">Livreur</option>
+                        <option value="LIVREUR">Agent Livreur (Terrain)</option>
                         {isAdmin && (
                           <>
-                            <option value="CAISSIERE">Caissière</option>
-                            <option value="AGENT_MIXTE">Agent Mixte (Caisse + Call)</option>
+                            <option value="CAISSIERE">Gestionnaire Caisse</option>
+                            <option value="AGENT_MIXTE">Agent Mixte</option>
                           </>
                         )}
                       </select>
                     </div>
                     {form.role !== 'LIVREUR' && (
                       <div className="form-group">
-                        <label className="form-label">Email</label>
-                        <input className="form-input" value={form.email || ''} onChange={e => setForm({...form, email: e.target.value})} />
-                      </div>
-                    )}
-                    {editingId === 'new' && (
-                      <div className="form-group">
-                        <label className="form-label">Mot de Passe (Optionnel)</label>
-                        <input 
-                          type="text" 
-                          className="form-input" 
-                          placeholder={form.role === 'LIVREUR' ? 'Défaut: Téléphone' : 'Défaut: Admin123!'}
-                          value={form.password || ''} 
-                          onChange={e => setForm({...form, password: e.target.value})} 
-                        />
-                        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                          {form.role === 'LIVREUR' ? 'Par défaut, c\'est son numéro de téléphone.' : 'Par défaut: Admin123!'}
-                        </p>
+                        <label className="form-label" style={{ color: 'white', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Adresse Email</label>
+                        <input className="form-input" value={form.email || ''} onChange={e => setForm({...form, email: e.target.value})} style={{ borderRadius: '12px' }} />
                       </div>
                     )}
                     <div style={{ gridColumn: '1 / -1' }}>
-                      <label className="form-label">Permissions d'Accès</label>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', marginTop: '0.75rem', background: 'white', padding: '1.5rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                      <label className="form-label" style={{ color: 'white', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Permissions & Privilèges</label>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginTop: '1rem', background: 'rgba(255,255,255,0.03)', padding: '2rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.06)' }}>
                         {PERMISSIONS_LIST.map(p => (
-                          <label key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 500 }}>
-                            <input type="checkbox" checked={form.permissions?.includes(p.id)} onChange={() => togglePermission(p.id)} style={{ width: '18px', height: '18px' }} />
+                          <label key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                            <input type="checkbox" checked={form.permissions?.includes(p.id)} onChange={() => togglePermission(p.id)} style={{ width: '20px', height: '20px', accentColor: 'var(--primary)' }} />
                             {p.label}
                           </label>
                         ))}
                       </div>
                     </div>
-                    <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
-                      <button className="btn btn-outline" onClick={() => setEditingId(null)}>Annuler</button>
-                      <button className="btn btn-primary" onClick={handleSave} disabled={loading}>
-                        {loading ? 'Sauvegarde...' : 'Enregistrer'}
+                    <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
+                      <button className="btn btn-outline" onClick={() => setEditingId(null)} style={{ borderRadius: '12px' }}>Retour</button>
+                      <button className="btn btn-primary" onClick={handleSave} disabled={loading} style={{ borderRadius: '12px', padding: '0 2.5rem' }}>
+                        {loading ? 'Traitement...' : 'Finaliser le Profil'}
                       </button>
                     </div>
                   </div>
@@ -311,26 +371,42 @@ const UsersManager = ({ showToast, tenantId }: { showToast: any, tenantId: strin
 
             {users.map(u => (
               <tr key={u.id}>
-                <td data-label="Nom & Tel">
+                <td data-label="Identité" style={{ padding: '1.25rem 1.5rem' }}>
                   <div>
-                    <p style={{ fontWeight: 700, color: 'var(--text-main)' }}>{u.nom_complet}</p>
-                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{u.telephone || 'N/A'}</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div style={{ width: '32px', height: '32px', borderRadius: '10px', background: 'var(--primary-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', fontWeight: 900, fontSize: '0.8rem' }}>
+                            {u.nom_complet.charAt(0)}
+                        </div>
+                        <p style={{ fontWeight: 800, color: 'white', margin: 0 }}>{u.nom_complet}</p>
+                    </div>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginLeft: '2.75rem', fontWeight: 600 }}>{u.telephone || 'N/A'}</p>
                   </div>
                 </td>
-                <td data-label="Rôle / Email">
-                  <span className={`badge ${u.role === 'ADMIN' ? 'badge-danger' : 'badge-info'}`} style={{ marginBottom: '0.25rem', display: 'inline-block' }}>{u.role}</span>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{u.email}</p>
+                <td data-label="Rôle" style={{ padding: '1.25rem 1.5rem' }}>
+                  <span style={{ 
+                    fontSize: '0.7rem', 
+                    padding: '0.35rem 0.75rem', 
+                    background: u.role === 'ADMIN' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(6, 182, 212, 0.1)', 
+                    borderRadius: '8px', 
+                    color: u.role === 'ADMIN' ? '#f87171' : '#67e8f9', 
+                    fontWeight: 800,
+                    letterSpacing: '0.05em',
+                    border: u.role === 'ADMIN' ? '1px solid rgba(239, 68, 68, 0.2)' : '1px solid rgba(6, 182, 212, 0.2)'
+                  }}>
+                    {u.role}
+                  </span>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.5rem', fontWeight: 500 }}>{u.email}</p>
                 </td>
-                <td data-label="Permissions">
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
+                <td data-label="Permissions" style={{ padding: '1.25rem 1.5rem' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
                     {u.permissions?.slice(0, 3).map(p => (
-                      <span key={p} style={{ fontSize: '0.7rem', padding: '0.1rem 0.4rem', background: '#f1f5f9', borderRadius: '4px', color: 'var(--text-muted)', fontWeight: 600 }}>{p}</span>
+                      <span key={p} style={{ fontSize: '0.65rem', padding: '0.2rem 0.6rem', background: 'rgba(255,255,255,0.03)', borderRadius: '6px', color: 'var(--text-secondary)', fontWeight: 700, border: '1px solid rgba(255,255,255,0.05)' }}>{p}</span>
                     ))}
-                    {(u.permissions?.length || 0) > 3 && <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>+{(u.permissions?.length || 0) - 3}</span>}
+                    {(u.permissions?.length || 0) > 3 && <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 800 }}>+{u.permissions!.length - 3}</span>}
                   </div>
                 </td>
-                <td style={{ textAlign: 'right' }}>
-                  <button className="btn btn-outline btn-sm" onClick={() => {setEditingId(u.id); setForm(u);}}>Modifier</button>
+                <td style={{ textAlign: 'right', padding: '1.25rem 1.5rem' }}>
+                  <button className="btn btn-outline" style={{ height: '36px', minHeight: '36px', padding: '0 1rem', fontSize: '0.8rem', borderRadius: '10px' }} onClick={() => {setEditingId(u.id); setForm(u);}}>Configuration</button>
                 </td>
               </tr>
             ))}
@@ -399,43 +475,47 @@ const CommunesManager = ({ showToast, tenantId }: { showToast: any, tenantId: st
   };
 
   return (
-    <div className="card table-responsive-cards" style={{ padding: '2rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-        <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>Zones & Tarifs</h3>
+    <div className="card glass-effect" style={{ padding: '2.5rem', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '32px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2.5rem', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
+        <div>
+          <h3 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 900, color: 'white' }}>Zonage & Tarification</h3>
+          <p style={{ color: 'var(--text-muted)', fontWeight: 600, fontSize: '0.9rem' }}>Définissez vos secteurs et frais de livraison par défaut.</p>
+        </div>
         <button 
           className="btn btn-primary" 
           onClick={() => { setEditingId('new'); setForm({ tarif_livraison: 1500 }); }}
           disabled={loading}
+          style={{ height: '54px', borderRadius: '14px', padding: '0 2rem' }}
         >
-          <Plus size={18} /> Ajouter une zone
+          <Plus size={20} strokeWidth={3} /> Nouvelle Zone
         </button>
       </div>
 
-      <div className="table-container">
-        <table>
+      <div className="table-container" style={{ background: 'rgba(0,0,0,0.1)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px' }}>
+        <table className="table-responsive-cards">
           <thead>
             <tr>
-              <th>Zone / Commune</th>
-              <th>Tarif (CFA)</th>
-              <th style={{ textAlign: 'right', width: '150px' }}>Actions</th>
+              <th style={{ padding: '1.5rem' }}>Secteur / Commune</th>
+              <th style={{ padding: '1.5rem' }}>Forfait Livraison</th>
+              <th style={{ textAlign: 'right', width: '150px', padding: '1.5rem' }}>Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-white/5">
             {(editingId === 'new' || communes.some(c => c.id === editingId)) && editingId !== null && (
-               <tr style={{ background: '#f8fafc' }}>
+               <tr style={{ background: 'rgba(6, 182, 212, 0.05)' }}>
                  <td colSpan={3}>
-                    <div style={{ padding: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
-                      <div className="form-group" style={{ flex: 2, minWidth: '200px' }}>
-                        <label className="form-label">Nom de la Zone</label>
-                        <input className="form-input" value={form.nom || ''} onChange={e => setForm({...form, nom: e.target.value})} />
+                    <div style={{ padding: '2.5rem', display: 'flex', gap: '1.5rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+                      <div className="form-group" style={{ flex: 2, minWidth: '220px' }}>
+                        <label className="form-label" style={{ color: 'white', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Libellé de la Zone</label>
+                        <input className="form-input" value={form.nom || ''} onChange={e => setForm({...form, nom: e.target.value})} style={{ borderRadius: '12px' }} />
                       </div>
-                      <div className="form-group" style={{ flex: 1, minWidth: '150px' }}>
-                        <label className="form-label">Tarif de Livraison</label>
-                        <input className="form-input" type="number" value={form.tarif_livraison ?? ''} onChange={e => setForm({...form, tarif_livraison: Number(e.target.value)})} />
+                      <div className="form-group" style={{ flex: 1, minWidth: '160px' }}>
+                        <label className="form-label" style={{ color: 'white', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Tarif (CFA)</label>
+                        <input className="form-input" type="number" value={form.tarif_livraison ?? ''} onChange={e => setForm({...form, tarif_livraison: Number(e.target.value)})} style={{ borderRadius: '12px', fontWeight: 900, fontSize: '1.1rem' }} />
                       </div>
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button className="btn btn-primary" onClick={handleSave} disabled={loading}>OK</button>
-                        <button className="btn btn-outline" onClick={() => setEditingId(null)}>Annuler</button>
+                      <div style={{ display: 'flex', gap: '0.75rem' }}>
+                        <button className="btn btn-primary" onClick={handleSave} disabled={loading} style={{ borderRadius: '12px', padding: '0 1.5rem' }}>Valider</button>
+                        <button className="btn btn-outline" onClick={() => setEditingId(null)} style={{ borderRadius: '12px' }}>Fermer</button>
                       </div>
                     </div>
                  </td>
@@ -444,12 +524,22 @@ const CommunesManager = ({ showToast, tenantId }: { showToast: any, tenantId: st
 
             {communes.filter(c => c.id !== editingId).map(c => (
               <tr key={c.id}>
-                <td data-label="Zone" style={{ fontWeight: 700 }}>{c.nom}</td>
-                <td data-label="Tarif" style={{ color: 'var(--primary)', fontWeight: 800 }}>{c.tarif_livraison?.toLocaleString()} CFA</td>
-                <td style={{ textAlign: 'right' }}>
+                <td data-label="Secteur" style={{ padding: '1.25rem 1.5rem' }}>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
+                          <MapIcon size={18} />
+                      </div>
+                      <span style={{ fontWeight: 800, color: 'white' }}>{c.nom}</span>
+                   </div>
+                </td>
+                <td data-label="Tarif" style={{ padding: '1.25rem 1.5rem' }}>
+                  <span style={{ color: 'var(--primary)', fontWeight: 900, fontSize: '1.1rem' }}>{c.tarif_livraison?.toLocaleString()}</span>
+                  <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem', fontWeight: 900, marginLeft: '0.5rem' }}>CFA</span>
+                </td>
+                <td style={{ textAlign: 'right', padding: '1.25rem 1.5rem' }}>
                   <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                    <button className="btn btn-outline btn-sm" onClick={() => {setEditingId(c.id); setForm(c);}}>Modifier</button>
-                    <button className="btn btn-outline btn-sm" style={{ color: '#ef4444' }} onClick={() => handleDelete(c.id)}><Trash2 size={16} /></button>
+                    <button className="btn btn-outline" style={{ height: '36px', minHeight: '36px', padding: '0 1rem', fontSize: '0.8rem', borderRadius: '10px' }} onClick={() => {setEditingId(c.id); setForm(c);}}>Modifier</button>
+                    <button className="btn btn-outline" style={{ height: '36px', minHeight: '36px', padding: '0 0.8rem', borderRadius: '10px', color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.1)' }} onClick={() => handleDelete(c.id)}><Trash2 size={16} /></button>
                   </div>
                 </td>
               </tr>
@@ -529,7 +619,7 @@ const SubscriptionManager = ({ showToast, tenant }: { showToast: any, tenant: an
               <CheckCircle size={18} /> Statut : ACTIF
             </div>
           </div>
-          <div style={{ background: 'rgba(255,255,255,0.4)', padding: '1.25rem', borderRadius: '20px', textAlign: 'right' }}>
+          <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1.25rem', borderRadius: '20px', textAlign: 'right', border: '1px solid rgba(255,255,255,0.06)' }}>
             <p style={{ margin: 0, fontWeight: 700, color: 'var(--text-muted)' }}>Prochain renouvellement</p>
             <p style={{ margin: 0, fontSize: '1.25rem', fontWeight: 850, color: 'var(--text-main)' }}>Dans 30 jours (Auto)</p>
           </div>
@@ -552,7 +642,7 @@ const SubscriptionManager = ({ showToast, tenant }: { showToast: any, tenant: an
                     padding: '2.5rem', 
                     position: 'relative', 
                     transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                    border: plan.id === tenant.plan ? '2px solid var(--primary)' : '1px solid #e2e8f0',
+                    border: plan.id === tenant.plan ? '2px solid var(--primary)' : '1px solid rgba(255,255,255,0.06)',
                     boxShadow: plan.is_popular ? '0 20px 40px rgba(99,102,241,0.1)' : 'none',
                     display: 'flex',
                     flexDirection: 'column'
@@ -622,8 +712,8 @@ const SubscriptionManager = ({ showToast, tenant }: { showToast: any, tenant: an
         </div>
       )}
       
-      <div className="card" style={{ marginTop: '3rem', padding: '2rem', background: '#f8fafc', border: '1px dashed #cbd5e1', textAlign: 'center' }}>
-        <p style={{ fontWeight: 600, color: '#64748b', margin: 0 }}>Besoin d'un plan custom (Multi-entrepôts, White-label) ? 📧 Contactez support@gomboswiftci.com</p>
+      <div className="card" style={{ marginTop: '3rem', padding: '2rem', background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)', textAlign: 'center' }}>
+        <p style={{ fontWeight: 600, color: '#94a3b8', margin: 0 }}>Besoin d'un plan custom (Multi-entrepôts, White-label) ? 📧 Contactez support@gomboswiftci.com</p>
       </div>
     </div>
   );

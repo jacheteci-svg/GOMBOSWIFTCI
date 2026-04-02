@@ -43,28 +43,50 @@ export const updateProduit = async (tenantId: string, id: string, data: Partial<
 };
 
 export const addMouvementStock = async (tenantId: string, mouvement: Omit<MouvementStock, 'id'>): Promise<void> => {
-  mouvement.date = new Date();
+  mouvement.date = new Date().toISOString();
   
+  // 1. Insert the movement record
   const { error: moveError } = await insforge.database
     .from('mouvements_stock')
     .insert([{ ...mouvement, tenant_id: tenantId }]);
   
-  if (moveError) throw moveError;
+  if (moveError) {
+    console.error("Error inserting movement:", moveError);
+    throw new Error("Impossible d'enregistrer le mouvement dans l'historique.");
+  }
 
-  // Update product stock
+  // 2. Fetch current stock to calculate new value
   const { data: prod, error: fetchError } = await insforge.database
     .from('produits')
-    .select('stock_actuel')
+    .select('stock_actuel, nom')
     .eq('id', mouvement.produit_id)
     .eq('tenant_id', tenantId)
     .single();
 
-  if (fetchError) throw fetchError;
+  if (fetchError || !prod) {
+    console.error("Error fetching product for stock update:", fetchError);
+    throw new Error("Produit non trouvé pour la mise à jour du stock.");
+  }
 
+  // 3. Calculate and update
   const modifier = mouvement.type_mouvement === 'sortie' ? -mouvement.quantite : mouvement.quantite;
-  const newStock = (prod?.stock_actuel || 0) + modifier;
+  const newStock = (prod.stock_actuel || 0) + modifier;
 
-  await updateProduit(tenantId, mouvement.produit_id, { stock_actuel: newStock });
+  // Prevent negative stock if it's a sortie
+  if (newStock < 0 && mouvement.type_mouvement === 'sortie') {
+     throw new Error(`Stock insuffisant pour ${prod.nom}. Stock actuel: ${prod.stock_actuel}`);
+  }
+
+  const { error: updateError } = await insforge.database
+    .from('produits')
+    .update({ stock_actuel: newStock })
+    .eq('id', mouvement.produit_id)
+    .eq('tenant_id', tenantId);
+
+  if (updateError) {
+    console.error("Error updating product stock:", updateError);
+    throw new Error("Erreur lors de la mise à jour du niveau de stock final.");
+  }
 };
 
 export const getHistoriqueStock = async (tenantId: string, produit_id: string): Promise<MouvementStock[]> => {

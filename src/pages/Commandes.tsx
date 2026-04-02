@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, CheckCircle, Download, X } from 'lucide-react';
+import { Plus, Search, CheckCircle, Download } from 'lucide-react';
 import { CommandeList } from '../components/commandes/CommandeList';
 import { CommandeForm } from '../components/commandes/CommandeForm';
 import { CommandeDetails } from '../components/commandes/CommandeDetails';
@@ -122,36 +122,55 @@ export const Commandes = () => {
 
   return (
     <>
-      <div style={{ animation: 'pageEnter 0.6s ease' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1.5rem' }}>
-          <div className="mobile-stack">
-            <h1 className="text-premium" style={{ fontSize: 'clamp(1.8rem, 5vw, 2.2rem)', fontWeight: 800, margin: 0 }}>Gestion des Commandes</h1>
-            <p style={{ color: 'var(--text-muted)', fontSize: '1rem', marginTop: '0.4rem', fontWeight: 500 }}>Saisissez de nouvelles commandes et suivez leur cycle de vie.</p>
+    <div className="animate-pageEnter">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '3.5rem', flexWrap: 'wrap', gap: '2rem' }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+            <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--primary)', boxShadow: '0 0 10px var(--primary)' }}></div>
+            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.2em' }}>Order Nexus Flow</span>
           </div>
-          <button className="btn btn-primary" onClick={() => setIsFormOpen(true)} style={{ padding: '0.8rem 1.5rem', borderRadius: '14px', fontSize: '0.95rem', fontWeight: 700 }}>
-            <Plus size={20} />
-            Nouvelle Commande
-          </button>
+          <h1 className="text-premium" style={{ fontSize: '2.8rem', fontWeight: 950, margin: 0, letterSpacing: '-0.02em' }}>Gestion des Commandes</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginTop: '0.5rem', fontWeight: 600 }}>Pilotez le cycle de vie de vos ventes, de la saisie à la livraison finale.</p>
         </div>
+        <button 
+          className="btn btn-primary" 
+          onClick={() => setIsFormOpen(true)} 
+          style={{ 
+            height: '64px', 
+            padding: '0 2.5rem', 
+            borderRadius: '20px', 
+            fontWeight: 950, 
+            fontSize: '1.1rem',
+            boxShadow: '0 20px 40px -10px rgba(6, 182, 212, 0.4)',
+            background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
+            border: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem'
+          }}
+        >
+          <Plus size={24} strokeWidth={3} />
+          Nouvelle Saisie
+        </button>
+      </div>
 
         {/* BARRE DE RECHERCHE ET TABS */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginBottom: '2.5rem' }}>
-          <div style={{ position: 'relative', maxWidth: '600px', width: '100%' }}>
-            <div style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
-              <Search size={20} strokeWidth={2.5} />
-            </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', marginBottom: '3.5rem', alignItems: 'center' }}>
+          <div style={{ position: 'relative', flex: '1', minWidth: '320px' }}>
+            <Search size={24} strokeWidth={3} style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)' }} />
             <input 
               type="text" 
-              placeholder="Rechercher un client, téléphone, ID ou zone..." 
-              className="form-input"
+              placeholder="Rechercher un client, téléphone, ID ou zone de chalandise..." 
+              className="form-input input-futuristic"
               style={{ 
-                paddingLeft: '3.5rem', 
-                height: '56px',
-                fontSize: '1rem',
-                borderRadius: '18px', 
-                background: 'white',
-                boxShadow: 'var(--shadow-premium)',
-                border: '2px solid transparent',
+                paddingLeft: '4rem', 
+                height: '64px',
+                fontSize: '1.1rem',
+                borderRadius: '20px', 
+                background: 'rgba(255,255,255,0.02)',
+                border: 'none',
+                color: 'white',
+                fontWeight: 800,
                 transition: 'all 0.3s ease'
               }}
               value={searchTerm}
@@ -159,30 +178,31 @@ export const Commandes = () => {
             />
           </div>
 
-          <div style={{ display: 'flex', overflowX: 'auto', gap: '0.75rem', paddingBottom: '0.5rem', scrollbarWidth: 'none' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', padding: '0.4rem', background: 'rgba(255,255,255,0.02)', borderRadius: '18px', border: '1px solid rgba(255,255,255,0.05)', height: 'fit-content', backdropFilter: 'blur(10px)' }}>
             {[
               { id: 'to_process', label: 'À Traiter', color: '#f59e0b' },
               { id: 'in_delivery', label: 'En Livraison', color: 'var(--primary)' },
               { id: 'done', label: 'Terminées', color: '#10b981' },
               { id: 'failed', label: 'Retours/Échecs', color: '#ef4444' },
-              { id: 'all', label: 'Tout', color: 'var(--primary)' }
+              { id: 'all', label: 'Tout', color: 'rgba(255,255,255,0.1)' }
             ].map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 style={{
-                  padding: '0.6rem 1.25rem',
-                  borderRadius: '12px',
-                  fontSize: '0.9rem',
-                  fontWeight: 700,
+                  padding: '0.8rem 1.5rem',
+                  borderRadius: '14px',
+                  fontSize: '0.85rem',
+                  fontWeight: 800,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
                   whiteSpace: 'nowrap',
                   cursor: 'pointer',
                   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  border: activeTab === tab.id ? 'none' : '1px solid #e2e8f0',
-                  background: activeTab === tab.id ? tab.color : 'white',
-                  color: activeTab === tab.id ? 'white' : '#64748b',
-                  boxShadow: activeTab === tab.id ? `0 8px 16px ${tab.color}33` : 'none',
-                  transform: activeTab === tab.id ? 'translateY(-1px)' : 'none'
+                  border: 'none',
+                  background: activeTab === tab.id ? tab.color : 'transparent',
+                  color: activeTab === tab.id ? 'white' : 'var(--text-muted)',
+                  boxShadow: activeTab === tab.id ? `0 10px 20px ${tab.color}44` : 'none',
                 }}
               >
                 {tab.label}
@@ -191,11 +211,11 @@ export const Commandes = () => {
           </div>
         </div>
 
-        <div style={{ background: 'transparent', position: 'relative' }}>
+        <div className="card glass-effect" style={{ padding: '0', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '32px', overflow: 'hidden', background: 'transparent' }}>
           {loading ? (
-            <div className="card" style={{ textAlign: 'center', padding: '5rem', color: 'var(--text-muted)' }}>
-              <div className="loading-spinner" style={{ margin: '0 auto 1.5rem' }}></div>
-              <p style={{ fontWeight: 600, fontSize: '1.1rem' }}>Synchronisation des flux en cours...</p>
+            <div style={{ textAlign: 'center', padding: '8rem 2rem' }}>
+               <div className="spinner" style={{ margin: '0 auto 2rem', width: '50px', height: '50px', borderTopColor: 'var(--primary)' }}></div>
+               <p style={{ fontWeight: 800, fontSize: '1.2rem', color: 'var(--text-main)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Synchronisation des flux Atlas...</p>
             </div>
           ) : (
             <CommandeList 
@@ -208,37 +228,45 @@ export const Commandes = () => {
             />
           )}
 
-          {/* Floating Batch Action Bar */}
           {selectedIds.length > 0 && (
             <div 
+              className="animate-modalUp"
               style={{ 
                 position: 'fixed', 
-                bottom: '2rem', 
+                bottom: '3rem', 
                 left: '50%', 
                 transform: 'translateX(-50%)', 
-                background: 'var(--bg-card)', 
-                padding: '1rem 2rem', 
-                borderRadius: '24px', 
-                boxShadow: '0 20px 40px rgba(0,0,0,0.2)', 
+                background: 'rgba(2, 6, 23, 0.8)', 
+                backdropFilter: 'blur(20px)',
+                padding: '1.25rem 2.5rem', 
+                borderRadius: '30px', 
+                boxShadow: '0 30px 60px -12px rgba(0,0,0,0.6)', 
                 display: 'flex', 
                 alignItems: 'center', 
-                gap: '1.5rem',
-                border: '1px solid var(--primary)',
+                gap: '2rem',
+                border: '1px solid rgba(255,255,255,0.05)',
                 zIndex: 1000,
-                transition: 'all 0.3s ease'
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderRight: '1px solid #e2e8f0', paddingRight: '1.5rem' }}>
-                <span style={{ background: 'var(--primary)', color: 'white', width: '28px', height: '28px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 900 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderRight: '1px solid rgba(255,255,255,0.1)', paddingRight: '2rem' }}>
+                <div style={{ 
+                    background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)', 
+                    color: 'white', width: '36px', height: '36px', borderRadius: '12px', 
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', fontWeight: 950,
+                    boxShadow: '0 0 15px rgba(6, 182, 212, 0.4)'
+                }}>
                   {selectedIds.length}
-                </span>
-                <span style={{ fontWeight: 800, fontSize: '0.9rem' }}>Sélectionnés</span>
-                <button 
-                  onClick={() => setSelectedIds([])}
-                  style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', display: 'flex' }}
-                >
-                  <X size={16} />
-                </button>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontWeight: 900, fontSize: '0.9rem', color: 'white' }}>Commandes Sélectionnées</span>
+                    <button 
+                      onClick={() => setSelectedIds([])}
+                      style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', textAlign: 'left', fontSize: '0.75rem', fontWeight: 700, padding: 0 }}
+                    >
+                      Désélectionner tout
+                    </button>
+                </div>
               </div>
 
               <div style={{ display: 'flex', gap: '0.75rem' }}>

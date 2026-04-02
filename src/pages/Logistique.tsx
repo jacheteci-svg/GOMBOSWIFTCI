@@ -93,71 +93,77 @@ export const Logistique = () => {
   };
 
   return (
-    <div style={{ animation: 'pageEnter 0.6s ease' }}>
-      <div style={{ marginBottom: '2.5rem' }}>
-        <h1 className="text-premium" style={{ fontSize: '2.2rem', fontWeight: 800, margin: 0 }}>Gestion Logistique</h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', marginTop: '0.4rem', fontWeight: 500 }}>Coordination des tournées et affectation des livreurs.</p>
+    <div className="animate-pageEnter">
+      <div style={{ marginBottom: '3rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+          <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--primary)', boxShadow: '0 0 10px var(--primary)' }}></div>
+          <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.2em' }}>Supply Chain Nexus</span>
+        </div>
+        <h1 className="text-premium" style={{ fontSize: '2.8rem', fontWeight: 950, margin: 0, letterSpacing: '-0.02em' }}>Gestion Logistique</h1>
+        <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginTop: '0.5rem', fontWeight: 600 }}>Coordination des tournées, affectation des livreurs et suivi terrain en temps réel.</p>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem' }}>
         
         {/* NEW ROUTE SECTION */}
-        <div className="card" style={{ padding: '2rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
-            <div style={{ padding: '0.6rem', background: 'rgba(99, 102, 255, 0.1)', borderRadius: '12px' }}>
-              <Truck size={24} color="var(--primary)" />
+        <div className="card glass-effect" style={{ padding: '2.5rem', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '32px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2.5rem' }}>
+            <div style={{ padding: '0.75rem', background: 'var(--primary-soft)', borderRadius: '14px', border: '1px solid var(--primary-border)' }}>
+              <Truck size={24} color="var(--primary)" strokeWidth={2.5} />
             </div>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>Nouvelle Tournée</h2>
+            <h2 style={{ fontSize: '1.6rem', fontWeight: 900, margin: 0, color: 'white' }}>Nouvelle Tournée</h2>
           </div>
 
           <div className="form-group">
-            <label className="form-label" style={{ fontWeight: 700 }}>Affecter à un Livreur *</label>
+            <label className="form-label" style={{ fontWeight: 800, color: 'var(--text-secondary)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Affecter à un Livreur Responsable *</label>
             <select 
-              className="form-select" 
+              className="form-select input-futuristic" 
               value={selectedLivreur} 
               onChange={e => setSelectedLivreur(e.target.value)}
-              style={{ height: '52px', borderRadius: '14px', background: '#f8fafc', fontWeight: 600 }}
+              style={{ height: '56px', borderRadius: '16px', background: 'rgba(255,255,255,0.02)', fontWeight: 700, fontSize: '0.95rem' }}
             >
-              <option value="">Sélectionner le livreur responsable...</option>
+              <option value="">Sélectionner le livreur...</option>
               {livreurs.map(l => <option key={l.id} value={l.id}>{l.nom_complet} ({l.telephone})</option>)}
             </select>
           </div>
 
-          <div style={{ marginTop: '2rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <label className="form-label" style={{ fontWeight: 700, margin: 0 }}>Commandes Prêtes ({commandes.length})</label>
-              <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--primary)', background: 'rgba(99, 102, 255, 0.1)', padding: '0.2rem 0.6rem', borderRadius: '8px' }}>
-                {selectedCommands.size} sélectionnée(s)
+          <div style={{ marginTop: '2.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <label className="form-label" style={{ fontWeight: 800, color: 'var(--text-secondary)', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', margin: 0 }}>Colis en attente ({commandes.length})</label>
+              <span style={{ fontSize: '0.75rem', fontWeight: 900, color: 'var(--primary)', background: 'var(--primary-soft)', padding: '0.3rem 0.75rem', borderRadius: '10px', border: '1px solid var(--primary-border)' }}>
+                {selectedCommands.size} sélectionné(s)
               </span>
             </div>
             
-            <div className="table-container" style={{ maxHeight: '400px', overflowY: 'auto', border: '1px solid #f1f5f9', borderRadius: '14px' }}>
+            <div className="table-container custom-scroll" style={{ maxHeight: '450px', overflowY: 'auto', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '20px', background: 'rgba(0,0,0,0.1)' }}>
               <table style={{ width: '100%', fontSize: '0.9rem' }}>
-                <thead style={{ position: 'sticky', top: 0, zIndex: 1, background: '#f8fafc' }}>
+                <thead style={{ position: 'sticky', top: 0, zIndex: 1, background: 'var(--surface-light)', backdropFilter: 'blur(10px)' }}>
                   <tr>
-                    <th style={{ width: '40px' }}></th>
-                    <th>Destination</th>
-                    <th style={{ textAlign: 'right' }}>Total</th>
+                    <th style={{ width: '50px', padding: '1rem' }}></th>
+                    <th style={{ padding: '1rem' }}>Destination & Client</th>
+                    <th style={{ textAlign: 'right', padding: '1rem' }}>Montant Total</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-white/5">
                   {commandes.length === 0 ? (
-                    <tr><td colSpan={3} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>Aucun colis en attente de sortie.</td></tr>
+                    <tr><td colSpan={3} style={{ textAlign: 'center', padding: '5rem', color: 'var(--text-muted)', fontWeight: 600 }}>Aucun colis en attente de sortie.</td></tr>
                   ) : commandes.map(c => (
-                    <tr key={c.id} onClick={() => toggleCommand(c.id)} style={{ cursor: 'pointer', background: selectedCommands.has(c.id) ? 'rgba(99, 102, 255, 0.03)' : 'transparent' }}>
-                      <td>
-                        <input 
-                          type="checkbox" 
-                          checked={selectedCommands.has(c.id)} 
-                          onChange={() => {}} 
-                          style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }}
-                        />
+                    <tr key={c.id} onClick={() => toggleCommand(c.id)} style={{ cursor: 'pointer', background: selectedCommands.has(c.id) ? 'rgba(6, 182, 212, 0.05)' : 'transparent', transition: 'background 0.2s' }}>
+                      <td style={{ padding: '1rem' }}>
+                        <div style={{ 
+                          width: '22px', height: '22px', border: '2px solid var(--glass-border)', borderRadius: '6px', 
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          background: selectedCommands.has(c.id) ? 'var(--primary)' : 'transparent',
+                          borderColor: selectedCommands.has(c.id) ? 'var(--primary)' : 'var(--glass-border)'
+                        }}>
+                          {selectedCommands.has(c.id) && <div style={{ width: '6px', height: '6px', background: 'white', borderRadius: '1px' }}></div>}
+                        </div>
                       </td>
-                      <td>
-                        <div style={{ fontWeight: 700 }}>{c.commune_livraison}</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{c.nom_client}</div>
+                      <td style={{ padding: '1.25rem 1rem' }}>
+                        <div style={{ fontWeight: 850, color: 'white', fontSize: '1rem' }}>{c.commune_livraison}</div>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>Agent: {c.nom_client}</div>
                       </td>
-                      <td style={{ textAlign: 'right', fontWeight: 800 }}>{c.montant_total?.toLocaleString()}</td>
+                      <td style={{ textAlign: 'right', fontWeight: 900, color: 'var(--primary)', fontSize: '1.1rem', padding: '1rem' }}>{c.montant_total?.toLocaleString()}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -167,57 +173,63 @@ export const Logistique = () => {
 
           <button 
             className="btn btn-primary" 
-            style={{ width: '100%', marginTop: '2rem', height: '56px', borderRadius: '16px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em', boxShadow: '0 10px 15px -3px rgba(99, 102, 255, 0.3)' }}
+            style={{ 
+              width: '100%', marginTop: '2.5rem', height: '64px', borderRadius: '20px', fontWeight: 950, 
+              fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '0.1em', 
+              boxShadow: '0 20px 40px -10px rgba(6, 182, 212, 0.4)',
+              background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
+              border: 'none'
+            }}
             onClick={handleGenerateFeuille}
             disabled={loading || selectedCommands.size === 0 || !selectedLivreur}
           >
-            {loading ? 'GÉNÉRATION...' : 'ÉDITER LA FEUILLE DE ROUTE'}
+            {loading ? 'DÉPLOIEMENT...' : 'VALIDER LA FEUILLE DE ROUTE'}
           </button>
         </div>
 
         {/* ACTIVE ROUTES SECTION */}
-        <div className="card" style={{ padding: '2rem', background: '#f8fafc', border: '1px dashed #cbd5e1' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
-            <div style={{ padding: '0.6rem', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '12px' }}>
-              <Clock size={24} color="#10b981" />
+        <div className="card glass-effect" style={{ padding: '2.5rem', background: 'rgba(2, 6, 23, 0.4)', border: '1px dashed var(--glass-border)', borderRadius: '32px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2.5rem' }}>
+            <div style={{ padding: '0.75rem', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '14px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+              <Clock size={24} color="#10b981" strokeWidth={2.5} />
             </div>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0 }}>Tournées en cours</h2>
+            <h2 style={{ fontSize: '1.6rem', fontWeight: 900, margin: 0, color: 'white' }}>Tournées Actives</h2>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {activeFeuilles.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'white', borderRadius: '20px', border: '1px solid #e2e8f0' }}>
-                <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Toutes les tournées sont closes.</p>
+              <div style={{ textAlign: 'center', padding: '6rem 2.5rem', background: 'rgba(255,255,255,0.01)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.03)' }}>
+                <p style={{ color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Toutes les tournées sont closes.</p>
               </div>
             ) : activeFeuilles.map(f => (
-              <div key={f.id} className="card hover-card" style={{ background: 'white', padding: '1.5rem', border: '1px solid #e2e8f0', borderRadius: '20px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+              <div key={f.id} className="nexus-card-lite hover-scale" style={{ padding: '2rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.03)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
                   <div>
-                    <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.2rem' }}>Livreur Affecté</div>
-                    <div style={{ fontWeight: 900, color: 'var(--text-main)', fontSize: '1.1rem' }}>
+                    <div style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '0.4rem', letterSpacing: '0.1em' }}>Responsable Logistique</div>
+                    <div style={{ fontWeight: 950, color: 'white', fontSize: '1.25rem', letterSpacing: '-0.02em' }}>
                       {livreurs.find(l => l.id === f.livreur_id)?.nom_complet || 'Livreur Inconnu'}
                     </div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#10b981' }}>{format(new Date(f.date), 'HH:mm')}</div>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{format(new Date(f.date), 'dd MMM')}</div>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 900, color: '#10b981' }}>{format(new Date(f.date), 'HH:mm')}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>{format(new Date(f.date), 'dd MMM yyyy')}</div>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
                   {f.communes_couvertes?.map(commune => (
-                    <span key={commune} style={{ fontSize: '0.7rem', fontWeight: 800, background: '#f1f5f9', padding: '0.3rem 0.6rem', borderRadius: '6px', color: 'var(--text-muted)' }}>
+                    <span key={commune} style={{ fontSize: '0.7rem', fontWeight: 900, background: 'rgba(255,255,255,0.03)', padding: '0.4rem 0.8rem', borderRadius: '8px', color: 'var(--text-secondary)', border: '1px solid rgba(255,255,255,0.05)' }}>
                       {commune}
                     </span>
                   ))}
                 </div>
 
-                <div style={{ display: 'flex', gap: '0.75rem' }}>
-                  <button className="btn btn-outline" style={{ flex: 1, height: '44px', fontWeight: 800, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }} onClick={() => setSelectedFeuille(f)}>
-                    <Eye size={16} /> Détails
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                  <button className="btn btn-outline" style={{ flex: 1, height: '48px', fontWeight: 900, borderRadius: '14px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }} onClick={() => setSelectedFeuille(f)}>
+                    <Eye size={18} strokeWidth={2.5} /> Détails
                   </button>
-                  <button className="btn btn-primary" style={{ flex: 1, height: '44px', fontWeight: 800, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', background: '#475569', borderColor: '#475569' }} onClick={() => handlePrint(f)}>
-                    <Printer size={16} /> Imprimer
+                  <button className="btn btn-primary" style={{ flex: 1, height: '48px', fontWeight: 900, borderRadius: '14px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.1)' }} onClick={() => handlePrint(f)}>
+                    <Printer size={18} strokeWidth={2.5} /> Imprimer
                   </button>
                 </div>
               </div>
@@ -256,42 +268,59 @@ const FeuilleDetail = ({ feuille, onClose }: { feuille: FeuilleRoute, onClose: (
   }, [feuille.id, tenant?.id]);
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-content card" style={{ maxWidth: '800px', padding: '2.5rem' }} onClick={e => e.stopPropagation()}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-          <h2 style={{ fontWeight: 900, margin: 0 }}>Récapitulatif de Tournée</h2>
-          <button className="btn btn-outline" onClick={onClose}>Fermer</button>
+    <div className="modal-backdrop animate-fadeIn" onClick={onClose} style={{ backdropFilter: 'blur(12px)', background: 'rgba(0,0,0,0.85)' }}>
+      <div className="card glass-effect animate-modalUp" style={{ maxWidth: '900px', width: '95%', padding: '3.5rem', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '40px' }} onClick={e => e.stopPropagation()}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+          <div>
+            <h2 style={{ fontSize: '2rem', fontWeight: 950, margin: 0, color: 'white', letterSpacing: '-0.02em' }}>Tournée Opérationnelle</h2>
+            <p style={{ color: 'var(--text-muted)', fontWeight: 700, marginTop: '0.4rem' }}>Récapitulatif des ordres de livraison pour ce secteur.</p>
+          </div>
+          <button className="btn btn-outline" onClick={onClose} style={{ borderRadius: '14px', height: '48px', padding: '0 1.5rem' }}>Fermer</button>
         </div>
 
-        {loading ? <p>Chargement...</p> : (
-          <div className="table-container">
-            <table>
+        {loading ? (
+            <div style={{ textAlign: 'center', padding: '5rem' }}>
+                <div className="spinner" style={{ margin: '0 auto 1.5rem' }}></div>
+                <p style={{ color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase' }}>Synchronisation des données...</p>
+            </div>
+        ) : (
+          <div className="table-container" style={{ background: 'rgba(0,0,0,0.2)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.03)' }}>
+            <table className="table-responsive-cards">
               <thead>
                 <tr>
-                  <th>Client</th>
-                  <th>Destination</th>
-                  <th>Statut</th>
-                  <th style={{ textAlign: 'right' }}>Montant</th>
+                  <th style={{ padding: '1.25rem' }}>Client & Contact</th>
+                  <th style={{ padding: '1.25rem' }}>Secteur</th>
+                  <th style={{ padding: '1.25rem' }}>État Actuel</th>
+                  <th style={{ textAlign: 'right', padding: '1.25rem' }}>Net à Encaisser</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-white/5">
                 {orders.map(o => (
                   <tr key={o.id}>
-                    <td>
-                      <div style={{ fontWeight: 700 }}>{o.nom_client}</div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{o.telephone_client}</div>
+                    <td style={{ padding: '1.25rem' }}>
+                      <div style={{ fontWeight: 850, color: 'white' }}>{o.nom_client}</div>
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>{o.telephone_client}</div>
                     </td>
-                    <td>{o.commune_livraison}</td>
-                    <td><span className={`badge ${o.statut_commande === 'livree' ? 'badge-success' : 'badge-warning'}`}>{o.statut_commande}</span></td>
-                    <td style={{ textAlign: 'right', fontWeight: 800 }}>{o.montant_total?.toLocaleString()} CFA</td>
+                    <td style={{ padding: '1.25rem', fontWeight: 700 }}>{o.commune_livraison}</td>
+                    <td style={{ padding: '1.25rem' }}>
+                        <span style={{ 
+                            fontSize: '0.65rem', padding: '0.3rem 0.75rem', borderRadius: '8px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em',
+                            background: o.statut_commande === 'livree' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+                            color: o.statut_commande === 'livree' ? '#10b981' : '#f59e0b',
+                            border: o.statut_commande === 'livree' ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid rgba(245, 158, 11, 0.2)'
+                        }}>
+                            {o.statut_commande}
+                        </span>
+                    </td>
+                    <td style={{ textAlign: 'right', fontWeight: 900, color: 'white', fontSize: '1.1rem', padding: '1.25rem' }}>{o.montant_total?.toLocaleString()} <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 800 }}>CFA</span></td>
                   </tr>
                 ))}
               </tbody>
               <tfoot>
-                <tr style={{ background: '#f8fafc' }}>
-                  <td colSpan={3} style={{ fontWeight: 800 }}>TOTAL THÉORIQUE</td>
-                  <td style={{ textAlign: 'right', fontWeight: 900, color: 'var(--primary)', fontSize: '1.1rem' }}>
-                    {feuille.total_montant_theorique?.toLocaleString()} CFA
+                <tr style={{ background: 'rgba(6, 182, 212, 0.05)' }}>
+                  <td colSpan={3} style={{ fontWeight: 900, padding: '1.75rem', color: 'var(--primary)', letterSpacing: '0.1em', textTransform: 'uppercase', fontSize: '0.85rem' }}>VALEUR TOTALE DE LA CARGAISON</td>
+                  <td style={{ textAlign: 'right', fontWeight: 950, color: 'var(--primary)', fontSize: '1.4rem', padding: '1.75rem' }}>
+                    {feuille.total_montant_theorique?.toLocaleString()} <span style={{ fontSize: '0.8rem' }}>CFA</span>
                   </td>
                 </tr>
               </tfoot>

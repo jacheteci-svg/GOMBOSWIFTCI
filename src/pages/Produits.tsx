@@ -41,69 +41,76 @@ export const Produits = () => {
 
   return (
     <>
-      <div style={{ animation: 'pageEnter 0.6s ease' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }} className="responsive-flex">
-          <div>
-            <h1 className="text-premium" style={{ fontSize: '2.2rem', fontWeight: 800, margin: 0 }}>Catalogue Inventaire</h1>
-            <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', marginTop: '0.4rem', fontWeight: 500 }}>Gérez vos articles, prix de vente et niveaux de stock en temps réel.</p>
+    <div className="animate-pageEnter">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '3.5rem' }} className="responsive-flex">
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+            <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--primary)', boxShadow: '0 0 10px var(--primary)' }}></div>
+            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.2em' }}>Inventory Intelligence</span>
           </div>
-          <button 
-            className="btn btn-primary" 
-            style={{ 
-                height: '56px', 
-                padding: '0 2rem', 
-                borderRadius: '18px', 
-                fontWeight: 800, 
-                fontSize: '1.05rem', 
-                boxShadow: '0 10px 15px -3px rgba(99, 102, 255, 0.3)',
-                opacity: (planConfig?.max_products && planConfig.max_products !== -1 && produits.length >= planConfig.max_products) ? 0.6 : 1
-            }} 
-            onClick={() => { 
-                if (planConfig?.max_products && planConfig.max_products !== -1 && produits.length >= planConfig.max_products) {
-                    alert(`Limite de produits atteinte (${planConfig.max_products} pour votre forfait ${planConfig.name}). Veuillez passer au forfait supérieur.`);
-                    return;
-                }
-                setSelectedProduit(null); 
-                setIsProduitFormOpen(true); 
-            }}
-          >
-            <Plus size={22} strokeWidth={3} style={{ marginRight: '0.5rem' }} />
-            Nouveau Produit
-          </button>
+          <h1 className="text-premium" style={{ fontSize: '2.8rem', fontWeight: 950, margin: 0, letterSpacing: '-0.02em' }}>Catalogue Inventaire</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginTop: '0.5rem', fontWeight: 600 }}>Pilotez votre catalogue, vos marges et vos niveaux de stock stratégiques.</p>
         </div>
+        <button 
+          className="btn btn-primary" 
+          style={{ 
+              height: '64px', 
+              padding: '0 2.5rem', 
+              borderRadius: '20px', 
+              fontWeight: 950, 
+              fontSize: '1.1rem', 
+              boxShadow: '0 20px 40px -10px rgba(6, 182, 212, 0.4)',
+              background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
+              border: 'none',
+              opacity: (planConfig?.max_products && planConfig.max_products !== -1 && produits.length >= planConfig.max_products) ? 0.6 : 1,
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+          }} 
+          onClick={() => { 
+              if (planConfig?.max_products && planConfig.max_products !== -1 && produits.length >= planConfig.max_products) {
+                  alert(`Limite de produits atteinte (${planConfig.max_products} pour votre forfait ${planConfig.name}). Veuillez passer au forfait supérieur.`);
+                  return;
+              }
+              setSelectedProduit(null); 
+              setIsProduitFormOpen(true); 
+          }}
+        >
+          <Plus size={24} strokeWidth={3} style={{ marginRight: '0.75rem' }} />
+          Nouveau Produit
+        </button>
+      </div>
 
-        <div className="card glass-effect" style={{ marginBottom: '2.5rem', padding: '1.25rem', border: '1px solid rgba(255,255,255,0.1)' }}>
-          <div style={{ position: 'relative', maxWidth: '600px' }}>
-            <Search size={22} strokeWidth={2.5} style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)' }} />
-            <input 
-              type="text" 
-              placeholder="Rechercher par nom, catégorie, ou référence unique..." 
-              className="form-input"
-              style={{ paddingLeft: '3.5rem', height: '56px', fontSize: '1.05rem', fontWeight: 600, borderRadius: '18px', border: '2px solid #f1f5f9' }}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-        </div>
-
-        <div className="card glass-effect" style={{ padding: '0', border: '1px solid #f1f5f9', overflow: 'hidden' }}>
-          {loading ? (
-            <div style={{ textAlign: 'center', padding: '6rem', color: 'var(--text-muted)' }}>
-               <div className="spinner" style={{ margin: '0 auto 1.5rem' }}></div>
-               <p style={{ fontWeight: 700, fontSize: '1.1rem' }}>Synchronisation du catalogue...</p>
-            </div>
-          ) : (
-            <ProduitList 
-              produits={produits.filter(p => 
-                p.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                p.id.toLowerCase().includes(searchTerm.toLowerCase())
-              )} 
-              onEdit={handleEdit}
-              onStock={handleStock}
-            />
-          )}
+      <div className="card glass-effect" style={{ marginBottom: '3.5rem', padding: '1.5rem', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '28px', background: 'rgba(255,255,255,0.01)' }}>
+        <div style={{ position: 'relative', maxWidth: '800px' }}>
+          <Search size={24} strokeWidth={3} style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)' }} />
+          <input 
+            type="text" 
+            placeholder="Rechercher une référence, un nom ou une catégorie..." 
+            className="form-input input-futuristic"
+            style={{ paddingLeft: '4rem', height: '64px', fontSize: '1.1rem', fontWeight: 800, borderRadius: '20px', border: 'none', background: 'rgba(255,255,255,0.02)', color: 'white' }}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
       </div>
+
+      <div className="card glass-effect" style={{ padding: '0', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '32px', overflow: 'hidden' }}>
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '8rem 2rem' }}>
+             <div className="spinner" style={{ margin: '0 auto 2rem', width: '50px', height: '50px', borderTopColor: 'var(--primary)' }}></div>
+             <p style={{ fontWeight: 800, fontSize: '1.2rem', color: 'var(--text-main)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Synchronisation du Nexus...</p>
+          </div>
+        ) : (
+          <ProduitList 
+            produits={produits.filter(p => 
+              p.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              p.id.toLowerCase().includes(searchTerm.toLowerCase())
+            )} 
+            onEdit={handleEdit}
+            onStock={handleStock}
+          />
+        )}
+      </div>
+    </div>
 
       {isProduitFormOpen && (
         <ProduitForm 
