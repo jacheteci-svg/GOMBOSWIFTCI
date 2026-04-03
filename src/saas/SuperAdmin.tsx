@@ -359,8 +359,8 @@ const OverviewTab = ({ stats, tenants }: { stats: any, tenants: Tenant[] }) => {
 /* -------------------------------------------------------------------------- */
 const PerformanceHub = () => {
   return (
-    <div className="w-full -mx-6" style={{ marginTop: '-0.5rem' }}>
-       <PerformanceDashboard isSuperAdmin={true} />
+    <div className="w-full max-w-full overflow-x-hidden" style={{ marginTop: '-0.5rem' }}>
+      <PerformanceDashboard isSuperAdmin={true} />
     </div>
   );
 };

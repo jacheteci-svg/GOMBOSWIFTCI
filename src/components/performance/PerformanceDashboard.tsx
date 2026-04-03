@@ -43,10 +43,36 @@ import {
   RefreshCw,
   Download,
   AlertCircle,
+  AlertTriangle,
+  ExternalLink,
+  Filter,
 } from 'lucide-react';
 
 type TabType = 'logistique' | 'call-center' | 'inventaire';
 type FilterType = 'mois' | '7jours' | 'aujourdhui' | 'toujours';
+type SuperAdminSortKey = 'ca_gmv' | 'commandes' | 'success_rate' | 'sorties_terrain';
+type SuperAdminScope = 'all' | 'active_only' | 'with_orders';
+
+/** Livraisons terrain : sous ce seuil de réussite avec volume significatif → priorité support / terrain */
+const SA_LOGISTICS_RISK_THRESHOLD = 65;
+const SA_MIN_SORTIES_FOR_RISK = 5;
+
+function tenantLogisticsAtRisk(r: TenantPerfRow): boolean {
+  return r.sorties_terrain >= SA_MIN_SORTIES_FOR_RISK && r.success_rate < SA_LOGISTICS_RISK_THRESHOLD;
+}
+
+const SUPER_ADMIN_SORT_DEFS: { id: SuperAdminSortKey; label: string; color: string }[] = [
+  { id: 'ca_gmv', label: 'CA (GMV)', color: '#06b6d4' },
+  { id: 'commandes', label: 'Commandes', color: '#3b82f6' },
+  { id: 'success_rate', label: 'Taux succès', color: '#10b981' },
+  { id: 'sorties_terrain', label: 'Missions terrain', color: '#a78bfa' },
+];
+
+const SUPER_ADMIN_SCOPE_DEFS: { id: SuperAdminScope; label: string; hint: string }[] = [
+  { id: 'all', label: 'Toutes', hint: 'Catalogue complet' },
+  { id: 'active_only', label: 'Comptes actifs', hint: 'Abonnement / compte actif' },
+  { id: 'with_orders', label: 'Avec activité', hint: 'Au moins une commande sur la période' },
+];
 
 interface PerformanceDashboardProps {
   tenantId?: string;
@@ -345,6 +371,8 @@ export const PerformanceDashboard = ({
     inventaireStaff: [],
   });
   const [tenantRows, setTenantRows] = useState<TenantPerfRow[]>([]);
+  const [superAdminSort, setSuperAdminSort] = useState<SuperAdminSortKey>('ca_gmv');
+  const [superAdminScope, setSuperAdminScope] = useState<SuperAdminScope>('all');
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -447,6 +475,48 @@ export const PerformanceDashboard = ({
     return [...data].sort((a, b) => (b.efficiency_score || 0) - (a.efficiency_score || 0));
   }, [stats.inventaireStaff]);
 
+  const superAdminDisplayRows = useMemo(() => {
+    if (!isSuperAdmin) return [];
+    let r = [...tenantRows];
+    if (superAdminScope === 'active_only') r = r.filter((x) => x.actif);
+    if (superAdminScope === 'with_orders') r = r.filter((x) => x.commandes > 0);
+    const key = superAdminSort;
+    return r.sort((a, b) => (Number(b[key]) || 0) - (Number(a[key]) || 0));
+  }, [isSuperAdmin, tenantRows, superAdminSort, superAdminScope]);
+
+  const superAdminInsights = useMemo(() => {
+    if (!isSuperAdmin || tenantRows.length === 0) {
+      return {
+        concentrationTop3: 0,
+        panierMoyen: 0,
+        tauxAnnulPlateforme: 0,
+        atRiskCount: 0,
+        dormantActiveCount: 0,
+        atRiskTenants: [] as TenantPerfRow[],
+      };
+    }
+    const rows = tenantRows;
+    const totalGmv = rows.reduce((a, r) => a + r.ca_gmv, 0);
+    const totalCmd = rows.reduce((a, r) => a + r.commandes, 0);
+    const totalLiv = rows.reduce((a, r) => a + r.livrees, 0);
+    const totalAnn = rows.reduce((a, r) => a + r.annules, 0);
+    const sortedByCa = [...rows].sort((a, b) => b.ca_gmv - a.ca_gmv);
+    const top3Gmv = sortedByCa.slice(0, 3).reduce((a, r) => a + r.ca_gmv, 0);
+    const concentrationTop3 = totalGmv > 0 ? Math.round((top3Gmv / totalGmv) * 100) : 0;
+    const panierMoyen = totalLiv > 0 ? Math.round(totalGmv / totalLiv) : 0;
+    const tauxAnnulPlateforme = totalCmd > 0 ? Math.round((totalAnn / totalCmd) * 100) : 0;
+    const atRiskTenants = rows.filter(tenantLogisticsAtRisk);
+    const dormantActiveCount = rows.filter((r) => r.actif && r.commandes === 0).length;
+    return {
+      concentrationTop3,
+      panierMoyen,
+      tauxAnnulPlateforme,
+      atRiskCount: atRiskTenants.length,
+      dormantActiveCount,
+      atRiskTenants,
+    };
+  }, [isSuperAdmin, tenantRows]);
+
   const exportHubTableCsv = useCallback(() => {
     const stamp = new Date().toISOString().slice(0, 10);
     if (activeTab === 'logistique') {
@@ -513,6 +583,45 @@ export const PerformanceDashboard = ({
     ]);
     downloadCsv(`performance-inventaire-staff-${stamp}.csv`, h, lines);
   }, [activeTab, logisticsSorted, callCenterSorted, inventoryStaffSorted]);
+
+  const exportSuperAdminTenantsCsv = useCallback(() => {
+    const stamp = new Date().toISOString().slice(0, 10);
+    const rows = superAdminDisplayRows;
+    const h = [
+      'Rang',
+      'Boutique',
+      'Slug',
+      'Plan',
+      'Actif',
+      'Utilisateurs',
+      'Commandes',
+      'Livrées',
+      'Terrain',
+      'Succès %',
+      'Annul.',
+      'Annul. % ligne',
+      'CA GMV CFA',
+    ];
+    const lines = rows.map((r, i) => {
+      const annulPct = r.commandes > 0 ? Math.round((r.annules / r.commandes) * 100) : 0;
+      return [
+        String(i + 1),
+        r.nom,
+        r.slug,
+        r.plan,
+        r.actif ? 'oui' : 'non',
+        String(r.users_count),
+        String(r.commandes),
+        String(r.livrees),
+        String(r.sorties_terrain),
+        String(r.success_rate),
+        String(r.annules),
+        String(annulPct),
+        String(r.ca_gmv),
+      ];
+    });
+    downloadCsv(`performance-boutiques-${stamp}-${filter}.csv`, h, lines);
+  }, [superAdminDisplayRows, filter]);
 
   const staffKpiBundle = useMemo(() => {
     if (isSuperAdmin) return null;
@@ -1650,28 +1759,31 @@ export const PerformanceDashboard = ({
 
   /** Vue Nexus — refonte UI : bento KPI, tableau dense, graphique GMV (couleurs natives) */
   const renderSuperAdminTenants = () => {
-    const rows = tenantRows;
-    const totalCmd = rows.reduce((a, r) => a + r.commandes, 0);
-    const totalGmv = rows.reduce((a, r) => a + r.ca_gmv, 0);
-    const withActivity = rows.filter((r) => r.commandes > 0).length;
-    const inactiveTenants = rows.filter((r) => !r.actif).length;
-    const totalSorties = rows.reduce((a, r) => a + r.sorties_terrain, 0);
+    const rowsAll = tenantRows;
+    const rows = superAdminDisplayRows;
+    const ins = superAdminInsights;
+    const totalCmd = rowsAll.reduce((a, r) => a + r.commandes, 0);
+    const totalGmv = rowsAll.reduce((a, r) => a + r.ca_gmv, 0);
+    const withActivity = rowsAll.filter((r) => r.commandes > 0).length;
+    const inactiveTenants = rowsAll.filter((r) => !r.actif).length;
+    const totalSorties = rowsAll.reduce((a, r) => a + r.sorties_terrain, 0);
     const avgSuccPlat =
       totalSorties > 0
         ? Math.round(
-            rows.reduce((a, r) => a + r.success_rate * r.sorties_terrain, 0) / Math.max(1, totalSorties)
+            rowsAll.reduce((a, r) => a + r.success_rate * r.sorties_terrain, 0) / Math.max(1, totalSorties)
           )
         : 0;
 
-    const chartData = [...rows]
+    const chartData = [...rowsAll]
       .filter((r) => r.ca_gmv > 0 || r.commandes > 0)
+      .sort((a, b) => b.ca_gmv - a.ca_gmv)
       .slice(0, 12)
       .map((r) => ({
         nom: r.nom.length > 18 ? `${r.nom.slice(0, 18)}…` : r.nom,
         ca: r.ca_gmv,
       }));
 
-    const topTenant = rows[0];
+    const topTenant = rowsAll[0];
 
     const BentoKpi = ({
       accent,
@@ -1725,6 +1837,68 @@ export const PerformanceDashboard = ({
 
     return (
       <div className="space-y-8 lg:space-y-10">
+        {rowsAll.length > 0 && (
+          <div
+            className="rounded-2xl border border-cyan-500/15 bg-gradient-to-br from-slate-900/50 via-slate-950/60 to-[#0a0f1a] p-4 sm:p-5 shadow-[0_0_0_1px_rgba(6,182,212,0.06)]"
+            role="region"
+            aria-label="Synthèse plateforme"
+          >
+            <div className="flex flex-wrap items-start gap-3 sm:gap-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-cyan-500/20 bg-cyan-500/10 text-cyan-300">
+                <Target size={20} strokeWidth={2} aria-hidden />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">Lecture métier</p>
+                <p className="mt-1.5 text-sm text-slate-300 leading-relaxed">
+                  {ins.atRiskCount > 0 ? (
+                    <span className="text-amber-200/95">
+                      <AlertTriangle className="inline size-4 -mt-0.5 mr-1 text-amber-400" aria-hidden />
+                      {ins.atRiskCount} boutique(s) avec charge terrain et succès livraison {'<'}
+                      {SA_LOGISTICS_RISK_THRESHOLD}% — prioriser coaching livreurs ou support terrain.{' '}
+                    </span>
+                  ) : (
+                    <span className="text-emerald-200/90">
+                      Aucune alerte livraison sur les seuils (≥{SA_MIN_SORTIES_FOR_RISK} missions, {'<'}
+                      {SA_LOGISTICS_RISK_THRESHOLD}% succès).{' '}
+                    </span>
+                  )}
+                  {ins.dormantActiveCount > 0 ? (
+                    <span className="text-slate-400">
+                      {ins.dormantActiveCount} compte(s) actif(s) sans commande sur la période — opportunité de relance
+                      commerciale ou onboarding.
+                    </span>
+                  ) : null}
+                </p>
+              </div>
+            </div>
+            <div className="mt-4 grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="rounded-xl border border-white/[0.06] bg-black/25 px-3 py-3">
+                <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">CA — top 3 boutiques</p>
+                <p className="text-xl font-bold text-white tabular-nums mt-1">{ins.concentrationTop3}%</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">Part du CA plateforme (concentration)</p>
+              </div>
+              <div className="rounded-xl border border-white/[0.06] bg-black/25 px-3 py-3">
+                <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Panier moyen livré</p>
+                <p className="text-xl font-bold text-white tabular-nums mt-1">
+                  {ins.panierMoyen > 0 ? ins.panierMoyen.toLocaleString('fr-FR') : '—'}{' '}
+                  {ins.panierMoyen > 0 ? <span className="text-xs font-semibold text-slate-500">CFA</span> : null}
+                </p>
+                <p className="text-[11px] text-slate-500 mt-0.5">GMV ÷ commandes livrées / terminées</p>
+              </div>
+              <div className="rounded-xl border border-white/[0.06] bg-black/25 px-3 py-3">
+                <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Annulations (ligne)</p>
+                <p className="text-xl font-bold text-white tabular-nums mt-1">{ins.tauxAnnulPlateforme}%</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">Part des commandes annulées (toutes boutiques)</p>
+              </div>
+              <div className="rounded-xl border border-white/[0.06] bg-black/25 px-3 py-3">
+                <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">À surveiller (liv.)</p>
+                <p className="text-xl font-bold tabular-nums mt-1 text-amber-200">{ins.atRiskCount}</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">Boutiques sous le seuil de qualité livraison</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Grille bento — métriques clés */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-5">
           <BentoKpi
@@ -1752,10 +1926,10 @@ export const PerformanceDashboard = ({
             value={
               <span>
                 {withActivity}
-                <span className="text-slate-500 text-lg font-semibold"> / {rows.length}</span>
+                <span className="text-slate-500 text-lg font-semibold"> / {rowsAll.length}</span>
               </span>
             }
-            label="Boutiques actives"
+            label="Boutiques avec ventes"
             sub={`${inactiveTenants} compte(s) inactif(s) au catalogue`}
           />
           <BentoKpi
@@ -1834,7 +2008,7 @@ export const PerformanceDashboard = ({
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={chartData} layout="vertical" margin={{ top: 4, right: 12, left: 4, bottom: 4 }}>
                       <defs>
-                        <linearGradient id="gmvBarGrad" x1="0" y1="0" x2="1" y2="0">
+                        <linearGradient id="gmvBarGradSuperAdmin" x1="0" y1="0" x2="1" y2="0">
                           <stop offset="0%" stopColor="#06b6d4" />
                           <stop offset="55%" stopColor="#22d3ee" />
                           <stop offset="100%" stopColor="#3b82f6" />
@@ -1861,7 +2035,7 @@ export const PerformanceDashboard = ({
                       />
                       <Bar
                         dataKey="ca"
-                        fill="url(#gmvBarGrad)"
+                        fill="url(#gmvBarGradSuperAdmin)"
                         radius={[0, 8, 8, 0]}
                         maxBarSize={32}
                         animationDuration={600}
@@ -1881,20 +2055,60 @@ export const PerformanceDashboard = ({
                 boxShadow: 'var(--shadow-md)',
               }}
             >
-              <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-white/[0.06] bg-gradient-to-r from-cyan-950/30 to-transparent">
-                <div>
-                  <h2 className="text-lg font-bold text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>
-                    Matrice <span style={{ color: C.primary }}>tenants</span>
-                  </h2>
-                  <p className="text-xs text-slate-500 mt-0.5">Tri par CA décroissant · données temps réel</p>
+              <div className="flex flex-col gap-4 px-5 py-4 border-b border-white/[0.06] bg-gradient-to-r from-cyan-950/30 to-transparent">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-lg font-bold text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                      Matrice <span style={{ color: C.primary }}>tenants</span>
+                    </h2>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {rows.length} ligne(s) · données agrégées sur la période · ligne surlignée = qualité livraison à
+                      surveiller
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 rounded-full bg-slate-800/80 border border-white/10 px-3 py-1.5 text-[11px] font-medium text-slate-400">
+                    <Filter size={14} className="text-cyan-400/90 shrink-0" aria-hidden />
+                    Filtres & tri
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 rounded-full bg-slate-800/80 border border-white/10 px-3 py-1.5 text-[11px] font-medium text-slate-400">
-                  <Lightbulb size={14} className="text-amber-400/90 shrink-0" />
-                  Vue opérationnelle
+                <div className="flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-end lg:gap-8">
+                  <div className="space-y-2 min-w-[min(100%,260px)]">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Périmètre</span>
+                    <div style={NEXUS_TAB_BAR_WRAP} role="group" aria-label="Périmètre boutique">
+                      {SUPER_ADMIN_SCOPE_DEFS.map((def) => (
+                        <button
+                          key={def.id}
+                          type="button"
+                          title={def.hint}
+                          onClick={() => setSuperAdminScope(def.id)}
+                          style={nexusPillButtonStyle(superAdminScope === def.id, '#6366f1')}
+                        >
+                          {def.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="space-y-2 min-w-[min(100%,360px)] flex-1">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
+                      Tri du tableau
+                    </span>
+                    <div style={NEXUS_TAB_BAR_WRAP} role="group" aria-label="Colonne de tri">
+                      {SUPER_ADMIN_SORT_DEFS.map((def) => (
+                        <button
+                          key={def.id}
+                          type="button"
+                          onClick={() => setSuperAdminSort(def.id)}
+                          style={nexusPillButtonStyle(superAdminSort === def.id, def.color)}
+                        >
+                          {def.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="overflow-x-auto flex-1">
-                <table className="w-full text-left text-[13px] min-w-[880px]">
+                <table className="w-full text-left text-[13px] min-w-[960px]">
                   <thead>
                     <tr className="text-[10px] uppercase tracking-[0.12em] text-slate-500 border-b border-white/[0.06] bg-black/20">
                       <th className="pl-5 pr-2 py-3.5 font-bold w-10">#</th>
@@ -1914,19 +2128,47 @@ export const PerformanceDashboard = ({
                       <th className="px-2 py-3.5 font-bold text-center" style={{ color: C.annules }}>
                         Annul.
                       </th>
+                      <th className="px-2 py-3.5 font-bold text-center text-slate-400">Ann. %</th>
                       <th className="pl-2 pr-5 py-3.5 font-bold text-right">CA</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {rows.map((r, idx) => (
+                    {rows.map((r, idx) => {
+                      const annulPctLigne = r.commandes > 0 ? Math.round((r.annules / r.commandes) * 100) : 0;
+                      const atRisk = tenantLogisticsAtRisk(r);
+                      return (
                       <tr
                         key={r.tenant_id}
-                        className="border-b border-white/[0.04] transition-colors hover:bg-cyan-500/[0.04]"
+                        className={[
+                          'border-b border-white/[0.04] transition-colors hover:bg-cyan-500/[0.04]',
+                          atRisk ? 'bg-amber-500/[0.06]' : '',
+                        ].join(' ')}
                       >
                         <td className="pl-5 pr-2 py-3.5 text-slate-600 font-mono text-xs tabular-nums">{idx + 1}</td>
                         <td className="px-2 py-3.5">
                           <div className="font-semibold text-slate-100">{r.nom}</div>
-                          <div className="text-[11px] text-cyan-500/75 font-medium mt-0.5">/{r.slug || '—'}</div>
+                          <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                            <span className="text-[11px] text-cyan-500/75 font-medium">/{r.slug || '—'}</span>
+                            {r.slug ? (
+                              <Link
+                                to={`/${r.slug}`}
+                                className="inline-flex text-slate-500 hover:text-cyan-400 transition-colors"
+                                title="Ouvrir l'espace boutique"
+                                aria-label={`Ouvrir la boutique ${r.nom}`}
+                              >
+                                <ExternalLink size={13} strokeWidth={2} />
+                              </Link>
+                            ) : null}
+                            {atRisk ? (
+                              <span
+                                className="inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide bg-amber-500/20 text-amber-200 border border-amber-500/25"
+                                title="Charge terrain avec taux de succès sous le seuil"
+                              >
+                                <AlertTriangle className="size-3" aria-hidden />
+                                Liv.
+                              </span>
+                            ) : null}
+                          </div>
                         </td>
                         <td className="px-2 py-3.5">
                           <span className="inline-flex rounded-lg bg-slate-800/80 px-2 py-0.5 text-xs font-medium text-slate-300 border border-white/5">
@@ -1956,12 +2198,16 @@ export const PerformanceDashboard = ({
                         <td className="px-2 py-3.5 text-center tabular-nums" style={{ color: C.annules }}>
                           {r.annules}
                         </td>
+                        <td className="px-2 py-3.5 text-center tabular-nums text-slate-400 text-xs">
+                          {r.commandes > 0 ? `${annulPctLigne}%` : '—'}
+                        </td>
                         <td className="pl-2 pr-5 py-3.5 text-right font-semibold tabular-nums text-white">
                           {r.ca_gmv.toLocaleString('fr-FR')}{' '}
                           <span className="text-slate-500 text-[11px] font-medium">CFA</span>
                         </td>
                       </tr>
-                    ))}
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -2272,6 +2518,219 @@ export const PerformanceDashboard = ({
     );
   }
 
+  if (isSuperAdmin) {
+    return (
+      <div
+        className="min-h-full w-full font-sans overflow-x-hidden selection:bg-cyan-500/20"
+        style={{
+          background: 'linear-gradient(180deg, var(--bg-app) 0%, #0a0f1a 50%, var(--bg-app) 100%)',
+          color: 'var(--text-main)',
+          colorScheme: 'dark',
+        }}
+      >
+        <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 py-6 lg:py-8 pb-16">
+          <NexusModuleFrame
+            badge="Nexus Intelligence"
+            title="Performance des boutiques"
+            description="Comparez le volume, le CA (GMV) et la qualité de livraison de chaque organisation sur la période sélectionnée."
+            actions={
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  flexWrap: 'wrap',
+                  justifyContent: 'flex-end',
+                }}
+              >
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => fetchData()}
+                  disabled={loading}
+                  aria-label="Actualiser les données"
+                  style={{
+                    ...BTN_PRIMARY_INLINE,
+                    opacity: loading ? 0.75 : 1,
+                  }}
+                >
+                  <RefreshCw size={22} strokeWidth={2.5} className={loading ? 'animate-spin' : ''} aria-hidden />
+                  Actualiser
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  onClick={exportSuperAdminTenantsCsv}
+                  disabled={loading || !!loadError || superAdminDisplayRows.length === 0}
+                  aria-label="Exporter la matrice affichée en CSV"
+                  style={BTN_OUTLINE_INLINE}
+                >
+                  <Download size={20} strokeWidth={2.2} aria-hidden />
+                  Export CSV
+                </button>
+              </div>
+            }
+          >
+            {loadError ? (
+              <div
+                className="mb-8 flex flex-col gap-3 rounded-2xl border border-red-500/35 bg-red-950/35 p-4 text-red-100 shadow-[0_0_0_1px_rgba(248,113,113,0.12)] backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between"
+                role="alert"
+                aria-live="polite"
+              >
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="mt-0.5 shrink-0 text-red-400" size={20} aria-hidden />
+                  <div>
+                    <p className="m-0 font-semibold text-red-100">Chargement impossible</p>
+                    <p className="mt-1 mb-0 text-sm text-red-200/85">{loadError}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => fetchData()}
+                  className="btn btn-primary shrink-0"
+                  style={{ ...BTN_PRIMARY_INLINE, height: '52px', fontSize: '0.95rem', padding: '0 1.75rem' }}
+                >
+                  Réessayer
+                </button>
+              </div>
+            ) : null}
+
+            <nav style={{ marginBottom: '2rem' }} aria-label="Période">
+              <div
+                style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '1rem 1.5rem',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem',
+                    flexWrap: 'wrap',
+                    flex: '1 1 auto',
+                    minWidth: 'min(100%, 260px)',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: '0.75rem',
+                      fontWeight: 800,
+                      color: 'var(--text-muted)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.15em',
+                      flexShrink: 0,
+                    }}
+                  >
+                    Période
+                  </span>
+                  <div style={NEXUS_TAB_BAR_WRAP} role="group" aria-label="Période">
+                    {periodFilterDefs.map((f) => (
+                      <button
+                        key={f.id}
+                        type="button"
+                        onClick={() => setFilter(f.id)}
+                        style={nexusPillButtonStyle(filter === f.id, f.color)}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    flexWrap: 'wrap',
+                    flexShrink: 0,
+                  }}
+                >
+                  <div
+                    className="flex items-center gap-2 text-xs sm:text-sm text-slate-200 px-4 py-3 rounded-2xl border border-white/10"
+                    style={{ background: 'rgba(8, 11, 20, 0.75)', backdropFilter: 'blur(12px)' }}
+                  >
+                    <Clock size={17} className="shrink-0 text-cyan-400" strokeWidth={2} aria-hidden />
+                    <span className="font-medium tabular-nums">
+                      {new Date().toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '0.75rem',
+                  marginTop: '0.85rem',
+                }}
+              >
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: '0.85rem',
+                    color: 'var(--text-muted)',
+                    maxWidth: '42rem',
+                  }}
+                >
+                  Agrégat multi-tenant sur la fenêtre sélectionnée — comparez les boutiques et le CA par organisation.
+                </p>
+                {dataUpdatedAt && !loadError ? (
+                  <span
+                    style={{
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      color: 'var(--text-muted)',
+                      flexShrink: 0,
+                    }}
+                  >
+                    Mis à jour :{' '}
+                    {dataUpdatedAt.toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}
+                  </span>
+                ) : null}
+              </div>
+            </nav>
+
+            {loading ? (
+              <div
+                className="card glass-effect overflow-hidden"
+                style={{
+                  border: '1px solid rgba(255,255,255,0.03)',
+                  borderRadius: '32px',
+                  background: 'transparent',
+                }}
+              >
+                <div className="flex items-center gap-3 border-b border-white/[0.06] px-5 py-4">
+                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-cyan-500/25 border-t-cyan-400" />
+                  <p className="m-0 text-sm font-medium text-slate-400">Chargement des indicateurs…</p>
+                </div>
+                <NexusTableSkeleton rows={6} cols={4} />
+              </div>
+            ) : loadError ? null : (
+              <div
+                className="card glass-effect"
+                style={{
+                  padding: 0,
+                  border: '1px solid rgba(255,255,255,0.03)',
+                  borderRadius: '32px',
+                  overflow: 'hidden',
+                  background: 'transparent',
+                }}
+              >
+                <div style={{ animation: 'fadeIn 0.35s ease' }}>{renderSuperAdminTenants()}</div>
+              </div>
+            )}
+          </NexusModuleFrame>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="min-h-full w-full font-sans overflow-x-hidden selection:bg-cyan-500/20"
@@ -2281,62 +2740,7 @@ export const PerformanceDashboard = ({
         colorScheme: 'dark',
       }}
     >
-      <div
-        className={`mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10 pb-16 ${
-          isSuperAdmin ? 'max-w-[1400px]' : 'max-w-[1400px]'
-        }`}
-      >
-        {isSuperAdmin ? (
-          <header className="relative mb-10 lg:mb-12 overflow-hidden rounded-3xl border border-cyan-500/20 bg-gradient-to-br from-[#0c1222] via-[#0a0f1a] to-[#060911] px-6 py-8 sm:px-10 sm:py-10 shadow-[0_0_0_1px_rgba(6,182,212,0.08),0_40px_80px_-20px_rgba(0,0,0,0.65)]">
-            <div
-              className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-cyan-500/15 blur-[100px]"
-              aria-hidden
-            />
-            <div
-              className="pointer-events-none absolute -left-16 bottom-0 h-48 w-48 rounded-full bg-indigo-600/10 blur-[80px]"
-              aria-hidden
-            />
-            <div className="relative flex flex-col xl:flex-row xl:items-end xl:justify-between gap-8">
-              <div className="max-w-2xl">
-                <span className="inline-flex items-center gap-2 rounded-full border border-cyan-500/25 bg-cyan-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-300/95">
-                  <Sparkles size={12} className="text-cyan-400" strokeWidth={2.5} />
-                  Nexus · Intelligence multi-tenant
-                </span>
-                <h1
-                  className="mt-4 text-3xl sm:text-4xl lg:text-[2.35rem] font-bold tracking-tight leading-[1.15]"
-                  style={{ fontFamily: 'Outfit, sans-serif' }}
-                >
-                  <span
-                    style={{
-                      background: 'linear-gradient(135deg, #e0f2fe 0%, #22d3ee 35%, #a78bfa 70%, #818cf8 100%)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      backgroundClip: 'text',
-                    }}
-                  >
-                    Performance des boutiques
-                  </span>
-                </h1>
-                <p className="mt-3 text-sm sm:text-base text-slate-400 leading-relaxed max-w-xl">
-                  Tableau de bord opérationnel : comparez le volume, le CA (GMV) et la qualité de livraison de chaque
-                  organisation sur la période sélectionnée.
-                </p>
-              </div>
-              <div className="flex flex-col sm:flex-row xl:flex-col xl:items-end gap-4 shrink-0">
-                {renderFilterButtons()}
-                <div
-                  className="flex items-center gap-2.5 text-xs sm:text-sm text-slate-200 px-4 py-3 rounded-2xl border border-white/10"
-                  style={{ background: 'rgba(8, 11, 20, 0.75)', backdropFilter: 'blur(12px)' }}
-                >
-                  <Clock size={17} className="shrink-0 text-cyan-400" strokeWidth={2} aria-hidden />
-                  <span className="font-medium tabular-nums">
-                    {new Date().toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </header>
-        ) : (
+      <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 py-8 lg:py-10 pb-16">
           <header className="relative mb-10 lg:mb-12 overflow-hidden rounded-3xl border border-cyan-500/20 bg-gradient-to-br from-[#0c1222] via-[#0a0f1a] to-[#060911] px-6 py-8 sm:px-10 sm:py-10 shadow-[0_0_0_1px_rgba(6,182,212,0.08),0_40px_80px_-20px_rgba(0,0,0,0.65)]">
             <div
               className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-cyan-500/15 blur-[100px]"
@@ -2385,9 +2789,7 @@ export const PerformanceDashboard = ({
               </div>
             </div>
           </header>
-        )}
 
-        {isSuperAdmin ? null : (
           <>
             <nav
               className="mb-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between"
@@ -2448,15 +2850,9 @@ export const PerformanceDashboard = ({
               </div>
             )}
           </>
-        )}
 
         {loading ? (
-          <div
-            className={`flex flex-col items-center justify-center py-20 sm:py-28 rounded-2xl border border-white/[0.08] ${
-              isSuperAdmin ? '' : 'bg-gradient-to-b from-slate-900/40 to-transparent'
-            }`}
-            style={{ background: isSuperAdmin ? 'var(--surface)' : undefined }}
-          >
+          <div className="flex flex-col items-center justify-center py-20 sm:py-28 rounded-2xl border border-white/[0.08] bg-gradient-to-b from-slate-900/40 to-transparent">
             <div className="relative">
               <div className="w-12 h-12 border-2 border-cyan-500/25 border-t-cyan-400 rounded-full animate-spin" />
               <div className="absolute inset-0 rounded-full bg-cyan-500/10 blur-xl animate-pulse" aria-hidden />
@@ -2465,15 +2861,11 @@ export const PerformanceDashboard = ({
           </div>
         ) : (
           <div style={{ animation: 'fadeIn 0.35s ease' }}>
-            {isSuperAdmin ? (
-              renderSuperAdminTenants()
-            ) : (
-              <>
-                {activeTab === 'logistique' && renderLogistics()}
-                {activeTab === 'call-center' && renderCallCenter()}
-                {activeTab === 'inventaire' && renderInventory()}
-              </>
-            )}
+            <>
+              {activeTab === 'logistique' && renderLogistics()}
+              {activeTab === 'call-center' && renderCallCenter()}
+              {activeTab === 'inventaire' && renderInventory()}
+            </>
           </div>
         )}
       </div>
