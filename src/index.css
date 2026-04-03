@@ -309,40 +309,6 @@ h1, h2, h3, .brand {
   position: relative;
 }
 
-/* Page Performance Staff — fond clair plein cadre (évite le bloc « flottant » sur fond sombre) */
-.staff-performance-hub {
-  margin: -1.5rem;
-  margin-bottom: 0;
-  padding: 1.25rem 1.5rem 2rem;
-  min-height: calc(100dvh - var(--header-height, 64px) - 1rem);
-  background: linear-gradient(165deg, #f8fafc 0%, #f1f5f9 42%, #e8edf3 100%);
-  color: #0f172a;
-}
-
-@media (max-width: 768px) {
-  .staff-performance-hub {
-    margin: -1rem;
-    margin-bottom: 0;
-    padding: 1rem 1rem calc(var(--bottom-nav-height, 64px) + 1rem);
-    min-height: calc(100dvh - var(--header-height, 56px) - 2rem);
-  }
-}
-
-/* Cartes tableau responsive : fond clair sur cette page (sinon --surface sombre) */
-.staff-performance-hub .table-responsive-cards tr {
-  background: #ffffff !important;
-  border-color: #e2e8f0 !important;
-  box-shadow: 0 4px 14px -4px rgba(15, 23, 42, 0.08) !important;
-}
-
-.staff-performance-hub .table-responsive-cards td {
-  border-bottom-color: rgba(15, 23, 42, 0.06) !important;
-}
-
-.staff-performance-hub .table-responsive-cards td::before {
-  color: #64748b !important;
-}
-
 /* Cadre largeur max alignée Performance / super-admin */
 .nexus-module-frame {
   max-width: 1400px;

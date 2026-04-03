@@ -1,12 +1,19 @@
-import { useState, useEffect, useMemo, useCallback, type ReactNode } from 'react';
+import {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  type ReactNode,
+  type CSSProperties,
+} from 'react';
 import { useParams, Link } from 'react-router-dom';
-import type { LucideIcon } from 'lucide-react';
 import {
   loadPerformanceDashboardData,
   loadSuperAdminTenantPerformance,
   type TenantPerfRow,
   type InventoryStaffPerfRow,
 } from '../../services/performanceService';
+import { NexusModuleFrame } from '../layout/NexusModuleFrame';
 import {
   BarChart,
   Bar,
@@ -33,14 +40,7 @@ import {
   Activity,
   Target,
   Medal,
-  ClipboardList,
-  CheckCircle2,
-  XCircle,
-  Ban,
   RefreshCw,
-  Plug,
-  Undo2,
-  BarChart3,
   Download,
   AlertCircle,
 } from 'lucide-react';
@@ -67,18 +67,6 @@ const chartTooltip = {
   itemStyle: { color: '#cbd5e1' },
 };
 
-const chartTooltipLight = {
-  contentStyle: {
-    background: '#ffffff',
-    border: '1px solid #e2e8f0',
-    borderRadius: 12,
-    padding: '10px 14px',
-    boxShadow: '0 12px 28px rgba(15,23,42,0.12)',
-  },
-  labelStyle: { color: '#0f172a', fontWeight: 700 },
-  itemStyle: { color: '#475569' },
-};
-
 /** Couleurs sémantiques alignées sur le thème (cyan primaire + états) */
 const C = {
   primary: '#06b6d4',
@@ -90,118 +78,88 @@ const C = {
   textMuted: '#94a3b8',
 };
 
-/** Thème « Hub » clair (captures produit) */
-const HUB = {
-  purple: '#5b21b6',
-  purpleSoft: '#ede9fe',
-  border: '#e2e8f0',
-  muted: '#64748b',
+/** Aligné sur Commandes.tsx : barre d’onglets / filtres */
+const NEXUS_MODULE_TOOLBAR_ROW: CSSProperties = {
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: '2rem',
+  marginBottom: '3.5rem',
+  alignItems: 'center',
 };
 
-function HubMetricPill({
-  children,
-  tone,
-}: {
-  children: React.ReactNode;
-  tone: 'green' | 'purple' | 'red' | 'amber' | 'slate';
-}) {
-  const map: Record<string, string> = {
-    green: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100',
-    purple: 'bg-violet-50 text-violet-700 ring-1 ring-violet-100',
-    red: 'bg-rose-50 text-rose-700 ring-1 ring-rose-100',
-    amber: 'bg-amber-50 text-amber-800 ring-1 ring-amber-100',
-    slate: 'bg-slate-50 text-slate-800 ring-1 ring-slate-100',
+const NEXUS_TAB_BAR_WRAP: CSSProperties = {
+  display: 'flex',
+  gap: '0.5rem',
+  padding: '0.4rem',
+  background: 'rgba(255,255,255,0.02)',
+  borderRadius: '18px',
+  border: '1px solid rgba(255,255,255,0.05)',
+  height: 'fit-content',
+  backdropFilter: 'blur(10px)',
+  flexWrap: 'wrap',
+};
+
+function nexusPillButtonStyle(active: boolean, color: string): CSSProperties {
+  return {
+    padding: '0.8rem 1.5rem',
+    borderRadius: '14px',
+    fontSize: '0.85rem',
+    fontWeight: 800,
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+    whiteSpace: 'nowrap',
+    cursor: 'pointer',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    border: 'none',
+    background: active ? color : 'transparent',
+    color: active ? 'white' : 'var(--text-muted)',
+    boxShadow: active ? `0 10px 20px ${color}44` : 'none',
   };
-  return (
-    <span
-      className={`inline-flex min-w-[2rem] justify-center rounded-full px-2.5 py-1 text-sm font-semibold tabular-nums ${map[tone]}`}
-    >
-      {children}
-    </span>
-  );
 }
 
-function HubEmptyState({
-  icon: Icon,
-  title,
-  description,
-  action,
-}: {
-  icon: LucideIcon;
-  title: string;
-  description: string;
-  action?: { to: string; label: string };
-}) {
-  return (
-    <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-5 py-12 text-center shadow-sm sm:py-14">
-      <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-100 text-violet-700 ring-1 ring-violet-200/80">
-        <Icon size={26} strokeWidth={2} />
-      </div>
-      <p className="m-0 text-base font-semibold text-slate-900">{title}</p>
-      <p className="mx-auto mb-0 mt-2 max-w-lg text-sm leading-relaxed text-slate-500">{description}</p>
-      {action ? (
-        <Link
-          to={action.to}
-          className="mt-5 inline-flex items-center justify-center rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-violet-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
-        >
-          {action.label}
-        </Link>
-      ) : null}
-    </div>
-  );
-}
+const BTN_PRIMARY_INLINE: CSSProperties = {
+  height: '64px',
+  padding: '0 2.5rem',
+  borderRadius: '20px',
+  fontWeight: 950,
+  fontSize: '1.1rem',
+  boxShadow: '0 20px 40px -10px rgba(6, 182, 212, 0.4)',
+  background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
+  border: 'none',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.75rem',
+};
 
-function HubTableSkeleton({ rows = 5, cols = 4 }: { rows?: number; cols?: number }) {
+const BTN_OUTLINE_INLINE: CSSProperties = {
+  height: '64px',
+  padding: '0 2rem',
+  borderRadius: '20px',
+  fontWeight: 800,
+  fontSize: '0.95rem',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.6rem',
+};
+
+function NexusTableSkeleton({ rows = 5, cols = 3 }: { rows?: number; cols?: number }) {
   return (
     <div className="space-y-3 p-4 sm:p-5" aria-hidden>
       {Array.from({ length: rows }).map((_, i) => (
         <div
           key={i}
-          className="flex flex-wrap items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/80 p-3 animate-pulse"
+          className="flex flex-wrap items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.03] p-3 animate-pulse"
         >
-          <div className="h-10 w-10 shrink-0 rounded-full bg-slate-200" />
+          <div className="h-10 w-10 shrink-0 rounded-full bg-white/[0.08]" />
           <div className="min-w-0 flex-1 space-y-2">
-            <div className="h-3.5 w-32 rounded bg-slate-200 sm:w-48" />
-            <div className="h-3 w-24 rounded bg-slate-100" />
+            <div className="h-3.5 w-32 rounded bg-white/[0.08] sm:w-48" />
+            <div className="h-3 w-24 rounded bg-white/[0.05]" />
           </div>
           {Array.from({ length: cols }).map((__, j) => (
-            <div key={j} className="h-8 w-12 rounded-lg bg-slate-200 sm:w-14" />
+            <div key={j} className="h-8 w-12 rounded-lg bg-white/[0.08] sm:w-14" />
           ))}
         </div>
       ))}
-    </div>
-  );
-}
-
-type HubKpiItem = {
-  key: string;
-  label: string;
-  value: ReactNode;
-  sub: string;
-  Icon: LucideIcon;
-};
-
-function HubKpiStrip({ items }: { items: HubKpiItem[] }) {
-  return (
-    <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-      {items.map((k) => {
-        const Icon = k.Icon;
-        return (
-          <div
-            key={k.key}
-            className="rounded-xl border border-slate-200/90 bg-white p-3 shadow-sm sm:p-4"
-          >
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-50 text-violet-700 ring-1 ring-violet-100">
-                <Icon size={18} strokeWidth={2} aria-hidden />
-              </div>
-            </div>
-            <p className="mt-2 text-[10px] font-bold uppercase tracking-wider text-slate-500">{k.label}</p>
-            <p className="mt-1 text-lg font-bold tabular-nums leading-tight text-slate-900 sm:text-xl">{k.value}</p>
-            <p className="mt-1 text-[11px] leading-snug text-slate-500">{k.sub}</p>
-          </div>
-        );
-      })}
     </div>
   );
 }
@@ -473,131 +431,6 @@ export const PerformanceDashboard = ({
     return [...data].sort((a, b) => (b.efficiency_score || 0) - (a.efficiency_score || 0));
   }, [stats.inventaireStaff]);
 
-  /** Synthèse contextualisée pour le bandeau KPI (vue hub clair) */
-  const hubStripeItems = useMemo((): HubKpiItem[] | null => {
-    if (!moduleChrome || isSuperAdmin) return null;
-    if (activeTab === 'logistique') {
-      const log = logisticsSorted;
-      const logSorties = log.reduce((a, s: any) => a + (Number(s.sorties) || 0), 0);
-      const logReuss = log.reduce((a, s: any) => a + (Number(s.reussies) || 0), 0);
-      const logAvg = logSorties > 0 ? Math.round((logReuss / logSorties) * 100) : 0;
-      const logCa = log.reduce((a, s: any) => a + (Number(s.ca_frais) || 0), 0);
-      return [
-        {
-          key: 'sorties',
-          label: 'Sorties',
-          value: logSorties.toLocaleString('fr-FR'),
-          sub: 'Missions terrain sur la période',
-          Icon: Truck,
-        },
-        {
-          key: 'livr',
-          label: 'Livrés',
-          value: logReuss.toLocaleString('fr-FR'),
-          sub: 'Colis délivrés avec succès',
-          Icon: Target,
-        },
-        {
-          key: 'taux',
-          label: 'Taux succès',
-          value: `${logAvg}%`,
-          sub: 'Moyenne équipe (pondérée)',
-          Icon: TrendingUp,
-        },
-        {
-          key: 'ca',
-          label: 'Gains livreurs',
-          value: `${logCa.toLocaleString('fr-FR')} CFA`,
-          sub: 'Frais sur livraisons',
-          Icon: Banknote,
-        },
-      ];
-    }
-    if (activeTab === 'call-center') {
-      const cc = callCenterSorted;
-      const th = cc.reduce((a, s: any) => a + (Number(s.total_handled) || 0), 0);
-      const td = cc.reduce((a, s: any) => a + (Number(s.total_delivered) || 0), 0);
-      const tv = cc.reduce((a, s: any) => a + (Number(s.total_validations) || 0), 0);
-      const avg = th > 0 ? Math.round((td / th) * 100) : 0;
-      return [
-        {
-          key: 'th',
-          label: 'Dossiers',
-          value: th.toLocaleString('fr-FR'),
-          sub: 'Traités par les agents',
-          Icon: ClipboardList,
-        },
-        {
-          key: 'val',
-          label: 'Validations',
-          value: tv.toLocaleString('fr-FR'),
-          sub: 'Étapes post-appel',
-          Icon: CheckCircle2,
-        },
-        {
-          key: 'livr',
-          label: 'Livrées',
-          value: td.toLocaleString('fr-FR'),
-          sub: 'Commandes finalisées',
-          Icon: Package,
-        },
-        {
-          key: 'conv',
-          label: 'Conversion',
-          value: `${avg}%`,
-          sub: 'Livrées / dossiers',
-          Icon: TrendingUp,
-        },
-      ];
-    }
-    const inv = inventoryStaffSorted;
-    const totalP = inv.reduce((a, r) => a + r.produits_crees, 0);
-    const activeContributors = inv.filter((r) => r.produits_crees > 0).length;
-    const avgPer = inv.length > 0 ? (totalP / inv.length).toFixed(1) : '0';
-    const top = inv[0];
-    return [
-      {
-        key: 'tot',
-        label: 'Produits créés',
-        value: totalP.toLocaleString('fr-FR'),
-        sub: 'Total sur la période',
-        Icon: Package,
-      },
-      {
-        key: 'contrib',
-        label: 'Contributeurs',
-        value: String(activeContributors),
-        sub: 'Avec au moins une création',
-        Icon: Users,
-      },
-      {
-        key: 'avg',
-        label: 'Moy. / collaborateur',
-        value: avgPer,
-        sub: 'Moyenne arithmétique',
-        Icon: TrendingUp,
-      },
-      {
-        key: 'top',
-        label: 'Meilleur volume',
-        value: top ? String(top.produits_crees) : '—',
-        sub: top
-          ? top.staff_name.length > 24
-            ? `${top.staff_name.slice(0, 24)}…`
-            : top.staff_name
-          : '—',
-        Icon: Medal,
-      },
-    ];
-  }, [
-    moduleChrome,
-    isSuperAdmin,
-    activeTab,
-    logisticsSorted,
-    callCenterSorted,
-    inventoryStaffSorted,
-  ]);
-
   const exportHubTableCsv = useCallback(() => {
     const stamp = new Date().toISOString().slice(0, 10);
     if (activeTab === 'logistique') {
@@ -689,6 +522,91 @@ export const PerformanceDashboard = ({
         : 0;
     const invCrit = inv.filter((i: any) => (Number(i.stock_actuel) || 0) <= 0).length;
 
+    const staffInv = inventoryStaffSorted;
+    const staffTotalP = staffInv.reduce((a, r) => a + r.produits_crees, 0);
+    const staffContributors = staffInv.filter((r) => r.produits_crees > 0).length;
+    const staffAvgPer = staffInv.length > 0 ? (staffTotalP / staffInv.length).toFixed(1) : '0';
+    const staffTop = staffInv[0];
+
+    const inventaireKpisEmbedded = [
+      {
+        key: 'tot',
+        label: 'Produits créés',
+        value: staffTotalP.toLocaleString('fr-FR'),
+        sub: 'Total sur la période',
+        accent: 'cyan' as const,
+        Icon: Package,
+      },
+      {
+        key: 'contrib',
+        label: 'Contributeurs',
+        value: String(staffContributors),
+        sub: 'Avec au moins une création',
+        accent: 'emerald' as const,
+        Icon: Users,
+      },
+      {
+        key: 'avg',
+        label: 'Moy. / collaborateur',
+        value: staffAvgPer,
+        sub: 'Moyenne arithmétique',
+        accent: 'violet' as const,
+        Icon: TrendingUp,
+      },
+      {
+        key: 'top',
+        label: 'Meilleur volume',
+        value: staffTop ? String(staffTop.produits_crees) : '—',
+        sub: staffTop
+          ? staffTop.staff_name.length > 28
+            ? `${staffTop.staff_name.slice(0, 28)}…`
+            : staffTop.staff_name
+          : '—',
+        accent: 'amber' as const,
+        Icon: Medal,
+      },
+    ];
+
+    const inventaireKpisFull = [
+      {
+        key: 'refs',
+        label: 'Références',
+        value: invN.toLocaleString('fr-FR'),
+        sub: 'Articles suivis',
+        accent: 'cyan' as const,
+        Icon: Package,
+      },
+      {
+        key: 'alert',
+        label: 'Alertes stock',
+        value: invAlert.toLocaleString('fr-FR'),
+        sub: 'Sous le seuil minimum',
+        accent: 'amber' as const,
+        Icon: Lightbulb,
+      },
+      {
+        key: 'rot',
+        label: 'Rotation moy.',
+        value: (
+          <span>
+            {invRotAvg}
+            <span className="text-cyan-400/90">%</span>
+          </span>
+        ),
+        sub: 'Indice moyen sur le catalogue',
+        accent: 'violet' as const,
+        Icon: TrendingUp,
+      },
+      {
+        key: 'rupt',
+        label: 'Ruptures',
+        value: invCrit.toLocaleString('fr-FR'),
+        sub: 'Stock à zéro',
+        accent: 'rose' as const,
+        Icon: Target,
+      },
+    ];
+
     return {
       logistique: [
         {
@@ -773,224 +691,12 @@ export const PerformanceDashboard = ({
           Icon: TrendingUp,
         },
       ],
-      inventaire: [
-        {
-          key: 'refs',
-          label: 'Références',
-          value: invN.toLocaleString('fr-FR'),
-          sub: 'Articles suivis',
-          accent: 'cyan' as const,
-          Icon: Package,
-        },
-        {
-          key: 'alert',
-          label: 'Alertes stock',
-          value: invAlert.toLocaleString('fr-FR'),
-          sub: 'Sous le seuil minimum',
-          accent: 'amber' as const,
-          Icon: Lightbulb,
-        },
-        {
-          key: 'rot',
-          label: 'Rotation moy.',
-          value: (
-            <span>
-              {invRotAvg}
-              <span className="text-cyan-400/90">%</span>
-            </span>
-          ),
-          sub: 'Indice moyen sur le catalogue',
-          accent: 'violet' as const,
-          Icon: TrendingUp,
-        },
-        {
-          key: 'rupt',
-          label: 'Ruptures',
-          value: invCrit.toLocaleString('fr-FR'),
-          sub: 'Stock à zéro',
-          accent: 'rose' as const,
-          Icon: Target,
-        },
-      ],
+      inventaire: moduleChrome ? inventaireKpisEmbedded : inventaireKpisFull,
     };
-  }, [isSuperAdmin, logisticsSorted, callCenterSorted, inventorySorted]);
+  }, [isSuperAdmin, moduleChrome, logisticsSorted, callCenterSorted, inventorySorted, inventoryStaffSorted]);
 
   const renderLogistics = () => {
     const data = logisticsSorted;
-
-    if (moduleChrome) {
-      const totalSorties = data.reduce((acc: number, s: any) => acc + (Number(s.sorties) || 0), 0);
-      const totalReussies = data.reduce((acc: number, s: any) => acc + (Number(s.reussies) || 0), 0);
-      const avgSuccess = totalSorties > 0 ? Math.round((totalReussies / totalSorties) * 100) : 0;
-      const hubHint = (
-        <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
-          <Medal size={15} className="text-violet-500 shrink-0" strokeWidth={2} />
-          Classé par efficacité
-        </div>
-      );
-      return (
-        <div className="space-y-6">
-          <div className="rounded-2xl border border-slate-200/90 bg-white shadow-[0_4px_24px_-12px_rgba(15,23,42,0.1)] overflow-hidden">
-            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between px-4 py-4 sm:px-5 border-b border-slate-100 bg-gradient-to-r from-white to-slate-50/80">
-              <h2 className="text-base sm:text-lg font-bold text-violet-900 m-0 tracking-tight pr-2">
-                Détails des performances : <span className="text-violet-600">Logistique</span>
-              </h2>
-              {hubHint}
-            </div>
-            {data.length === 0 ? (
-              <div className="p-4 sm:p-6">
-                <HubEmptyState
-                  icon={Truck}
-                  title="Aucune activité logistique"
-                  description="Aucune sortée terrain sur la période choisie. Élargissez la fenêtre (7 jours, Toujours…) ou vérifiez que des livreurs ont des missions en cours."
-                  action={tenantBase ? { to: `${tenantBase}/logistique`, label: 'Ouvrir la logistique' } : undefined}
-                />
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="table-responsive-cards w-full min-w-[720px] text-left text-sm">
-                  <caption className="sr-only">
-                    Détail logistique par livreur, trié par efficacité, pour la période sélectionnée
-                  </caption>
-                  <thead>
-                    <tr className="text-[10px] uppercase tracking-[0.1em] text-slate-500 bg-slate-100/90 border-b border-slate-200">
-                      <th className="px-4 py-3.5 text-left font-bold">Livreur</th>
-                      <th className="px-3 py-3.5 text-center font-bold">Sorties</th>
-                      <th className="px-3 py-3.5 text-center font-bold text-emerald-700">Livrés</th>
-                      <th className="px-3 py-3.5 text-center font-bold text-violet-700">Retours</th>
-                      <th className="px-3 py-3.5 text-center font-bold text-rose-700">Annulés</th>
-                      <th className="px-3 py-3.5 text-center font-bold text-amber-700">Reports</th>
-                      <th className="px-4 py-3.5 text-right font-bold">Gains livr.</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {data.map((s: any) => (
-                      <tr key={s.livreur_id} className="border-slate-100 transition-colors hover:bg-violet-50/50">
-                        <td data-label="Livreur" className="px-4 py-4">
-                          <div className="flex items-center gap-3">
-                            <div
-                              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white shadow-sm"
-                              style={{
-                                background: `linear-gradient(135deg, ${HUB.purple} 0%, #8b5cf6 100%)`,
-                              }}
-                            >
-                              {s.nom?.charAt(0) ?? '?'}
-                            </div>
-                            <div>
-                              <div className="font-semibold text-slate-800">{s.nom}</div>
-                              <div
-                                className={`mt-0.5 text-xs font-semibold ${
-                                  s.success_rate >= 70
-                                    ? 'text-emerald-600'
-                                    : s.success_rate >= 45
-                                      ? 'text-amber-600'
-                                      : 'text-rose-600'
-                                }`}
-                              >
-                                {s.success_rate}% réussite
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td
-                          data-label="Sorties"
-                          className="px-3 py-3 text-center font-semibold text-slate-800 tabular-nums sm:py-4"
-                        >
-                          {s.sorties}
-                        </td>
-                        <td data-label="Livrés" className="px-3 py-3 text-center sm:py-4">
-                          <HubMetricPill tone="green">{s.reussies}</HubMetricPill>
-                        </td>
-                        <td data-label="Retours" className="px-3 py-3 text-center sm:py-4">
-                          <HubMetricPill tone="purple">{s.retours}</HubMetricPill>
-                        </td>
-                        <td data-label="Annulés" className="px-3 py-3 text-center sm:py-4">
-                          <HubMetricPill tone="red">{s.annules ?? 0}</HubMetricPill>
-                        </td>
-                        <td data-label="Reports" className="px-3 py-3 text-center sm:py-4">
-                          <HubMetricPill tone="amber">{s.reportes ?? 0}</HubMetricPill>
-                        </td>
-                        <td
-                          data-label="Gains livr."
-                          className="px-4 py-3 text-right font-bold tabular-nums text-slate-900 sm:py-4"
-                        >
-                          {s.ca_frais != null ? Number(s.ca_frais).toLocaleString('fr-FR') : '—'}{' '}
-                          <span className="text-xs font-semibold text-slate-500">CFA</span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-
-          <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-[0_4px_24px_-12px_rgba(15,23,42,0.1)] md:p-6">
-            <div className="mb-5">
-              <h3 className="m-0 flex items-center gap-2 text-base font-bold text-violet-900">
-                <Activity size={18} className="shrink-0 text-violet-600" />
-                Impact livraison (succès %)
-              </h3>
-              <p className="mt-1 text-xs text-slate-500">Comparatif du taux de succès par livreur</p>
-            </div>
-            {data.length === 0 ? (
-              <HubEmptyState
-                icon={BarChart3}
-                title="Graphique indisponible"
-                description="Ajoutez des missions terrain sur la période pour visualiser le comparatif de succès."
-              />
-            ) : (
-              <>
-                <div className="h-[260px] min-h-[220px] sm:h-[300px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={data} margin={{ top: 12, right: 8, left: 0, bottom: 4 }}>
-                      <defs>
-                        <linearGradient id="staffLogBarGradHub" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#34d399" />
-                          <stop offset="100%" stopColor="#059669" />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                      <XAxis
-                        dataKey="nom"
-                        tick={{ fill: HUB.muted, fontSize: 10 }}
-                        axisLine={false}
-                        tickLine={false}
-                        interval={0}
-                        angle={data.length > 5 ? -25 : 0}
-                        textAnchor={data.length > 5 ? 'end' : 'middle'}
-                        height={data.length > 5 ? 56 : 32}
-                      />
-                      <YAxis
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fill: HUB.muted, fontSize: 11 }}
-                        domain={[0, 100]}
-                        width={36}
-                      />
-                      <Tooltip {...chartTooltipLight} formatter={(v) => [`${v ?? 0}%`, 'Succès']} />
-                      <Bar
-                        dataKey="success_rate"
-                        fill="url(#staffLogBarGradHub)"
-                        radius={[8, 8, 0, 0]}
-                        maxBarSize={48}
-                        animationDuration={500}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4 text-sm">
-                  <span className="text-slate-500">Moyenne équipe (pondérée)</span>
-                  <span className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-4 py-1.5 font-bold tabular-nums text-violet-800">
-                    {avgSuccess}%
-                  </span>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      );
-    }
 
     const totalSorties = data.reduce((acc: number, s: any) => acc + (Number(s.sorties) || 0), 0);
     const totalReussies = data.reduce((acc: number, s: any) => acc + (Number(s.reussies) || 0), 0);
@@ -1278,193 +984,6 @@ export const PerformanceDashboard = ({
   const renderCallCenter = () => {
     const data = callCenterSorted;
 
-    if (moduleChrome) {
-      const th = data.reduce((acc: number, s: any) => acc + (Number(s.total_handled) || 0), 0);
-      const td = data.reduce((acc: number, s: any) => acc + (Number(s.total_delivered) || 0), 0);
-      const avgConv = th > 0 ? Math.round((td / th) * 100) : 0;
-      const hubHint = (
-        <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
-          <Medal size={15} className="text-violet-500 shrink-0" strokeWidth={2} />
-          Classé par efficacité
-        </div>
-      );
-      const thCell = (label: string, Icon: LucideIcon) => (
-        <span className="inline-flex flex-col items-center gap-0.5">
-          <Icon size={13} className="shrink-0 text-slate-400" strokeWidth={2} aria-hidden />
-          <span>{label}</span>
-        </span>
-      );
-      return (
-        <div className="space-y-6">
-          <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_4px_24px_-12px_rgba(15,23,42,0.1)]">
-            <div className="flex flex-col gap-3 border-b border-slate-100 bg-gradient-to-r from-white to-slate-50/80 px-4 py-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-5">
-              <h2 className="m-0 pr-2 text-base font-bold tracking-tight text-violet-900 sm:text-lg">
-                Détails des performances : <span className="text-violet-600">Centre d&apos;appel</span>
-              </h2>
-              {hubHint}
-            </div>
-            {data.length === 0 ? (
-              <div className="p-4 sm:p-6">
-                <HubEmptyState
-                  icon={PhoneCall}
-                  title="Aucune activité centre d'appel"
-                  description="Aucune commande associée à un agent sur cette période. Élargissez les dates ou vérifiez les attributions d'agents."
-                  action={tenantBase ? { to: `${tenantBase}/centre-appel`, label: "Ouvrir le centre d'appel" } : undefined}
-                />
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="table-responsive-cards min-w-[1000px] w-full text-left text-sm">
-                  <caption className="sr-only">
-                    Détail centre d&apos;appel par agent, trié par conversion, pour la période sélectionnée
-                  </caption>
-                  <thead>
-                    <tr className="border-b border-slate-200 bg-slate-100/90 text-[10px] font-bold uppercase tracking-[0.08em] text-slate-500">
-                      <th className="min-w-[11rem] px-3 py-3 text-left align-bottom">Agent</th>
-                      <th className="px-1.5 py-3 text-center align-bottom sm:px-2">{thCell('Traitées', ClipboardList)}</th>
-                      <th className="px-1.5 py-3 text-center align-bottom sm:px-2">{thCell('Validées', CheckCircle2)}</th>
-                      <th className="px-1.5 py-3 text-center align-bottom text-emerald-700 sm:px-2">
-                        {thCell('Livrées', Package)}
-                      </th>
-                      <th className="px-1.5 py-3 text-center align-bottom text-violet-700 sm:px-2">
-                        {thCell('Retours', Undo2)}
-                      </th>
-                      <th className="px-1.5 py-3 text-center align-bottom text-rose-700 sm:px-2">
-                        {thCell('Échecs', XCircle)}
-                      </th>
-                      <th className="px-1.5 py-3 text-center align-bottom text-amber-700 sm:px-2">
-                        {thCell('Reprog.', RefreshCw)}
-                      </th>
-                      <th className="px-1.5 py-3 text-center align-bottom text-rose-800 sm:px-2">
-                        {thCell('Annulées', Ban)}
-                      </th>
-                      <th className="px-1.5 py-3 text-center align-bottom text-slate-600 sm:px-2">
-                        {thCell('Connex.', Plug)}
-                      </th>
-                      <th className="min-w-[4.5rem] px-2 py-3 text-center align-bottom text-violet-800">Taux</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {data.map((agent: any) => {
-                      const r = Number(agent.success_rate) || 0;
-                      const convColor =
-                        r >= 60 ? 'text-emerald-600' : r >= 45 ? 'text-amber-600' : 'text-rose-600';
-                      return (
-                        <tr key={agent.agent_id} className="transition-colors hover:bg-violet-50/50">
-                          <td data-label="Agent" className="px-3 py-3 sm:py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-violet-700 text-sm font-bold text-white shadow-sm">
-                                {(agent.staff_name || 'A').charAt(0)}
-                              </div>
-                              <div>
-                                <div className="font-semibold text-slate-800">{agent.staff_name || 'Agent'}</div>
-                                <div className={`mt-0.5 text-xs font-semibold ${convColor}`}>
-                                  {r}% conversion réelle
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                          <td
-                            data-label="Traitées"
-                            className="px-2 py-3 text-center text-sm font-medium tabular-nums text-slate-800 sm:py-4"
-                          >
-                            {agent.total_handled}
-                          </td>
-                          <td data-label="Validées" className="px-2 py-3 text-center sm:py-4">
-                            <HubMetricPill tone="slate">{agent.total_validations}</HubMetricPill>
-                          </td>
-                          <td data-label="Livrées" className="px-2 py-3 text-center sm:py-4">
-                            <HubMetricPill tone="green">{agent.total_delivered}</HubMetricPill>
-                          </td>
-                          <td data-label="Retours" className="px-2 py-3 text-center sm:py-4">
-                            <HubMetricPill tone="purple">{Number(agent.retours) || 0}</HubMetricPill>
-                          </td>
-                          <td data-label="Échecs" className="px-2 py-3 text-center sm:py-4">
-                            <HubMetricPill tone="red">{Number(agent.echouees) || 0}</HubMetricPill>
-                          </td>
-                          <td data-label="Reprog." className="px-2 py-3 text-center sm:py-4">
-                            <HubMetricPill tone="amber">{Number(agent.reprogrammes) || 0}</HubMetricPill>
-                          </td>
-                          <td data-label="Annulées" className="px-2 py-3 text-center sm:py-4">
-                            <HubMetricPill tone="red">{Number(agent.annulees) || 0}</HubMetricPill>
-                          </td>
-                          <td data-label="Connex." className="px-2 py-3 text-center sm:py-4">
-                            <HubMetricPill tone="slate">{Number(agent.connexions) || 0}</HubMetricPill>
-                          </td>
-                          <td data-label="Taux conv." className="px-2 py-3 text-center sm:py-4">
-                            <span className={`text-base font-bold tabular-nums sm:text-lg ${convColor}`}>{r}%</span>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-
-          <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-[0_4px_24px_-12px_rgba(15,23,42,0.1)] md:p-6">
-            <div className="mb-5">
-              <h3 className="m-0 flex items-center gap-2 text-base font-bold text-violet-900">
-                <PhoneCall size={18} className="shrink-0 text-violet-600" />
-                Courbe de conversion
-              </h3>
-              <p className="mt-1 text-xs text-slate-500">Taux de conversion par agent (dossiers → livraisons)</p>
-            </div>
-            {data.length === 0 ? (
-              <HubEmptyState
-                icon={BarChart3}
-                title="Graphique indisponible"
-                description="Les données d'agents apparaîtront ici dès qu'il y aura des dossiers traités sur la période."
-              />
-            ) : (
-              <>
-                <div className="h-[260px] min-h-[220px] sm:h-[280px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={data} margin={{ top: 8, right: 4, left: 0, bottom: 4 }}>
-                      <defs>
-                        <linearGradient id="barCallGradHub" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#8b5cf6" />
-                          <stop offset="100%" stopColor="#6d28d9" />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                      <XAxis
-                        dataKey="staff_name"
-                        tick={{ fill: HUB.muted, fontSize: 10 }}
-                        axisLine={false}
-                        tickLine={false}
-                        interval={0}
-                        angle={data.length > 4 ? -22 : 0}
-                        textAnchor={data.length > 4 ? 'end' : 'middle'}
-                        height={data.length > 4 ? 64 : 36}
-                      />
-                      <YAxis
-                        domain={[0, 100]}
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fill: HUB.muted, fontSize: 11 }}
-                        width={34}
-                      />
-                      <Tooltip {...chartTooltipLight} formatter={(v) => [`${v ?? 0}%`, 'Conversion']} />
-                      <Bar dataKey="success_rate" fill="url(#barCallGradHub)" radius={[6, 6, 0, 0]} maxBarSize={44} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-slate-600">
-                  <PhoneCall size={18} className="shrink-0 text-violet-500" aria-hidden />
-                  <span>
-                    Moyenne équipe :{' '}
-                    <span className="font-bold tabular-nums text-violet-800">{avgConv}%</span>
-                  </span>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      );
-    }
-
     const th = data.reduce((acc: number, s: any) => acc + (Number(s.total_handled) || 0), 0);
     const td = data.reduce((acc: number, s: any) => acc + (Number(s.total_delivered) || 0), 0);
     const avgConv = th > 0 ? Math.round((td / th) * 100) : 0;
@@ -1695,110 +1214,132 @@ export const PerformanceDashboard = ({
 
     if (moduleChrome) {
       const staffData = inventoryStaffSorted;
-      const hubHint = (
-        <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
-          <Medal size={15} className="text-violet-500 shrink-0" strokeWidth={2} />
-          Classé par efficacité
-        </div>
-      );
       const chartStaff = staffData.map((r) => ({
         nom: r.staff_name.length > 14 ? `${r.staff_name.slice(0, 14)}…` : r.staff_name,
         produits: r.produits_crees,
       }));
+      const invStaffHint = (
+        <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
+          <Lightbulb size={16} className="text-amber-400/90 shrink-0" strokeWidth={2} />
+          {sortHint('inventaire')}
+        </div>
+      );
+      const staffTable = (
+        <table className="table-responsive-cards w-full min-w-[560px] text-left text-sm">
+          <caption className="sr-only">
+            Créations de produits par membre du staff sur la période sélectionnée
+          </caption>
+          <thead>
+            <tr className="text-[10px] uppercase tracking-[0.08em] text-slate-500 border-b border-white/[0.06] bg-black/20">
+              <th className="px-4 py-3.5 text-left font-bold">Staff</th>
+              <th className="px-3 py-3.5 text-center font-semibold" style={{ color: C.primary }}>
+                Produits créés
+              </th>
+              <th className="px-3 py-3.5 text-center font-semibold">Connexions</th>
+              <th className="px-4 py-3.5 text-right font-semibold text-slate-300">Fréq. hebdo</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-white/[0.05]">
+            {staffData.map((row) => (
+              <tr key={row.staff_id} className="border-b border-white/[0.04] transition-colors hover:bg-cyan-500/[0.04]">
+                <td data-label="Staff" className="px-4 py-3.5 sm:py-4">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
+                      style={{
+                        background: `linear-gradient(135deg, ${C.primary} 0%, #6366f1 100%)`,
+                        boxShadow: `0 4px 14px ${C.primarySoft}`,
+                      }}
+                    >
+                      {row.staff_name?.charAt(0) ?? '?'}
+                    </div>
+                    <span className="font-semibold text-slate-100">{row.staff_name}</span>
+                  </div>
+                </td>
+                <td
+                  data-label="Produits créés"
+                  className="px-3 py-3 text-center text-base font-bold tabular-nums text-white sm:py-4"
+                >
+                  {row.produits_crees}
+                </td>
+                <td
+                  data-label="Connexions"
+                  className="px-3 py-3 text-center tabular-nums text-slate-300 sm:py-4"
+                >
+                  {row.connexions}
+                </td>
+                <td
+                  data-label="Fréq. hebdo"
+                  className="px-4 py-3 text-right text-sm font-semibold tabular-nums text-cyan-200/90 sm:py-4"
+                >
+                  {row.freq_hebdo_label}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      );
+
       return (
-        <div className="space-y-6">
-          <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_4px_24px_-12px_rgba(15,23,42,0.1)]">
-            <div className="flex flex-col gap-3 border-b border-slate-100 bg-gradient-to-r from-white to-slate-50/80 px-4 py-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-5">
-              <h2 className="m-0 pr-2 text-base font-bold tracking-tight text-violet-900 sm:text-lg">
-                Détails des performances : <span className="text-violet-600">Inventaire</span>
-              </h2>
-              {hubHint}
-            </div>
+        <div className="space-y-6 lg:space-y-8">
+          <PerfAdminTableCard
+            title="Création"
+            titleAccent="produits"
+            subtitle="Collaborateurs · volume et fréquence"
+            hint={invStaffHint}
+          >
             {staffData.length === 0 ? (
-              <div className="p-4 sm:p-6">
-                <HubEmptyState
-                  icon={Package}
-                  title="Aucune donnée sur cette période"
-                  description="Aucun collaborateur avec produits créés ou aucune création enregistrée. Élargissez la fenêtre temporelle ou créez des fiches produits depuis le module Produits."
-                  action={tenantBase ? { to: `${tenantBase}/produits`, label: 'Gérer les produits' } : undefined}
-                />
+              <div className="rounded-2xl border border-dashed border-white/12 bg-white/[0.02] px-6 py-14 text-center">
+                <Package className="mx-auto mb-4 text-cyan-400/40" size={40} strokeWidth={1.5} aria-hidden />
+                <p className="m-0 text-base font-semibold text-slate-200">Aucune donnée sur cette période</p>
+                <p className="mx-auto mt-2 mb-0 max-w-md text-sm text-slate-500">
+                  Élargissez la fenêtre temporelle ou enregistrez des fiches depuis le module Produits.
+                </p>
+                {tenantBase ? (
+                  <Link
+                    to={`${tenantBase}/produits`}
+                    className="btn btn-primary mt-6 inline-flex min-h-[48px] px-6 text-sm"
+                  >
+                    Ouvrir Produits
+                  </Link>
+                ) : null}
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="table-responsive-cards min-w-[560px] w-full text-left text-sm">
-                  <caption className="sr-only">
-                    Créations de produits par membre du staff sur la période sélectionnée
-                  </caption>
-                  <thead>
-                    <tr className="border-b border-slate-200 bg-slate-100/90 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">
-                      <th className="px-4 py-3.5 text-left">Staff</th>
-                      <th className="px-3 py-3.5 text-center">Produits créés</th>
-                      <th className="px-3 py-3.5 text-center">Connexions</th>
-                      <th className="px-4 py-3.5 text-right text-violet-800">Fréquence hebdo</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {staffData.map((row) => (
-                      <tr key={row.staff_id} className="transition-colors hover:bg-violet-50/50">
-                        <td data-label="Staff" className="px-4 py-3 sm:py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-violet-200 bg-violet-100 text-sm font-bold text-violet-800 shadow-sm">
-                              {row.staff_name?.charAt(0) ?? '?'}
-                            </div>
-                            <div className="font-semibold text-slate-800">{row.staff_name}</div>
-                          </div>
-                        </td>
-                        <td
-                          data-label="Produits créés"
-                          className="px-3 py-3 text-center text-base font-bold tabular-nums text-slate-900 sm:py-4"
-                        >
-                          {row.produits_crees}
-                        </td>
-                        <td
-                          data-label="Connexions"
-                          className="px-3 py-3 text-center tabular-nums text-slate-600 sm:py-4"
-                        >
-                          {row.connexions}
-                        </td>
-                        <td
-                          data-label="Fréq. hebdo"
-                          className="px-4 py-3 text-right text-sm font-semibold tabular-nums text-violet-700 sm:py-4"
-                        >
-                          {row.freq_hebdo_label}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <div className="overflow-x-auto">{staffTable}</div>
             )}
-          </div>
+          </PerfAdminTableCard>
 
           {chartStaff.length > 0 ? (
-            <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-[0_4px_24px_-12px_rgba(15,23,42,0.1)] md:p-6">
+            <div
+              className="card glass-effect p-5 md:p-6"
+              style={{ borderRadius: '32px', border: '1px solid rgba(255,255,255,0.03)' }}
+            >
               <div className="mb-5">
-                <h3 className="m-0 flex items-center gap-2 text-base font-bold text-violet-900">
-                  <TrendingUp size={18} className="shrink-0 text-violet-600" />
-                  Créations de produits par collaborateur
+                <h3
+                  className="m-0 flex items-center gap-2 text-base font-bold text-white"
+                  style={{ fontFamily: 'Outfit, sans-serif' }}
+                >
+                  <TrendingUp size={18} className="shrink-0 text-cyan-400" />
+                  Volume par collaborateur
                 </h3>
-                <p className="mt-1 text-xs text-slate-500">Volume sur la période sélectionnée</p>
+                <p className="mt-1 text-xs text-slate-500">Créations de produits sur la période</p>
               </div>
               <div
                 className="min-h-[240px]"
                 style={{ height: Math.max(240, Math.min(520, chartStaff.length * 44)) }}
               >
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartStaff} margin={{ top: 8, right: 8, left: 0, bottom: 8 }}>
+                  <BarChart data={chartStaff} margin={{ top: 8, right: 8, left: 4, bottom: 8 }}>
                     <defs>
-                      <linearGradient id="staffInvHubGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#a78bfa" />
-                        <stop offset="100%" stopColor="#6d28d9" />
+                      <linearGradient id="staffInvEmbedGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#22d3ee" />
+                        <stop offset="100%" stopColor="#6366f1" />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.06)" />
                     <XAxis
                       dataKey="nom"
-                      tick={{ fill: HUB.muted, fontSize: 10 }}
+                      tick={{ fill: C.textMuted, fontSize: 10 }}
                       axisLine={false}
                       tickLine={false}
                       interval={0}
@@ -1809,14 +1350,14 @@ export const PerformanceDashboard = ({
                     <YAxis
                       axisLine={false}
                       tickLine={false}
-                      tick={{ fill: HUB.muted, fontSize: 11 }}
+                      tick={{ fill: C.textMuted, fontSize: 11 }}
                       width={36}
                       allowDecimals={false}
                     />
-                    <Tooltip {...chartTooltipLight} formatter={(v) => [`${v ?? 0}`, 'Produits créés']} />
+                    <Tooltip {...chartTooltip} formatter={(v) => [`${v ?? 0}`, 'Produits créés']} />
                     <Bar
                       dataKey="produits"
-                      fill="url(#staffInvHubGrad)"
+                      fill="url(#staffInvEmbedGrad)"
                       radius={[8, 8, 0, 0]}
                       maxBarSize={44}
                     />
@@ -2418,118 +1959,88 @@ export const PerformanceDashboard = ({
     );
   };
 
-  const tabDefs: { id: TabType; label: string; sub: string; icon: typeof Truck }[] = [
-    { id: 'logistique', label: 'Logistique', sub: 'Livraisons & retours', icon: Truck },
-    { id: 'call-center', label: "Centre d'appel", sub: 'Validations & relances', icon: PhoneCall },
-    { id: 'inventaire', label: 'Inventaire', sub: 'Création de produits', icon: Package },
+  const tabDefs: {
+    id: TabType;
+    label: string;
+    sub: string;
+    icon: typeof Truck;
+    /** Couleur pastille active (alignement Commandes) */
+    color: string;
+  }[] = [
+    { id: 'logistique', label: 'Logistique', sub: 'Livraisons & retours', icon: Truck, color: '#06b6d4' },
+    { id: 'call-center', label: "Centre d'appel", sub: 'Validations & relances', icon: PhoneCall, color: '#8b5cf6' },
+    { id: 'inventaire', label: 'Inventaire', sub: 'Création de produits', icon: Package, color: '#10b981' },
   ];
 
-  const renderPeriodFiltersHubLight = () => (
-    <div
-      className="inline-flex flex-wrap items-center gap-1.5 p-1.5 rounded-xl bg-white border border-slate-200 shadow-sm"
-      role="group"
-      aria-label="Période"
-    >
-      {(
-        [
-          { id: 'mois' as const, label: 'Ce mois' },
-          { id: '7jours' as const, label: '7 jours' },
-          { id: 'aujourdhui' as const, label: "Aujourd'hui" },
-          { id: 'toujours' as const, label: 'Toujours' },
-        ] as const
-      ).map((f) => {
-        const on = filter === f.id;
-        return (
-          <button
-            key={f.id}
-            type="button"
-            onClick={() => setFilter(f.id)}
-            className={[
-              'px-3.5 py-2 rounded-lg text-xs font-semibold transition-all min-h-[38px]',
-              on
-                ? 'bg-violet-600 text-white shadow-md shadow-violet-500/25'
-                : 'text-slate-600 hover:bg-slate-50',
-            ].join(' ')}
-          >
-            {f.label}
-          </button>
-        );
-      })}
-    </div>
-  );
+  const periodFilterDefs: { id: FilterType; label: string; color: string }[] = [
+    { id: 'mois', label: 'Ce mois', color: '#06b6d4' },
+    { id: '7jours', label: '7 jours', color: '#0891b2' },
+    { id: 'aujourdhui', label: "Aujourd'hui", color: '#3b82f6' },
+    { id: 'toujours', label: 'Toujours', color: '#6366f1' },
+  ];
 
   if (moduleChrome) {
     return (
-      <div className="nexus-module-frame mx-auto w-full max-w-[1400px] animate-pageEnter px-0">
-        <div className="mb-6 overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_4px_24px_-12px_rgba(15,23,42,0.1)]">
-          <div className="flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
-            <div className="min-w-0 flex-1">
-              <div className="mb-3 flex flex-wrap items-center gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-violet-200/90 bg-violet-100 text-violet-700 shadow-sm">
-                  <Target size={22} strokeWidth={2} aria-hidden />
-                </div>
-                <h1
-                  className="m-0 text-2xl font-bold tracking-tight text-violet-900 sm:text-[1.65rem]"
-                  style={{ fontFamily: 'Outfit, sans-serif' }}
-                >
-                  Hub Performance Équipe
-                </h1>
-              </div>
-              <p className="m-0 max-w-2xl text-sm font-medium leading-relaxed text-slate-600 sm:text-[0.95rem]">
-                {subtitle}
-              </p>
-            </div>
-            <div className="flex w-full flex-col gap-3 sm:w-auto sm:items-end lg:pt-1">
-              <div className="flex flex-wrap items-center justify-end gap-2">
-                {renderPeriodFiltersHubLight()}
-                <button
-                  type="button"
-                  onClick={() => fetchData()}
-                  disabled={loading}
-                  className="inline-flex min-h-[38px] items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-50"
-                  aria-label="Actualiser les données"
-                >
-                  <RefreshCw size={15} className={loading ? 'animate-spin' : ''} aria-hidden />
-                  Actualiser
-                </button>
-                <button
-                  type="button"
-                  onClick={exportHubTableCsv}
-                  disabled={loading || !!loadError}
-                  className="inline-flex min-h-[38px] items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-50"
-                  aria-label="Exporter le tableau visible en CSV"
-                >
-                  <Download size={15} aria-hidden />
-                  CSV
-                </button>
-              </div>
-              {dataUpdatedAt && !loadError ? (
-                <p className="m-0 text-right text-[11px] text-slate-400">
-                  Mis à jour :{' '}
-                  {dataUpdatedAt.toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}
-                </p>
-              ) : null}
-            </div>
+      <NexusModuleFrame
+        badge="Performance Intelligence"
+        title="Performance équipe"
+        description={subtitle}
+        actions={
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              flexWrap: 'wrap',
+              justifyContent: 'flex-end',
+            }}
+          >
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => fetchData()}
+              disabled={loading}
+              aria-label="Actualiser les données"
+              style={{
+                ...BTN_PRIMARY_INLINE,
+                opacity: loading ? 0.75 : 1,
+              }}
+            >
+              <RefreshCw size={22} strokeWidth={2.5} className={loading ? 'animate-spin' : ''} aria-hidden />
+              Actualiser
+            </button>
+            <button
+              type="button"
+              className="btn btn-outline"
+              onClick={exportHubTableCsv}
+              disabled={loading || !!loadError}
+              aria-label="Exporter le tableau visible en CSV"
+              style={BTN_OUTLINE_INLINE}
+            >
+              <Download size={20} strokeWidth={2.2} aria-hidden />
+              Export CSV
+            </button>
           </div>
-        </div>
-
+        }
+      >
         {loadError ? (
           <div
-            className="mb-6 flex flex-col gap-3 rounded-2xl border border-red-200 bg-red-50/90 p-4 text-red-900 shadow-sm sm:flex-row sm:items-center sm:justify-between"
+            className="mb-8 flex flex-col gap-3 rounded-2xl border border-red-500/35 bg-red-950/35 p-4 text-red-100 shadow-[0_0_0_1px_rgba(248,113,113,0.12)] backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between"
             role="alert"
             aria-live="polite"
           >
             <div className="flex items-start gap-3">
-              <AlertCircle className="mt-0.5 shrink-0" size={20} aria-hidden />
+              <AlertCircle className="mt-0.5 shrink-0 text-red-400" size={20} aria-hidden />
               <div>
-                <p className="m-0 font-semibold">Chargement impossible</p>
-                <p className="mt-1 mb-0 text-sm text-red-800/90">{loadError}</p>
+                <p className="m-0 font-semibold text-red-100">Chargement impossible</p>
+                <p className="mt-1 mb-0 text-sm text-red-200/85">{loadError}</p>
               </div>
             </div>
             <button
               type="button"
               onClick={() => fetchData()}
-              className="shrink-0 rounded-xl bg-red-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-800"
+              className="btn btn-primary shrink-0"
+              style={{ ...BTN_PRIMARY_INLINE, height: '52px', fontSize: '0.95rem', padding: '0 1.75rem' }}
             >
               Réessayer
             </button>
@@ -2537,70 +2048,161 @@ export const PerformanceDashboard = ({
         ) : null}
 
         {!tenantId ? (
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white py-16 shadow-sm">
-            <div className="h-10 w-10 animate-spin rounded-full border-2 border-violet-200 border-t-violet-600" />
-            <p className="mt-4 text-sm font-semibold text-slate-500">Initialisation…</p>
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-white/[0.08] bg-[var(--surface)] py-16">
+            <div className="h-10 w-10 animate-spin rounded-full border-2 border-cyan-500/30 border-t-cyan-400" />
+            <p className="mt-4 text-sm font-medium text-slate-400">Initialisation du module…</p>
           </div>
         ) : (
           <>
-            <div className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4" aria-label="Départements">
-              {tabDefs.map((tab) => {
-                const active = activeTab === tab.id;
-                const Icon = tab.icon;
-                const iconBg =
-                  tab.id === 'logistique'
-                    ? 'border-sky-200/80 bg-sky-100 text-sky-700'
-                    : tab.id === 'call-center'
-                      ? 'border-blue-200/80 bg-blue-100 text-blue-700'
-                      : 'border-fuchsia-200/80 bg-fuchsia-100 text-fuchsia-800';
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={active}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={[
-                      'flex min-h-[5.5rem] items-start gap-4 rounded-2xl border-2 p-4 text-left transition-all sm:min-h-0 sm:p-5',
-                      'focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2',
-                      active
-                        ? 'border-violet-500 bg-violet-50/95 shadow-md ring-1 ring-violet-200/90'
-                        : 'border-slate-200/90 bg-white shadow-sm hover:border-slate-300 hover:shadow-md',
-                    ].join(' ')}
-                  >
-                    <div
-                      className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border ${iconBg}`}
+            {/* Même disposition que Commandes : barre période + pastilles */}
+            <div style={NEXUS_MODULE_TOOLBAR_ROW}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
+                <span
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 800,
+                    color: 'var(--text-muted)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.15em',
+                  }}
+                >
+                  Période
+                </span>
+                <div style={NEXUS_TAB_BAR_WRAP} role="group" aria-label="Période">
+                  {periodFilterDefs.map((f) => (
+                    <button
+                      key={f.id}
+                      type="button"
+                      onClick={() => setFilter(f.id)}
+                      style={nexusPillButtonStyle(filter === f.id, f.color)}
                     >
-                      <Icon size={22} strokeWidth={active ? 2.5 : 2} aria-hidden />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-base font-bold text-slate-900">{tab.label}</div>
-                      <div className="mt-0.5 text-[13px] leading-snug text-slate-500">{tab.sub}</div>
-                    </div>
-                  </button>
-                );
-              })}
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {dataUpdatedAt && !loadError ? (
+                <span
+                  style={{
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    color: 'var(--text-muted)',
+                    marginLeft: 'auto',
+                  }}
+                >
+                  Mis à jour :{' '}
+                  {dataUpdatedAt.toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}
+                </span>
+              ) : null}
             </div>
 
-              {loading ? (
-              <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div className="flex items-center gap-3 border-b border-slate-100 px-4 py-3 sm:px-5">
-                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-violet-200 border-t-violet-600" />
-                  <p className="m-0 text-sm font-medium text-slate-600">Chargement des indicateurs…</p>
+            <nav style={{ ...NEXUS_MODULE_TOOLBAR_ROW, marginBottom: '2rem' }} aria-label="Départements">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
+                  <span
+                    style={{
+                      fontSize: '0.75rem',
+                      fontWeight: 800,
+                      color: 'var(--text-muted)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.15em',
+                    }}
+                  >
+                    Pôle
+                  </span>
+                  <div style={NEXUS_TAB_BAR_WRAP}>
+                    {tabDefs.map((tab) => {
+                      const active = activeTab === tab.id;
+                      return (
+                        <button
+                          key={tab.id}
+                          type="button"
+                          role="tab"
+                          aria-selected={active}
+                          onClick={() => setActiveTab(tab.id)}
+                          style={nexusPillButtonStyle(active, tab.color)}
+                        >
+                          {tab.label}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-                <HubTableSkeleton rows={6} cols={3} />
+                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)', maxWidth: '42rem' }}>
+                  {tabDefs.find((t) => t.id === activeTab)?.sub} — sélectionnez un pôle pour afficher les indicateurs
+                  détaillés.
+                </p>
+              </div>
+            </nav>
+
+            {staffKpiBundle && !loading && !loadError ? (
+              <div
+                className="card glass-effect"
+                style={{
+                  marginBottom: '3.5rem',
+                  padding: '1.5rem',
+                  border: '1px solid rgba(255,255,255,0.03)',
+                  borderRadius: '28px',
+                  background: 'rgba(255,255,255,0.01)',
+                }}
+              >
+                <p
+                  style={{
+                    margin: '0 0 1.25rem 0',
+                    fontSize: '0.7rem',
+                    fontWeight: 800,
+                    letterSpacing: '0.14em',
+                    textTransform: 'uppercase',
+                    color: 'var(--text-muted)',
+                  }}
+                >
+                  Synthèse indicateurs
+                </p>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 lg:gap-5">
+                  {staffKpiBundle[activeTab].map((k) => {
+                    const IconComp = k.Icon;
+                    return (
+                      <StaffKpiCard
+                        key={k.key}
+                        accent={k.accent}
+                        icon={<IconComp size={20} strokeWidth={2} />}
+                        label={k.label}
+                        value={k.value}
+                        sub={k.sub}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            ) : null}
+
+            {loading ? (
+              <div
+                className="card glass-effect overflow-hidden"
+                style={{
+                  border: '1px solid rgba(255,255,255,0.03)',
+                  borderRadius: '32px',
+                  background: 'transparent',
+                }}
+              >
+                <div className="flex items-center gap-3 border-b border-white/[0.06] px-5 py-4">
+                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-cyan-500/25 border-t-cyan-400" />
+                  <p className="m-0 text-sm font-medium text-slate-400">Chargement des indicateurs…</p>
+                </div>
+                <NexusTableSkeleton rows={6} cols={3} />
               </div>
             ) : loadError ? null : (
-              <div style={{ animation: 'fadeIn 0.35s ease' }}>
-                {hubStripeItems ? <HubKpiStrip items={hubStripeItems} /> : null}
-                {activeTab === 'logistique' && renderLogistics()}
-                {activeTab === 'call-center' && renderCallCenter()}
-                {activeTab === 'inventaire' && renderInventory()}
+              <div className="card glass-effect" style={{ padding: 0, border: '1px solid rgba(255,255,255,0.03)', borderRadius: '32px', overflow: 'hidden', background: 'transparent' }}>
+                <div style={{ animation: 'fadeIn 0.35s ease' }}>
+                  {activeTab === 'logistique' && renderLogistics()}
+                  {activeTab === 'call-center' && renderCallCenter()}
+                  {activeTab === 'inventaire' && renderInventory()}
+                </div>
               </div>
             )}
           </>
         )}
-      </div>
+      </NexusModuleFrame>
     );
   }
 
