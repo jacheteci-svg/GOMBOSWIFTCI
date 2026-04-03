@@ -280,22 +280,35 @@ const UsersManager = ({ showToast, tenantId }: { showToast: any, tenantId: strin
           tenant_id: tenantId,
         };
 
+        let inviteRpc: Awaited<ReturnType<typeof finalizeUserInviteViaRpc>> | null = null;
         if (!userId) {
-          const rpcId = await finalizeUserInviteViaRpc(tenantId, {
+          inviteRpc = await finalizeUserInviteViaRpc(tenantId, {
             email: profilePayload.email,
             nom_complet: profilePayload.nom_complet,
             role: profilePayload.role,
             telephone: profilePayload.telephone,
             permissions: profilePayload.permissions || [],
           });
-          if (rpcId) {
-            userId = rpcId;
+          if (inviteRpc.userId) {
+            userId = inviteRpc.userId;
+          } else if (import.meta.env.DEV && authData) {
+            console.warn('[Admin] Création utilisateur : impossible d’extraire l’UUID depuis signUp. Aperçu réponse :', authData);
           }
         }
 
         if (!userId) {
+          if (inviteRpc?.rpcMissing) {
+            throw new Error(
+              "La fonction SQL « admin_finalize_user_invite » n’est pas installée sur la base. Dans InsForge : éditeur SQL → exécutez le fichier « rpc_admin_finalize_user_invite.sql » du dépôt, puis réessayez."
+            );
+          }
+          if (inviteRpc?.noAuthUserRow) {
+            throw new Error(
+              "Aucun compte trouvé dans l’authentification pour cet e-mail (souvent : confirmation e-mail obligatoire avant création du compte). Dans la console InsForge (Auth), désactivez la confirmation obligatoire pour les inscriptions, ou exécutez le script SQL du projet puis réessayez après que le collaborateur ait confirmé son e-mail."
+            );
+          }
           throw new Error(
-            "Impossible d'obtenir l'identifiant du nouveau compte. Exécutez le script SQL « rpc_admin_finalize_user_invite.sql » sur la base, ou dans la console InsForge désactivez la confirmation e-mail obligatoire pour les inscriptions."
+            "Impossible d’obtenir l’identifiant du nouveau compte. Exécutez « rpc_admin_finalize_user_invite.sql » sur la base InsForge, ou désactivez la confirmation e-mail obligatoire pour les inscriptions."
           );
         }
 

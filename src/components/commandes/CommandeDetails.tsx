@@ -24,11 +24,13 @@ export const CommandeDetails = ({ commandeId, onClose }: CommandeDetailsProps) =
   if (loading) {
     return (
       <div className="modal-backdrop" onClick={onClose}>
-        <div className="modal-content modal-nexus card" style={{ maxWidth: '600px', textAlign: 'center', padding: 0, overflow: 'hidden' }}>
-          <div className="modal-nexus-accent" />
-          <div style={{ padding: '2.5rem 2rem' }}>
-            <div className="loading-spinner" style={{ margin: '0 auto 1.5rem' }}></div>
-            <p style={{ fontWeight: 600 }}>Chargement des détails...</p>
+        <div className="modal-content modal-nexus card" style={{ maxWidth: '600px', textAlign: 'center', padding: 0, overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
+          <div className="modal-shell">
+            <div className="modal-nexus-accent" />
+            <div className="modal-body-scroll" style={{ padding: '2.5rem 2rem' }}>
+              <div className="loading-spinner" style={{ margin: '0 auto 1.5rem' }}></div>
+              <p style={{ fontWeight: 600 }}>Chargement des détails...</p>
+            </div>
           </div>
         </div>
       </div>
@@ -42,27 +44,29 @@ export const CommandeDetails = ({ commandeId, onClose }: CommandeDetailsProps) =
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-content modal-nexus modal-nexus-wide card" style={{ maxWidth: '700px', padding: '0', overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
-        <div className="modal-nexus-accent" />
-        {/* Header Section */}
-        <div style={{ padding: '2rem', background: 'linear-gradient(135deg, rgba(6,182,212,0.15) 0%, #0f172a 100%)', color: 'white', position: 'relative' }}>
-          <button 
-            onClick={onClose} 
-            style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '12px', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'white' }}
-          >
-            <X size={18} />
-          </button>
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-            <div style={{ padding: '0.6rem', background: 'rgba(6, 182, 212, 0.2)', borderRadius: '12px' }}>
-              <Receipt size={24} color="var(--primary)" />
-            </div>
-            <div>
-              <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800 }}>Commande #{commande.id.slice(0, 8).toUpperCase()}</h2>
-              <p style={{ margin: 0, opacity: 0.7, fontSize: '0.9rem', fontWeight: 500 }}>Statut actuel: <span style={{ color: 'var(--primary)', fontWeight: 700 }}>{commande.statut_commande.replace(/_/g, ' ')}</span></p>
+        <div className="modal-shell">
+          <div className="modal-nexus-accent" />
+          {/* Header Section */}
+          <div style={{ padding: '2rem', background: 'linear-gradient(135deg, rgba(6,182,212,0.15) 0%, #0f172a 100%)', color: 'white', position: 'relative', flexShrink: 0 }}>
+            <button 
+              onClick={onClose} 
+              style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '12px', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'white' }}
+            >
+              <X size={18} />
+            </button>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+              <div style={{ padding: '0.6rem', background: 'rgba(6, 182, 212, 0.2)', borderRadius: '12px' }}>
+                <Receipt size={24} color="var(--primary)" />
+              </div>
+              <div>
+                <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800 }}>Commande #{commande.id.slice(0, 8).toUpperCase()}</h2>
+                <p style={{ margin: 0, opacity: 0.7, fontSize: '0.9rem', fontWeight: 500 }}>Statut actuel: <span style={{ color: 'var(--primary)', fontWeight: 700 }}>{commande.statut_commande.replace(/_/g, ' ')}</span></p>
+              </div>
             </div>
           </div>
-        </div>
 
+          <div className="modal-body-scroll">
         <div style={{ padding: '2rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }} className="responsive-grid">
           {/* Client Info */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -136,10 +140,12 @@ export const CommandeDetails = ({ commandeId, onClose }: CommandeDetailsProps) =
             </div>
           </div>
         </div>
+          </div>
 
         {/* Footer actions */}
-        <div className="modal-footer-bar">
+        <div className="modal-footer-bar" style={{ flexShrink: 0 }}>
           <button type="button" className="btn btn-outline" onClick={onClose} style={{ borderRadius: '12px', fontWeight: 700 }}>Fermer</button>
+        </div>
         </div>
       </div>
     </div>

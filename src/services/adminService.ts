@@ -95,9 +95,16 @@ export const tryResolveUserIdByEmail = async (
   return data.id;
 };
 
+export type FinalizeUserInviteRpcResult = {
+  userId: string | null;
+  /** True si la fonction Postgres n’est pas déployée (PostgREST / erreur « does not exist »). */
+  rpcMissing: boolean;
+  /** True si la RPC existe mais a renvoyé NULL (aucune ligne auth.users pour cet e-mail). */
+  noAuthUserRow: boolean;
+};
+
 /**
  * RPC serveur : lit auth.users par e-mail et upsert public.users (voir rpc_admin_finalize_user_invite.sql).
- * Retourne null si la fonction n’existe pas ou si aucun compte auth ne correspond.
  */
 export const finalizeUserInviteViaRpc = async (
   tenantId: string,
@@ -108,7 +115,14 @@ export const finalizeUserInviteViaRpc = async (
     telephone: string;
     permissions: string[];
   }
-): Promise<string | null> => {
+): Promise<FinalizeUserInviteRpcResult> => {
+  const empty = (flags: Partial<FinalizeUserInviteRpcResult>): FinalizeUserInviteRpcResult => ({
+    userId: null,
+    rpcMissing: false,
+    noAuthUserRow: false,
+    ...flags,
+  });
+
   try {
     const { data, error } = await insforge.database.rpc('admin_finalize_user_invite', {
       p_email: payload.email.trim().toLowerCase(),
@@ -126,18 +140,24 @@ export const finalizeUserInviteViaRpc = async (
         code === '42883' ||
         msg.includes('does not exist') ||
         msg.includes('introuvable') ||
-        msg.includes('Could not find')
+        msg.includes('Could not find') ||
+        msg.includes('function public.admin_finalize_user_invite')
       ) {
-        return null;
+        return empty({ rpcMissing: true });
       }
       throw error;
     }
 
-    if (data === null || data === undefined) return null;
-    return typeof data === 'string' ? data : String(data);
+    if (data === null || data === undefined) {
+      return empty({ noAuthUserRow: true });
+    }
+    const userId = typeof data === 'string' ? data : String(data);
+    return { userId, rpcMissing: false, noAuthUserRow: false };
   } catch (e: unknown) {
     const msg = e && typeof e === 'object' && 'message' in e ? String((e as Error).message) : '';
-    if (msg.includes('does not exist') || msg.includes('42883')) return null;
+    if (msg.includes('does not exist') || msg.includes('42883')) {
+      return empty({ rpcMissing: true });
+    }
     throw e;
   }
 };

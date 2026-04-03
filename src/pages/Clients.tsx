@@ -220,8 +220,9 @@ export const Clients = () => {
       {selectedClient && (
         <div className="modal-backdrop" onClick={() => setSelectedClient(null)}>
           <div className="modal-content" style={{ maxWidth: '800px', padding: 0, overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
+            <div className="modal-shell">
             {/* Modal Header */}
-            <div className="modal-panel-light" style={{ padding: '2rem', borderBottom: '1px solid #e2e8f0', background: '#f8fafc', position: 'relative' }}>
+            <div className="modal-panel-light" style={{ padding: '2rem', borderBottom: '1px solid #e2e8f0', background: '#f8fafc', position: 'relative', flexShrink: 0 }}>
                <button onClick={() => setSelectedClient(null)} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'white', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '0.5rem', cursor: 'pointer' }}>
                  <X size={20} />
                </button>
@@ -240,7 +241,7 @@ export const Clients = () => {
             </div>
 
             {/* Modal Body */}
-            <div className="modal-panel-light" style={{ padding: '2rem', maxHeight: '60vh', overflowY: 'auto', background: '#ffffff' }}>
+            <div className="modal-panel-light modal-body-scroll" style={{ padding: '2rem', background: '#ffffff' }}>
                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
                   <div style={{ padding: '1.25rem', borderRadius: '16px', background: '#f1f5f9' }}>
                     <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Volume Total</div>
@@ -260,7 +261,7 @@ export const Clients = () => {
                   <h3 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <TrendingUp size={20} color="var(--primary)" /> Actions Marketing WhatsApp
                   </h3>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                  <div className="modal-whatsapp-row">
                     <button className="btn" style={{ background: '#22c55e', color: 'white', fontSize: '0.85rem' }} onClick={() => sendWhatsApp(selectedClient.client, 'friendly')}>Bienvenue 👋</button>
                     <button className="btn" style={{ background: '#16a34a', color: 'white', fontSize: '0.85rem' }} onClick={() => sendWhatsApp(selectedClient.client, 'promo')}>Promo VIP 🎁</button>
                     <button className="btn" style={{ background: '#15803d', color: 'white', fontSize: '0.85rem' }} onClick={() => sendWhatsApp(selectedClient.client, 'reminder')}>Relance 🔄</button>
@@ -293,8 +294,9 @@ export const Clients = () => {
                 </div>
             </div>
 
-            <div className="modal-footer-bar" style={{ justifyContent: 'flex-end' }}>
+            <div className="modal-footer-bar" style={{ justifyContent: 'flex-end', flexShrink: 0 }}>
                <button type="button" className="btn btn-primary" onClick={() => setSelectedClient(null)}>Fermer l'Analyse</button>
+            </div>
             </div>
           </div>
         </div>

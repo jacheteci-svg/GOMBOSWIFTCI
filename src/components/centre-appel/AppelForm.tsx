@@ -268,23 +268,18 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
         style={{
           maxWidth: '720px',
           padding: 0,
-          maxHeight: 'min(92vh, 900px)',
           overflow: 'hidden',
           position: 'relative',
           borderRadius: '28px',
-          display: 'flex',
-          flexDirection: 'column',
         }}
         onClick={e => e.stopPropagation()}
       >
+        <div className="modal-shell">
         <div className="modal-nexus-accent" />
         <div
+          className="modal-body-scroll"
           style={{
             position: 'relative',
-            flex: 1,
-            minHeight: 0,
-            overflowY: 'auto',
-            WebkitOverflowScrolling: 'touch',
             padding: '2.25rem 2.25rem 2rem',
             paddingBottom: 'calc(2rem + env(safe-area-inset-bottom, 0px))',
           }}
@@ -567,6 +562,7 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
             </button>
           </div>
         </form>
+        </div>
         </div>
       </div>
     </div>

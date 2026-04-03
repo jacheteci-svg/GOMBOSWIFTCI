@@ -267,18 +267,21 @@ const FeuilleDetail = ({ feuille, onClose }: { feuille: FeuilleRoute, onClose: (
   return (
     <div className="modal-backdrop animate-fadeIn" onClick={onClose} style={{ backdropFilter: 'blur(12px)', background: 'rgba(0,0,0,0.85)' }}>
       <div className="modal-content modal-nexus modal-nexus-wide card glass-effect animate-modalUp" style={{ maxWidth: '900px', width: '95%', padding: 0, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '32px', position: 'relative' }} onClick={e => e.stopPropagation()}>
+        <div className="modal-shell">
         <div className="modal-nexus-accent" />
-        <div style={{ padding: '3rem 3.5rem 3.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+        <div style={{ padding: '1.5rem 1.5rem 1rem', flexShrink: 0 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
             <h2 style={{ fontSize: '2rem', fontWeight: 950, margin: 0, color: 'white', letterSpacing: '-0.02em' }}>Tournée Opérationnelle</h2>
             <p style={{ color: 'var(--text-muted)', fontWeight: 700, marginTop: '0.4rem' }}>Récapitulatif des ordres de livraison pour ce secteur.</p>
           </div>
           <button className="btn btn-outline" onClick={onClose} style={{ borderRadius: '14px', height: '48px', padding: '0 1.5rem' }}>Fermer</button>
         </div>
+        </div>
 
+        <div className="modal-body-scroll" style={{ padding: '0 1.5rem 1.5rem' }}>
         {loading ? (
-            <div style={{ textAlign: 'center', padding: '5rem' }}>
+            <div style={{ textAlign: 'center', padding: '3rem 1rem' }}>
                 <div className="spinner" style={{ margin: '0 auto 1.5rem' }}></div>
                 <p style={{ color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase' }}>Synchronisation des données...</p>
             </div>
@@ -326,6 +329,7 @@ const FeuilleDetail = ({ feuille, onClose }: { feuille: FeuilleRoute, onClose: (
             </table>
           </div>
         )}
+        </div>
         </div>
       </div>
     </div>

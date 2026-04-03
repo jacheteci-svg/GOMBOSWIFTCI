@@ -36,11 +36,23 @@ export function restoreAdminSession(client: Client, snap: AdminSessionSnapshot |
   c.getHttpClient().setAuthToken(snap.accessToken);
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function isLikelyUserUuid(s: string): boolean {
+  return typeof s === 'string' && s.length >= 32 && UUID_RE.test(s.trim());
+}
+
 function readUserIdFromUserObject(u: unknown): string {
   if (!u || typeof u !== 'object') return '';
   const o = u as Record<string, unknown>;
-  const id = o.id ?? o.userId ?? o.sub;
+  const id = o.id ?? o.userId ?? o.uuid ?? o.sub;
   if (typeof id === 'string' && id.length > 0) return id;
+  const profile = o.profile;
+  if (profile && typeof profile === 'object') {
+    const p = profile as Record<string, unknown>;
+    const pid = p.id ?? p.userId;
+    if (typeof pid === 'string' && pid.length > 0) return pid;
+  }
   return '';
 }
 
@@ -71,6 +83,21 @@ export function extractUserIdFromAuthPayload(authData: unknown): string {
   for (const k of ['userId', 'user_id']) {
     const v = r[k];
     if (typeof v === 'string' && v.length > 0) return v;
+  }
+
+  // Corps brut POST /api/auth/users (InsForge) : parfois id au niveau racine
+  if (typeof r.id === 'string' && isLikelyUserUuid(r.id)) return r.id;
+
+  const account = r.account;
+  if (account && typeof account === 'object') {
+    id = readUserIdFromUserObject(account);
+    if (id) return id;
+  }
+
+  const createdUser = r.createdUser ?? r.created_user;
+  if (createdUser) {
+    id = readUserIdFromUserObject(createdUser);
+    if (id) return id;
   }
 
   return '';

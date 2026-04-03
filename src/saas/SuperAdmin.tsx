@@ -511,11 +511,13 @@ const TenantsTab = ({ tenants, fetchData, loading }: { tenants: Tenant[], fetchD
       )}
 
       {isModalOpen && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(2,6,23,0.85)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000, padding: '1.5rem' }}>
-          <div className="nexus-card-elite" style={{ width: '100%', maxWidth: '500px', padding: '3rem', animation: 'modalScale 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+        <div className="modal-backdrop" style={{ zIndex: 10000, background: 'rgba(2,6,23,0.85)', backdropFilter: 'blur(12px)' }} onClick={() => setIsModalOpen(false)}>
+          <div className="nexus-card-elite" style={{ width: '100%', maxWidth: '500px', padding: 0, overflow: 'hidden', animation: 'modalScale 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }} onClick={e => e.stopPropagation()}>
+            <div className="modal-shell">
+            <div className="modal-body-scroll" style={{ padding: '2rem 2rem 2.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', gap: '1rem' }}>
               <h2 style={{ fontSize: '1.6rem', fontWeight: 950, margin: 0 }}>Déployer une Organisation</h2>
-              <button onClick={() => setIsModalOpen(false)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}><X size={28} /></button>
+              <button type="button" onClick={() => setIsModalOpen(false)} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', flexShrink: 0 }}><X size={28} /></button>
             </div>
             <form onSubmit={handleCreateTenant} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               <div>
@@ -535,6 +537,8 @@ const TenantsTab = ({ tenants, fetchData, loading }: { tenants: Tenant[], fetchD
                 {actionLoading ? <div className="spinner"></div> : 'LANCER LE DÉPLOIEMENT'}
               </button>
             </form>
+            </div>
+            </div>
           </div>
         </div>
       )}

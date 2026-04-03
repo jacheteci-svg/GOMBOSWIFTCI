@@ -57,7 +57,9 @@ export const StockForm = ({ produit, onClose, onSave }: StockFormProps) => {
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-content card glass-effect" style={{ maxWidth: '550px', padding: '2.5rem' }} onClick={e => e.stopPropagation()}>
+      <div className="modal-content card glass-effect" style={{ maxWidth: '550px', padding: 0, overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
+        <div className="modal-shell">
+        <div className="modal-body-scroll" style={{ padding: '2rem 2rem 2.25rem' }}>
         <button onClick={onClose} className="btn-close-premium" style={{ 
           position: 'absolute', top: '1.5rem', right: '1.5rem', 
           background: 'rgba(255,255,255,0.05)', border: 'none', cursor: 'pointer', 
@@ -88,7 +90,7 @@ export const StockForm = ({ produit, onClose, onSave }: StockFormProps) => {
           
           <div style={{ marginBottom: '2rem' }}>
             <label className="form-label" style={{ marginBottom: '1rem', display: 'block' }}>Type de mouvement</label>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+            <div className="stock-movement-type-grid">
               <div 
                 onClick={() => setFormData({...formData, type_mouvement: 'entree'})}
                 style={{ 
@@ -211,6 +213,8 @@ export const StockForm = ({ produit, onClose, onSave }: StockFormProps) => {
             </button>
           </div>
         </form>
+        </div>
+        </div>
       </div>
     </div>
   );

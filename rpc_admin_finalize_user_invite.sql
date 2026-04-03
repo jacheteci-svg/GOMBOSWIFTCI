@@ -1,7 +1,12 @@
--- À exécuter sur la base InsForge / Postgres du projet.
--- Quand signUp réussit mais ne renvoie pas de session (ex. confirmation e-mail),
--- le front ne peut pas lire l’UUID auth côté client : cette RPC lie auth.users → public.users
--- en vérifiant que l’appelant appartient au même tenant.
+-- À exécuter une fois sur la base Postgres InsForge (éditeur SQL du tableau de bord).
+--
+-- Pourquoi : après « Créer un profil », le SDK appelle signUp. Si la confirmation e-mail est
+-- obligatoire, souvent il n’y a pas d’UUID exploitable côté navigateur : cette fonction lit
+-- auth.users par e-mail et fait l’upsert dans public.users, en vérifiant que l’admin appelant
+-- est du même tenant.
+--
+-- Alternative : dans InsForge → Auth / paramètres, désactiver la confirmation e-mail obligatoire
+-- pour les inscriptions (développement ou équipe de confiance uniquement).
 
 CREATE OR REPLACE FUNCTION public.admin_finalize_user_invite(
   p_email text,

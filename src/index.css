@@ -1222,6 +1222,71 @@ tr:hover td {
   border-radius: var(--radius-xl);
 }
 
+/* Coque modale : hauteur max viewport + corps interne défilant (mobile / popups longues) */
+.modal-shell {
+  display: flex;
+  flex-direction: column;
+  max-height: min(92dvh, calc(100svh - 1.5rem));
+  overflow: hidden;
+  width: 100%;
+  min-width: 0;
+}
+
+.modal-body-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+.modal-shell .modal-nexus-actions {
+  flex-shrink: 0;
+}
+
+/* Grille WhatsApp / actions marketing (Clients) */
+.modal-whatsapp-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+/* Types de mouvement stock (3 cartes) */
+.stock-movement-type-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+@media (max-width: 640px) {
+  .stock-movement-type-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Grilles stats dans les modales (Historique, etc.) */
+.modal-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .modal-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .responsive-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.15rem !important;
+  }
+
+  .modal-whatsapp-row {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 /*
  * Surfaces claires dans les modales / popovers :
  * le thème global définit --text-main très clair pour le fond sombre ;
@@ -1290,17 +1355,46 @@ tr:hover td {
   }
 }
 
-@media (max-width: 640px) {
+/* Modales plein écran / bas de écran : safe areas, scroll interne */
+@media (max-width: 768px) {
   .modal-backdrop {
     padding: 0;
+    padding-top: max(0.35rem, env(safe-area-inset-top, 0px));
     align-items: flex-end;
+    justify-content: center;
   }
-  .modal-content {
-    border-radius: 24px 24px 0 0;
-    padding: 1.5rem;
-    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
-    max-width: 100%;
+
+  .modal-content,
+  .modal-content.modal-nexus,
+  .modal-content.modal-nexus.modal-nexus-wide {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 22px 22px 0 0;
+    margin: 0;
+    max-height: min(96dvh, 100dvh) !important;
   }
+
+  .modal-shell {
+    max-height: min(96dvh, 100dvh) !important;
+  }
+
+  .modal-content:not(.modal-nexus) {
+    padding: 1.25rem;
+    padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .modal-footer-bar {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .modal-footer-bar .btn {
+    width: 100%;
+  }
+
   @keyframes slideUp {
     from { transform: translateY(100%); }
     to { transform: translateY(0); }

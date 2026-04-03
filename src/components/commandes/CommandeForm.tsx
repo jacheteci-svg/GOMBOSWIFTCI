@@ -213,8 +213,9 @@ export const CommandeForm = ({ onClose, onSave }: { onClose: () => void, onSave:
         style={{ maxWidth: '900px', padding: 0, overflow: 'hidden', borderRadius: '28px', position: 'relative' }}
         onClick={e => e.stopPropagation()}
       >
+        <div className="modal-shell">
         <div className="modal-nexus-accent" />
-        <div style={{ padding: '2.5rem 3rem 3rem' }}>
+        <div className="modal-body-scroll" style={{ padding: '2.5rem 3rem 3rem' }}>
         <button 
           onClick={onClose} 
           style={{ 
@@ -361,6 +362,7 @@ export const CommandeForm = ({ onClose, onSave }: { onClose: () => void, onSave:
             </button>
           </div>
         </form>
+        </div>
         </div>
       </div>
     </div>

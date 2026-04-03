@@ -195,9 +195,10 @@ const ReviewModal = ({ feuille, commandes, loading, onClose, onRefresh, showToas
         onConfirm={executeReopen}
       />
       <div className="modal-content modal-nexus modal-nexus-wide card glass-effect" onClick={e => e.stopPropagation()} style={{ maxWidth: '900px', padding: 0, overflow: 'hidden' }}>
+        <div className="modal-shell">
         <div className="modal-nexus-accent" />
         {/* Header Modal */}
-        <div style={{ padding: '2rem', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'linear-gradient(180deg, rgba(6,182,212,0.08) 0%, rgba(15,23,42,0.4) 100%)' }}>
+        <div style={{ padding: '2rem', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'linear-gradient(180deg, rgba(6,182,212,0.08) 0%, rgba(15,23,42,0.4) 100%)', flexShrink: 0 }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.4rem' }}>
               <Truck size={24} color="var(--primary)" />
@@ -211,12 +212,12 @@ const ReviewModal = ({ feuille, commandes, loading, onClose, onRefresh, showToas
         </div>
 
         {/* Content */}
-        <div style={{ padding: '2rem', maxHeight: '70vh', overflowY: 'auto' }}>
+        <div className="modal-body-scroll" style={{ padding: '2rem' }}>
           {loading ? (
              <div style={{ textAlign: 'center', padding: '4rem' }}>Chargement...</div>
           ) : (
              <>
-               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '2rem' }}>
+               <div className="modal-stat-grid" style={{ marginBottom: '2rem' }}>
                   <div style={{ padding: '1.5rem', borderRadius: '20px', background: '#f0fdf4', border: '1px solid #dcfce7' }}>
                     <p style={{ margin: 0, fontSize: '0.75rem', fontWeight: 800, color: '#166534', textTransform: 'uppercase' }}>Encaissement</p>
                     <p style={{ margin: '0.5rem 0 0', fontSize: '1.5rem', fontWeight: 900, color: '#15803d' }}>{(feuille.montant_encaisse ?? feuille.total_montant_theorique)?.toLocaleString()} CFA</p>
@@ -288,7 +289,7 @@ const ReviewModal = ({ feuille, commandes, loading, onClose, onRefresh, showToas
           )}
         </div>
 
-        <div className="modal-footer-bar">
+        <div className="modal-footer-bar" style={{ flexShrink: 0 }}>
            <button type="button" className="btn btn-outline" onClick={onClose}>Fermer</button>
            {isAdmin && (
              <button type="button" className="btn btn-outline" style={{ borderColor: '#f87171', color: '#fecaca' }} onClick={() => setReopenConfirm(true)}>
@@ -298,6 +299,7 @@ const ReviewModal = ({ feuille, commandes, loading, onClose, onRefresh, showToas
            <button type="button" className="btn btn-primary" onClick={handleReprint}>
              <Printer size={18} /> Ré-imprimer
            </button>
+        </div>
         </div>
       </div>
     </div>

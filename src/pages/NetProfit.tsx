@@ -290,9 +290,11 @@ export const NetProfit = () => {
       </div>
 
       {isModalOpen && (
-        <div className="modal-backdrop" onClick={() => setIsModalOpen(false)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(15, 23, 42, 0.7)', backdropFilter: 'blur(8px)', zIndex: 1000 }}>
-          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: '500px', borderRadius: '32px', padding: '2.5rem', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+        <div className="modal-backdrop" onClick={() => setIsModalOpen(false)} style={{ zIndex: 1000 }}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: '500px', borderRadius: '32px', padding: 0, overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' }}>
+            <div className="modal-shell">
+            <div className="modal-body-scroll" style={{ padding: '1.75rem 2rem 2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', gap: '1rem' }}>
                <div>
                  <h2 style={{ margin: 0, fontWeight: 950, fontSize: '1.8rem', letterSpacing: '-0.03em' }}>Nouvelle Dépense</h2>
                  <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '0.9rem', fontWeight: 600 }}>Enregistrement d'une charge d'exploitation</p>
@@ -323,11 +325,13 @@ export const NetProfit = () => {
                 <label className="form-label" style={{ fontWeight: 700, marginBottom: '0.6rem', display: 'block' }}>Notes & Justification</label>
                 <textarea className="form-input" style={{ borderRadius: '14px', padding: '1rem', fontWeight: 500 }} rows={2} value={newDepense.description} onChange={e => setNewDepense({...newDepense, description: e.target.value})} placeholder="Ex: Campagne Facebook Mars 2024" />
               </div>
-              <div style={{ display: 'flex', gap: '1.25rem', marginTop: '3rem' }}>
-                <button type="button" className="btn btn-outline" style={{ flex: 1, height: '54px', borderRadius: '16px', fontWeight: 800 }} onClick={() => setIsModalOpen(false)}>Annuler</button>
-                <button type="submit" className="btn btn-primary" style={{ flex: 1, height: '54px', borderRadius: '16px', fontWeight: 800 }}>Enregistrer</button>
+              <div style={{ display: 'flex', gap: '1.25rem', marginTop: '2rem', flexWrap: 'wrap' }}>
+                <button type="button" className="btn btn-outline" style={{ flex: 1, minWidth: '120px', height: '54px', borderRadius: '16px', fontWeight: 800 }} onClick={() => setIsModalOpen(false)}>Annuler</button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1, minWidth: '120px', height: '54px', borderRadius: '16px', fontWeight: 800 }}>Enregistrer</button>
               </div>
             </form>
+            </div>
+            </div>
           </div>
         </div>
       )}

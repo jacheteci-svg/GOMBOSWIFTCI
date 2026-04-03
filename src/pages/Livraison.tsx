@@ -215,58 +215,68 @@ export const Livraison = () => {
 
       {/* Modal Premium Mise à jour Statut */}
       {selectedCommande && (
-        <div style={{ 
-          position: 'fixed', 
-          inset: 0, 
-          backgroundColor: 'rgba(15, 23, 42, 0.7)', 
-          backdropFilter: 'blur(8px)',
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
-          zIndex: 1000,
-          padding: '1.5rem',
-          animation: 'pageEnter 0.3s ease-out'
-        }}>
-          <div className="card" style={{ width: '100%', maxWidth: '420px', padding: '2.5rem', borderRadius: '28px', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <h3 style={{ marginBottom: '2rem', fontSize: '1.4rem', fontWeight: 800, textAlign: 'center', color: statusAction === 'livree' ? '#10b981' : '#ef4444' }}>
-              {statusAction === 'livree' ? '🎉 Bravo ! Colis Livré' : '⚠️ Signalement d\'échec'}
-            </h3>
-            
-            <div className="modal-panel-light" style={{ padding: '1.25rem', borderRadius: '16px', background: '#f1f5f9', border: '1px solid #e2e8f0', marginBottom: '0.5rem' }}>
-            {statusAction === 'livree' && (
-              <div className="form-group">
-                <label className="form-label" style={{ fontWeight: 700 }}>Méthode d'encaissement</label>
-                <select className="form-select" value={modeForm} onChange={e => setModeForm(e.target.value)} style={{ height: '48px', fontWeight: 600 }}>
-                  <option value="Cash">Cash (Espèces)</option>
-                  <option value="Mobile Money">Mobile Money (OM/Momo)</option>
-                  <option value="Carte">Carte / Autre</option>
-                </select>
+        <div
+          className="modal-backdrop"
+          style={{ zIndex: 1000, animation: 'pageEnter 0.3s ease-out' }}
+          onClick={() => setSelectedCommande(null)}
+        >
+          <div
+            className="modal-content card"
+            style={{ width: '100%', maxWidth: '420px', padding: 0, overflow: 'hidden', borderRadius: '28px', border: '1px solid rgba(255,255,255,0.1)' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="modal-shell">
+              <div className="modal-body-scroll" style={{ padding: '1.5rem 1.5rem 1rem' }}>
+                <h3 style={{ marginBottom: '1.25rem', fontSize: '1.35rem', fontWeight: 800, textAlign: 'center', color: statusAction === 'livree' ? '#10b981' : '#ef4444' }}>
+                  {statusAction === 'livree' ? '🎉 Bravo ! Colis Livré' : '⚠️ Signalement d\'échec'}
+                </h3>
+
+                <div className="modal-panel-light" style={{ padding: '1.25rem', borderRadius: '16px', background: '#f1f5f9', border: '1px solid #e2e8f0', marginBottom: '0.5rem' }}>
+                  {statusAction === 'livree' && (
+                    <div className="form-group">
+                      <label className="form-label" style={{ fontWeight: 700 }}>Méthode d'encaissement</label>
+                      <select className="form-select" value={modeForm} onChange={e => setModeForm(e.target.value)} style={{ height: '48px', fontWeight: 600 }}>
+                        <option value="Cash">Cash (Espèces)</option>
+                        <option value="Mobile Money">Mobile Money (OM/Momo)</option>
+                        <option value="Carte">Carte / Autre</option>
+                      </select>
+                    </div>
+                  )}
+
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label" style={{ fontWeight: 700 }}>Note du terrain</label>
+                    <textarea
+                      className="form-input"
+                      rows={3}
+                      required={statusAction === 'retour_livreur'}
+                      style={{ padding: '1rem', borderRadius: '16px', width: '100%', boxSizing: 'border-box' }}
+                      value={noteForm}
+                      onChange={e => setNoteForm(e.target.value)}
+                      placeholder={statusAction === 'retour_livreur' ? "Ex: Client injoignable après 3 tentatives..." : "Commentaire additionnel (facultatif)"}
+                    />
+                  </div>
+                </div>
               </div>
-            )}
-
-            <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label" style={{ fontWeight: 700 }}>Note du terrain</label>
-              <textarea 
-                className="form-input" 
-                rows={3} 
-                required={statusAction === 'retour_livreur'}
-                style={{ padding: '1rem', borderRadius: '16px' }}
-                value={noteForm}
-                onChange={e => setNoteForm(e.target.value)}
-                placeholder={statusAction === 'retour_livreur' ? "Ex: Client injoignable après 3 tentatives..." : "Commentaire additionnel (facultatif)"}
-              />
-            </div>
-            </div>
-
-            <div style={{ display: 'flex', gap: '1rem', marginTop: '2.5rem' }}>
-              <button className="btn btn-outline" onClick={() => setSelectedCommande(null)} style={{ flex: 1, height: '52px', borderRadius: '14px', fontWeight: 700 }}>Annuler</button>
-              <button 
-                className="btn btn-primary" 
-                onClick={handleUpdate} 
-                style={{ flex: 2, height: '52px', borderRadius: '14px', fontWeight: 800, background: statusAction === 'livree' ? '#10b981' : '#ef4444', boxShadow: statusAction === 'livree' ? '0 10px 15px -3px rgba(16, 185, 129, 0.4)' : '0 10px 15px -3px rgba(239, 68, 68, 0.4)' }}
-              >
-                Confirmer l'état
-              </button>
+              <div className="modal-footer-bar" style={{ marginTop: 0, paddingTop: '1rem' }}>
+                <button type="button" className="btn btn-outline" onClick={() => setSelectedCommande(null)} style={{ flex: 1, minHeight: '52px', borderRadius: '14px', fontWeight: 700 }}>
+                  Annuler
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleUpdate}
+                  style={{
+                    flex: 2,
+                    minHeight: '52px',
+                    borderRadius: '14px',
+                    fontWeight: 800,
+                    background: statusAction === 'livree' ? '#10b981' : '#ef4444',
+                    boxShadow: statusAction === 'livree' ? '0 10px 15px -3px rgba(16, 185, 129, 0.4)' : '0 10px 15px -3px rgba(239, 68, 68, 0.4)',
+                  }}
+                >
+                  Confirmer l'état
+                </button>
+              </div>
             </div>
           </div>
         </div>
