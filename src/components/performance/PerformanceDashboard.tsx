@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo, type ReactNode } from 'react';
+import { useState, useEffect, useMemo, type CSSProperties, type ReactNode } from 'react';
+import { NexusModuleFrame } from '../layout/NexusModuleFrame';
 import {
   loadPerformanceDashboardData,
   loadSuperAdminTenantPerformance,
@@ -38,6 +39,8 @@ type FilterType = 'mois' | '7jours' | 'aujourdhui' | 'toujours';
 interface PerformanceDashboardProps {
   tenantId?: string;
   isSuperAdmin?: boolean;
+  /** Aligne la page sur Admin : NexusModuleFrame, onglets, cartes et tables */
+  embeddedModuleChrome?: boolean;
 }
 
 const chartTooltip = {
@@ -125,7 +128,105 @@ function StaffKpiCard({
   );
 }
 
-export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDashboardProps) => {
+const ADMIN_TAB_BAR_WRAP: CSSProperties = {
+  display: 'flex',
+  gap: '0.5rem',
+  marginBottom: '3rem',
+  padding: '0.5rem',
+  background: 'rgba(255,255,255,0.02)',
+  borderRadius: '20px',
+  width: 'fit-content',
+  border: '1px solid rgba(255,255,255,0.05)',
+  backdropFilter: 'blur(10px)',
+};
+
+const adminTabButtonStyle = (active: boolean): CSSProperties => ({
+  background: active ? 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)' : 'transparent',
+  color: active ? 'white' : 'var(--text-muted)',
+  boxShadow: active ? '0 10px 20px rgba(6, 182, 212, 0.3)' : 'none',
+  border: 'none',
+  padding: '0.8rem 1.8rem',
+  borderRadius: '16px',
+  fontWeight: 800,
+  fontSize: '0.9rem',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.75rem',
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+});
+
+function PerfAdminTableCard({
+  title,
+  titleAccent,
+  subtitle,
+  hint,
+  children,
+}: {
+  title: string;
+  titleAccent?: string;
+  subtitle: string;
+  hint: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      className="card glass-effect"
+      style={{
+        padding: '2.5rem',
+        border: '1px solid rgba(255,255,255,0.03)',
+        borderRadius: '32px',
+        marginBottom: '2rem',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          marginBottom: '2rem',
+          alignItems: 'flex-start',
+          flexWrap: 'wrap',
+          gap: '1rem',
+        }}
+      >
+        <div>
+          <h3 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 900, color: 'white' }}>
+            {title}
+            {titleAccent ? <span style={{ color: 'var(--primary)' }}> {titleAccent}</span> : null}
+          </h3>
+          <p
+            style={{
+              color: 'var(--text-muted)',
+              fontWeight: 600,
+              fontSize: '0.9rem',
+              marginTop: '0.35rem',
+            }}
+          >
+            {subtitle}
+          </p>
+        </div>
+        {hint}
+      </div>
+      <div
+        className="table-container"
+        style={{
+          background: 'rgba(0,0,0,0.1)',
+          border: '1px solid rgba(255,255,255,0.05)',
+          borderRadius: '24px',
+          overflowX: 'auto',
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
+export const PerformanceDashboard = ({
+  tenantId,
+  isSuperAdmin,
+  embeddedModuleChrome,
+}: PerformanceDashboardProps) => {
+  const moduleChrome = Boolean(embeddedModuleChrome && !isSuperAdmin);
   const [activeTab, setActiveTab] = useState<TabType>('logistique');
   const [filter, setFilter] = useState<FilterType>('mois');
   const [loading, setLoading] = useState(true);
@@ -191,6 +292,33 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
                   }
                 : undefined
             }
+          >
+            {f.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+
+  /** Filtres période — même gabarit que les onglets de la page Admin */
+  const renderPeriodFiltersAdmin = () => (
+    <div style={ADMIN_TAB_BAR_WRAP} role="group" aria-label="Période">
+      {(
+        [
+          { id: 'mois' as const, label: 'Ce mois' },
+          { id: '7jours' as const, label: '7 jours' },
+          { id: 'aujourdhui' as const, label: "Aujourd'hui" },
+          { id: 'toujours' as const, label: 'Toujours' },
+        ] as const
+      ).map((f) => {
+        const on = filter === f.id;
+        return (
+          <button
+            key={f.id}
+            type="button"
+            className="btn"
+            onClick={() => setFilter(f.id)}
+            style={adminTabButtonStyle(on)}
           >
             {f.label}
           </button>
@@ -376,134 +504,232 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
     const avgSuccess = totalSorties > 0 ? Math.round((totalReussies / totalSorties) * 100) : 0;
     const top = data[0];
 
+    const logHint = (
+      <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
+        <Lightbulb size={16} className="text-amber-400/90 shrink-0" strokeWidth={2} />
+        {sortHint('logistique')}
+      </div>
+    );
+
+    const logisticsTable = (
+      <table
+        className={
+          moduleChrome ? 'table-responsive-cards w-full text-left text-sm' : 'w-full text-left text-sm min-w-[720px]'
+        }
+      >
+        <thead>
+          <tr
+            className={
+              moduleChrome
+                ? ''
+                : 'text-[10px] uppercase tracking-[0.08em] text-slate-500 border-b border-white/[0.06] bg-black/20'
+            }
+          >
+            <th style={moduleChrome ? { padding: '1.5rem' } : undefined} className={moduleChrome ? '' : 'px-5 py-3.5 font-bold'}>
+              Livreur
+            </th>
+            <th
+              style={moduleChrome ? { padding: '1.5rem', textAlign: 'center' } : undefined}
+              className={moduleChrome ? '' : 'px-3 py-3.5 font-bold text-center'}
+            >
+              Sorties
+            </th>
+            <th
+              style={moduleChrome ? { padding: '1.5rem', textAlign: 'center', color: C.livres } : undefined}
+              className={moduleChrome ? '' : 'px-3 py-3.5 font-bold text-center'}
+            >
+              Livrés
+            </th>
+            <th
+              style={moduleChrome ? { padding: '1.5rem', textAlign: 'center', color: C.retours } : undefined}
+              className={moduleChrome ? '' : 'px-3 py-3.5 font-semibold text-center'}
+            >
+              Retours
+            </th>
+            <th
+              style={moduleChrome ? { padding: '1.5rem', textAlign: 'center', color: C.annules } : undefined}
+              className={moduleChrome ? '' : 'px-3 py-3.5 font-semibold text-center'}
+            >
+              Annulés
+            </th>
+            <th
+              style={moduleChrome ? { padding: '1.5rem', textAlign: 'center', color: C.reports } : undefined}
+              className={moduleChrome ? '' : 'px-3 py-3.5 font-semibold text-center'}
+            >
+              Reportés
+            </th>
+            <th
+              style={moduleChrome ? { padding: '1.5rem', textAlign: 'right' } : undefined}
+              className={moduleChrome ? '' : 'px-5 py-3.5 font-semibold text-right'}
+            >
+              Gains livr.
+            </th>
+          </tr>
+        </thead>
+        <tbody className={moduleChrome ? 'divide-y divide-white/5' : 'divide-y divide-white/[0.05]'}>
+          {data.map((s: any) => (
+            <tr
+              key={s.livreur_id}
+              className="hover:bg-cyan-500/[0.04] transition-colors border-b border-white/[0.04]"
+            >
+              <td data-label="Livreur" style={moduleChrome ? { padding: '1.25rem 1.5rem' } : undefined} className={moduleChrome ? '' : 'px-5 py-4'}>
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
+                    style={{
+                      background: `linear-gradient(135deg, ${C.primary} 0%, #6366f1 100%)`,
+                      boxShadow: `0 4px 16px ${C.primarySoft}`,
+                    }}
+                  >
+                    {s.nom?.charAt(0) ?? '?'}
+                  </div>
+                  <div>
+                    <div className="font-semibold text-slate-100">{s.nom}</div>
+                    <div className="text-xs text-slate-500 mt-0.5">{s.success_rate}% réussite</div>
+                  </div>
+                </div>
+              </td>
+              <td
+                data-label="Sorties"
+                style={moduleChrome ? { padding: '1.25rem 1.5rem', textAlign: 'center' } : undefined}
+                className={moduleChrome ? '' : 'px-3 py-4 text-center font-medium text-slate-200 tabular-nums'}
+              >
+                {s.sorties}
+              </td>
+              <td
+                data-label="Livrés"
+                style={moduleChrome ? { padding: '1.25rem 1.5rem', textAlign: 'center', color: C.livres } : undefined}
+                className={moduleChrome ? '' : 'px-3 py-4 text-center font-semibold tabular-nums'}
+              >
+                {s.reussies}
+              </td>
+              <td
+                data-label="Retours"
+                style={moduleChrome ? { padding: '1.25rem 1.5rem', textAlign: 'center', color: C.retours } : undefined}
+                className={moduleChrome ? '' : 'px-3 py-4 text-center font-semibold tabular-nums'}
+              >
+                {s.retours}
+              </td>
+              <td
+                data-label="Annulés"
+                style={moduleChrome ? { padding: '1.25rem 1.5rem', textAlign: 'center', color: C.annules } : undefined}
+                className={moduleChrome ? '' : 'px-3 py-4 text-center font-semibold tabular-nums'}
+              >
+                {s.annules ?? 0}
+              </td>
+              <td
+                data-label="Reportés"
+                style={moduleChrome ? { padding: '1.25rem 1.5rem', textAlign: 'center', color: C.reports } : undefined}
+                className={moduleChrome ? '' : 'px-3 py-4 text-center font-semibold tabular-nums'}
+              >
+                {s.reportes ?? 0}
+              </td>
+              <td
+                data-label="Gains livr."
+                style={moduleChrome ? { padding: '1.25rem 1.5rem', textAlign: 'right' } : undefined}
+                className={moduleChrome ? '' : 'px-5 py-4 text-right font-bold text-slate-100 tabular-nums'}
+              >
+                {s.ca_frais != null ? Number(s.ca_frais).toLocaleString('fr-FR') : '—'}{' '}
+                <span className="text-slate-500 text-xs font-semibold">CFA</span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+
+    const heroTop = top ? (
+      <div
+        className={
+          moduleChrome
+            ? 'card glass-effect relative overflow-hidden p-5 sm:p-6'
+            : 'relative overflow-hidden rounded-2xl border border-cyan-500/30 p-5 sm:p-6'
+        }
+        style={
+          moduleChrome
+            ? { borderRadius: '32px', border: '1px solid rgba(255,255,255,0.03)' }
+            : {
+                background:
+                  'linear-gradient(135deg, rgba(6, 182, 212, 0.12) 0%, rgba(15, 23, 42, 0.98) 50%, #0f172a 100%)',
+                boxShadow: '0 0 0 1px rgba(6, 182, 212, 0.1), 0 25px 50px -12px rgba(0,0,0,0.45)',
+              }
+        }
+      >
+        {!moduleChrome && <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-cyan-400/15 blur-3xl" aria-hidden />}
+        <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-start gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-amber-400/35 bg-amber-500/15 text-amber-200">
+              <Medal size={24} strokeWidth={2} />
+            </div>
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-cyan-400/95">Top livreur · période</p>
+              <p className="mt-1 text-xl font-bold text-white tracking-tight">{top.nom}</p>
+              <p className="text-sm text-slate-400 mt-0.5">
+                {top.success_rate}% réussite · {Number(top.sorties) || 0} sorties
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-3 sm:gap-4">
+            <div className="rounded-xl bg-black/25 border border-white/5 px-4 py-3 min-w-[120px]">
+              <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Livrés</p>
+              <p className="text-lg font-bold tabular-nums mt-1" style={{ color: C.livres }}>
+                {top.reussies}
+              </p>
+            </div>
+            <div className="rounded-xl bg-black/25 border border-white/5 px-4 py-3 min-w-[120px]">
+              <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Gains</p>
+              <p className="text-lg font-bold text-white tabular-nums mt-1">
+                {top.ca_frais != null ? Number(top.ca_frais).toLocaleString('fr-FR') : '—'}{' '}
+                <span className="text-xs text-slate-500">CFA</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    ) : null;
+
     return (
       <div className="space-y-6 lg:space-y-8">
-        {top && (
-          <div
-            className="relative overflow-hidden rounded-2xl border border-cyan-500/30 p-5 sm:p-6"
-            style={{
-              background:
-                'linear-gradient(135deg, rgba(6, 182, 212, 0.12) 0%, rgba(15, 23, 42, 0.98) 50%, #0f172a 100%)',
-              boxShadow: '0 0 0 1px rgba(6, 182, 212, 0.1), 0 25px 50px -12px rgba(0,0,0,0.45)',
-            }}
+        {heroTop}
+
+        {moduleChrome ? (
+          <PerfAdminTableCard
+            title="Détail"
+            titleAccent="logistique"
+            subtitle="Livreurs · volumes et résultats"
+            hint={logHint}
           >
-            <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-cyan-400/15 blur-3xl" aria-hidden />
-            <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-amber-400/35 bg-amber-500/15 text-amber-200">
-                  <Medal size={24} strokeWidth={2} />
-                </div>
-                <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-cyan-400/95">
-                    Top livreur · période
-                  </p>
-                  <p className="mt-1 text-xl font-bold text-white tracking-tight">{top.nom}</p>
-                  <p className="text-sm text-slate-400 mt-0.5">
-                    {top.success_rate}% réussite · {Number(top.sorties) || 0} sorties
-                  </p>
-                </div>
+            {logisticsTable}
+            {data.length === 0 && (
+              <p className="p-10 text-center text-slate-500 text-sm">Aucune donnée logistique pour cette période.</p>
+            )}
+          </PerfAdminTableCard>
+        ) : (
+          <div className={panelClass}>
+            <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-white/[0.06] bg-gradient-to-r from-cyan-950/25 to-transparent">
+              <div>
+                <h2 className="text-lg font-bold text-[var(--text-main)]" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                  Détail <span style={{ color: C.primary }}>logistique</span>
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">Livreurs · volumes et résultats</p>
               </div>
-              <div className="flex gap-3 sm:gap-4">
-                <div className="rounded-xl bg-black/25 border border-white/5 px-4 py-3 min-w-[120px]">
-                  <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Livrés</p>
-                  <p className="text-lg font-bold tabular-nums mt-1" style={{ color: C.livres }}>
-                    {top.reussies}
-                  </p>
-                </div>
-                <div className="rounded-xl bg-black/25 border border-white/5 px-4 py-3 min-w-[120px]">
-                  <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Gains</p>
-                  <p className="text-lg font-bold text-white tabular-nums mt-1">
-                    {top.ca_frais != null ? Number(top.ca_frais).toLocaleString('fr-FR') : '—'}{' '}
-                    <span className="text-xs text-slate-500">CFA</span>
-                  </p>
-                </div>
-              </div>
+              {logHint}
             </div>
+            <div className="overflow-x-auto">{logisticsTable}</div>
+            {data.length === 0 && (
+              <p className="p-10 text-center text-slate-500 text-sm">Aucune donnée logistique pour cette période.</p>
+            )}
           </div>
         )}
 
-        <div className={panelClass}>
-          <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-white/[0.06] bg-gradient-to-r from-cyan-950/25 to-transparent">
-            <div>
-              <h2 className="text-lg font-bold text-[var(--text-main)]" style={{ fontFamily: 'Outfit, sans-serif' }}>
-                Détail <span style={{ color: C.primary }}>logistique</span>
-              </h2>
-              <p className="text-xs text-slate-500 mt-0.5">Livreurs · volumes et résultats</p>
-            </div>
-            <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
-              <Lightbulb size={16} className="text-amber-400/90 shrink-0" strokeWidth={2} />
-              {sortHint('logistique')}
-            </div>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm min-w-[720px]">
-              <thead>
-                <tr className="text-[10px] uppercase tracking-[0.08em] text-slate-500 border-b border-white/[0.06] bg-black/20">
-                  <th className="px-5 py-3.5 font-bold">Livreur</th>
-                  <th className="px-3 py-3.5 font-bold text-center">Sorties</th>
-                  <th className="px-3 py-3.5 font-bold text-center" style={{ color: C.livres }}>
-                    Livrés
-                  </th>
-                  <th className="px-3 py-3.5 font-semibold text-center" style={{ color: C.retours }}>
-                    Retours
-                  </th>
-                  <th className="px-3 py-3.5 font-semibold text-center" style={{ color: C.annules }}>
-                    Annulés
-                  </th>
-                  <th className="px-3 py-3.5 font-semibold text-center" style={{ color: C.reports }}>
-                    Reportés
-                  </th>
-                  <th className="px-5 py-3.5 font-semibold text-right">Gains livr.</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/[0.05]">
-                {data.map((s: any) => (
-                    <tr key={s.livreur_id} className="hover:bg-cyan-500/[0.04] transition-colors border-b border-white/[0.04]">
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
-                            style={{
-                              background: `linear-gradient(135deg, ${C.primary} 0%, #6366f1 100%)`,
-                              boxShadow: `0 4px 16px ${C.primarySoft}`,
-                            }}
-                          >
-                            {s.nom?.charAt(0) ?? '?'}
-                          </div>
-                          <div>
-                            <div className="font-semibold text-slate-100">{s.nom}</div>
-                            <div className="text-xs text-slate-500 mt-0.5">{s.success_rate}% réussite</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-3 py-4 text-center font-medium text-slate-200 tabular-nums">{s.sorties}</td>
-                      <td className="px-3 py-4 text-center font-semibold tabular-nums" style={{ color: C.livres }}>
-                        {s.reussies}
-                      </td>
-                      <td className="px-3 py-4 text-center font-semibold tabular-nums" style={{ color: C.retours }}>
-                        {s.retours}
-                      </td>
-                      <td className="px-3 py-4 text-center font-semibold tabular-nums" style={{ color: C.annules }}>
-                        {s.annules ?? 0}
-                      </td>
-                      <td className="px-3 py-4 text-center font-semibold tabular-nums" style={{ color: C.reports }}>
-                        {s.reportes ?? 0}
-                      </td>
-                      <td className="px-5 py-4 text-right font-bold text-slate-100 tabular-nums">
-                        {s.ca_frais != null ? Number(s.ca_frais).toLocaleString('fr-FR') : '—'}{' '}
-                        <span className="text-slate-500 text-xs font-semibold">CFA</span>
-                      </td>
-                    </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          {data.length === 0 && (
-            <p className="p-10 text-center text-slate-500 text-sm">Aucune donnée logistique pour cette période.</p>
-          )}
-        </div>
-
-        <div className={`${panelClass} p-5 md:p-6`}>
+        <div
+          className={
+            moduleChrome
+              ? 'card glass-effect p-5 md:p-6'
+              : `${panelClass} p-5 md:p-6`
+          }
+          style={moduleChrome ? { borderRadius: '32px', border: '1px solid rgba(255,255,255,0.03)' } : undefined}
+        >
           <div className="mb-6">
             <h3 className="text-base font-bold text-white mb-1 flex items-center gap-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
               <Activity size={18} className="text-cyan-400" />
@@ -563,107 +789,178 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
     const avgConv = th > 0 ? Math.round((td / th) * 100) : 0;
     const top = data[0];
 
+    const ccHint = (
+      <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
+        <Lightbulb size={16} className="text-amber-400/90 shrink-0" strokeWidth={2} />
+        {sortHint('call-center')}
+      </div>
+    );
+
+    const callTable = (
+      <table
+        className={
+          moduleChrome ? 'table-responsive-cards w-full text-left text-sm' : 'w-full text-left text-sm min-w-[640px]'
+        }
+      >
+        <thead>
+          <tr className={moduleChrome ? '' : 'text-[10px] uppercase tracking-[0.08em] text-slate-500 border-b border-white/[0.06] bg-black/20'}>
+            <th style={moduleChrome ? { padding: '1.5rem' } : undefined} className={moduleChrome ? '' : 'px-5 py-3.5 font-bold'}>
+              Agent
+            </th>
+            <th style={moduleChrome ? { padding: '1.5rem', textAlign: 'center' } : undefined} className={moduleChrome ? '' : 'px-3 py-3.5 font-semibold text-center'}>
+              Dossiers
+            </th>
+            <th style={moduleChrome ? { padding: '1.5rem', textAlign: 'center' } : undefined} className={moduleChrome ? '' : 'px-3 py-3.5 font-semibold text-center'}>
+              Validations
+            </th>
+            <th
+              style={moduleChrome ? { padding: '1.5rem', textAlign: 'center', color: C.livres } : undefined}
+              className={moduleChrome ? '' : 'px-3 py-3.5 font-semibold text-center'}
+            >
+              Livrées
+            </th>
+            <th
+              style={moduleChrome ? { padding: '1.5rem', textAlign: 'right', color: C.primary } : undefined}
+              className={moduleChrome ? '' : 'px-5 py-3.5 font-semibold text-right'}
+            >
+              Conversion
+            </th>
+          </tr>
+        </thead>
+        <tbody className={moduleChrome ? 'divide-y divide-white/5' : 'divide-y divide-white/[0.05]'}>
+          {data.map((agent: any) => (
+            <tr key={agent.agent_id} className="hover:bg-violet-500/[0.05] transition-colors border-b border-white/[0.04]">
+              <td data-label="Agent" style={moduleChrome ? { padding: '1.25rem 1.5rem' } : undefined} className={moduleChrome ? '' : 'px-5 py-4'}>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/40 to-cyan-500/20 flex items-center justify-center text-violet-100 font-bold text-sm shrink-0 border border-white/10">
+                    {(agent.staff_name || 'A').charAt(0)}
+                  </div>
+                  <span className="font-semibold text-slate-100">{agent.staff_name || 'Agent'}</span>
+                </div>
+              </td>
+              <td
+                data-label="Dossiers"
+                style={moduleChrome ? { padding: '1.25rem 1.5rem', textAlign: 'center' } : undefined}
+                className={moduleChrome ? '' : 'px-3 py-4 text-center tabular-nums text-slate-200'}
+              >
+                {agent.total_handled}
+              </td>
+              <td
+                data-label="Validations"
+                style={moduleChrome ? { padding: '1.25rem 1.5rem', textAlign: 'center' } : undefined}
+                className={moduleChrome ? '' : 'px-3 py-4 text-center tabular-nums text-slate-300'}
+              >
+                {agent.total_validations}
+              </td>
+              <td
+                data-label="Livrées"
+                style={moduleChrome ? { padding: '1.25rem 1.5rem', textAlign: 'center', color: C.livres } : undefined}
+                className={moduleChrome ? '' : 'px-3 py-4 text-center font-semibold tabular-nums'}
+              >
+                {agent.total_delivered}
+              </td>
+              <td
+                data-label="Conversion"
+                style={moduleChrome ? { padding: '1.25rem 1.5rem', textAlign: 'right', color: C.primary } : undefined}
+                className={moduleChrome ? '' : 'px-5 py-4 text-right font-bold tabular-nums'}
+              >
+                {agent.success_rate}%
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+
+    const heroCc = top ? (
+      <div
+        className={
+          moduleChrome
+            ? 'card glass-effect relative overflow-hidden p-5 sm:p-6'
+            : 'relative overflow-hidden rounded-2xl border border-violet-500/25 p-5 sm:p-6'
+        }
+        style={
+          moduleChrome
+            ? { borderRadius: '32px', border: '1px solid rgba(255,255,255,0.03)' }
+            : {
+                background:
+                  'linear-gradient(135deg, rgba(139, 92, 246, 0.12) 0%, rgba(15, 23, 42, 0.98) 45%, #0f172a 100%)',
+                boxShadow: '0 0 0 1px rgba(139, 92, 246, 0.12), 0 25px 50px -12px rgba(0,0,0,0.45)',
+              }
+        }
+      >
+        {!moduleChrome && <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-violet-500/15 blur-3xl" aria-hidden />}
+        <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-start gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-violet-400/35 bg-violet-500/20 text-violet-200">
+              <Medal size={24} strokeWidth={2} />
+            </div>
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-violet-300/95">Top agent · conversion</p>
+              <p className="mt-1 text-xl font-bold text-white tracking-tight">{top.staff_name || 'Agent'}</p>
+              <p className="text-sm text-slate-400 mt-0.5">
+                {top.success_rate}% conversion · {top.total_handled} dossiers
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <div className="rounded-xl bg-black/25 border border-white/5 px-4 py-3 min-w-[110px]">
+              <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Livrées</p>
+              <p className="text-lg font-bold tabular-nums mt-1" style={{ color: C.livres }}>
+                {top.total_delivered}
+              </p>
+            </div>
+            <div className="rounded-xl bg-black/25 border border-white/5 px-4 py-3 min-w-[110px]">
+              <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Validations</p>
+              <p className="text-lg font-bold text-slate-100 tabular-nums mt-1">{top.total_validations}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    ) : null;
+
     return (
       <div className="space-y-6 lg:space-y-8">
-        {top && (
-          <div
-            className="relative overflow-hidden rounded-2xl border border-violet-500/25 p-5 sm:p-6"
-            style={{
-              background:
-                'linear-gradient(135deg, rgba(139, 92, 246, 0.12) 0%, rgba(15, 23, 42, 0.98) 45%, #0f172a 100%)',
-              boxShadow: '0 0 0 1px rgba(139, 92, 246, 0.12), 0 25px 50px -12px rgba(0,0,0,0.45)',
-            }}
+        {heroCc}
+
+        {moduleChrome ? (
+          <PerfAdminTableCard
+            title="Détail"
+            titleAccent="centre d'appel"
+            subtitle="Agents · dossiers et conversion"
+            hint={ccHint}
           >
-            <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-violet-500/15 blur-3xl" aria-hidden />
-            <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-violet-400/35 bg-violet-500/20 text-violet-200">
-                  <Medal size={24} strokeWidth={2} />
-                </div>
-                <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-violet-300/95">
-                    Top agent · conversion
-                  </p>
-                  <p className="mt-1 text-xl font-bold text-white tracking-tight">{top.staff_name || 'Agent'}</p>
-                  <p className="text-sm text-slate-400 mt-0.5">
-                    {top.success_rate}% conversion · {top.total_handled} dossiers
-                  </p>
-                </div>
+            {callTable}
+            {data.length === 0 && (
+              <p className="p-10 text-center text-slate-500 text-sm">Aucune donnée centre d&apos;appel.</p>
+            )}
+          </PerfAdminTableCard>
+        ) : (
+          <div className={panelClass}>
+            <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-white/[0.06] bg-gradient-to-r from-violet-950/30 to-transparent">
+              <div>
+                <h2 className="text-lg font-bold text-[var(--text-main)]" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                  Détail <span style={{ color: C.primary }}>centre d&apos;appel</span>
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">Agents · dossiers et conversion</p>
               </div>
-              <div className="flex gap-3">
-                <div className="rounded-xl bg-black/25 border border-white/5 px-4 py-3 min-w-[110px]">
-                  <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Livrées</p>
-                  <p className="text-lg font-bold tabular-nums mt-1" style={{ color: C.livres }}>
-                    {top.total_delivered}
-                  </p>
-                </div>
-                <div className="rounded-xl bg-black/25 border border-white/5 px-4 py-3 min-w-[110px]">
-                  <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Validations</p>
-                  <p className="text-lg font-bold text-slate-100 tabular-nums mt-1">{top.total_validations}</p>
-                </div>
-              </div>
+              {ccHint}
             </div>
+            <div className="overflow-x-auto">{callTable}</div>
+            {data.length === 0 && (
+              <p className="p-10 text-center text-slate-500 text-sm">Aucune donnée centre d&apos;appel.</p>
+            )}
           </div>
         )}
 
-        <div className={panelClass}>
-          <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-white/[0.06] bg-gradient-to-r from-violet-950/30 to-transparent">
-            <div>
-              <h2 className="text-lg font-bold text-[var(--text-main)]" style={{ fontFamily: 'Outfit, sans-serif' }}>
-                Détail <span style={{ color: C.primary }}>centre d&apos;appel</span>
-              </h2>
-              <p className="text-xs text-slate-500 mt-0.5">Agents · dossiers et conversion</p>
-            </div>
-            <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
-              <Lightbulb size={16} className="text-amber-400/90 shrink-0" strokeWidth={2} />
-              {sortHint('call-center')}
-            </div>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm min-w-[640px]">
-              <thead>
-                <tr className="text-[10px] uppercase tracking-[0.08em] text-slate-500 border-b border-white/[0.06] bg-black/20">
-                  <th className="px-5 py-3.5 font-bold">Agent</th>
-                  <th className="px-3 py-3.5 font-semibold text-center">Dossiers</th>
-                  <th className="px-3 py-3.5 font-semibold text-center">Validations</th>
-                  <th className="px-3 py-3.5 font-semibold text-center" style={{ color: C.livres }}>
-                    Livrées
-                  </th>
-                  <th className="px-5 py-3.5 font-semibold text-right" style={{ color: C.primary }}>
-                    Conversion
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/[0.05]">
-                {data.map((agent: any) => (
-                  <tr key={agent.agent_id} className="hover:bg-violet-500/[0.05] transition-colors border-b border-white/[0.04]">
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/40 to-cyan-500/20 flex items-center justify-center text-violet-100 font-bold text-sm shrink-0 border border-white/10">
-                          {(agent.staff_name || 'A').charAt(0)}
-                        </div>
-                        <span className="font-semibold text-slate-100">{agent.staff_name || 'Agent'}</span>
-                      </div>
-                    </td>
-                    <td className="px-3 py-4 text-center tabular-nums text-slate-200">{agent.total_handled}</td>
-                    <td className="px-3 py-4 text-center tabular-nums text-slate-300">{agent.total_validations}</td>
-                    <td className="px-3 py-4 text-center font-semibold tabular-nums" style={{ color: C.livres }}>
-                      {agent.total_delivered}
-                    </td>
-                    <td className="px-5 py-4 text-right font-bold tabular-nums" style={{ color: C.primary }}>
-                      {agent.success_rate}%
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          {data.length === 0 && (
-            <p className="p-10 text-center text-slate-500 text-sm">Aucune donnée centre d&apos;appel.</p>
-          )}
-        </div>
-
-        <div className={`${panelClass} p-5 md:p-6`}>
+        <div
+          className={
+            moduleChrome
+              ? 'card glass-effect p-5 md:p-6'
+              : `${panelClass} p-5 md:p-6`
+          }
+          style={moduleChrome ? { borderRadius: '32px', border: '1px solid rgba(255,255,255,0.03)' } : undefined}
+        >
           <div className="mb-5">
             <h3 className="text-base font-bold text-white mb-1 flex items-center gap-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
               <PhoneCall size={18} className="text-cyan-400" />
@@ -717,143 +1014,213 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
     const itemsAlert = data.filter((i: any) => i.stock_actuel <= (i.stock_minimum || 5)).length;
     const top = data[0];
 
+    const invHint = (
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="text-xs font-bold text-slate-300 px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/[0.08]">
+          {data.length} réf. · {itemsAlert} alerte(s)
+        </span>
+        <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
+          <Lightbulb size={16} className="text-amber-400/90 shrink-0" strokeWidth={2} />
+          {sortHint('inventaire')}
+        </div>
+      </div>
+    );
+
+    const invRows = data.map((item: any) => (
+      <tr key={item.sku} className="hover:bg-emerald-500/[0.04] transition-colors border-b border-white/[0.04]">
+        <td
+          data-label="Produit"
+          style={moduleChrome ? { padding: '1.25rem 1.5rem' } : undefined}
+          className={moduleChrome ? '' : 'px-5 py-4'}
+        >
+          <div className="font-semibold text-slate-100">{item.nom}</div>
+          <div className="text-[11px] font-medium mt-0.5" style={{ color: C.primary }}>
+            SKU {item.sku}
+          </div>
+        </td>
+        <td
+          data-label="Stock"
+          style={moduleChrome ? { padding: '1.25rem 1.5rem', textAlign: 'center' } : undefined}
+          className={moduleChrome ? '' : 'px-3 py-4 text-center'}
+        >
+          <span
+            className={`inline-flex min-w-[2.5rem] justify-center px-2.5 py-1 rounded-lg text-sm font-semibold tabular-nums ${
+              item.stock_actuel <= (item.stock_minimum || 5)
+                ? 'bg-rose-500/15 text-rose-300'
+                : 'bg-emerald-500/15 text-emerald-300'
+            }`}
+          >
+            {item.stock_actuel}
+          </span>
+        </td>
+        <td
+          data-label="Seuil"
+          style={moduleChrome ? { padding: '1.25rem 1.5rem', textAlign: 'center' } : undefined}
+          className={moduleChrome ? '' : 'px-3 py-4 text-center text-slate-500 tabular-nums'}
+        >
+          {item.stock_minimum || 5}
+        </td>
+        <td
+          data-label="Rotation"
+          style={moduleChrome ? { padding: '1.25rem 1.5rem', textAlign: 'center' } : undefined}
+          className={moduleChrome ? '' : 'px-3 py-4 text-center'}
+        >
+          <div className="flex items-center justify-center gap-2">
+            <div className="w-16 h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
+              <div
+                className="h-full rounded-full"
+                style={{
+                  width: `${Math.min(100, Number(item.rotation_index) || 0)}%`,
+                  background: `linear-gradient(90deg, ${C.primary}, #3b82f6)`,
+                }}
+              />
+            </div>
+            <span className="text-xs font-semibold text-slate-300 tabular-nums w-8">{item.rotation_index}%</span>
+          </div>
+        </td>
+        <td
+          data-label="Statut"
+          style={moduleChrome ? { padding: '1.25rem 1.5rem', textAlign: 'right' } : undefined}
+          className={moduleChrome ? '' : 'px-5 py-4 text-right'}
+        >
+          <span
+            className={`inline-block px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${
+              item.stock_actuel > (item.stock_minimum || 5)
+                ? 'bg-emerald-500/15 text-emerald-300'
+                : item.stock_actuel > 0
+                  ? 'bg-amber-500/15 text-amber-200'
+                  : 'bg-rose-500/15 text-rose-300'
+            }`}
+          >
+            {item.stock_actuel > (item.stock_minimum || 5)
+              ? 'Optimal'
+              : item.stock_actuel > 0
+                ? 'Réappro.'
+                : 'Rupture'}
+          </span>
+        </td>
+      </tr>
+    ));
+
+    const invTable = (
+      <table
+        className={
+          moduleChrome ? 'table-responsive-cards w-full text-left text-sm' : 'w-full text-left text-sm min-w-[640px]'
+        }
+      >
+        <thead>
+          <tr className={moduleChrome ? '' : 'text-[10px] uppercase tracking-[0.08em] text-slate-500 border-b border-white/[0.06] bg-black/20'}>
+            <th style={moduleChrome ? { padding: '1.5rem' } : undefined} className={moduleChrome ? '' : 'px-5 py-3.5 font-bold'}>
+              Produit
+            </th>
+            <th style={moduleChrome ? { padding: '1.5rem', textAlign: 'center' } : undefined} className={moduleChrome ? '' : 'px-3 py-3.5 font-semibold text-center'}>
+              Stock
+            </th>
+            <th style={moduleChrome ? { padding: '1.5rem', textAlign: 'center' } : undefined} className={moduleChrome ? '' : 'px-3 py-3.5 font-semibold text-center'}>
+              Seuil
+            </th>
+            <th
+              style={moduleChrome ? { padding: '1.5rem', textAlign: 'center', color: C.primary } : undefined}
+              className={moduleChrome ? '' : 'px-3 py-3.5 font-semibold text-center'}
+            >
+              Rotation
+            </th>
+            <th style={moduleChrome ? { padding: '1.5rem', textAlign: 'right' } : undefined} className={moduleChrome ? '' : 'px-5 py-3.5 font-semibold text-right'}>
+              Statut
+            </th>
+          </tr>
+        </thead>
+        <tbody className={moduleChrome ? 'divide-y divide-white/5' : 'divide-y divide-white/[0.05]'}>{invRows}</tbody>
+      </table>
+    );
+
+    const heroInv = top ? (
+      <div
+        className={
+          moduleChrome
+            ? 'card glass-effect relative overflow-hidden p-5 sm:p-6'
+            : 'relative overflow-hidden rounded-2xl border border-emerald-500/25 p-5 sm:p-6'
+        }
+        style={
+          moduleChrome
+            ? { borderRadius: '32px', border: '1px solid rgba(255,255,255,0.03)' }
+            : {
+                background:
+                  'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(15, 23, 42, 0.98) 50%, #0f172a 100%)',
+                boxShadow: '0 0 0 1px rgba(16, 185, 129, 0.12), 0 25px 50px -12px rgba(0,0,0,0.45)',
+              }
+        }
+      >
+        {!moduleChrome && <div className="absolute -right-6 -bottom-10 h-36 w-36 rounded-full bg-emerald-500/12 blur-3xl" aria-hidden />}
+        <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-start gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-emerald-400/35 bg-emerald-500/15 text-emerald-200">
+              <Package size={24} strokeWidth={2} />
+            </div>
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-300/95">Article le plus dynamique</p>
+              <p className="mt-1 text-xl font-bold text-white tracking-tight">{top.nom}</p>
+              <p className="text-sm text-slate-400 mt-0.5">
+                Rotation {top.rotation_index}% · SKU {top.sku}
+              </p>
+            </div>
+          </div>
+          <div className="rounded-xl bg-black/25 border border-white/5 px-4 py-3 min-w-[140px]">
+            <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Stock actuel</p>
+            <p
+              className={`text-2xl font-bold tabular-nums mt-1 ${
+                top.stock_actuel <= (top.stock_minimum || 5) ? 'text-amber-300' : 'text-emerald-300'
+              }`}
+            >
+              {top.stock_actuel}
+            </p>
+          </div>
+        </div>
+      </div>
+    ) : null;
+
     return (
       <div className="space-y-6 lg:space-y-8">
-        {top && (
-          <div
-            className="relative overflow-hidden rounded-2xl border border-emerald-500/25 p-5 sm:p-6"
-            style={{
-              background:
-                'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(15, 23, 42, 0.98) 50%, #0f172a 100%)',
-              boxShadow: '0 0 0 1px rgba(16, 185, 129, 0.12), 0 25px 50px -12px rgba(0,0,0,0.45)',
-            }}
+        {heroInv}
+
+        {moduleChrome ? (
+          <PerfAdminTableCard
+            title="Détail"
+            titleAccent="inventaire"
+            subtitle="Stocks, seuils et rotation"
+            hint={invHint}
           >
-            <div className="absolute -right-6 -bottom-10 h-36 w-36 rounded-full bg-emerald-500/12 blur-3xl" aria-hidden />
-            <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-emerald-400/35 bg-emerald-500/15 text-emerald-200">
-                  <Package size={24} strokeWidth={2} />
-                </div>
-                <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-300/95">
-                    Article le plus dynamique
-                  </p>
-                  <p className="mt-1 text-xl font-bold text-white tracking-tight">{top.nom}</p>
-                  <p className="text-sm text-slate-400 mt-0.5">
-                    Rotation {top.rotation_index}% · SKU {top.sku}
-                  </p>
-                </div>
+            {invTable}
+            {data.length === 0 && (
+              <p className="p-10 text-center text-slate-500 text-sm">Aucun produit suivi pour l&apos;inventaire.</p>
+            )}
+          </PerfAdminTableCard>
+        ) : (
+          <div className={panelClass}>
+            <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-white/[0.06] bg-gradient-to-r from-emerald-950/25 to-transparent">
+              <div>
+                <h2 className="text-lg font-bold text-[var(--text-main)]" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                  Détail <span style={{ color: C.primary }}>inventaire</span>
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">Stocks, seuils et rotation</p>
               </div>
-              <div className="rounded-xl bg-black/25 border border-white/5 px-4 py-3 min-w-[140px]">
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Stock actuel</p>
-                <p
-                  className={`text-2xl font-bold tabular-nums mt-1 ${
-                    top.stock_actuel <= (top.stock_minimum || 5) ? 'text-amber-300' : 'text-emerald-300'
-                  }`}
-                >
-                  {top.stock_actuel}
-                </p>
-              </div>
+              {invHint}
             </div>
+            <div className="overflow-x-auto">{invTable}</div>
+            {data.length === 0 && (
+              <p className="p-10 text-center text-slate-500 text-sm">Aucun produit suivi pour l&apos;inventaire.</p>
+            )}
           </div>
         )}
 
-        <div className={panelClass}>
-          <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-white/[0.06] bg-gradient-to-r from-emerald-950/25 to-transparent">
-            <div>
-              <h2 className="text-lg font-bold text-[var(--text-main)]" style={{ fontFamily: 'Outfit, sans-serif' }}>
-                Détail <span style={{ color: C.primary }}>inventaire</span>
-              </h2>
-              <p className="text-xs text-slate-500 mt-0.5">Stocks, seuils et rotation</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-xs font-bold text-slate-300 px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/[0.08]">
-                {data.length} réf. · {itemsAlert} alerte(s)
-              </span>
-              <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
-                <Lightbulb size={16} className="text-amber-400/90 shrink-0" strokeWidth={2} />
-                {sortHint('inventaire')}
-              </div>
-            </div>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm min-w-[640px]">
-              <thead>
-                <tr className="text-[10px] uppercase tracking-[0.08em] text-slate-500 border-b border-white/[0.06] bg-black/20">
-                  <th className="px-5 py-3.5 font-bold">Produit</th>
-                  <th className="px-3 py-3.5 font-semibold text-center">Stock</th>
-                  <th className="px-3 py-3.5 font-semibold text-center">Seuil</th>
-                  <th className="px-3 py-3.5 font-semibold text-center" style={{ color: C.primary }}>
-                    Rotation
-                  </th>
-                  <th className="px-5 py-3.5 font-semibold text-right">Statut</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/[0.05]">
-                {data.map((item: any) => (
-                  <tr key={item.sku} className="hover:bg-emerald-500/[0.04] transition-colors border-b border-white/[0.04]">
-                    <td className="px-5 py-4">
-                      <div className="font-semibold text-slate-100">{item.nom}</div>
-                      <div className="text-[11px] font-medium mt-0.5" style={{ color: C.primary }}>
-                        SKU {item.sku}
-                      </div>
-                    </td>
-                    <td className="px-3 py-4 text-center">
-                      <span
-                        className={`inline-flex min-w-[2.5rem] justify-center px-2.5 py-1 rounded-lg text-sm font-semibold tabular-nums ${
-                          item.stock_actuel <= (item.stock_minimum || 5)
-                            ? 'bg-rose-500/15 text-rose-300'
-                            : 'bg-emerald-500/15 text-emerald-300'
-                        }`}
-                      >
-                        {item.stock_actuel}
-                      </span>
-                    </td>
-                    <td className="px-3 py-4 text-center text-slate-500 tabular-nums">{item.stock_minimum || 5}</td>
-                    <td className="px-3 py-4 text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <div className="w-16 h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
-                          <div
-                            className="h-full rounded-full"
-                            style={{
-                              width: `${Math.min(100, Number(item.rotation_index) || 0)}%`,
-                              background: `linear-gradient(90deg, ${C.primary}, #3b82f6)`,
-                            }}
-                          />
-                        </div>
-                        <span className="text-xs font-semibold text-slate-300 tabular-nums w-8">
-                          {item.rotation_index}%
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-5 py-4 text-right">
-                      <span
-                        className={`inline-block px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${
-                          item.stock_actuel > (item.stock_minimum || 5)
-                            ? 'bg-emerald-500/15 text-emerald-300'
-                            : item.stock_actuel > 0
-                              ? 'bg-amber-500/15 text-amber-200'
-                              : 'bg-rose-500/15 text-rose-300'
-                        }`}
-                      >
-                        {item.stock_actuel > (item.stock_minimum || 5)
-                          ? 'Optimal'
-                          : item.stock_actuel > 0
-                            ? 'Réappro.'
-                            : 'Rupture'}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          {data.length === 0 && (
-            <p className="p-10 text-center text-slate-500 text-sm">Aucun produit suivi pour l&apos;inventaire.</p>
-          )}
-        </div>
-
-        <div className={`${panelClass} p-5 md:p-6`}>
+        <div
+          className={
+            moduleChrome
+              ? 'card glass-effect p-5 md:p-6'
+              : `${panelClass} p-5 md:p-6`
+          }
+          style={moduleChrome ? { borderRadius: '32px', border: '1px solid rgba(255,255,255,0.03)' } : undefined}
+        >
           <div className="mb-5">
             <h3 className="text-base font-bold text-white mb-1 flex items-center gap-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
               <TrendingUp size={18} className="text-cyan-400" />
@@ -1238,6 +1605,139 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
     { id: 'call-center', label: "Centre d'appel", sub: 'Efficacité & conversions', icon: PhoneCall },
     { id: 'inventaire', label: 'Inventaire', sub: 'Stocks & rotation', icon: Package },
   ];
+
+  const clockPill = (
+    <div
+      className="flex items-center gap-2.5 text-xs sm:text-sm text-slate-200 px-4 py-3 rounded-2xl border border-white/10"
+      style={{ background: 'rgba(8, 11, 20, 0.75)', backdropFilter: 'blur(12px)' }}
+    >
+      <Clock size={17} className="shrink-0 text-cyan-400" strokeWidth={2} aria-hidden />
+      <span className="font-medium tabular-nums">
+        {new Date().toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}
+      </span>
+    </div>
+  );
+
+  if (moduleChrome) {
+    return (
+      <NexusModuleFrame
+        badge="Platform Control"
+        title="Performance équipe"
+        description={subtitle}
+        actions={
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'flex-end' }}>
+            {renderPeriodFiltersAdmin()}
+            {clockPill}
+          </div>
+        }
+      >
+        {!tenantId ? (
+          <div
+            className="card glass-effect animate-pulse"
+            style={{ padding: '5rem', textAlign: 'center', borderRadius: '40px' }}
+          >
+            <div
+              className="spinner"
+              style={{ margin: '0 auto 2rem', width: '50px', height: '50px', borderTopColor: 'var(--primary)' }}
+            />
+            <p
+              style={{
+                color: 'var(--text-main)',
+                fontWeight: 800,
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+              }}
+            >
+              Initialisation du Nexus…
+            </p>
+          </div>
+        ) : (
+          <>
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '1.5rem',
+                marginBottom: '2rem',
+              }}
+            >
+              <div style={ADMIN_TAB_BAR_WRAP} aria-label="Départements">
+                {tabDefs.map((tab) => {
+                  const active = activeTab === tab.id;
+                  const Icon = tab.icon;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      className="btn"
+                      onClick={() => setActiveTab(tab.id)}
+                      style={adminTabButtonStyle(active)}
+                    >
+                      <Icon size={18} strokeWidth={active ? 3 : 2} />
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-slate-500 max-w-md" style={{ fontWeight: 600 }}>
+                {tabDefs.find((t) => t.id === activeTab)?.sub}
+              </p>
+            </div>
+
+            {staffKpiBundle && !loading && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-5 mb-8">
+                {staffKpiBundle[activeTab].map((k) => {
+                  const IconComp = k.Icon;
+                  return (
+                    <StaffKpiCard
+                      key={k.key}
+                      accent={k.accent}
+                      icon={<IconComp size={20} strokeWidth={2} />}
+                      label={k.label}
+                      value={k.value}
+                      sub={k.sub}
+                    />
+                  );
+                })}
+              </div>
+            )}
+
+            <div className="nexus-main-area">
+              {loading ? (
+                <div
+                  className="card glass-effect animate-pulse"
+                  style={{ padding: '5rem', textAlign: 'center', borderRadius: '40px' }}
+                >
+                  <div
+                    className="spinner"
+                    style={{ margin: '0 auto 2rem', width: '50px', height: '50px', borderTopColor: 'var(--primary)' }}
+                  />
+                  <p
+                    style={{
+                      color: 'var(--text-main)',
+                      fontWeight: 800,
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    Chargement des indicateurs…
+                  </p>
+                </div>
+              ) : (
+                <div style={{ animation: 'fadeIn 0.35s ease' }}>
+                  {activeTab === 'logistique' && renderLogistics()}
+                  {activeTab === 'call-center' && renderCallCenter()}
+                  {activeTab === 'inventaire' && renderInventory()}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </NexusModuleFrame>
+    );
+  }
 
   return (
     <div

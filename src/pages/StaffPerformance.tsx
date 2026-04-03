@@ -5,8 +5,8 @@ export const StaffPerformance = () => {
   const { tenant } = useSaas();
   
   return (
-    <div className="min-h-full w-full -mx-6">
-      <PerformanceDashboard tenantId={tenant?.id} />
+    <div className="min-h-full w-full">
+      <PerformanceDashboard tenantId={tenant?.id} embeddedModuleChrome />
     </div>
   );
 };
