@@ -119,7 +119,7 @@ export const Caisse = () => {
       const fullCmd = {
         ...cmd,
         nom_client: cmd.clients?.nom_complet ?? cmd.client_nom,
-        telephone_client: cmd.clients?.telephone
+        telephone_client: cmd.clients?.telephone ?? cmd.client_telephone
       };
 
       // 1. Assign to current sheet in DB

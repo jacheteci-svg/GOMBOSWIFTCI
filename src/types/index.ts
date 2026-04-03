@@ -157,6 +157,8 @@ export interface Commande {
   nom_client?: string;
   client_nom?: string;
   telephone_client?: string;
+  /** Dupliqué sur certaines BDD (colonne `client_telephone` NOT NULL sur `commandes`). */
+  client_telephone?: string;
   source_commande: string;
   statut_commande: StatutCommande;
   montant_total: number;

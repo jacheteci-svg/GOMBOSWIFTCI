@@ -13,6 +13,7 @@ ALTER TABLE clients ADD COLUMN IF NOT EXISTS remarques TEXT;
 -- commandes : lien client + champs utilisés par l’app (voir schema.sql)
 ALTER TABLE commandes ADD COLUMN IF NOT EXISTS client_id UUID REFERENCES clients(id);
 ALTER TABLE commandes ADD COLUMN IF NOT EXISTS client_nom TEXT;
+ALTER TABLE commandes ADD COLUMN IF NOT EXISTS client_telephone TEXT;
 ALTER TABLE commandes ADD COLUMN IF NOT EXISTS source_commande TEXT;
 ALTER TABLE commandes ADD COLUMN IF NOT EXISTS mode_paiement TEXT;
 ALTER TABLE commandes ADD COLUMN IF NOT EXISTS commune_livraison TEXT;

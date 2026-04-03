@@ -27,7 +27,7 @@ export const creerFeuilleRoute = async (livreurId: string, commandeIds: string[]
   const mappedCmds = cmdData.map((c: any) => ({
     ...c,
     nom_client: c.clients?.nom_complet ?? c.client_nom,
-    telephone_client: c.clients?.telephone
+    telephone_client: c.clients?.telephone ?? c.client_telephone
   }));
   
   const total_montant = mappedCmds.reduce((acc, c) => acc + (Number(c.montant_total) || 0), 0);
@@ -103,7 +103,7 @@ export const getCommandesByFeuille = async (tenantId: string, feuilleId: string)
   return orders.map((o: any) => ({
     ...o,
     nom_client: o.clients?.nom_complet ?? o.client_nom,
-    telephone_client: o.clients?.telephone,
+    telephone_client: o.clients?.telephone ?? o.client_telephone,
     lignes: (lines || []).filter((l: any) => l.commande_id === o.id)
   }));
 };
@@ -121,7 +121,7 @@ export const getCommandeByReference = async (tenantId: string, id: string): Prom
   return {
     ...data,
     nom_client: data.clients?.nom_complet ?? data.client_nom,
-    telephone_client: data.clients?.telephone
+    telephone_client: data.clients?.telephone ?? data.client_telephone
   };
 };
 

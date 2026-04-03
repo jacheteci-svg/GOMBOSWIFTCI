@@ -69,6 +69,7 @@ CREATE TABLE commandes (
   date_creation TIMESTAMPTZ DEFAULT now(),
   client_id UUID REFERENCES clients(id),
   client_nom TEXT,
+  client_telephone TEXT,
   source_commande TEXT,
   statut_commande TEXT NOT NULL,
   montant_total NUMERIC(15, 2) NOT NULL DEFAULT 0,

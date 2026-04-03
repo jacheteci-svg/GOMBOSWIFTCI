@@ -27,7 +27,7 @@ export const getCommandesForFeuille = async (tenantId: string, feuilleRouteId: s
   return (data || []).map((c: any) => ({
     ...c,
     nom_client: c.clients?.nom_complet ?? c.client_nom,
-    telephone_client: c.clients?.telephone
+    telephone_client: c.clients?.telephone ?? c.client_telephone
   }));
 };
 
