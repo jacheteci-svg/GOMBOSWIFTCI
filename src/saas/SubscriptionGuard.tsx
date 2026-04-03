@@ -2,6 +2,7 @@ import { useSaas } from './SaasProvider';
 import { SaasPlanDb } from '../types';
 import { Crown, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { AppLoadingScreen } from '../components/AppLoadingScreen';
 
 interface SubscriptionGuardProps {
   children: React.ReactNode;
@@ -18,7 +19,9 @@ export const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
 }) => {
   const { hasModule, loading } = useSaas();
 
-  if (loading) return null;
+  if (loading) {
+    return <AppLoadingScreen variant="embedded" message="Vérification de votre abonnement…" />;
+  }
 
   if (hasModule(requiredModule)) {
     return <>{children}</>;

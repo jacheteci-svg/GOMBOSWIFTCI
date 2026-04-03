@@ -3,6 +3,7 @@ import { User, Role } from '../types';
 import { useToast } from './ToastContext';
 import { insforge } from '../lib/insforge';
 import { withTimeout } from '../lib/asyncTimeout';
+import { AppLoadingScreen } from '../components/AppLoadingScreen';
 
 const AUTH_TIMEOUT_MS = 25000;
 
@@ -191,20 +192,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <AuthContext.Provider value={{ currentUser, loading, logout, hasRole, hasPermission }}>
       {loading ? (
-        <div
-          className="login-v2"
-          style={{
-            minHeight: '100vh',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '1.25rem',
-          }}
-        >
-          <div className="spinner" style={{ width: 44, height: 44 }} />
-          <p style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.95rem' }}>Connexion au Nexus…</p>
-        </div>
+        <AppLoadingScreen variant="fullscreen" message="Connexion en cours…" />
       ) : (
         children
       )}

@@ -8,6 +8,7 @@ import { monerooService } from '../../services/monerooService';
 import { Lock, CreditCard, LogOut, Loader2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
+import { AppLoadingScreen } from '../AppLoadingScreen';
 
 export const Layout = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -56,21 +57,8 @@ export const Layout = () => {
 
   if (saasLoading) {
     return (
-      <div
-        className="main-content"
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '60vh',
-          gap: '1rem',
-        }}
-      >
-        <div className="spinner" style={{ width: 44, height: 44 }} />
-        <p style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem' }}>
-          {"Chargement de l'espace boutique…"}
-        </p>
+      <div className="main-content">
+        <AppLoadingScreen variant="embedded" message="Préparation de votre espace…" />
       </div>
     );
   }

@@ -7,30 +7,33 @@ import { SaasProvider } from './saas/SaasProvider';
 import { Pricing } from './saas/Pricing';
 import { SubscriptionGuard } from './saas/SubscriptionGuard';
 import { LandingPage } from './saas/LandingPage';
-import { SuperAdmin } from './saas/SuperAdmin';
 import { RegisterTenant } from './saas/RegisterTenant';
 import { PlatformPortal } from './saas/PlatformPortal';
+import { AppLoadingScreen } from './components/AppLoadingScreen';
+import { APP_NAME } from './constants/app';
 
-// --- Core Imports (Snappy) ---
-import { Dashboard } from './pages/Dashboard';
-import { Produits } from './pages/Produits';
-import { Commandes } from './pages/Commandes';
-import { CentreAppel } from './pages/CentreAppel';
-import { Logistique } from './pages/Logistique';
-import { Livraison } from './pages/Livraison';
-import { Historique } from './pages/Historique';
-import { Caisse } from './pages/Caisse';
-import { Clients } from './pages/Clients';
-import { Admin } from './pages/Admin';
-import { Profil } from './pages/Profil';
 import { Login } from './pages/Login';
-import { FinancialReport } from './pages/FinancialReport';
-import { Home } from './pages/Home';
-import { StaffPerformance } from './pages/StaffPerformance';
-import { NetProfit } from './pages/NetProfit';
-import { AdminTresorerie } from './pages/AdminTresorerie';
-import { AuditTresorerie } from './pages/AuditTresorerie';
 import { SubscriptionCallback } from './pages/SubscriptionCallback';
+
+// --- Pages applicatives (code splitting : chargement initial plus léger) ---
+const Dashboard = lazy(() => import('./pages/Dashboard').then((m) => ({ default: m.Dashboard })));
+const Produits = lazy(() => import('./pages/Produits').then((m) => ({ default: m.Produits })));
+const Commandes = lazy(() => import('./pages/Commandes').then((m) => ({ default: m.Commandes })));
+const CentreAppel = lazy(() => import('./pages/CentreAppel').then((m) => ({ default: m.CentreAppel })));
+const Logistique = lazy(() => import('./pages/Logistique').then((m) => ({ default: m.Logistique })));
+const Livraison = lazy(() => import('./pages/Livraison').then((m) => ({ default: m.Livraison })));
+const Historique = lazy(() => import('./pages/Historique').then((m) => ({ default: m.Historique })));
+const Caisse = lazy(() => import('./pages/Caisse').then((m) => ({ default: m.Caisse })));
+const Clients = lazy(() => import('./pages/Clients').then((m) => ({ default: m.Clients })));
+const Admin = lazy(() => import('./pages/Admin').then((m) => ({ default: m.Admin })));
+const Profil = lazy(() => import('./pages/Profil').then((m) => ({ default: m.Profil })));
+const FinancialReport = lazy(() => import('./pages/FinancialReport').then((m) => ({ default: m.FinancialReport })));
+const Home = lazy(() => import('./pages/Home').then((m) => ({ default: m.Home })));
+const StaffPerformance = lazy(() => import('./pages/StaffPerformance').then((m) => ({ default: m.StaffPerformance })));
+const NetProfit = lazy(() => import('./pages/NetProfit').then((m) => ({ default: m.NetProfit })));
+const AdminTresorerie = lazy(() => import('./pages/AdminTresorerie').then((m) => ({ default: m.AdminTresorerie })));
+const AuditTresorerie = lazy(() => import('./pages/AuditTresorerie').then((m) => ({ default: m.AuditTresorerie })));
+const SuperAdmin = lazy(() => import('./saas/SuperAdmin').then((m) => ({ default: m.SuperAdmin })));
 
 // --- Lazy Loaded Pages ---
 const FeaturesPage = lazy(() => import('./pages/StaticPages').then(m => ({ default: m.FeaturesPage })));
@@ -47,13 +50,9 @@ const DemoPage = lazy(() => import('./pages/DemoPage').then(m => ({ default: m.D
 const Blog = lazy(() => import('./pages/blog/Blog').then(m => ({ default: m.Blog })));
 const BlogPostDetail = lazy(() => import('./pages/blog/BlogPostDetail').then(m => ({ default: m.BlogPostDetail })));
 
-const PageLoader = () => {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%', padding: '5rem' }}>
-      <div className="spinner"></div>
-    </div>
-  );
-};
+const PageLoader = () => (
+  <AppLoadingScreen variant="embedded" message="Ouverture de la page…" />
+);
 
 // --- Error Boundary Component ---
 class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean, error: any }> {
@@ -78,7 +77,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
         <div style={{ padding: '2rem', textAlign: 'center', background: '#0f172a', color: 'white', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontFamily: 'Inter, sans-serif' }}>
           <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '3rem', borderRadius: '32px', border: '1px solid rgba(239, 68, 68, 0.2)', maxWidth: '600px' }}>
             <h1 style={{ color: '#ef4444', fontWeight: 900, fontSize: '2rem', marginBottom: '1rem' }}>Oups ! Une erreur est survenue</h1>
-            <p style={{ color: '#94a3b8', marginBottom: '2rem' }}>Le système Nexus a rencontré une anomalie au rendu. Cela peut arriver lors d'une mise à jour du logiciel.</p>
+            <p style={{ color: '#94a3b8', marginBottom: '2rem' }}>{APP_NAME} a rencontré une anomalie au rendu. Cela peut arriver lors d&apos;une mise à jour du logiciel.</p>
             <pre style={{ background: 'rgba(0,0,0,0.3)', padding: '1.25rem', borderRadius: '16px', overflow: 'auto', fontSize: '0.75rem', textAlign: 'left', border: '1px solid rgba(255,255,255,0.1)', color: '#fca5a5' }}>
               {this.state.error?.toString()}
             </pre>

@@ -47,7 +47,8 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [planConfig, setPlanConfig] = useState<SaasPlanDb | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchSaasData = useCallback(async () => {
+  const fetchSaasData = useCallback(async (opts?: { force?: boolean }) => {
+    const force = opts?.force === true;
     const hostname = window.location.hostname;
     const pathParts = location.pathname.split('/').filter(Boolean);
     const urlSlug = pathParts[0];
@@ -78,7 +79,30 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
-    setLoading(true);
+    /* Super-admin sur /super-admin sans tenant ciblé : pas de requête inutile à chaque navigation */
+    if (urlSlug === 'super-admin' && currentUser?.role === 'SUPER_ADMIN' && !targetSlug && !force) {
+      setTenant(null);
+      setSubscription(null);
+      setPlanConfig(null);
+      setLoading(false);
+      return;
+    }
+
+    const canReuseTenant =
+      tenant &&
+      currentUser &&
+      (currentUser.role === 'SUPER_ADMIN' && targetSlug
+        ? tenant.slug === targetSlug
+        : Boolean(currentUser.tenant_id && tenant.id === currentUser.tenant_id));
+
+    if (canReuseTenant && !force) {
+      return;
+    }
+
+    const shouldShowBlockingLoader = !canReuseTenant || force;
+    if (shouldShowBlockingLoader) {
+      setLoading(true);
+    }
 
     try {
       let tenantData = null;
@@ -142,7 +166,7 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
-  }, [location.pathname, currentUser?.id, currentUser?.role, currentUser?.tenant_id]);
+  }, [location.pathname, currentUser, tenant]);
 
   useEffect(() => {
     void fetchSaasData();
@@ -169,8 +193,7 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const refreshSaasData = async () => {
-    setLoading(true);
-    await fetchSaasData();
+    await fetchSaasData({ force: true });
   };
 
   return (

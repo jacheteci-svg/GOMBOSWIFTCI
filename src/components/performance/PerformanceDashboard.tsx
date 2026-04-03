@@ -27,6 +27,9 @@ import {
   Area,
   Line,
   Legend,
+  PieChart,
+  Pie,
+  Cell,
 } from 'recharts';
 import {
   Truck,
@@ -48,6 +51,8 @@ import {
   AlertCircle,
   AlertTriangle,
   ExternalLink,
+  Store,
+  Percent,
 } from 'lucide-react';
 
 type TabType = 'logistique' | 'call-center' | 'inventaire';
@@ -1790,6 +1795,16 @@ export const PerformanceDashboard = ({
     const topTenant = rowsAll[0];
     const tl = platformTimeline;
 
+    const boutiquePieData = [
+      { name: 'Avec commandes', value: withActivity, color: '#22d3ee' },
+      { name: 'Sans commande', value: Math.max(0, rowsAll.length - withActivity), color: '#475569' },
+    ];
+    const concTop3Clamped = Math.min(100, Math.max(0, ins.concentrationTop3));
+    const concPieData = [
+      { name: 'Top 3 CA', value: concTop3Clamped, color: '#06b6d4' },
+      { name: 'Autres boutiques', value: Math.max(0, 100 - concTop3Clamped), color: '#1e293b' },
+    ];
+
     return (
       <div className="space-y-8 lg:space-y-10">
         {rowsAll.length > 0 && (
@@ -1830,31 +1845,170 @@ export const PerformanceDashboard = ({
               </div>
             </div>
 
-            <p className="mb-3 text-[11px] leading-relaxed text-slate-500">
-              Vue globale :{' '}
-              <span className="font-semibold tabular-nums text-slate-200">{totalCmd}</span> cmd ·{' '}
-              <span className="font-semibold tabular-nums text-cyan-200/95">
-                {totalGmv.toLocaleString('fr-FR')} CFA
-              </span>{' '}
-              GMV ·{' '}
-              <span className="tabular-nums text-slate-300">
-                {withActivity}/{rowsAll.length}
-              </span>{' '}
-              boutiques ·{' '}
-              <span className="tabular-nums text-slate-300">{avgSuccPlat}%</span> livr. · top 3 CA{' '}
-              <span className="tabular-nums text-slate-300">{ins.concentrationTop3}%</span>
-              {ins.panierMoyen > 0 ? (
-                <>
-                  {' '}
-                  · panier{' '}
-                  <span className="tabular-nums text-slate-300">
-                    {ins.panierMoyen.toLocaleString('fr-FR')} CFA
-                  </span>
-                </>
-              ) : null}{' '}
-              · annul. <span className="tabular-nums text-slate-300">{ins.tauxAnnulPlateforme}%</span> ·{' '}
-              <span className="text-slate-500">{inactiveTenants} inactif(s)</span>
-            </p>
+            {/* Vue globale : cartes KPI + diagrammes (remplace le paragraphe texte) */}
+            <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-6">
+              <div className="rounded-xl border border-white/[0.06] bg-slate-950/50 p-3 shadow-sm">
+                <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">
+                  <Package className="size-3.5 shrink-0 text-cyan-400/90" aria-hidden />
+                  Commandes
+                </div>
+                <p className="mt-1.5 text-2xl font-bold tabular-nums leading-none text-white">{totalCmd}</p>
+              </div>
+              <div className="rounded-xl border border-white/[0.06] bg-slate-950/50 p-3 shadow-sm">
+                <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">
+                  <Banknote className="size-3.5 shrink-0 text-cyan-400/90" aria-hidden />
+                  GMV
+                </div>
+                <p className="mt-1.5 text-lg font-bold tabular-nums leading-tight text-cyan-200/95 sm:text-xl">
+                  {totalGmv.toLocaleString('fr-FR')}
+                </p>
+                <p className="mt-0.5 text-[10px] text-slate-500">CFA</p>
+              </div>
+              <div className="rounded-xl border border-white/[0.06] bg-slate-950/50 p-3 shadow-sm">
+                <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">
+                  <Store className="size-3.5 shrink-0 text-emerald-400/90" aria-hidden />
+                  Boutiques actives
+                </div>
+                <p className="mt-1.5 text-2xl font-bold tabular-nums leading-none text-white">
+                  {withActivity}
+                  <span className="text-base font-semibold text-slate-500">/{rowsAll.length}</span>
+                </p>
+                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
+                  <div
+                    className="h-full rounded-full bg-emerald-500/80"
+                    style={{
+                      width: `${rowsAll.length ? Math.min(100, (withActivity / rowsAll.length) * 100) : 0}%`,
+                    }}
+                  />
+                </div>
+              </div>
+              <div className="rounded-xl border border-white/[0.06] bg-slate-950/50 p-3 shadow-sm">
+                <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">
+                  <Truck className="size-3.5 shrink-0 text-violet-400/90" aria-hidden />
+                  Livraison
+                </div>
+                <p className="mt-1.5 text-2xl font-bold tabular-nums leading-none text-white">{avgSuccPlat}%</p>
+                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
+                  <div
+                    className="h-full rounded-full bg-violet-500/75"
+                    style={{ width: `${Math.min(100, Math.max(0, avgSuccPlat))}%` }}
+                  />
+                </div>
+              </div>
+              <div className="rounded-xl border border-white/[0.06] bg-slate-950/50 p-3 shadow-sm">
+                <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">
+                  <Percent className="size-3.5 shrink-0 text-rose-400/90" aria-hidden />
+                  Annulations
+                </div>
+                <p className="mt-1.5 text-2xl font-bold tabular-nums leading-none text-rose-200/95">
+                  {ins.tauxAnnulPlateforme}%
+                </p>
+                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
+                  <div
+                    className="h-full rounded-full bg-rose-500/70"
+                    style={{ width: `${Math.min(100, Math.max(0, ins.tauxAnnulPlateforme))}%` }}
+                  />
+                </div>
+              </div>
+              <div className="rounded-xl border border-white/[0.06] bg-slate-950/50 p-3 shadow-sm">
+                <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">
+                  <AlertCircle className="size-3.5 shrink-0 text-slate-400" aria-hidden />
+                  Inactifs
+                </div>
+                <p className="mt-1.5 text-2xl font-bold tabular-nums leading-none text-slate-200">{inactiveTenants}</p>
+                {ins.panierMoyen > 0 ? (
+                  <p className="mt-1 text-[10px] text-slate-500">
+                    Panier moy.{' '}
+                    <span className="font-semibold tabular-nums text-slate-400">
+                      {ins.panierMoyen.toLocaleString('fr-FR')} CFA
+                    </span>
+                  </p>
+                ) : (
+                  <p className="mt-1 text-[10px] text-slate-600">—</p>
+                )}
+              </div>
+            </div>
+
+            <div className="mb-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
+              <div className="rounded-xl border border-white/[0.08] bg-gradient-to-b from-slate-950/80 to-[#0a0f18] p-3 sm:p-4">
+                <p className="mb-2 text-center text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
+                  Répartition boutiques
+                </p>
+                <div className="h-[200px] w-full min-w-0 sm:h-[220px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={boutiquePieData}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={52}
+                        outerRadius={78}
+                        paddingAngle={2}
+                        stroke="rgba(255,255,255,0.06)"
+                        strokeWidth={1}
+                      >
+                        {boutiquePieData.map((entry) => (
+                          <Cell key={entry.name} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        {...chartTooltip}
+                        formatter={(value) => {
+                          const v = typeof value === 'number' ? value : Number(value ?? 0);
+                          return [Number.isFinite(v) ? v : 0, 'Boutiques'];
+                        }}
+                      />
+                      <Legend
+                        verticalAlign="bottom"
+                        height={28}
+                        wrapperStyle={{ fontSize: '11px', paddingTop: 4 }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+              <div className="rounded-xl border border-white/[0.08] bg-gradient-to-b from-slate-950/80 to-[#0a0f18] p-3 sm:p-4">
+                <p className="mb-2 text-center text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
+                  Concentration CA — top 3
+                </p>
+                <div className="h-[200px] w-full min-w-0 sm:h-[220px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={concPieData}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={52}
+                        outerRadius={78}
+                        paddingAngle={2}
+                        stroke="rgba(255,255,255,0.06)"
+                        strokeWidth={1}
+                      >
+                        {concPieData.map((entry) => (
+                          <Cell key={entry.name} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        {...chartTooltip}
+                        formatter={(value) => {
+                          const v = typeof value === 'number' ? value : Number(value ?? 0);
+                          return [`${Number.isFinite(v) ? v : 0} %`, 'Part'];
+                        }}
+                      />
+                      <Legend
+                        verticalAlign="bottom"
+                        height={28}
+                        wrapperStyle={{ fontSize: '11px', paddingTop: 4 }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
 
             <div className="rounded-xl border border-white/[0.08] bg-gradient-to-b from-slate-950/80 to-[#0a0f18] p-3 sm:p-4">
               <div className="mb-2 flex flex-wrap items-end justify-between gap-2">
@@ -1862,9 +2016,9 @@ export const PerformanceDashboard = ({
                   <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">
                     Suivi dans le temps
                   </p>
-                  <p className="mt-0.5 text-[10px] text-slate-500">
-                    Par jour si ≤ 90 jours de plage, sinon par semaine · chaque point = commandes créées dans la
-                    fenêtre ; CA = montant livrées / terminées parmi elles
+                  <p className="mt-0.5 max-w-2xl text-[10px] leading-snug text-slate-500">
+                    Agrégation par jour (≤ 90 j) ou par semaine · commandes créées dans la fenêtre · CA = montants
+                    livrées / terminées
                   </p>
                 </div>
               </div>
@@ -1942,7 +2096,15 @@ export const PerformanceDashboard = ({
                   </ResponsiveContainer>
                 </div>
               ) : (
-                <p className="py-10 text-center text-sm text-slate-500">Aucune donnée pour la période.</p>
+                <div className="relative flex min-h-[240px] flex-col items-center justify-center rounded-lg border border-dashed border-white/[0.08] bg-slate-950/30 py-10 sm:min-h-[280px]">
+                  <Activity className="mb-3 size-10 text-slate-600" aria-hidden />
+                  <p className="max-w-sm px-4 text-center text-sm font-medium text-slate-400">
+                    Aucune activité sur cette période
+                  </p>
+                  <p className="mt-1 max-w-md px-4 text-center text-xs text-slate-500">
+                    Élargissez la période ou vérifiez les filtres (périmètre, dates).
+                  </p>
+                </div>
               )}
             </div>
 
