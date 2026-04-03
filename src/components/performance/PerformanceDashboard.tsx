@@ -1,5 +1,9 @@
-import { useState, useEffect, useMemo } from 'react';
-import { loadPerformanceDashboardData } from '../../services/performanceService';
+import { useState, useEffect, useMemo, type ReactNode } from 'react';
+import {
+  loadPerformanceDashboardData,
+  loadSuperAdminTenantPerformance,
+  type TenantPerfRow,
+} from '../../services/performanceService';
 import {
   BarChart,
   Bar,
@@ -9,7 +13,18 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from 'recharts';
-import { Truck, PhoneCall, Package, TrendingUp, Clock, Lightbulb } from 'lucide-react';
+import {
+  Truck,
+  PhoneCall,
+  Package,
+  TrendingUp,
+  Clock,
+  Lightbulb,
+  Building2,
+  Users,
+  ShoppingCart,
+  Banknote,
+} from 'lucide-react';
 
 type TabType = 'logistique' | 'call-center' | 'inventaire';
 type FilterType = 'mois' | '7jours' | 'aujourdhui' | 'toujours';
@@ -60,14 +75,19 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
   const [filter, setFilter] = useState<FilterType>('mois');
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<any>({ logistique: [], callCenter: [], inventaire: [] });
+  const [tenantRows, setTenantRows] = useState<TenantPerfRow[]>([]);
 
   const fetchData = async () => {
-    const effectiveTenantId = tenantId;
-    if (!effectiveTenantId && !isSuperAdmin) return;
-
     setLoading(true);
     try {
-      const loaded = await loadPerformanceDashboardData(effectiveTenantId, isSuperAdmin, filter);
+      if (isSuperAdmin) {
+        const rows = await loadSuperAdminTenantPerformance(filter);
+        setTenantRows(rows);
+        return;
+      }
+      const effectiveTenantId = tenantId;
+      if (!effectiveTenantId) return;
+      const loaded = await loadPerformanceDashboardData(effectiveTenantId, false, filter);
       setStats(loaded);
     } catch (err) {
       console.error('Hub Performance Error:', err);
@@ -82,36 +102,45 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
 
   const renderFilterButtons = () => (
     <div
-      className="inline-flex flex-wrap gap-1 p-1 rounded-xl border border-white/[0.08]"
-      style={{ background: 'var(--surface)' }}
+      role="group"
+      aria-label="Période"
+      className="inline-flex flex-wrap items-center gap-2 p-2 rounded-2xl border border-white/[0.1] shadow-inner"
+      style={{
+        background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.75) 100%)',
+      }}
     >
       {[
         { id: 'mois' as const, label: 'Ce mois' },
         { id: '7jours' as const, label: '7 jours' },
         { id: 'aujourdhui' as const, label: "Aujourd'hui" },
         { id: 'toujours' as const, label: 'Toujours' },
-      ].map((f) => (
-        <button
-          key={f.id}
-          type="button"
-          onClick={() => setFilter(f.id)}
-          className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
-            filter === f.id
-              ? 'text-white shadow-md'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
-          }`}
-          style={
-            filter === f.id
-              ? {
-                  background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
-                  boxShadow: '0 4px 20px rgba(6, 182, 212, 0.35)',
-                }
-              : undefined
-          }
-        >
-          {f.label}
-        </button>
-      ))}
+      ].map((f) => {
+        const on = filter === f.id;
+        return (
+          <button
+            key={f.id}
+            type="button"
+            onClick={() => setFilter(f.id)}
+            className={[
+              'min-h-[40px] px-4 py-2 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200',
+              'focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0f1a]',
+              on
+                ? 'text-white shadow-md scale-[1.02]'
+                : 'text-slate-200 bg-slate-800/90 border border-slate-600/40 hover:bg-slate-700/95 hover:text-white hover:border-slate-500/50',
+            ].join(' ')}
+            style={
+              on
+                ? {
+                    background: 'linear-gradient(135deg, #0891b2 0%, #2563eb 100%)',
+                    boxShadow: '0 4px 18px rgba(6, 182, 212, 0.4)',
+                  }
+                : undefined
+            }
+          >
+            {f.label}
+          </button>
+        );
+      })}
     </div>
   );
 
@@ -505,9 +534,165 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
     );
   };
 
-  const subtitle = isSuperAdmin
-    ? "Suivez l'efficacité opérationnelle de tous les départements."
-    : "Suivez l'efficacité opérationnelle de vos départements.";
+  const subtitle = "Suivez l'efficacité opérationnelle de vos départements.";
+
+  /** Vue Nexus : performance par tenant (boutiques), pas par livreur */
+  const renderSuperAdminTenants = () => {
+    const rows = tenantRows;
+    const totalCmd = rows.reduce((a, r) => a + r.commandes, 0);
+    const totalGmv = rows.reduce((a, r) => a + r.ca_gmv, 0);
+    const withActivity = rows.filter((r) => r.commandes > 0).length;
+    const totalSorties = rows.reduce((a, r) => a + r.sorties_terrain, 0);
+    const avgSuccPlat =
+      totalSorties > 0
+        ? Math.round(
+            rows.reduce((a, r) => a + r.success_rate * r.sorties_terrain, 0) / Math.max(1, totalSorties)
+          )
+        : 0;
+
+    const chartData = [...rows]
+      .filter((r) => r.ca_gmv > 0 || r.commandes > 0)
+      .slice(0, 12)
+      .map((r) => ({
+        nom: r.nom.length > 16 ? `${r.nom.slice(0, 16)}…` : r.nom,
+        ca: r.ca_gmv,
+      }));
+
+    const kpi = (icon: ReactNode, label: string, value: string | number, hint?: string) => (
+      <div
+        className="rounded-2xl border border-slate-600/30 p-4 sm:p-5 flex gap-4 items-start"
+        style={{ background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%)' }}
+      >
+        <div className="w-11 h-11 rounded-xl bg-cyan-500/15 border border-cyan-500/25 flex items-center justify-center text-cyan-300 shrink-0">
+          {icon}
+        </div>
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{label}</p>
+          <p className="text-xl sm:text-2xl font-bold text-white tabular-nums mt-0.5">{value}</p>
+          {hint ? <p className="text-xs text-slate-500 mt-1">{hint}</p> : null}
+        </div>
+      </div>
+    );
+
+    return (
+      <div className="space-y-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          {kpi(<ShoppingCart size={20} />, 'Commandes (période)', totalCmd.toLocaleString('fr-FR'), 'Toutes boutiques')}
+          {kpi(
+            <Banknote size={20} />,
+            'CA livré (GMV)',
+            `${totalGmv.toLocaleString('fr-FR')} CFA`,
+            'Commandes livrées / terminées'
+          )}
+          {kpi(<Building2 size={20} />, 'Boutiques actives', withActivity, `Sur ${rows.length} organisations`)}
+          {kpi(<TrendingUp size={20} />, 'Taux livraison moy.', `${avgSuccPlat}%`, 'Pondéré par le terrain')}
+        </div>
+
+        <div className={panelClass}>
+          <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-white/[0.06] bg-white/[0.02]">
+            <h2 className="text-lg font-bold text-[var(--text-main)]" style={{ fontFamily: 'Outfit, sans-serif' }}>
+              Détail par{' '}
+              <span style={{ color: C.primary }}>boutique (tenant)</span>
+            </h2>
+            <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
+              <Lightbulb size={16} className="text-amber-400/90 shrink-0" strokeWidth={2} />
+              Classé par CA livré sur la période
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm min-w-[900px]">
+              <thead>
+                <tr className="text-[10px] uppercase tracking-wider text-slate-500 border-b border-white/[0.06] bg-white/[0.03]">
+                  <th className="px-4 py-3 font-semibold">Boutique</th>
+                  <th className="px-3 py-3 font-semibold">Plan</th>
+                  <th className="px-3 py-3 font-semibold text-center">Compte</th>
+                  <th className="px-3 py-3 font-semibold text-center">
+                    <Users className="inline size-3.5 opacity-60 mr-1" />
+                    Users
+                  </th>
+                  <th className="px-3 py-3 font-semibold text-center">Cmd</th>
+                  <th className="px-3 py-3 font-semibold text-center" style={{ color: C.livres }}>
+                    Livrées
+                  </th>
+                  <th className="px-3 py-3 font-semibold text-center">Terrain</th>
+                  <th className="px-3 py-3 font-semibold text-center">Succès</th>
+                  <th className="px-3 py-3 font-semibold text-center" style={{ color: C.annules }}>
+                    Annul.
+                  </th>
+                  <th className="px-4 py-3 font-semibold text-right">CA (GMV)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/[0.05]">
+                {rows.map((r) => (
+                  <tr key={r.tenant_id} className="hover:bg-white/[0.02]">
+                    <td className="px-4 py-3">
+                      <div className="font-semibold text-slate-100">{r.nom}</div>
+                      <div className="text-[11px] text-cyan-400/80 font-medium mt-0.5">/{r.slug || '—'}</div>
+                    </td>
+                    <td className="px-3 py-3 text-slate-300 font-medium">{r.plan}</td>
+                    <td className="px-3 py-3 text-center">
+                      <span
+                        className={`inline-block px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase ${
+                          r.actif ? 'bg-emerald-500/15 text-emerald-300' : 'bg-slate-600/40 text-slate-400'
+                        }`}
+                      >
+                        {r.actif ? 'Actif' : 'Inactif'}
+                      </span>
+                    </td>
+                    <td className="px-3 py-3 text-center tabular-nums text-slate-200">{r.users_count}</td>
+                    <td className="px-3 py-3 text-center tabular-nums text-slate-200">{r.commandes}</td>
+                    <td className="px-3 py-3 text-center font-semibold tabular-nums" style={{ color: C.livres }}>
+                      {r.livrees}
+                    </td>
+                    <td className="px-3 py-3 text-center tabular-nums text-slate-400">{r.sorties_terrain}</td>
+                    <td className="px-3 py-3 text-center font-bold tabular-nums text-cyan-300">{r.success_rate}%</td>
+                    <td className="px-3 py-3 text-center tabular-nums" style={{ color: C.annules }}>
+                      {r.annules}
+                    </td>
+                    <td className="px-4 py-3 text-right font-bold text-slate-100 tabular-nums">
+                      {r.ca_gmv.toLocaleString('fr-FR')} <span className="text-slate-500 text-xs font-semibold">CFA</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {rows.length === 0 && (
+            <p className="p-10 text-center text-slate-500 text-sm">Aucune boutique enregistrée.</p>
+          )}
+        </div>
+
+        {chartData.length > 0 && (
+          <div className={`${panelClass} p-5 md:p-6`}>
+            <h3 className="text-base font-bold text-[var(--text-main)] mb-1" style={{ fontFamily: 'Outfit, sans-serif' }}>
+              Top boutiques — CA livré (GMV)
+            </h3>
+            <p className="text-xs text-slate-500 mb-6">Jusqu&apos;à 12 organisations avec activité sur la période</p>
+            <div style={{ height: 320 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} layout="vertical" margin={{ top: 8, right: 16, left: 8, bottom: 8 }}>
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(255,255,255,0.06)" />
+                  <XAxis type="number" tick={{ fill: C.textMuted, fontSize: 11 }} axisLine={false} />
+                  <YAxis
+                    type="category"
+                    dataKey="nom"
+                    width={120}
+                    tick={{ fill: C.textMuted, fontSize: 11 }}
+                    axisLine={false}
+                  />
+                  <Tooltip
+                    {...chartTooltip}
+                    formatter={(v) => [`${Number(v ?? 0).toLocaleString('fr-FR')} CFA`, 'CA']}
+                  />
+                  <Bar dataKey="ca" fill={C.primary} radius={[0, 6, 6, 0]} maxBarSize={28} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const tabDefs: { id: TabType; label: string; sub: string; icon: typeof Truck }[] = [
     { id: 'logistique', label: 'Logistique', sub: 'Livraisons & retours', icon: Truck },
@@ -521,12 +706,12 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
       style={{
         background: 'linear-gradient(180deg, var(--bg-app) 0%, #0a0f1a 50%, var(--bg-app) 100%)',
         color: 'var(--text-main)',
+        colorScheme: 'dark',
       }}
     >
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10 pb-16">
-        {/* En-tête type maquette */}
-        <header className="flex flex-col lg:flex-row lg:items-start justify-between gap-6 mb-8">
-          <div className="max-w-xl">
+        <header className="flex flex-col gap-6 mb-10">
+          <div className="max-w-2xl">
             <h1
               className="text-2xl sm:text-3xl lg:text-[2rem] font-bold tracking-tight mb-2"
               style={{
@@ -537,53 +722,83 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
                 backgroundClip: 'text',
               }}
             >
-              Hub Performance Équipe
+              {isSuperAdmin ? 'Performance des boutiques' : 'Hub Performance Équipe'}
             </h1>
-            <p className="text-slate-400 text-sm sm:text-base leading-relaxed">{subtitle}</p>
+            <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
+              {isSuperAdmin
+                ? 'Vue Nexus : volume, CA (GMV) et taux de livraison par organisation (tenant), sur la période choisie.'
+                : subtitle}
+            </p>
           </div>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 lg:gap-4 shrink-0">
+
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             {renderFilterButtons()}
-            <div className="flex items-center gap-2 text-xs text-slate-500 px-3 py-2 rounded-xl border border-white/[0.06] bg-white/[0.02]">
-              <Clock size={14} className="shrink-0 opacity-80" />
-              {new Date().toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}
+            <div
+              className="flex items-center gap-2.5 text-xs sm:text-sm text-slate-300 px-4 py-2.5 rounded-xl border border-slate-600/35 shrink-0"
+              style={{ background: 'rgba(15, 23, 42, 0.65)' }}
+            >
+              <Clock size={16} className="shrink-0 text-cyan-400/90" strokeWidth={2} aria-hidden />
+              <span className="font-medium tabular-nums text-slate-200">
+                {new Date().toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}
+              </span>
             </div>
           </div>
         </header>
 
-        {/* Cartes départements — horizontal, état actif bordure cyan */}
-        <nav className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8" aria-label="Départements">
-          {tabDefs.map((tab) => {
-            const active = activeTab === tab.id;
-            const Icon = tab.icon;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-start gap-4 p-5 rounded-[12px] text-left border transition-all duration-300 ${
-                  active ? 'shadow-lg' : 'hover:border-white/12'
-                }`}
-                style={{
-                  background: active ? C.primarySoft : 'var(--surface)',
-                  borderColor: active ? 'rgba(6, 182, 212, 0.45)' : 'rgba(255,255,255,0.08)',
-                  boxShadow: active ? '0 8px 32px rgba(6, 182, 212, 0.12)' : undefined,
-                }}
-              >
-                <div
-                  className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border ${
-                    active ? 'border-cyan-500/30 bg-cyan-500/15 text-cyan-300' : 'border-white/[0.06] bg-white/[0.04] text-slate-500'
-                  }`}
+        {isSuperAdmin ? null : (
+          <nav className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10" aria-label="Départements">
+            {tabDefs.map((tab) => {
+              const active = activeTab === tab.id;
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={[
+                    'group flex items-center gap-4 min-h-[88px] p-4 sm:p-5 rounded-2xl text-left border transition-all duration-300',
+                    active
+                      ? 'ring-1 ring-cyan-400/35 shadow-[0_12px_40px_-8px_rgba(6,182,212,0.25)]'
+                      : 'hover:ring-1 hover:ring-white/10 hover:bg-slate-800/40',
+                  ].join(' ')}
+                  style={{
+                    background: active
+                      ? 'linear-gradient(145deg, rgba(6, 182, 212, 0.14) 0%, rgba(15, 23, 42, 0.95) 100%)'
+                      : 'linear-gradient(145deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.92) 100%)',
+                    borderColor: active ? 'rgba(34, 211, 238, 0.45)' : 'rgba(148, 163, 184, 0.2)',
+                  }}
                 >
-                  <Icon size={20} strokeWidth={2} />
-                </div>
-                <div>
-                  <div className={`font-bold text-[15px] ${active ? 'text-white' : 'text-slate-200'}`}>{tab.label}</div>
-                  <div className="text-xs text-slate-500 mt-1 leading-snug">{tab.sub}</div>
-                </div>
-              </button>
-            );
-          })}
-        </nav>
+                  <div
+                    className={[
+                      'w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border transition-colors',
+                      active
+                        ? 'border-cyan-400/40 bg-cyan-500/20 text-cyan-200'
+                        : 'border-slate-500/35 bg-slate-800/90 text-cyan-300/95 group-hover:text-cyan-200',
+                    ].join(' ')}
+                  >
+                    <Icon size={22} strokeWidth={2} className="text-inherit" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div
+                      className={`font-bold text-base sm:text-[17px] leading-tight ${
+                        active ? 'text-white' : 'text-slate-100'
+                      }`}
+                    >
+                      {tab.label}
+                    </div>
+                    <div
+                      className={`text-xs sm:text-[13px] mt-1 leading-snug ${
+                        active ? 'text-cyan-100/75' : 'text-slate-400 group-hover:text-slate-300'
+                      }`}
+                    >
+                      {tab.sub}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </nav>
+        )}
 
         {loading ? (
           <div
@@ -595,9 +810,15 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
           </div>
         ) : (
           <div style={{ animation: 'fadeIn 0.35s ease' }}>
-            {activeTab === 'logistique' && renderLogistics()}
-            {activeTab === 'call-center' && renderCallCenter()}
-            {activeTab === 'inventaire' && renderInventory()}
+            {isSuperAdmin ? (
+              renderSuperAdminTenants()
+            ) : (
+              <>
+                {activeTab === 'logistique' && renderLogistics()}
+                {activeTab === 'call-center' && renderCallCenter()}
+                {activeTab === 'inventaire' && renderInventory()}
+              </>
+            )}
           </div>
         )}
       </div>

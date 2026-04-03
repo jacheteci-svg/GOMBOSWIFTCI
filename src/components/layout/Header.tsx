@@ -61,6 +61,7 @@ export const Header = ({ onMenuClick }: { onMenuClick: () => void }) => {
     if (path.endsWith('/audit-tresorerie')) return 'Audit Comptable';
     if (path.endsWith('/performance-staff')) return 'Performance';
     
+    if (path.includes('/super-admin/performance')) return 'Performance boutiques';
     if (path.startsWith('/super-admin')) return 'Nexus Portal';
     return 'GomboSwiftCI';
   };

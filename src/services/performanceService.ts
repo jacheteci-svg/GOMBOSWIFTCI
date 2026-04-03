@@ -33,6 +33,24 @@ export interface InventoryPerfRow {
   ventes_periode?: number;
 }
 
+/** Ligne agrégée par boutique (vue Super Admin — suivi des tenants) */
+export interface TenantPerfRow {
+  tenant_id: string;
+  nom: string;
+  slug: string;
+  plan: string;
+  actif: boolean;
+  users_count: number;
+  commandes: number;
+  livrees: number;
+  annules: number;
+  ca_gmv: number;
+  /** Missions terrain (statuts logistique) sur la période */
+  sorties_terrain: number;
+  /** % de livraisons réussies parmi les sorties terrain */
+  success_rate: number;
+}
+
 const norm = (s: string | undefined) => (s || '').toLowerCase();
 
 /** Même logique que le Dashboard : création ou livraison effective dans la fenêtre */
@@ -306,4 +324,109 @@ export async function loadPerformanceDashboardData(
   const inventaire = await fetchInventoryFromSources(tenantId || null, !!isSuperAdmin, commandes, range);
 
   return { logistique, callCenter, inventaire };
+}
+
+/**
+ * Performance multi-tenant : une ligne par boutique (commandes réelles sur la période).
+ * Réservé au Super Admin.
+ */
+export async function loadSuperAdminTenantPerformance(
+  filter: PerformanceFilter
+): Promise<TenantPerfRow[]> {
+  const range = getDateRangeForFilter(filter);
+
+  const [{ data: tenantsData, error: te }, { data: usersData, error: ue }, { data: cmdData, error: ce }] =
+    await Promise.all([
+      insforge.database.from('tenants').select('id, nom, slug, plan, actif').order('nom', { ascending: true }),
+      insforge.database.from('users').select('tenant_id'),
+      insforge.database
+        .from('commandes')
+        .select(
+          'tenant_id, statut_commande, montant_total, montant_encaisse, date_creation, date_livraison_effective'
+        ),
+    ]);
+
+  if (te) console.error('tenants performance', te);
+  if (ue) console.error('users performance', ue);
+  if (ce) console.error('commandes performance SA', ce);
+
+  const usersByTenant = new Map<string, number>();
+  for (const u of usersData || []) {
+    const tid = (u as { tenant_id: string }).tenant_id;
+    if (!tid) continue;
+    usersByTenant.set(tid, (usersByTenant.get(tid) || 0) + 1);
+  }
+
+  type Acc = {
+    commandes: number;
+    livrees: number;
+    annules: number;
+    sorties: number;
+    ca: number;
+  };
+  const byTenant = new Map<string, Acc>();
+
+  const ensure = (tid: string): Acc => {
+    if (!byTenant.has(tid)) {
+      byTenant.set(tid, { commandes: 0, livrees: 0, annules: 0, sorties: 0, ca: 0 });
+    }
+    return byTenant.get(tid)!;
+  };
+
+  const cmds = (cmdData || []) as Commande[];
+  for (const c of cmds) {
+    if (!c.tenant_id) continue;
+    if (!commandeInDateRange(c, range.start, range.end)) continue;
+
+    const row = ensure(c.tenant_id);
+    row.commandes += 1;
+
+    const st = norm(c.statut_commande);
+
+    if (st === 'livree' || st === 'terminee') {
+      row.livrees += 1;
+      const m =
+        Number(c.montant_encaisse) > 0
+          ? Number(c.montant_encaisse)
+          : Number(c.montant_total) || 0;
+      row.ca += Number.isFinite(m) ? m : 0;
+    } else if (st === 'annulee') {
+      row.annules += 1;
+    }
+
+    if (isTerrainLivreur(c.statut_commande)) {
+      row.sorties += 1;
+    }
+  }
+
+  const rows: TenantPerfRow[] = (tenantsData || []).map((t: any) => {
+    const acc = byTenant.get(t.id) || {
+      commandes: 0,
+      livrees: 0,
+      annules: 0,
+      sorties: 0,
+      ca: 0,
+    };
+    const liv = acc.livrees;
+    const sortiesTerrain = acc.sorties;
+    const success_rate =
+      sortiesTerrain > 0 ? Math.min(100, Math.round((liv / sortiesTerrain) * 100)) : liv > 0 ? 100 : 0;
+
+    return {
+      tenant_id: t.id,
+      nom: t.nom || 'Sans nom',
+      slug: t.slug || '',
+      plan: t.plan || '—',
+      actif: !!t.actif,
+      users_count: usersByTenant.get(t.id) || 0,
+      commandes: acc.commandes,
+      livrees: acc.livrees,
+      annules: acc.annules,
+      ca_gmv: Math.round(acc.ca),
+      sorties_terrain: acc.sorties,
+      success_rate,
+    };
+  });
+
+  return rows.sort((a, b) => b.ca_gmv - a.ca_gmv || b.commandes - a.commandes);
 }

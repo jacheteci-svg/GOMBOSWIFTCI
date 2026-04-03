@@ -124,7 +124,7 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
       items: [
         { path: '/super-admin/overview', icon: TrendingUp, label: 'Tableau de bord Global', permission: 'SUPER_ADMIN' },
         { path: '/super-admin/tenants', icon: Building, label: 'Gestion des Clients', permission: 'SUPER_ADMIN' },
-        { path: '/super-admin/performance', icon: Activity, label: 'Performance Hub', permission: 'SUPER_ADMIN' },
+        { path: '/super-admin/performance', icon: Activity, label: 'Perf. boutiques', permission: 'SUPER_ADMIN' },
         { path: '/super-admin/plans', icon: Crown, label: 'Catalogue Offres', permission: 'SUPER_ADMIN' },
       ]
     },
