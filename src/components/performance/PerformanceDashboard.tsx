@@ -1795,10 +1795,15 @@ export const PerformanceDashboard = ({
     const topTenant = rowsAll[0];
     const tl = platformTimeline;
 
-    const boutiquePieData = [
-      { name: 'Avec commandes', value: withActivity, color: '#22d3ee' },
-      { name: 'Sans commande', value: Math.max(0, rowsAll.length - withActivity), color: '#475569' },
-    ];
+    const sansCmdBoutiques = Math.max(0, rowsAll.length - withActivity);
+    /** Évite un camembert vide (0+0) côté Recharts ; si aucune boutique en base, segment gris explicite */
+    const boutiquePieData =
+      rowsAll.length === 0
+        ? [{ name: 'Aucune boutique enregistrée', value: 1, color: '#334155' }]
+        : [
+            { name: 'Avec commandes', value: withActivity, color: '#22d3ee' },
+            { name: 'Sans commande', value: sansCmdBoutiques, color: '#475569' },
+          ];
     const concTop3Clamped = Math.min(100, Math.max(0, ins.concentrationTop3));
     const concPieData = [
       { name: 'Top 3 CA', value: concTop3Clamped, color: '#06b6d4' },
@@ -1807,19 +1812,31 @@ export const PerformanceDashboard = ({
 
     return (
       <div className="space-y-8 lg:space-y-10">
-        {rowsAll.length > 0 && (
+        <div
+          className="relative overflow-hidden rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-slate-900/60 via-slate-950/70 to-[#070b12] p-4 sm:p-5 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.85),0_0_0_1px_rgba(6,182,212,0.12)] ring-1 ring-cyan-500/10"
+          role="region"
+          aria-label="Synthèse plateforme"
+        >
           <div
-            className="rounded-2xl border border-cyan-500/15 bg-gradient-to-br from-slate-900/50 via-slate-950/60 to-[#0a0f1a] p-3 sm:p-4 shadow-[0_0_0_1px_rgba(6,182,212,0.06)]"
-            role="region"
-            aria-label="Synthèse plateforme"
-          >
-            <div className="mb-3 flex flex-col gap-3 border-b border-white/[0.06] pb-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-              <div className="flex min-w-0 items-center gap-2">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-cyan-500/20 bg-cyan-500/10 text-cyan-300">
-                  <Target size={18} strokeWidth={2} aria-hidden />
-                </div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">Synthèse plateforme</p>
+            className="pointer-events-none absolute -right-24 -top-24 h-56 w-56 rounded-full bg-cyan-500/10 blur-3xl"
+            aria-hidden
+          />
+          <div
+            className="pointer-events-none absolute -left-20 bottom-0 h-40 w-40 rounded-full bg-violet-600/10 blur-3xl"
+            aria-hidden
+          />
+          <div className="relative mb-4 flex flex-col gap-3 border-b border-white/[0.07] pb-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+            <div className="flex min-w-0 flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-cyan-500/25 bg-gradient-to-br from-cyan-500/15 to-slate-900/80 text-cyan-300 shadow-inner">
+                <Target size={20} strokeWidth={2} aria-hidden />
               </div>
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">Synthèse plateforme</p>
+                <p className="mt-0.5 text-xs text-slate-500">
+                  KPI, camemberts et courbe temporelle — toujours visibles pour la période choisie
+                </p>
+              </div>
+            </div>
               <div className="flex flex-shrink-0 flex-wrap items-center gap-2 sm:justify-end">
                 {ins.atRiskCount > 0 ? (
                   <span
@@ -1845,8 +1862,9 @@ export const PerformanceDashboard = ({
               </div>
             </div>
 
-            {/* Vue globale : cartes KPI + diagrammes (remplace le paragraphe texte) */}
-            <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-6">
+            <div className="relative z-10 space-y-4">
+            {/* Vue globale : cartes KPI + diagrammes */}
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-6">
               <div className="rounded-xl border border-white/[0.06] bg-slate-950/50 p-3 shadow-sm">
                 <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">
                   <Package className="size-3.5 shrink-0 text-cyan-400/90" aria-hidden />
@@ -2108,8 +2126,8 @@ export const PerformanceDashboard = ({
               )}
             </div>
 
+            </div>
           </div>
-        )}
 
         {/* Carte "leader" + grille 2 colonnes */}
         <div className="grid grid-cols-1 xl:grid-cols-5 gap-6 lg:gap-8">

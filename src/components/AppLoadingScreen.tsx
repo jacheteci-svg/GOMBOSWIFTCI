@@ -1,12 +1,11 @@
-import { APP_NAME } from '../constants/app';
-
 type AppLoadingScreenProps = {
-  /** Texte sous le nom de l’application (ex. « Connexion… », « Chargement… »). */
+  /** Texte sous le logo (ex. « Connexion… », « Chargement… »). */
   message?: string;
   /** Plein écran (auth) vs zone contenu (layout). */
   variant?: 'fullscreen' | 'embedded';
 };
 
+/** Logo officiel + fond noir — identité GomboSwiftCI (voir /public/logo-gomboswiftci.png). */
 export const AppLoadingScreen = ({
   message = 'Chargement…',
   variant = 'embedded',
@@ -15,7 +14,6 @@ export const AppLoadingScreen = ({
 
   return (
     <div
-      className={variant === 'fullscreen' ? 'login-v2' : undefined}
       style={{
         minHeight,
         width: '100%',
@@ -23,41 +21,45 @@ export const AppLoadingScreen = ({
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: '1rem',
+        gap: '1.25rem',
         padding: variant === 'fullscreen' ? '2rem' : '1.5rem',
+        background: '#000000',
+        borderRadius: variant === 'embedded' ? 16 : undefined,
       }}
     >
       <img
-        src="/favicon.svg"
-        alt=""
-        width={48}
-        height={48}
-        style={{ borderRadius: 12, flexShrink: 0 }}
+        src="/logo-gomboswiftci.png"
+        alt="GomboSwiftCI — ECOM LOGISTICS"
+        width={320}
+        height={140}
+        style={{
+          maxWidth: 'min(320px, 88vw)',
+          width: 'auto',
+          height: 'auto',
+          objectFit: 'contain',
+          flexShrink: 0,
+        }}
       />
-      <div style={{ textAlign: 'center' }}>
-        <p
-          style={{
-            margin: 0,
-            color: '#0f172a',
-            fontWeight: 800,
-            fontSize: '1.15rem',
-            letterSpacing: '-0.02em',
-          }}
-        >
-          {APP_NAME}
-        </p>
-        <p
-          style={{
-            margin: '0.35rem 0 0',
-            color: '#64748b',
-            fontWeight: 600,
-            fontSize: '0.9rem',
-          }}
-        >
-          {message}
-        </p>
-      </div>
-      <div className="spinner" style={{ width: 40, height: 40 }} />
+      <p
+        style={{
+          margin: 0,
+          color: '#94a3b8',
+          fontWeight: 600,
+          fontSize: '0.9rem',
+          textAlign: 'center',
+        }}
+      >
+        {message}
+      </p>
+      <div
+        className="spinner"
+        style={{
+          width: 40,
+          height: 40,
+          borderColor: 'rgba(138, 99, 210, 0.35)',
+          borderTopColor: '#8A63D2',
+        }}
+      />
     </div>
   );
 };
