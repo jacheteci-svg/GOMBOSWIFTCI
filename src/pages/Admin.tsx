@@ -8,6 +8,7 @@ import { useToast } from '../contexts/ToastContext';
 import { insforge } from '../lib/insforge';
 import { useAuth } from '../contexts/AuthContext';
 import { useSaas } from '../saas/SaasProvider';
+import { NexusModuleFrame } from '../components/layout/NexusModuleFrame';
 
 export const Admin = () => {
   const { showToast } = useToast();
@@ -27,22 +28,15 @@ export const Admin = () => {
   );
 
   return (
-    <div className="animate-pageEnter">
-      <div style={{ marginBottom: '3rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-          <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--primary)', boxShadow: '0 0 10px var(--primary)' }}></div>
-          <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.2em' }}>Platform Control</span>
-        </div>
-        <h1 className="text-premium" style={{ fontSize: '2.8rem', fontWeight: 950, margin: 0, letterSpacing: '-0.02em' }}>
-          {hasPermission('ADMIN') ? 'Console Administration' : 'Gestion Équipe & Zones'}
-        </h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginTop: '0.5rem', fontWeight: 600 }}>
-          {hasPermission('ADMIN') 
-            ? 'Architecture globale du système, permissions et configuration du forfait.' 
-            : 'Pilotez votre équipe de livreurs et vos zones de chalandise.'}
-        </p>
-      </div>
-
+    <NexusModuleFrame
+      badge="Platform Control"
+      title={hasPermission('ADMIN') ? 'Console Administration' : 'Gestion Équipe & Zones'}
+      description={
+        hasPermission('ADMIN')
+          ? 'Architecture globale du système, permissions et configuration du forfait.'
+          : 'Pilotez votre équipe de livreurs et vos zones de chalandise.'
+      }
+    >
       <div style={{ 
         display: 'flex', 
         gap: '0.5rem', 
@@ -112,7 +106,7 @@ export const Admin = () => {
           <SubscriptionManager showToast={showToast} tenant={tenant} />
         )}
       </div>
-    </div>
+    </NexusModuleFrame>
   );
 };
 

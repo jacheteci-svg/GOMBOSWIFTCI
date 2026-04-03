@@ -136,8 +136,14 @@ export const CommandeForm = ({ onClose, onSave }: { onClose: () => void, onSave:
 
     setLoading(true);
     try {
+      if (!tenant?.id) {
+        showToast('Espace boutique introuvable. Rechargez la page ou reconnectez-vous.', 'error');
+        setLoading(false);
+        return;
+      }
+      const tenantId = tenant.id;
+
       let finalClientId = clientId;
-      const tenantId = tenant?.id || 'default';
 
       if (!finalClientId && clientRecherche.telephone) {
         const existing = await searchClientByPhone(tenantId, clientRecherche.telephone);
@@ -172,14 +178,17 @@ export const CommandeForm = ({ onClose, onSave }: { onClose: () => void, onSave:
         adresse_livraison: clientRecherche.adresse || '',
         notes_client: notes,
         tenant_id: tenantId,
-        agent_id: currentUser?.id
+        /* Colonne DB : agent_appel_id (pas agent_id) */
+        agent_appel_id: currentUser?.id,
       };
 
       await createCommandeBase(tenantId, newCommande as any, lignes as Omit<LigneCommande, 'id' | 'commande_id'>[]);
+      showToast('Commande enregistrée.', 'success');
       onSave();
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(error);
-      showToast("Erreur lors de la création.", "error");
+      const msg = error instanceof Error ? error.message : 'Erreur lors de la création.';
+      showToast(msg.length > 120 ? 'Erreur lors de la création. Vérifiez les champs et réessayez.' : msg, 'error');
     } finally {
       setLoading(false);
     }

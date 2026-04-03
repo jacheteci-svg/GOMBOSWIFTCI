@@ -8,6 +8,7 @@ import { useToast } from '../contexts/ToastContext';
 import { generateDeliverySlipPDF } from '../services/pdfService';
 import { format } from 'date-fns';
 import { CommandeDetails } from '../components/commandes/CommandeDetails';
+import { NexusModuleFrame } from '../components/layout/NexusModuleFrame';
 
 export const Logistique = () => {
   const { showToast } = useToast();
@@ -93,16 +94,11 @@ export const Logistique = () => {
   };
 
   return (
-    <div className="animate-pageEnter">
-      <div style={{ marginBottom: '3rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-          <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--primary)', boxShadow: '0 0 10px var(--primary)' }}></div>
-          <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.2em' }}>Supply Chain Nexus</span>
-        </div>
-        <h1 className="text-premium" style={{ fontSize: '2.8rem', fontWeight: 950, margin: 0, letterSpacing: '-0.02em' }}>Gestion Logistique</h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginTop: '0.5rem', fontWeight: 600 }}>Coordination des tournées, affectation des livreurs et suivi terrain en temps réel.</p>
-      </div>
-
+    <NexusModuleFrame
+      badge="Supply Chain Nexus"
+      title="Gestion Logistique"
+      description="Coordination des tournées, affectation des livreurs et suivi terrain en temps réel."
+    >
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem' }}>
         
         {/* NEW ROUTE SECTION */}
@@ -249,7 +245,7 @@ export const Logistique = () => {
           onClose={() => setSelectedCommandeId(null)} 
         />
       )}
-    </div>
+    </NexusModuleFrame>
   );
 };
 

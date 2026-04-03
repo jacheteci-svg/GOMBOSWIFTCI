@@ -86,12 +86,19 @@ export const subscribeToCommandesByStatus = (tenantId: string, statusList: strin
 
 export const createCommandeBase = async (tenantId: string, commande: Omit<Commande, 'id'>, lignes: Omit<LigneCommande, 'id' | 'commande_id'>[]): Promise<string> => {
   commande.date_creation = new Date();
-  commande.statut_commande = 'en_attente_appel'; 
+  commande.statut_commande = 'en_attente_appel';
   commande.tenant_id = tenantId;
+
+  /* La table utilise agent_appel_id ; agent_id (legacy) ferait échouer l'insert */
+  const row = { ...commande } as Commande & { agent_id?: string };
+  if (row.agent_id && !row.agent_appel_id) {
+    row.agent_appel_id = row.agent_id;
+  }
+  delete (row as { agent_id?: string }).agent_id;
 
   const { data: cmdData, error: cmdError } = await insforge.database
     .from('commandes')
-    .insert([commande])
+    .insert([row])
     .select();
 
   if (cmdError) {

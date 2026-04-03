@@ -6,6 +6,7 @@ import { StockForm } from '../components/produits/StockForm';
 import { subscribeToProduits } from '../services/produitService';
 import { Produit } from '../types';
 import { useSaas } from '../saas/SaasProvider';
+import { NexusModuleFrame } from '../components/layout/NexusModuleFrame';
 
 export const Produits = () => {
   const { tenant, planConfig } = useSaas();
@@ -41,16 +42,11 @@ export const Produits = () => {
 
   return (
     <>
-    <div className="animate-pageEnter">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '3.5rem' }} className="responsive-flex">
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-            <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--primary)', boxShadow: '0 0 10px var(--primary)' }}></div>
-            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.2em' }}>Inventory Intelligence</span>
-          </div>
-          <h1 className="text-premium" style={{ fontSize: '2.8rem', fontWeight: 950, margin: 0, letterSpacing: '-0.02em' }}>Catalogue Inventaire</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginTop: '0.5rem', fontWeight: 600 }}>Pilotez votre catalogue, vos marges et vos niveaux de stock stratégiques.</p>
-        </div>
+    <NexusModuleFrame
+      badge="Inventory Intelligence"
+      title="Catalogue Inventaire"
+      description="Pilotez votre catalogue, vos marges et vos niveaux de stock stratégiques."
+      actions={
         <button 
           className="btn btn-primary" 
           style={{ 
@@ -77,8 +73,8 @@ export const Produits = () => {
           <Plus size={24} strokeWidth={3} style={{ marginRight: '0.75rem' }} />
           Nouveau Produit
         </button>
-      </div>
-
+      }
+    >
       <div className="card glass-effect" style={{ marginBottom: '3.5rem', padding: '1.5rem', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '28px', background: 'rgba(255,255,255,0.01)' }}>
         <div style={{ position: 'relative', maxWidth: '800px' }}>
           <Search size={24} strokeWidth={3} style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)' }} />
@@ -110,7 +106,7 @@ export const Produits = () => {
           />
         )}
       </div>
-    </div>
+    </NexusModuleFrame>
 
       {isProduitFormOpen && (
         <ProduitForm 

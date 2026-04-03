@@ -3,9 +3,9 @@ import { PerformanceDashboard } from '../components/performance/PerformanceDashb
 
 export const StaffPerformance = () => {
   const { tenant } = useSaas();
-  
+
   return (
-    <div className="min-h-full w-full">
+    <div className="staff-performance-hub min-h-full w-full">
       <PerformanceDashboard tenantId={tenant?.id} embeddedModuleChrome />
     </div>
   );

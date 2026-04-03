@@ -71,7 +71,7 @@ export const Header = ({ onMenuClick }: { onMenuClick: () => void }) => {
     : '?';
 
   return (
-    <header className="header">
+    <header className="header nexus-header-bar">
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
         <button className="mobile-menu-btn" onClick={onMenuClick} aria-label="Menu">
            <Menu size={20} />

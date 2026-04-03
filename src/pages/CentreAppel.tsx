@@ -5,6 +5,7 @@ import { CommandeDetails } from '../components/commandes/CommandeDetails';
 import { subscribeToCommandesByStatus } from '../services/commandeService';
 import { useSaas } from '../saas/SaasProvider';
 import type { Commande } from '../types';
+import { NexusModuleFrame } from '../components/layout/NexusModuleFrame';
 
 export const CentreAppel = () => {
   const { tenant } = useSaas();
@@ -25,12 +26,12 @@ export const CentreAppel = () => {
 
   return (
     <>
-      <div style={{ animation: 'pageEnter 0.6s ease' }}>
-        <div style={{ marginBottom: '2.5rem' }}>
-          <h1 className="text-premium" style={{ fontSize: '2.2rem', fontWeight: 800, margin: 0 }}>Centre d'Appel</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', marginTop: '0.4rem', fontWeight: 500 }}>Gestion des flux de validation client et relances téléphoniques.</p>
-        </div>
-
+      <NexusModuleFrame
+        badge="Nexus Voice"
+        title="Centre d'appel"
+        description="Gestion des flux de validation client et relances téléphoniques."
+        tight
+      >
         <div className="card glass-effect" style={{ marginBottom: '2.5rem', padding: '2rem', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
             <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 800, color: 'var(--primary)' }}>
@@ -60,7 +61,7 @@ export const CentreAppel = () => {
             />
           )}
         </div>
-      </div>
+      </NexusModuleFrame>
 
       {selectedCommande && (
         <AppelForm 

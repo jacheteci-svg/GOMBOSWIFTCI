@@ -225,7 +225,10 @@ export const Dashboard = () => {
   );
 
   return (
-    <div className="nexus-theme-dark" style={{ animation: 'fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+    <div
+      className="nexus-theme-dark nexus-module-frame"
+      style={{ animation: 'fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1)' }}
+    >
       
       {/* HEADER SECTION */}
       <div style={{ marginBottom: '3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1.5rem' }}>

@@ -8,6 +8,7 @@ import { generateInvoicePDF } from '../services/pdfService';
 import type { Commande } from '../types';
 import { useToast } from '../contexts/ToastContext';
 import { useSaas } from '../saas/SaasProvider';
+import { NexusModuleFrame } from '../components/layout/NexusModuleFrame';
 
 export const Commandes = () => {
   const { tenant } = useSaas();
@@ -122,16 +123,11 @@ export const Commandes = () => {
 
   return (
     <>
-    <div className="animate-pageEnter">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '3.5rem', flexWrap: 'wrap', gap: '2rem' }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-            <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--primary)', boxShadow: '0 0 10px var(--primary)' }}></div>
-            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.2em' }}>Order Nexus Flow</span>
-          </div>
-          <h1 className="text-premium" style={{ fontSize: '2.8rem', fontWeight: 950, margin: 0, letterSpacing: '-0.02em' }}>Gestion des Commandes</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', marginTop: '0.5rem', fontWeight: 600 }}>Pilotez le cycle de vie de vos ventes, de la saisie à la livraison finale.</p>
-        </div>
+    <NexusModuleFrame
+      badge="Order Nexus Flow"
+      title="Gestion des Commandes"
+      description="Pilotez le cycle de vie de vos ventes, de la saisie à la livraison finale."
+      actions={
         <button 
           className="btn btn-primary" 
           onClick={() => setIsFormOpen(true)} 
@@ -152,8 +148,8 @@ export const Commandes = () => {
           <Plus size={24} strokeWidth={3} />
           Nouvelle Saisie
         </button>
-      </div>
-
+      }
+    >
         {/* BARRE DE RECHERCHE ET TABS */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', marginBottom: '3.5rem', alignItems: 'center' }}>
           <div style={{ position: 'relative', flex: '1', minWidth: '320px' }}>
@@ -288,7 +284,7 @@ export const Commandes = () => {
             </div>
           )}
         </div>
-      </div>
+    </NexusModuleFrame>
 
       {isFormOpen && (
         <CommandeForm 

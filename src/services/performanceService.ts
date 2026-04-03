@@ -22,6 +22,15 @@ export interface CallCenterPerfRow {
   total_validations: number;
   total_delivered: number;
   success_rate: number;
+  /** Commandes avec statut retour (livreur / stock) */
+  retours: number;
+  /** Statut échouée */
+  echouees: number;
+  /** À rappeler / reprogrammation */
+  reprogrammes: number;
+  annulees: number;
+  /** Connexions / sessions (non mesuré dans la base → 0) */
+  connexions: number;
 }
 
 export interface InventoryPerfRow {
@@ -31,6 +40,17 @@ export interface InventoryPerfRow {
   stock_minimum: number;
   rotation_index: number;
   ventes_periode?: number;
+}
+
+/** Performance inventaire par membre du staff (produits créés sur la période) */
+export interface InventoryStaffPerfRow {
+  staff_id: string;
+  staff_name: string;
+  produits_crees: number;
+  connexions: number;
+  freq_hebdo_label: string;
+  /** Pour tri (volume créé sur la période) */
+  efficiency_score: number;
 }
 
 /** Ligne agrégée par boutique (vue Super Admin — suivi des tenants) */
@@ -194,11 +214,28 @@ function aggregateCallCenter(
   range: { start: Date; end: Date },
   agentNames: Map<string, string>
 ): CallCenterPerfRow[] {
-  const byAgent = new Map<string, { handled: number; validations: number; delivered: number }>();
+  type Acc = {
+    handled: number;
+    validations: number;
+    delivered: number;
+    retours: number;
+    echouees: number;
+    reprogrammes: number;
+    annulees: number;
+  };
+  const byAgent = new Map<string, Acc>();
 
-  const ensure = (id: string) => {
+  const ensure = (id: string): Acc => {
     if (!byAgent.has(id)) {
-      byAgent.set(id, { handled: 0, validations: 0, delivered: 0 });
+      byAgent.set(id, {
+        handled: 0,
+        validations: 0,
+        delivered: 0,
+        retours: 0,
+        echouees: 0,
+        reprogrammes: 0,
+        annulees: 0,
+      });
     }
     return byAgent.get(id)!;
   };
@@ -214,6 +251,10 @@ function aggregateCallCenter(
     row.handled += 1;
     if (postAppel(st)) row.validations += 1;
     if (st === 'livree' || st === 'terminee') row.delivered += 1;
+    if (st === 'retour_livreur' || st === 'retour_stock') row.retours += 1;
+    if (st === 'echouee') row.echouees += 1;
+    if (st === 'a_rappeler') row.reprogrammes += 1;
+    if (st === 'annulee') row.annulees += 1;
   }
 
   const out: CallCenterPerfRow[] = [];
@@ -226,10 +267,81 @@ function aggregateCallCenter(
       total_validations: v.validations,
       total_delivered: v.delivered,
       success_rate,
+      retours: v.retours,
+      echouees: v.echouees,
+      reprogrammes: v.reprogrammes,
+      annulees: v.annulees,
+      connexions: 0,
     });
   });
 
   return out.sort((a, b) => b.success_rate - a.success_rate);
+}
+
+async function fetchInventoryStaffForTenant(
+  tenantId: string | null,
+  isSuperAdmin: boolean,
+  range: { start: Date; end: Date },
+  names: Map<string, string>
+): Promise<InventoryStaffPerfRow[]> {
+  let pq = insforge.database.from('produits').select('*');
+  if (!isSuperAdmin && tenantId) pq = pq.eq('tenant_id', tenantId);
+  const { data: produits, error } = await pq;
+  if (error) {
+    console.error('produits inventaire staff', error);
+    return [];
+  }
+
+  const rangeMs = Math.max(1, range.end.getTime() - range.start.getTime());
+  const weeks = rangeMs / (7 * 24 * 60 * 60 * 1000);
+
+  const countByStaff = new Map<string, number>();
+  for (const p of produits || []) {
+    const raw = p as Record<string, unknown>;
+    const createdRaw = raw.created_at;
+    if (!createdRaw) continue;
+    const ca = new Date(String(createdRaw));
+    if (ca < range.start || ca > range.end) continue;
+    const uid = (raw.created_by as string) || null;
+    const key = uid || '__unassigned__';
+    countByStaff.set(key, (countByStaff.get(key) || 0) + 1);
+  }
+
+  let tenantUserIds: string[] = [];
+  if (!isSuperAdmin && tenantId) {
+    const { data: users } = await insforge.database.from('users').select('id').eq('tenant_id', tenantId);
+    tenantUserIds = (users || []).map((u: { id: string }) => u.id);
+  }
+
+  const idSet = new Set<string>([...countByStaff.keys()]);
+  if (!isSuperAdmin && tenantUserIds.length) {
+    for (const id of tenantUserIds) idSet.add(id);
+  }
+  idSet.delete('__unassigned__');
+
+  const rows: InventoryStaffPerfRow[] = [];
+  const orderedIds = [...idSet];
+  if (countByStaff.has('__unassigned__')) orderedIds.push('__unassigned__');
+
+  for (const id of orderedIds) {
+    const count = countByStaff.get(id) || 0;
+    const perWeek = count / Math.max(weeks, 1 / 7);
+    const label =
+      perWeek < 0.05 ? '0 items /semaine' : `${perWeek.toFixed(1)} items /semaine`;
+    rows.push({
+      staff_id: id,
+      staff_name:
+        id === '__unassigned__'
+          ? 'Créations non attribuées'
+          : names.get(id) || 'Collaborateur',
+      produits_crees: count,
+      connexions: 0,
+      freq_hebdo_label: label,
+      efficiency_score: count,
+    });
+  }
+
+  return rows.sort((a, b) => b.efficiency_score - a.efficiency_score);
 }
 
 async function fetchInventoryFromSources(
@@ -312,6 +424,7 @@ export async function loadPerformanceDashboardData(
   logistique: LogisticsPerfRow[];
   callCenter: CallCenterPerfRow[];
   inventaire: InventoryPerfRow[];
+  inventaireStaff: InventoryStaffPerfRow[];
 }> {
   const range = getDateRangeForFilter(filter);
   const [commandes, names] = await Promise.all([
@@ -321,9 +434,12 @@ export async function loadPerformanceDashboardData(
 
   const logistique = aggregateLogistics(commandes, range, names);
   const callCenter = aggregateCallCenter(commandes, range, names);
-  const inventaire = await fetchInventoryFromSources(tenantId || null, !!isSuperAdmin, commandes, range);
+  const [inventaire, inventaireStaff] = await Promise.all([
+    fetchInventoryFromSources(tenantId || null, !!isSuperAdmin, commandes, range),
+    fetchInventoryStaffForTenant(tenantId || null, !!isSuperAdmin, range, names),
+  ]);
 
-  return { logistique, callCenter, inventaire };
+  return { logistique, callCenter, inventaire, inventaireStaff };
 }
 
 /**
