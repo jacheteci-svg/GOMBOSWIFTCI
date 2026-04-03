@@ -17,6 +17,8 @@ ALTER TABLE commandes ADD COLUMN IF NOT EXISTS mode_paiement TEXT;
 ALTER TABLE commandes ADD COLUMN IF NOT EXISTS commune_livraison TEXT;
 ALTER TABLE commandes ADD COLUMN IF NOT EXISTS adresse_livraison TEXT;
 ALTER TABLE commandes ADD COLUMN IF NOT EXISTS notes_client TEXT;
+-- Référence métier (certaines instances : NOT NULL sans défaut — l’app envoie toujours une valeur à la création)
+ALTER TABLE commandes ADD COLUMN IF NOT EXISTS reference TEXT;
 ALTER TABLE commandes ADD COLUMN IF NOT EXISTS agent_appel_id UUID REFERENCES users(id);
 ALTER TABLE commandes ADD COLUMN IF NOT EXISTS livreur_id UUID REFERENCES users(id);
 ALTER TABLE commandes ADD COLUMN IF NOT EXISTS feuille_route_id UUID;

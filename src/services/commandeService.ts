@@ -85,19 +85,29 @@ export const subscribeToCommandesByStatus = (tenantId: string, statusList: strin
   return () => clearInterval(interval);
 };
 
+function generateCommandeReference(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return `CMD-${crypto.randomUUID()}`;
+  }
+  return `CMD-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+}
+
 /**
  * Colonnes d’insertion commandes : liste explicite (évite clés fantômes / mismatch schéma PostgREST).
- * agent_appel_id : volontairement omis (traçabilité dans notes_client si besoin) tant que la BDD peut varier ;
- * après ensure_core_schema.sql vous pouvez réactiver ici si souhaité.
+ * reference : obligatoire sur certaines BDD (NOT NULL) — toujours renseignée à la création.
+ * agent_appel_id : volontairement omis (traçabilité dans notes_client si besoin).
  */
 function buildInsertCommandePayload(tenantId: string, commande: Omit<Commande, 'id'>): Record<string, unknown> {
   const dateCreation =
     commande.date_creation instanceof Date
       ? commande.date_creation
       : new Date();
+  const reference =
+    commande.reference?.trim() || generateCommandeReference();
   return {
     tenant_id: tenantId,
     client_id: commande.client_id,
+    reference,
     statut_commande: 'en_attente_appel',
     date_creation: dateCreation.toISOString(),
     montant_total: commande.montant_total,

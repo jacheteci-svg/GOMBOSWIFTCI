@@ -149,6 +149,8 @@ export type StatutCommande =
 
 export interface Commande {
   id: string;
+  /** Référence métier / facture (certaines BDD : NOT NULL sur la colonne `reference`) */
+  reference?: string;
   date_creation: Date | any; // allow firestore timestamp
   client_id: string;
   nom_client?: string;

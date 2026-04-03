@@ -76,6 +76,7 @@ CREATE TABLE commandes (
   commune_livraison TEXT,
   adresse_livraison TEXT,
   notes_client TEXT,
+  reference TEXT,
   agent_appel_id UUID REFERENCES users(id),
   livreur_id UUID REFERENCES users(id),
   feuille_route_id UUID,
