@@ -22,7 +22,7 @@ export const getCommandeWithLines = async (tenantId: string, id: string): Promis
 
   return {
     ...cmd,
-    nom_client: cmd.clients?.nom_complet,
+    nom_client: cmd.clients?.nom_complet ?? (cmd as { client_nom?: string }).client_nom,
     telephone_client: cmd.clients?.telephone,
     lignes: lines || []
   };
@@ -39,7 +39,7 @@ export const getCommandes = async (tenantId: string): Promise<Commande[]> => {
   
   return (data || []).map((c: any) => ({
     ...c,
-    nom_client: c.clients?.nom_complet,
+    nom_client: c.clients?.nom_complet ?? c.client_nom,
     telephone_client: c.clients?.telephone
   }));
 };
@@ -72,7 +72,7 @@ export const getCommandesByStatus = async (tenantId: string, statusList: string[
   
   return (orders || []).map((o: any) => ({
     ...o,
-    nom_client: o.clients?.nom_complet,
+    nom_client: o.clients?.nom_complet ?? o.client_nom,
     telephone_client: o.clients?.telephone,
     lignes: (lines || []).filter((l: any) => l.commande_id === o.id)
   }));
@@ -104,9 +104,14 @@ function buildInsertCommandePayload(tenantId: string, commande: Omit<Commande, '
       : new Date();
   const reference =
     commande.reference?.trim() || generateCommandeReference();
+  const clientNom =
+    (commande as { client_nom?: string }).client_nom?.trim() ||
+    commande.nom_client?.trim() ||
+    'Client';
   return {
     tenant_id: tenantId,
     client_id: commande.client_id,
+    client_nom: clientNom,
     reference,
     statut_commande: 'en_attente_appel',
     date_creation: dateCreation.toISOString(),
@@ -123,6 +128,12 @@ function buildInsertCommandePayload(tenantId: string, commande: Omit<Commande, '
 export const createCommandeBase = async (tenantId: string, commande: Omit<Commande, 'id'>, lignes: Omit<LigneCommande, 'id' | 'commande_id'>[]): Promise<string> => {
   if (!commande.client_id || String(commande.client_id).trim() === '') {
     throw new Error('Client obligatoire : identifiant client manquant.');
+  }
+  const nomOk =
+    (commande as { client_nom?: string }).client_nom?.trim() ||
+    commande.nom_client?.trim();
+  if (!nomOk) {
+    throw new Error('Nom du client obligatoire pour enregistrer la commande.');
   }
 
   const payload = buildInsertCommandePayload(tenantId, {
@@ -366,7 +377,7 @@ export const getFinancialData = async (tenantId: string, startDate?: string, end
 
   return orders.map((o: any) => ({
     ...o,
-    nom_client: o.clients?.nom_complet,
+    nom_client: o.clients?.nom_complet ?? o.client_nom,
     telephone_client: o.clients?.telephone,
     lignes: (lines || []).filter((l: any) => l.commande_id === o.id)
   }));

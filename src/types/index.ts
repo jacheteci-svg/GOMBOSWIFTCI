@@ -153,7 +153,9 @@ export interface Commande {
   reference?: string;
   date_creation: Date | any; // allow firestore timestamp
   client_id: string;
+  /** Nom affiché ; en base certaines instances dupliquent en colonne `client_nom` (NOT NULL). */
   nom_client?: string;
+  client_nom?: string;
   telephone_client?: string;
   source_commande: string;
   statut_commande: StatutCommande;

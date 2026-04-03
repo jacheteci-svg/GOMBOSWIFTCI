@@ -1,10 +1,16 @@
 import { useState, useEffect } from 'react';
-import { X, CheckCircle, Clock, XCircle } from 'lucide-react';
-import { updateCommandeStatus } from '../../services/commandeService';
+import { X, CheckCircle, Clock, XCircle, MessageCircle } from 'lucide-react';
+import { getCommandeWithLines, updateCommandeStatus } from '../../services/commandeService';
 import { insforge } from '../../lib/insforge';
 import { useAuth } from '../../contexts/AuthContext';
 import { getCommunes } from '../../services/adminService';
 import { useSaas } from '../../saas/SaasProvider';
+import { useToast } from '../../contexts/ToastContext';
+import {
+  buildCentreAppelWhatsAppMessage,
+  buildWhatsAppWebUrl,
+  normalizePhoneForWhatsApp,
+} from '../../lib/whatsappCentreAppel';
 import type { Commande, AppelCommande, Commune } from '../../types';
 
 interface AppelFormProps {
@@ -16,6 +22,8 @@ interface AppelFormProps {
 export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
   const { currentUser } = useAuth();
   const { tenant } = useSaas();
+  const { showToast } = useToast();
+  const [detailCommande, setDetailCommande] = useState<Commande>(commande);
   const [loading, setLoading] = useState(false);
   const [resultat, setResultat] = useState<AppelCommande['resultat_appel']>('validee');
   const [commentaire, setCommentaire] = useState('');
@@ -28,6 +36,36 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
     if (!tenant?.id) return;
     getCommunes(tenant.id).then(setCommunesDb);
   }, [tenant?.id]);
+
+  useEffect(() => {
+    setDetailCommande(commande);
+  }, [commande.id]);
+
+  useEffect(() => {
+    if (!tenant?.id) return;
+    let cancelled = false;
+    getCommandeWithLines(tenant.id, commande.id)
+      .then((c) => {
+        if (!cancelled) setDetailCommande(c);
+      })
+      .catch(() => {
+        if (!cancelled) setDetailCommande(commande);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [tenant?.id, commande.id]);
+
+  const openWhatsAppClient = () => {
+    const phone = normalizePhoneForWhatsApp(detailCommande.telephone_client);
+    if (!phone) {
+      showToast('Numéro de téléphone client manquant ou invalide pour WhatsApp.', 'error');
+      return;
+    }
+    const msg = buildCentreAppelWhatsAppMessage(detailCommande, tenant?.nom || '');
+    const url = buildWhatsAppWebUrl(phone, msg);
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
 
   const handleCommuneChange = (nom: string) => {
     setCommuneLocal(nom);
@@ -128,6 +166,34 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
               📞 {commande.telephone_client}
             </div>
           </div>
+          <button
+            type="button"
+            onClick={openWhatsAppClient}
+            style={{
+              width: '100%',
+              marginTop: '1rem',
+              padding: '0.9rem 1rem',
+              borderRadius: '14px',
+              border: 'none',
+              background: 'linear-gradient(180deg, #25D366 0%, #128C7E 100%)',
+              color: 'white',
+              fontWeight: 800,
+              fontSize: '0.95rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.55rem',
+              boxShadow: '0 8px 20px rgba(37, 211, 102, 0.35)',
+            }}
+          >
+            <MessageCircle size={22} strokeWidth={2.5} />
+            WhatsApp — confirmation & livraison
+          </button>
+          <p style={{ margin: '0.55rem 0 0', fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.45 }}>
+            Message prérempli : enregistrement de la commande, récap produits et montants (en gras), demande de
+            confirmation de livraison et des informations encore manquantes dans la base.
+          </p>
         </div>
         
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>

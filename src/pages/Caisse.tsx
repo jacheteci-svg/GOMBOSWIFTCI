@@ -118,7 +118,7 @@ export const Caisse = () => {
       const cmd = results[0];
       const fullCmd = {
         ...cmd,
-        nom_client: cmd.clients?.nom_complet,
+        nom_client: cmd.clients?.nom_complet ?? cmd.client_nom,
         telephone_client: cmd.clients?.telephone
       };
 
