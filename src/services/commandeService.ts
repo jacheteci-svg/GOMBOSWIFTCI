@@ -1,5 +1,6 @@
 import { Commande, LigneCommande } from '../types';
 import { insforge } from '../lib/insforge';
+import { getErrorMessage } from '../lib/errorUtils';
 import { addMouvementStock } from './produitService';
 
 export const getCommandeWithLines = async (tenantId: string, id: string): Promise<Commande & { lignes: LigneCommande[] }> => {
@@ -85,7 +86,7 @@ export const subscribeToCommandesByStatus = (tenantId: string, statusList: strin
 };
 
 export const createCommandeBase = async (tenantId: string, commande: Omit<Commande, 'id'>, lignes: Omit<LigneCommande, 'id' | 'commande_id'>[]): Promise<string> => {
-  commande.date_creation = new Date();
+  commande.date_creation = new Date() as any;
   commande.statut_commande = 'en_attente_appel';
   commande.tenant_id = tenantId;
 
@@ -96,14 +97,26 @@ export const createCommandeBase = async (tenantId: string, commande: Omit<Comman
   }
   delete (row as { agent_id?: string }).agent_id;
 
+  /* Payload PostgREST : pas de clés undefined ; dates en ISO pour timestamptz */
+  const payload: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(row as unknown as Record<string, unknown>)) {
+    if (v === undefined || v === null) continue;
+    if (k === 'agent_appel_id' && v === '') continue;
+    if (k === 'date_creation' && v instanceof Date) {
+      payload[k] = v.toISOString();
+    } else {
+      payload[k] = v;
+    }
+  }
+
   const { data: cmdData, error: cmdError } = await insforge.database
     .from('commandes')
-    .insert([row])
+    .insert([payload as any])
     .select();
 
   if (cmdError) {
     console.error("Erreur création commande:", cmdError);
-    throw new Error(`Erreur insertion commande: ${cmdError.message}`);
+    throw new Error(`Erreur insertion commande: ${getErrorMessage(cmdError)}`);
   }
   
   const id = cmdData?.[0]?.id;
@@ -128,7 +141,7 @@ export const createCommandeBase = async (tenantId: string, commande: Omit<Comman
     
     if (lineError) {
       console.error("Erreur ligne commande:", lineError);
-      throw new Error(`Erreur ligne commande (${l.nom_produit}): ${lineError.message}`);
+      throw new Error(`Erreur ligne commande (${l.nom_produit}): ${getErrorMessage(lineError)}`);
     }
 
     try {

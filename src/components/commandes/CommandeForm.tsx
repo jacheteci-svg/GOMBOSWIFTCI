@@ -9,6 +9,7 @@ import { useToast } from '../../contexts/ToastContext';
 import { useAuth } from '../../contexts/AuthContext';
 import type { Commune } from '../../types';
 import { useSaas } from '../../saas/SaasProvider';
+import { getErrorMessage } from '../../lib/errorUtils';
 
 export const CommandeForm = ({ onClose, onSave }: { onClose: () => void, onSave: () => void }) => {
   const { showToast } = useToast();
@@ -187,8 +188,11 @@ export const CommandeForm = ({ onClose, onSave }: { onClose: () => void, onSave:
       onSave();
     } catch (error: unknown) {
       console.error(error);
-      const msg = error instanceof Error ? error.message : 'Erreur lors de la création.';
-      showToast(msg.length > 120 ? 'Erreur lors de la création. Vérifiez les champs et réessayez.' : msg, 'error');
+      const msg = getErrorMessage(error, 'Erreur lors de la création.');
+      showToast(
+        msg.length > 180 ? `${msg.slice(0, 177)}…` : msg,
+        'error'
+      );
     } finally {
       setLoading(false);
     }

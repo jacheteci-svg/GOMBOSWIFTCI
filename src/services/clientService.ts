@@ -42,8 +42,10 @@ export const createClient = async (tenantId: string, client: Omit<Client, 'id'>)
     .insert([{ ...client, tenant_id: tenantId }])
     .select();
   
-  if (error) throw error;
-  return data?.[0]?.id;
+  if (error) throw new Error(error.message || 'Insertion client impossible.');
+  const id = data?.[0]?.id;
+  if (!id) throw new Error('Client créé mais identifiant non retourné.');
+  return id;
 };
 
 export interface ClientFidelityStats {
