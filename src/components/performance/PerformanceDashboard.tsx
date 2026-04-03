@@ -24,6 +24,9 @@ import {
   Users,
   ShoppingCart,
   Banknote,
+  Sparkles,
+  LayoutDashboard,
+  ArrowUpRight,
 } from 'lucide-react';
 
 type TabType = 'logistique' | 'call-center' | 'inventaire';
@@ -536,12 +539,13 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
 
   const subtitle = "Suivez l'efficacité opérationnelle de vos départements.";
 
-  /** Vue Nexus : performance par tenant (boutiques), pas par livreur */
+  /** Vue Nexus — refonte UI : bento KPI, tableau dense, graphique GMV (couleurs natives) */
   const renderSuperAdminTenants = () => {
     const rows = tenantRows;
     const totalCmd = rows.reduce((a, r) => a + r.commandes, 0);
     const totalGmv = rows.reduce((a, r) => a + r.ca_gmv, 0);
     const withActivity = rows.filter((r) => r.commandes > 0).length;
+    const inactiveTenants = rows.filter((r) => !r.actif).length;
     const totalSorties = rows.reduce((a, r) => a + r.sorties_terrain, 0);
     const avgSuccPlat =
       totalSorties > 0
@@ -554,142 +558,310 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
       .filter((r) => r.ca_gmv > 0 || r.commandes > 0)
       .slice(0, 12)
       .map((r) => ({
-        nom: r.nom.length > 16 ? `${r.nom.slice(0, 16)}…` : r.nom,
+        nom: r.nom.length > 18 ? `${r.nom.slice(0, 18)}…` : r.nom,
         ca: r.ca_gmv,
       }));
 
-    const kpi = (icon: ReactNode, label: string, value: string | number, hint?: string) => (
-      <div
-        className="rounded-2xl border border-slate-600/30 p-4 sm:p-5 flex gap-4 items-start"
-        style={{ background: 'linear-gradient(145deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%)' }}
-      >
-        <div className="w-11 h-11 rounded-xl bg-cyan-500/15 border border-cyan-500/25 flex items-center justify-center text-cyan-300 shrink-0">
-          {icon}
+    const topTenant = rows[0];
+
+    const BentoKpi = ({
+      accent,
+      icon,
+      label,
+      value,
+      sub,
+    }: {
+      accent: 'cyan' | 'emerald' | 'violet' | 'amber';
+      icon: ReactNode;
+      label: string;
+      value: ReactNode;
+      sub: string;
+    }) => {
+      const ring =
+        accent === 'cyan'
+          ? 'from-cyan-500/25 to-transparent'
+          : accent === 'emerald'
+            ? 'from-emerald-500/20 to-transparent'
+            : accent === 'violet'
+              ? 'from-violet-500/20 to-transparent'
+              : 'from-amber-500/20 to-transparent';
+      return (
+        <div className="group relative overflow-hidden rounded-2xl border border-white/[0.07] p-5 sm:p-6 transition-transform duration-300 hover:-translate-y-0.5 hover:border-cyan-500/25">
+          <div
+            className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${ring} opacity-80`}
+            aria-hidden
+          />
+          <div className="relative flex flex-col gap-4 h-full">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-slate-900/60 text-cyan-300 shadow-inner">
+                {icon}
+              </div>
+              <ArrowUpRight
+                size={18}
+                className="text-slate-600 opacity-0 transition-opacity group-hover:opacity-100"
+                strokeWidth={2}
+              />
+            </div>
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">{label}</p>
+              <p className="mt-2 text-2xl sm:text-[1.65rem] font-bold tracking-tight text-white tabular-nums leading-none">
+                {value}
+              </p>
+              <p className="mt-2 text-xs text-slate-500 leading-snug">{sub}</p>
+            </div>
+          </div>
         </div>
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{label}</p>
-          <p className="text-xl sm:text-2xl font-bold text-white tabular-nums mt-0.5">{value}</p>
-          {hint ? <p className="text-xs text-slate-500 mt-1">{hint}</p> : null}
-        </div>
-      </div>
-    );
+      );
+    };
 
     return (
-      <div className="space-y-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-          {kpi(<ShoppingCart size={20} />, 'Commandes (période)', totalCmd.toLocaleString('fr-FR'), 'Toutes boutiques')}
-          {kpi(
-            <Banknote size={20} />,
-            'CA livré (GMV)',
-            `${totalGmv.toLocaleString('fr-FR')} CFA`,
-            'Commandes livrées / terminées'
-          )}
-          {kpi(<Building2 size={20} />, 'Boutiques actives', withActivity, `Sur ${rows.length} organisations`)}
-          {kpi(<TrendingUp size={20} />, 'Taux livraison moy.', `${avgSuccPlat}%`, 'Pondéré par le terrain')}
+      <div className="space-y-8 lg:space-y-10">
+        {/* Grille bento — métriques clés */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-5">
+          <BentoKpi
+            accent="cyan"
+            icon={<ShoppingCart size={22} strokeWidth={2} />}
+            label="Volume commandes"
+            value={totalCmd.toLocaleString('fr-FR')}
+            sub="Toutes organisations · période sélectionnée"
+          />
+          <BentoKpi
+            accent="emerald"
+            icon={<Banknote size={22} strokeWidth={2} />}
+            value={
+              <span className="text-[1.35rem] sm:text-[1.65rem]">
+                {totalGmv.toLocaleString('fr-FR')}{' '}
+                <span className="text-sm font-semibold text-slate-400">CFA</span>
+              </span>
+            }
+            label="CA livré (GMV)"
+            sub="Sur commandes livrées / terminées"
+          />
+          <BentoKpi
+            accent="violet"
+            icon={<Building2 size={22} strokeWidth={2} />}
+            value={
+              <span>
+                {withActivity}
+                <span className="text-slate-500 text-lg font-semibold"> / {rows.length}</span>
+              </span>
+            }
+            label="Boutiques actives"
+            sub={`${inactiveTenants} compte(s) inactif(s) au catalogue`}
+          />
+          <BentoKpi
+            accent="amber"
+            icon={<TrendingUp size={22} strokeWidth={2} />}
+            value={
+              <span>
+                {avgSuccPlat}
+                <span className="text-cyan-400/90">%</span>
+              </span>
+            }
+            label="Taux livraison"
+            sub="Moyenne pondérée par missions terrain"
+          />
         </div>
 
-        <div className={panelClass}>
-          <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-white/[0.06] bg-white/[0.02]">
-            <h2 className="text-lg font-bold text-[var(--text-main)]" style={{ fontFamily: 'Outfit, sans-serif' }}>
-              Détail par{' '}
-              <span style={{ color: C.primary }}>boutique (tenant)</span>
-            </h2>
-            <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
-              <Lightbulb size={16} className="text-amber-400/90 shrink-0" strokeWidth={2} />
-              Classé par CA livré sur la période
-            </div>
+        {/* Carte "leader" + grille 2 colonnes */}
+        <div className="grid grid-cols-1 xl:grid-cols-5 gap-6 lg:gap-8">
+          <div className="xl:col-span-2 space-y-4">
+            {topTenant && (topTenant.ca_gmv > 0 || topTenant.commandes > 0) ? (
+              <div
+                className="relative overflow-hidden rounded-2xl border border-cyan-500/30 p-6 sm:p-7"
+                style={{
+                  background:
+                    'linear-gradient(135deg, rgba(6, 182, 212, 0.12) 0%, rgba(15, 23, 42, 0.98) 45%, #0f172a 100%)',
+                  boxShadow: '0 0 0 1px rgba(6, 182, 212, 0.12), 0 25px 50px -12px rgba(0,0,0,0.5)',
+                }}
+              >
+                <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-cyan-400/15 blur-3xl" aria-hidden />
+                <div className="relative flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-cyan-400/95">
+                  <Sparkles size={14} strokeWidth={2.5} />
+                  Leader période
+                </div>
+                <p className="relative mt-3 text-xl sm:text-2xl font-bold text-white tracking-tight">
+                  {topTenant.nom}
+                </p>
+                <p className="relative text-sm text-slate-400 mt-1">/{topTenant.slug || '—'}</p>
+                <div className="relative mt-6 grid grid-cols-2 gap-4">
+                  <div className="rounded-xl bg-black/20 border border-white/5 px-4 py-3">
+                    <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">CA (GMV)</p>
+                    <p className="text-lg font-bold text-white tabular-nums mt-1">
+                      {topTenant.ca_gmv.toLocaleString('fr-FR')}{' '}
+                      <span className="text-xs text-slate-500">CFA</span>
+                    </p>
+                  </div>
+                  <div className="rounded-xl bg-black/20 border border-white/5 px-4 py-3">
+                    <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Succès livr.</p>
+                    <p className="text-lg font-bold text-cyan-300 tabular-nums mt-1">{topTenant.success_rate}%</p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-slate-600/50 p-8 text-center text-slate-500 text-sm">
+                Aucune activité sur cette période — élargissez la fenêtre temporelle.
+              </div>
+            )}
+
+            {chartData.length > 0 && (
+              <div
+                className="rounded-2xl border border-white/[0.08] p-5 sm:p-6 overflow-hidden"
+                style={{ background: 'linear-gradient(180deg, rgba(18, 24, 43, 0.95) 0%, #0b1120 100%)' }}
+              >
+                <div className="flex items-center justify-between gap-3 mb-5">
+                  <div>
+                    <h3
+                      className="text-base font-bold text-white flex items-center gap-2"
+                      style={{ fontFamily: 'Outfit, sans-serif' }}
+                    >
+                      <LayoutDashboard size={18} className="text-cyan-400" strokeWidth={2} />
+                      Répartition CA (top 12)
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">Barres horizontales · même échelle pour comparer</p>
+                  </div>
+                </div>
+                <div style={{ height: Math.max(280, chartData.length * 36) }} className="min-h-[280px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData} layout="vertical" margin={{ top: 4, right: 12, left: 4, bottom: 4 }}>
+                      <defs>
+                        <linearGradient id="gmvBarGrad" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stopColor="#06b6d4" />
+                          <stop offset="55%" stopColor="#22d3ee" />
+                          <stop offset="100%" stopColor="#3b82f6" />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(255,255,255,0.05)" />
+                      <XAxis
+                        type="number"
+                        tick={{ fill: C.textMuted, fontSize: 11 }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <YAxis
+                        type="category"
+                        dataKey="nom"
+                        width={118}
+                        tick={{ fill: '#cbd5e1', fontSize: 11 }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <Tooltip
+                        {...chartTooltip}
+                        formatter={(v) => [`${Number(v ?? 0).toLocaleString('fr-FR')} CFA`, 'CA livré']}
+                      />
+                      <Bar
+                        dataKey="ca"
+                        fill="url(#gmvBarGrad)"
+                        radius={[0, 8, 8, 0]}
+                        maxBarSize={32}
+                        animationDuration={600}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            )}
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm min-w-[900px]">
-              <thead>
-                <tr className="text-[10px] uppercase tracking-wider text-slate-500 border-b border-white/[0.06] bg-white/[0.03]">
-                  <th className="px-4 py-3 font-semibold">Boutique</th>
-                  <th className="px-3 py-3 font-semibold">Plan</th>
-                  <th className="px-3 py-3 font-semibold text-center">Compte</th>
-                  <th className="px-3 py-3 font-semibold text-center">
-                    <Users className="inline size-3.5 opacity-60 mr-1" />
-                    Users
-                  </th>
-                  <th className="px-3 py-3 font-semibold text-center">Cmd</th>
-                  <th className="px-3 py-3 font-semibold text-center" style={{ color: C.livres }}>
-                    Livrées
-                  </th>
-                  <th className="px-3 py-3 font-semibold text-center">Terrain</th>
-                  <th className="px-3 py-3 font-semibold text-center">Succès</th>
-                  <th className="px-3 py-3 font-semibold text-center" style={{ color: C.annules }}>
-                    Annul.
-                  </th>
-                  <th className="px-4 py-3 font-semibold text-right">CA (GMV)</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/[0.05]">
-                {rows.map((r) => (
-                  <tr key={r.tenant_id} className="hover:bg-white/[0.02]">
-                    <td className="px-4 py-3">
-                      <div className="font-semibold text-slate-100">{r.nom}</div>
-                      <div className="text-[11px] text-cyan-400/80 font-medium mt-0.5">/{r.slug || '—'}</div>
-                    </td>
-                    <td className="px-3 py-3 text-slate-300 font-medium">{r.plan}</td>
-                    <td className="px-3 py-3 text-center">
-                      <span
-                        className={`inline-block px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase ${
-                          r.actif ? 'bg-emerald-500/15 text-emerald-300' : 'bg-slate-600/40 text-slate-400'
-                        }`}
+
+          <div className="xl:col-span-3">
+            <div
+              className="rounded-2xl border border-white/[0.08] overflow-hidden h-full flex flex-col min-h-[420px]"
+              style={{
+                background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(8, 11, 20, 0.99) 100%)',
+                boxShadow: 'var(--shadow-md)',
+              }}
+            >
+              <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-white/[0.06] bg-gradient-to-r from-cyan-950/30 to-transparent">
+                <div>
+                  <h2 className="text-lg font-bold text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                    Matrice <span style={{ color: C.primary }}>tenants</span>
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-0.5">Tri par CA décroissant · données temps réel</p>
+                </div>
+                <div className="flex items-center gap-2 rounded-full bg-slate-800/80 border border-white/10 px-3 py-1.5 text-[11px] font-medium text-slate-400">
+                  <Lightbulb size={14} className="text-amber-400/90 shrink-0" />
+                  Vue opérationnelle
+                </div>
+              </div>
+              <div className="overflow-x-auto flex-1">
+                <table className="w-full text-left text-[13px] min-w-[880px]">
+                  <thead>
+                    <tr className="text-[10px] uppercase tracking-[0.12em] text-slate-500 border-b border-white/[0.06] bg-black/20">
+                      <th className="pl-5 pr-2 py-3.5 font-bold w-10">#</th>
+                      <th className="px-2 py-3.5 font-bold">Boutique</th>
+                      <th className="px-2 py-3.5 font-bold">Plan</th>
+                      <th className="px-2 py-3.5 font-bold text-center">État</th>
+                      <th className="px-2 py-3.5 font-bold text-center">
+                        <Users className="inline size-3.5 opacity-50 mr-0.5" />
+                        Équipe
+                      </th>
+                      <th className="px-2 py-3.5 font-bold text-center">Cmd</th>
+                      <th className="px-2 py-3.5 font-bold text-center" style={{ color: C.livres }}>
+                        OK
+                      </th>
+                      <th className="px-2 py-3.5 font-bold text-center text-slate-400">Terrain</th>
+                      <th className="px-2 py-3.5 font-bold text-center">%</th>
+                      <th className="px-2 py-3.5 font-bold text-center" style={{ color: C.annules }}>
+                        Annul.
+                      </th>
+                      <th className="pl-2 pr-5 py-3.5 font-bold text-right">CA</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows.map((r, idx) => (
+                      <tr
+                        key={r.tenant_id}
+                        className="border-b border-white/[0.04] transition-colors hover:bg-cyan-500/[0.04]"
                       >
-                        {r.actif ? 'Actif' : 'Inactif'}
-                      </span>
-                    </td>
-                    <td className="px-3 py-3 text-center tabular-nums text-slate-200">{r.users_count}</td>
-                    <td className="px-3 py-3 text-center tabular-nums text-slate-200">{r.commandes}</td>
-                    <td className="px-3 py-3 text-center font-semibold tabular-nums" style={{ color: C.livres }}>
-                      {r.livrees}
-                    </td>
-                    <td className="px-3 py-3 text-center tabular-nums text-slate-400">{r.sorties_terrain}</td>
-                    <td className="px-3 py-3 text-center font-bold tabular-nums text-cyan-300">{r.success_rate}%</td>
-                    <td className="px-3 py-3 text-center tabular-nums" style={{ color: C.annules }}>
-                      {r.annules}
-                    </td>
-                    <td className="px-4 py-3 text-right font-bold text-slate-100 tabular-nums">
-                      {r.ca_gmv.toLocaleString('fr-FR')} <span className="text-slate-500 text-xs font-semibold">CFA</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          {rows.length === 0 && (
-            <p className="p-10 text-center text-slate-500 text-sm">Aucune boutique enregistrée.</p>
-          )}
-        </div>
-
-        {chartData.length > 0 && (
-          <div className={`${panelClass} p-5 md:p-6`}>
-            <h3 className="text-base font-bold text-[var(--text-main)] mb-1" style={{ fontFamily: 'Outfit, sans-serif' }}>
-              Top boutiques — CA livré (GMV)
-            </h3>
-            <p className="text-xs text-slate-500 mb-6">Jusqu&apos;à 12 organisations avec activité sur la période</p>
-            <div style={{ height: 320 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} layout="vertical" margin={{ top: 8, right: 16, left: 8, bottom: 8 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(255,255,255,0.06)" />
-                  <XAxis type="number" tick={{ fill: C.textMuted, fontSize: 11 }} axisLine={false} />
-                  <YAxis
-                    type="category"
-                    dataKey="nom"
-                    width={120}
-                    tick={{ fill: C.textMuted, fontSize: 11 }}
-                    axisLine={false}
-                  />
-                  <Tooltip
-                    {...chartTooltip}
-                    formatter={(v) => [`${Number(v ?? 0).toLocaleString('fr-FR')} CFA`, 'CA']}
-                  />
-                  <Bar dataKey="ca" fill={C.primary} radius={[0, 6, 6, 0]} maxBarSize={28} />
-                </BarChart>
-              </ResponsiveContainer>
+                        <td className="pl-5 pr-2 py-3.5 text-slate-600 font-mono text-xs tabular-nums">{idx + 1}</td>
+                        <td className="px-2 py-3.5">
+                          <div className="font-semibold text-slate-100">{r.nom}</div>
+                          <div className="text-[11px] text-cyan-500/75 font-medium mt-0.5">/{r.slug || '—'}</div>
+                        </td>
+                        <td className="px-2 py-3.5">
+                          <span className="inline-flex rounded-lg bg-slate-800/80 px-2 py-0.5 text-xs font-medium text-slate-300 border border-white/5">
+                            {r.plan}
+                          </span>
+                        </td>
+                        <td className="px-2 py-3.5 text-center">
+                          <span
+                            className={`inline-flex items-center justify-center min-w-[3.25rem] rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
+                              r.actif ? 'bg-emerald-500/15 text-emerald-300' : 'bg-slate-700/60 text-slate-400'
+                            }`}
+                          >
+                            {r.actif ? 'On' : 'Off'}
+                          </span>
+                        </td>
+                        <td className="px-2 py-3.5 text-center tabular-nums text-slate-300">{r.users_count}</td>
+                        <td className="px-2 py-3.5 text-center tabular-nums text-slate-300">{r.commandes}</td>
+                        <td className="px-2 py-3.5 text-center font-semibold tabular-nums" style={{ color: C.livres }}>
+                          {r.livrees}
+                        </td>
+                        <td className="px-2 py-3.5 text-center tabular-nums text-slate-500">{r.sorties_terrain}</td>
+                        <td className="px-2 py-3.5 text-center">
+                          <span className="inline-flex min-w-[2.75rem] justify-center rounded-md bg-cyan-500/10 px-1.5 py-0.5 text-xs font-bold tabular-nums text-cyan-200 border border-cyan-500/20">
+                            {r.success_rate}%
+                          </span>
+                        </td>
+                        <td className="px-2 py-3.5 text-center tabular-nums" style={{ color: C.annules }}>
+                          {r.annules}
+                        </td>
+                        <td className="pl-2 pr-5 py-3.5 text-right font-semibold tabular-nums text-white">
+                          {r.ca_gmv.toLocaleString('fr-FR')}{' '}
+                          <span className="text-slate-500 text-[11px] font-medium">CFA</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {rows.length === 0 && (
+                <p className="p-12 text-center text-slate-500 text-sm">Aucune boutique enregistrée.</p>
+              )}
             </div>
           </div>
-        )}
+        </div>
       </div>
     );
   };
@@ -709,41 +881,93 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
         colorScheme: 'dark',
       }}
     >
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10 pb-16">
-        <header className="flex flex-col gap-6 mb-10">
-          <div className="max-w-2xl">
-            <h1
-              className="text-2xl sm:text-3xl lg:text-[2rem] font-bold tracking-tight mb-2"
-              style={{
-                fontFamily: 'Outfit, sans-serif',
-                background: 'linear-gradient(135deg, #22d3ee 0%, #a78bfa 45%, #818cf8 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
-              {isSuperAdmin ? 'Performance des boutiques' : 'Hub Performance Équipe'}
-            </h1>
-            <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
-              {isSuperAdmin
-                ? 'Vue Nexus : volume, CA (GMV) et taux de livraison par organisation (tenant), sur la période choisie.'
-                : subtitle}
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            {renderFilterButtons()}
+      <div
+        className={`mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10 pb-16 ${
+          isSuperAdmin ? 'max-w-[1400px]' : 'max-w-[1200px]'
+        }`}
+      >
+        {isSuperAdmin ? (
+          <header className="relative mb-10 lg:mb-12 overflow-hidden rounded-3xl border border-cyan-500/20 bg-gradient-to-br from-[#0c1222] via-[#0a0f1a] to-[#060911] px-6 py-8 sm:px-10 sm:py-10 shadow-[0_0_0_1px_rgba(6,182,212,0.08),0_40px_80px_-20px_rgba(0,0,0,0.65)]">
             <div
-              className="flex items-center gap-2.5 text-xs sm:text-sm text-slate-300 px-4 py-2.5 rounded-xl border border-slate-600/35 shrink-0"
-              style={{ background: 'rgba(15, 23, 42, 0.65)' }}
-            >
-              <Clock size={16} className="shrink-0 text-cyan-400/90" strokeWidth={2} aria-hidden />
-              <span className="font-medium tabular-nums text-slate-200">
-                {new Date().toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}
-              </span>
+              className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-cyan-500/15 blur-[100px]"
+              aria-hidden
+            />
+            <div
+              className="pointer-events-none absolute -left-16 bottom-0 h-48 w-48 rounded-full bg-indigo-600/10 blur-[80px]"
+              aria-hidden
+            />
+            <div className="relative flex flex-col xl:flex-row xl:items-end xl:justify-between gap-8">
+              <div className="max-w-2xl">
+                <span className="inline-flex items-center gap-2 rounded-full border border-cyan-500/25 bg-cyan-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-300/95">
+                  <Sparkles size={12} className="text-cyan-400" strokeWidth={2.5} />
+                  Nexus · Intelligence multi-tenant
+                </span>
+                <h1
+                  className="mt-4 text-3xl sm:text-4xl lg:text-[2.35rem] font-bold tracking-tight leading-[1.15]"
+                  style={{ fontFamily: 'Outfit, sans-serif' }}
+                >
+                  <span
+                    style={{
+                      background: 'linear-gradient(135deg, #e0f2fe 0%, #22d3ee 35%, #a78bfa 70%, #818cf8 100%)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                    }}
+                  >
+                    Performance des boutiques
+                  </span>
+                </h1>
+                <p className="mt-3 text-sm sm:text-base text-slate-400 leading-relaxed max-w-xl">
+                  Tableau de bord opérationnel : comparez le volume, le CA (GMV) et la qualité de livraison de chaque
+                  organisation sur la période sélectionnée.
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row xl:flex-col xl:items-end gap-4 shrink-0">
+                {renderFilterButtons()}
+                <div
+                  className="flex items-center gap-2.5 text-xs sm:text-sm text-slate-200 px-4 py-3 rounded-2xl border border-white/10"
+                  style={{ background: 'rgba(8, 11, 20, 0.75)', backdropFilter: 'blur(12px)' }}
+                >
+                  <Clock size={17} className="shrink-0 text-cyan-400" strokeWidth={2} aria-hidden />
+                  <span className="font-medium tabular-nums">
+                    {new Date().toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}
+                  </span>
+                </div>
+              </div>
             </div>
-          </div>
-        </header>
+          </header>
+        ) : (
+          <header className="flex flex-col gap-6 mb-10">
+            <div className="max-w-2xl">
+              <h1
+                className="text-2xl sm:text-3xl lg:text-[2rem] font-bold tracking-tight mb-2"
+                style={{
+                  fontFamily: 'Outfit, sans-serif',
+                  background: 'linear-gradient(135deg, #22d3ee 0%, #a78bfa 45%, #818cf8 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+              >
+                Hub Performance Équipe
+              </h1>
+              <p className="text-slate-400 text-sm sm:text-base leading-relaxed">{subtitle}</p>
+            </div>
+
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              {renderFilterButtons()}
+              <div
+                className="flex items-center gap-2.5 text-xs sm:text-sm text-slate-300 px-4 py-2.5 rounded-xl border border-slate-600/35 shrink-0"
+                style={{ background: 'rgba(15, 23, 42, 0.65)' }}
+              >
+                <Clock size={16} className="shrink-0 text-cyan-400/90" strokeWidth={2} aria-hidden />
+                <span className="font-medium tabular-nums text-slate-200">
+                  {new Date().toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}
+                </span>
+              </div>
+            </div>
+          </header>
+        )}
 
         {isSuperAdmin ? null : (
           <nav className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10" aria-label="Départements">
