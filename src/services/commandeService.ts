@@ -196,6 +196,116 @@ export const createCommandeBase = async (tenantId: string, commande: Omit<Comman
   return id;
 };
 
+export type LigneCommandeCentreAppelInput = {
+  produit_id: string;
+  nom_produit: string;
+  quantite: number;
+  prix_unitaire: number;
+  montant_ligne: number;
+};
+
+/**
+ * Remplace les lignes d’une commande depuis le centre d’appel : ajuste le stock (delta par produit),
+ * puis supprime et réinsère les lignes. Le total articles retourné sert à recalculer `montant_total`.
+ */
+export const replaceCommandeLignesCentreAppel = async (
+  tenantId: string,
+  commandeId: string,
+  lignes: LigneCommandeCentreAppelInput[]
+): Promise<{ subtotal: number }> => {
+  if (!lignes.length) {
+    throw new Error('Au moins une ligne produit est requise.');
+  }
+  for (const l of lignes) {
+    if (!l.produit_id?.trim()) {
+      throw new Error('Chaque ligne doit avoir un produit sélectionné.');
+    }
+    if (!Number(l.quantite) || Number(l.quantite) < 1) {
+      throw new Error('Chaque ligne doit avoir une quantité d’au moins 1.');
+    }
+  }
+
+  const { data: oldLines, error: oldErr } = await insforge.database
+    .from('lignes_commandes')
+    .select('*')
+    .eq('commande_id', commandeId)
+    .eq('tenant_id', tenantId);
+
+  if (oldErr) throw new Error(getErrorMessage(oldErr));
+
+  const sumByProduct = (rows: { produit_id: string; quantite: number }[]) => {
+    const m = new Map<string, number>();
+    for (const r of rows) {
+      const pid = r.produit_id;
+      const q = Number(r.quantite) || 0;
+      m.set(pid, (m.get(pid) || 0) + q);
+    }
+    return m;
+  };
+
+  const oldMap = sumByProduct(oldLines || []);
+  const newMap = sumByProduct(lignes);
+
+  const allIds = new Set([...oldMap.keys(), ...newMap.keys()]);
+  for (const pid of allIds) {
+    const oldQ = oldMap.get(pid) || 0;
+    const newQ = newMap.get(pid) || 0;
+    const delta = newQ - oldQ;
+    if (delta === 0) continue;
+    if (delta > 0) {
+      await addMouvementStock(tenantId, {
+        produit_id: pid,
+        type_mouvement: 'sortie',
+        quantite: delta,
+        reference: `Ajustement appel Cmd #${commandeId.slice(0, 8)}`,
+      } as any);
+    } else {
+      await addMouvementStock(tenantId, {
+        produit_id: pid,
+        type_mouvement: 'entree',
+        quantite: -delta,
+        reference: `Ajustement appel Cmd #${commandeId.slice(0, 8)}`,
+      } as any);
+    }
+  }
+
+  const { error: delErr } = await insforge.database
+    .from('lignes_commandes')
+    .delete()
+    .eq('commande_id', commandeId)
+    .eq('tenant_id', tenantId);
+
+  if (delErr) throw new Error(getErrorMessage(delErr));
+
+  const subtotal = lignes.reduce((acc, l) => acc + Number(l.montant_ligne || 0), 0);
+
+  for (const l of lignes) {
+    const { data: prodData } = await insforge.database
+      .from('produits')
+      .select('prix_achat')
+      .eq('id', l.produit_id)
+      .eq('tenant_id', tenantId)
+      .single();
+
+    const { error: insErr } = await insforge.database.from('lignes_commandes').insert([
+      {
+        commande_id: commandeId,
+        produit_id: l.produit_id,
+        nom_produit: l.nom_produit,
+        quantite: Number(l.quantite),
+        prix_unitaire: Number(l.prix_unitaire),
+        montant_ligne: Number(l.montant_ligne),
+        prix_achat_unitaire: prodData?.prix_achat || 0,
+        tenant_id: tenantId,
+      },
+    ]);
+
+    if (insErr) throw new Error(getErrorMessage(insErr));
+  }
+
+  return { subtotal };
+};
+
 export const updateCommandeStatus = async (tenantId: string, id: string, status: string, additionalData: any = {}): Promise<void> => {
   // 1. Fetch current status and lines
   const { data: currentCmd } = await insforge.database

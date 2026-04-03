@@ -1,17 +1,23 @@
 import { useState, useEffect } from 'react';
-import { X, CheckCircle, Clock, XCircle, MessageCircle } from 'lucide-react';
-import { getCommandeWithLines, updateCommandeStatus } from '../../services/commandeService';
+import { X, CheckCircle, Clock, XCircle, MessageCircle, Plus, Trash2 } from 'lucide-react';
+import {
+  getCommandeWithLines,
+  replaceCommandeLignesCentreAppel,
+  updateCommandeStatus,
+} from '../../services/commandeService';
+import { subscribeToProduits } from '../../services/produitService';
 import { insforge } from '../../lib/insforge';
 import { useAuth } from '../../contexts/AuthContext';
 import { getCommunes } from '../../services/adminService';
 import { useSaas } from '../../saas/SaasProvider';
 import { useToast } from '../../contexts/ToastContext';
+import { getErrorMessage } from '../../lib/errorUtils';
 import {
   buildCentreAppelWhatsAppMessage,
   buildWhatsAppWebUrl,
   normalizePhoneForWhatsApp,
 } from '../../lib/whatsappCentreAppel';
-import type { Commande, AppelCommande, Commune } from '../../types';
+import type { Commande, AppelCommande, Commune, LigneCommande, Produit } from '../../types';
 
 interface AppelFormProps {
   commande: Commande;
@@ -31,10 +37,20 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
   const [communeLocal, setCommuneLocal] = useState(commande.commune_livraison || '');
   const [adresseLocal, setAdresseLocal] = useState(commande.adresse_livraison || '');
   const [communesDb, setCommunesDb] = useState<Commune[]>([]);
+  const [catalogue, setCatalogue] = useState<Produit[]>([]);
+  const [lignesLocal, setLignesLocal] = useState<Partial<LigneCommande>[]>([]);
 
   useEffect(() => {
     if (!tenant?.id) return;
     getCommunes(tenant.id).then(setCommunesDb);
+  }, [tenant?.id]);
+
+  useEffect(() => {
+    if (!tenant?.id) return;
+    const unsub = subscribeToProduits(tenant.id, (prods) => {
+      setCatalogue(prods.filter((p) => p.actif));
+    });
+    return () => unsub();
   }, [tenant?.id]);
 
   useEffect(() => {
@@ -46,15 +62,93 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
     let cancelled = false;
     getCommandeWithLines(tenant.id, commande.id)
       .then((c) => {
-        if (!cancelled) setDetailCommande(c);
+        if (!cancelled) {
+          setDetailCommande(c);
+          const rows = (c.lignes || []).map((l) => ({ ...l }));
+          setLignesLocal(
+            rows.length > 0
+              ? rows
+              : [{ produit_id: '', quantite: 1, prix_unitaire: 0, montant_ligne: 0 }]
+          );
+        }
       })
       .catch(() => {
-        if (!cancelled) setDetailCommande(commande);
+        if (!cancelled) {
+          setDetailCommande(commande);
+          const rows = (commande.lignes || []).map((l) => ({ ...l }));
+          setLignesLocal(
+            rows.length > 0
+              ? rows
+              : [{ produit_id: '', quantite: 1, prix_unitaire: 0, montant_ligne: 0 }]
+          );
+        }
       });
     return () => {
       cancelled = true;
     };
   }, [tenant?.id, commande.id]);
+
+  const parsePrice = (p: Produit): number => {
+    const fields = ['prix_vente', 'prixVente', 'prix_unitaire', 'prixUnitaire', 'prix', 'price', 'prix_achat'] as const;
+    let raw: unknown;
+    for (const f of fields) {
+      if ((p as any)[f] !== undefined && (p as any)[f] !== null) {
+        raw = (p as any)[f];
+        break;
+      }
+    }
+    if (raw === undefined) return 0;
+    const val = typeof raw === 'string' ? parseFloat(raw.replace(/[^0-9.-]+/g, '')) : Number(raw);
+    return isNaN(val) ? 0 : val;
+  };
+
+  const updateLigne = (index: number, field: keyof LigneCommande, value: unknown) => {
+    const next = [...lignesLocal];
+    if (field === 'produit_id') {
+      const prod = catalogue.find((p) => p.id === value);
+      if (!prod) return;
+      let prixActif = parsePrice(prod);
+      const pr = prod as unknown as Record<string, unknown>;
+      const promoRaw = pr.prix_promo ?? pr.prixPromo;
+      if (promoRaw !== undefined && promoRaw !== null && promoRaw !== 0) {
+        const now = Date.now();
+        const debut = prod.promo_debut ? new Date(prod.promo_debut).getTime() : 0;
+        const fin = prod.promo_fin ? new Date(prod.promo_fin).getTime() : Infinity;
+        if (now >= debut && now <= fin) {
+          const pv =
+            typeof promoRaw === 'string'
+              ? parseFloat(promoRaw.replace(/[^0-9.-]+/g, ''))
+              : Number(promoRaw);
+          if (!isNaN(pv)) prixActif = pv;
+        }
+      }
+      const q = Math.max(1, Number(next[index].quantite) || 1);
+      next[index] = {
+        ...next[index],
+        produit_id: value as string,
+        nom_produit: prod.nom,
+        prix_unitaire: prixActif,
+        montant_ligne: prixActif * q,
+      };
+    } else if (field === 'quantite') {
+      const qte = Math.max(1, Number(value));
+      const prix = Number(next[index].prix_unitaire) || 0;
+      next[index] = { ...next[index], quantite: qte, montant_ligne: prix * qte };
+    }
+    setLignesLocal(next);
+  };
+
+  const addLigne = () => {
+    setLignesLocal([...lignesLocal, { produit_id: '', quantite: 1, prix_unitaire: 0, montant_ligne: 0 }]);
+  };
+
+  const removeLigne = (index: number) => {
+    if (lignesLocal.length <= 1) {
+      showToast('Au moins une ligne produit est obligatoire.', 'error');
+      return;
+    }
+    setLignesLocal(lignesLocal.filter((_, i) => i !== index));
+  };
 
   const openWhatsAppClient = () => {
     const phone = normalizePhoneForWhatsApp(detailCommande.telephone_client);
@@ -62,7 +156,11 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
       showToast('Numéro de téléphone client manquant ou invalide pour WhatsApp.', 'error');
       return;
     }
-    const msg = buildCentreAppelWhatsAppMessage(detailCommande, tenant?.nom || '');
+    const merged: Commande = {
+      ...detailCommande,
+      lignes: lignesLocal.filter((l) => l.produit_id) as LigneCommande[],
+    };
+    const msg = buildCentreAppelWhatsAppMessage(merged, tenant?.nom || '');
     const url = buildWhatsAppWebUrl(phone, msg);
     window.open(url, '_blank', 'noopener,noreferrer');
   };
@@ -78,58 +176,94 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser) return;
-    
+    if (!tenant?.id) return;
+
+    const linesPayload = lignesLocal
+      .filter((l) => l.produit_id && Number(l.quantite) >= 1)
+      .map((l) => ({
+        produit_id: l.produit_id as string,
+        nom_produit: l.nom_produit || '',
+        quantite: Number(l.quantite),
+        prix_unitaire: Number(l.prix_unitaire) || 0,
+        montant_ligne: Number(l.montant_ligne) || 0,
+      }));
+
+    if (resultat !== 'annulee' && linesPayload.length === 0) {
+      showToast('Ajoutez au moins une ligne produit avec un article et une quantité.', 'error');
+      return;
+    }
+
     setLoading(true);
     try {
-      // 1. Enregistrer l'appel dans l'historique
-      await insforge.database
-        .from('appels_commandes')
-        .insert([{
+      let subtotalArticles = lignesLocal.reduce((acc, l) => acc + Number(l.montant_ligne || 0), 0);
+
+      if (resultat !== 'annulee') {
+        const { subtotal } = await replaceCommandeLignesCentreAppel(tenant.id, commande.id, linesPayload);
+        subtotalArticles = subtotal;
+      }
+
+      const fee =
+        typeof fraisLivraison === 'number'
+          ? fraisLivraison
+          : Number(commande.frais_livraison) || 0;
+
+      await insforge.database.from('appels_commandes').insert([
+        {
           commande_id: commande.id,
           agent_appel_id: currentUser.id,
           date_appel: new Date(),
           resultat_appel: resultat,
           commentaire_agent: commentaire,
-          tenant_id: tenant?.id
-        }]);
+          tenant_id: tenant.id,
+        },
+      ]);
 
-      // 2. Mettre à jour le statut de la commande
       const nextStatusMap: Record<string, string> = {
-        'validee': 'validee',
-        'a_rappeler': 'a_rappeler',
-        'annulee': 'annulee',
-        'injoignable': 'a_rappeler' // if unreachable, needs callback
+        validee: 'validee',
+        a_rappeler: 'a_rappeler',
+        annulee: 'annulee',
+        injoignable: 'a_rappeler',
       };
-      
-      const payload: any = { statut_commande: nextStatusMap[resultat] };
+
+      const payload: Record<string, unknown> = { statut_commande: nextStatusMap[resultat] };
+
+      if (resultat !== 'annulee') {
+        const feeFinal =
+          resultat === 'validee' && typeof fraisLivraison === 'number'
+            ? fraisLivraison
+            : fee;
+        payload.montant_total = subtotalArticles + feeFinal;
+      }
+
       if (resultat === 'validee') {
         payload.date_validation_appel = new Date();
         payload.commune_livraison = communeLocal;
         payload.adresse_livraison = adresseLocal;
         if (typeof fraisLivraison === 'number') {
           payload.frais_livraison = fraisLivraison;
-          // Robust subtotal: always remove what's currently marked as delivery fee
-          const currentFee = Number(commande.frais_livraison) || 0;
-          const subtotal = Number(commande.montant_total) - currentFee;
-          payload.montant_total = subtotal + fraisLivraison;
         }
       }
 
-      if (!tenant?.id) return;
       await updateCommandeStatus(tenant.id, commande.id, nextStatusMap[resultat], payload);
       onSave();
-    } catch (error) {
-      console.error("Erreur lors de la validation :", error);
+    } catch (error: unknown) {
+      console.error('Erreur lors de la validation :', error);
+      showToast(getErrorMessage(error, 'Erreur lors de la validation.'), 'error');
     } finally {
       setLoading(false);
     }
   };
 
-  const currentSubtotal = Number(commande.montant_total) - (Number(commande.frais_livraison) || 0);
+  const feeDisplay =
+    typeof fraisLivraison === 'number'
+      ? fraisLivraison
+      : Number(commande.frais_livraison) || 0;
+  const subtotalLignes = lignesLocal.reduce((acc, l) => acc + Number(l.montant_ligne || 0), 0);
+  const totalEncaisser = subtotalLignes + feeDisplay;
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-content card" style={{ maxWidth: '550px', padding: '2.5rem' }} onClick={e => e.stopPropagation()}>
+      <div className="modal-content card" style={{ maxWidth: '720px', padding: '2.5rem', maxHeight: '92vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
         <button 
           onClick={onClose} 
           style={{ 
@@ -195,6 +329,123 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
             confirmation de livraison et des informations encore manquantes dans la base.
           </p>
         </div>
+
+        <div
+          style={{
+            marginBottom: '1.5rem',
+            padding: '1.25rem',
+            background: '#f0fdf4',
+            borderRadius: '16px',
+            border: '1px solid #86efac',
+          }}
+        >
+          <div style={{ fontWeight: 800, marginBottom: '0.75rem', color: '#166534' }}>Articles & quantités</div>
+          <p style={{ fontSize: '0.8rem', color: '#15803d', marginBottom: '1rem', lineHeight: 1.45 }}>
+            Ajustez les quantités ou ajoutez des produits du catalogue. Les montants et le stock sont mis à jour à
+            l’enregistrement.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {lignesLocal.map((ligne, idx) => (
+              <div
+                key={idx}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 88px 36px',
+                  gap: '0.5rem',
+                  alignItems: 'center',
+                  background: 'white',
+                  padding: '0.65rem',
+                  borderRadius: '12px',
+                  border: '1px solid #e2e8f0',
+                }}
+              >
+                <select
+                  className="form-select"
+                  style={{ height: '40px', fontSize: '0.85rem' }}
+                  value={ligne.produit_id || ''}
+                  onChange={(e) => updateLigne(idx, 'produit_id', e.target.value)}
+                >
+                  <option value="">Produit…</option>
+                  {catalogue.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.nom}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="number"
+                  min={1}
+                  className="form-input"
+                  style={{ height: '40px', textAlign: 'center' }}
+                  value={ligne.quantite ?? 1}
+                  onChange={(e) => updateLigne(idx, 'quantite', e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={() => removeLigne(idx)}
+                  style={{
+                    border: 'none',
+                    background: '#fee2e2',
+                    borderRadius: '10px',
+                    height: '40px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#b91c1c',
+                  }}
+                  title="Retirer la ligne"
+                >
+                  <Trash2 size={18} />
+                </button>
+                <div style={{ gridColumn: '1 / -1', fontSize: '0.8rem', color: '#64748b' }}>
+                  {ligne.nom_produit ? (
+                    <>
+                      <strong>{ligne.nom_produit}</strong> —{' '}
+                      {(Number(ligne.prix_unitaire) || 0).toLocaleString()} CFA × {ligne.quantite ?? 1} ={' '}
+                      <strong style={{ color: 'var(--primary)' }}>
+                        {(Number(ligne.montant_ligne) || 0).toLocaleString()} CFA
+                      </strong>
+                    </>
+                  ) : (
+                    <span style={{ fontStyle: 'italic' }}>Choisissez un produit</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={addLigne}
+            className="btn btn-outline"
+            style={{
+              marginTop: '0.75rem',
+              width: '100%',
+              height: '44px',
+              fontWeight: 700,
+              borderStyle: 'dashed',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+            }}
+          >
+            <Plus size={18} /> Ajouter un article
+          </button>
+          <div
+            style={{
+              marginTop: '0.75rem',
+              padding: '0.75rem',
+              background: 'white',
+              borderRadius: '12px',
+              fontSize: '0.9rem',
+              fontWeight: 700,
+              color: '#166534',
+            }}
+          >
+            Sous-total articles : {subtotalLignes.toLocaleString()} CFA
+          </div>
+        </div>
         
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           
@@ -256,7 +507,7 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
               <div style={{ padding: '1.25rem', background: 'white', borderRadius: '16px', border: '1px solid #f0abfc' }}>
                  <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Montant total à encaisser</div>
                  <div className="brand-glow" style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--primary)' }}>
-                   {(currentSubtotal + (Number(fraisLivraison) || 0)).toLocaleString()} <span style={{ fontSize: '0.8rem' }}>CFA</span>
+                   {totalEncaisser.toLocaleString()} <span style={{ fontSize: '0.8rem' }}>CFA</span>
                  </div>
               </div>
             </div>
