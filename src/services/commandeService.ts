@@ -85,27 +85,42 @@ export const subscribeToCommandesByStatus = (tenantId: string, statusList: strin
   return () => clearInterval(interval);
 };
 
+/**
+ * Colonnes d’insertion commandes : liste explicite (évite clés fantômes / mismatch schéma PostgREST).
+ * agent_appel_id : volontairement omis (traçabilité dans notes_client si besoin) tant que la BDD peut varier ;
+ * après ensure_core_schema.sql vous pouvez réactiver ici si souhaité.
+ */
+function buildInsertCommandePayload(tenantId: string, commande: Omit<Commande, 'id'>): Record<string, unknown> {
+  const dateCreation =
+    commande.date_creation instanceof Date
+      ? commande.date_creation
+      : new Date();
+  return {
+    tenant_id: tenantId,
+    client_id: commande.client_id,
+    statut_commande: 'en_attente_appel',
+    date_creation: dateCreation.toISOString(),
+    montant_total: commande.montant_total,
+    frais_livraison: commande.frais_livraison ?? 0,
+    source_commande: commande.source_commande,
+    mode_paiement: commande.mode_paiement,
+    commune_livraison: commande.commune_livraison ?? '',
+    adresse_livraison: commande.adresse_livraison ?? '',
+    notes_client: commande.notes_client ?? '',
+  };
+}
+
 export const createCommandeBase = async (tenantId: string, commande: Omit<Commande, 'id'>, lignes: Omit<LigneCommande, 'id' | 'commande_id'>[]): Promise<string> => {
-  commande.date_creation = new Date() as any;
-  commande.statut_commande = 'en_attente_appel';
-  commande.tenant_id = tenantId;
-
-  /* agent_id legacy : ne pas envoyer en insert */
-  const row = { ...commande } as Commande & { agent_id?: string };
-  delete (row as { agent_id?: string }).agent_id;
-
-  /* Payload PostgREST : pas de clés undefined ; dates en ISO pour timestamptz.
-   * agent_appel_id : non envoyé si la table commandes n’a pas encore cette colonne (schéma cache). */
-  const payload: Record<string, unknown> = {};
-  for (const [k, v] of Object.entries(row as unknown as Record<string, unknown>)) {
-    if (v === undefined || v === null) continue;
-    if (k === 'agent_appel_id') continue;
-    if (k === 'date_creation' && v instanceof Date) {
-      payload[k] = v.toISOString();
-    } else {
-      payload[k] = v;
-    }
+  if (!commande.client_id || String(commande.client_id).trim() === '') {
+    throw new Error('Client obligatoire : identifiant client manquant.');
   }
+
+  const payload = buildInsertCommandePayload(tenantId, {
+    ...commande,
+    date_creation: new Date() as any,
+    statut_commande: 'en_attente_appel',
+    tenant_id: tenantId,
+  });
 
   const { data: cmdData, error: cmdError } = await insforge.database
     .from('commandes')
@@ -128,14 +143,18 @@ export const createCommandeBase = async (tenantId: string, commande: Omit<Comman
       .eq('id', l.produit_id)
       .single();
 
-    const { error: lineError } = await insforge.database
-      .from('lignes_commandes')
-      .insert([{ 
-        ...l, 
-        commande_id: id,
-        prix_achat_unitaire: prodData?.prix_achat || 0,
-        tenant_id: tenantId
-      }]);
+    const lignePayload = {
+      commande_id: id,
+      produit_id: l.produit_id,
+      nom_produit: l.nom_produit ?? '',
+      quantite: Number(l.quantite) || 0,
+      prix_unitaire: Number(l.prix_unitaire) || 0,
+      montant_ligne: Number(l.montant_ligne) || 0,
+      prix_achat_unitaire: prodData?.prix_achat || 0,
+      tenant_id: tenantId,
+    };
+
+    const { error: lineError } = await insforge.database.from('lignes_commandes').insert([lignePayload]);
     
     if (lineError) {
       console.error("Erreur ligne commande:", lineError);
