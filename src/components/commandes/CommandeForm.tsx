@@ -157,8 +157,6 @@ export const CommandeForm = ({ onClose, onSave }: { onClose: () => void, onSave:
             email: clientRecherche.email || '',
             adresse: clientRecherche.adresse || '',
             commune: clientRecherche.commune || '',
-            ville: clientRecherche.ville || 'Abidjan',
-            remarques: clientRecherche.remarques || '',
           } as any);
         }
       }
@@ -169,6 +167,16 @@ export const CommandeForm = ({ onClose, onSave }: { onClose: () => void, onSave:
         return;
       }
 
+      const rem = clientRecherche.remarques?.trim();
+      const ville = clientRecherche.ville?.trim();
+      const villeLine = ville ? `Ville : ${ville}` : '';
+      const agentLine = currentUser?.nom_complet
+        ? `Saisie : ${currentUser.nom_complet}`
+        : currentUser?.id
+          ? `Saisie : ${currentUser.id}`
+          : '';
+      const notesMerged = [rem, villeLine, agentLine, notes.trim()].filter(Boolean).join('\n\n');
+
       const newCommande: Omit<Commande, 'id' | 'date_creation' | 'statut_commande'> = {
         client_id: finalClientId,
         source_commande: source,
@@ -177,10 +185,8 @@ export const CommandeForm = ({ onClose, onSave }: { onClose: () => void, onSave:
         mode_paiement: modePaiement,
         commune_livraison: clientRecherche.commune || '',
         adresse_livraison: clientRecherche.adresse || '',
-        notes_client: notes,
+        notes_client: notesMerged,
         tenant_id: tenantId,
-        /* Colonne DB : agent_appel_id (pas agent_id) */
-        agent_appel_id: currentUser?.id,
       };
 
       await createCommandeBase(tenantId, newCommande as any, lignes as Omit<LigneCommande, 'id' | 'commande_id'>[]);

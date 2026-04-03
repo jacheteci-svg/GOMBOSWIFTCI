@@ -90,18 +90,16 @@ export const createCommandeBase = async (tenantId: string, commande: Omit<Comman
   commande.statut_commande = 'en_attente_appel';
   commande.tenant_id = tenantId;
 
-  /* La table utilise agent_appel_id ; agent_id (legacy) ferait échouer l'insert */
+  /* agent_id legacy : ne pas envoyer en insert */
   const row = { ...commande } as Commande & { agent_id?: string };
-  if (row.agent_id && !row.agent_appel_id) {
-    row.agent_appel_id = row.agent_id;
-  }
   delete (row as { agent_id?: string }).agent_id;
 
-  /* Payload PostgREST : pas de clés undefined ; dates en ISO pour timestamptz */
+  /* Payload PostgREST : pas de clés undefined ; dates en ISO pour timestamptz.
+   * agent_appel_id : non envoyé si la table commandes n’a pas encore cette colonne (schéma cache). */
   const payload: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(row as unknown as Record<string, unknown>)) {
     if (v === undefined || v === null) continue;
-    if (k === 'agent_appel_id' && v === '') continue;
+    if (k === 'agent_appel_id') continue;
     if (k === 'date_creation' && v instanceof Date) {
       payload[k] = v.toISOString();
     } else {

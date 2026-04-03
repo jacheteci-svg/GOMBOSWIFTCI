@@ -37,11 +37,17 @@ export const searchClientByPhone = async (tenantId: string, phone: string): Prom
 };
 
 export const createClient = async (tenantId: string, client: Omit<Client, 'id'>): Promise<string> => {
-  const { data, error } = await insforge.database
-    .from('clients')
-    .insert([{ ...client, tenant_id: tenantId }])
-    .select();
-  
+  /* Schéma minimal clients (ex. fix_missing_tenant_id) : pas de ville / remarques côté DB tant que non migré */
+  const payload = {
+    nom_complet: client.nom_complet,
+    telephone: client.telephone,
+    email: client.email ?? '',
+    adresse: client.adresse ?? '',
+    commune: client.commune ?? '',
+    tenant_id: tenantId,
+  };
+  const { data, error } = await insforge.database.from('clients').insert([payload]).select();
+
   if (error) throw new Error(error.message || 'Insertion client impossible.');
   const id = data?.[0]?.id;
   if (!id) throw new Error('Client créé mais identifiant non retourné.');
