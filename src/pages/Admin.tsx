@@ -1,7 +1,17 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { User, Commune, Permission } from '../types';
-import { getAdminUsers, createAdminUser, updateAdminUser, getCommunes, createCommune, updateCommune, deleteCommune } from '../services/adminService';
+import {
+  getAdminUsers,
+  updateAdminUser,
+  getCommunes,
+  createCommune,
+  updateCommune,
+  deleteCommune,
+  upsertAdminUserProfile,
+  tryResolveUserIdByEmail,
+  finalizeUserInviteViaRpc,
+} from '../services/adminService';
 import { Plus, Trash2, Users as UsersIcon, Map as MapIcon, CreditCard, CheckCircle, Building2 } from 'lucide-react';
 import { monerooService } from '../services/monerooService';
 import { useToast } from '../contexts/ToastContext';
@@ -256,23 +266,40 @@ const UsersManager = ({ showToast, tenantId }: { showToast: any, tenantId: strin
         restoreAdminSession(insforge, adminSnap);
 
         if (!userId) {
+          const fromDb = await tryResolveUserIdByEmail(tenantId, email);
+          if (fromDb) userId = fromDb;
+        }
+
+        const profilePayload = {
+          nom_complet: form.nom_complet || '',
+          email: email as string,
+          role: form.role as any,
+          telephone: sanitizedTel,
+          permissions: form.permissions || [],
+          actif: true,
+          tenant_id: tenantId,
+        };
+
+        if (!userId) {
+          const rpcId = await finalizeUserInviteViaRpc(tenantId, {
+            email: profilePayload.email,
+            nom_complet: profilePayload.nom_complet,
+            role: profilePayload.role,
+            telephone: profilePayload.telephone,
+            permissions: profilePayload.permissions || [],
+          });
+          if (rpcId) {
+            userId = rpcId;
+          }
+        }
+
+        if (!userId) {
           throw new Error(
-            "Impossible d'obtenir l'identifiant du nouveau compte. Dans la console InsForge, désactivez la confirmation e-mail obligatoire pour les inscriptions, ou assurez-vous que l'inscription renvoie bien un utilisateur."
+            "Impossible d'obtenir l'identifiant du nouveau compte. Exécutez le script SQL « rpc_admin_finalize_user_invite.sql » sur la base, ou dans la console InsForge désactivez la confirmation e-mail obligatoire pour les inscriptions."
           );
         }
 
-        await createAdminUser(
-          {
-            nom_complet: form.nom_complet || '',
-            email: email as string,
-            role: form.role as any,
-            telephone: sanitizedTel,
-            permissions: form.permissions || [],
-            actif: true,
-            tenant_id: tenantId,
-          },
-          userId
-        );
+        await upsertAdminUserProfile(tenantId, userId, profilePayload);
 
         restoreAdminSession(insforge, adminSnap);
       } else if (editingId) {

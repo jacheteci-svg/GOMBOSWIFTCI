@@ -36,19 +36,43 @@ export function restoreAdminSession(client: Client, snap: AdminSessionSnapshot |
   c.getHttpClient().setAuthToken(snap.accessToken);
 }
 
-/** Extrait l’UUID depuis la réponse brute POST /api/auth/users (formes variables). */
+function readUserIdFromUserObject(u: unknown): string {
+  if (!u || typeof u !== 'object') return '';
+  const o = u as Record<string, unknown>;
+  const id = o.id ?? o.userId ?? o.sub;
+  if (typeof id === 'string' && id.length > 0) return id;
+  return '';
+}
+
+/**
+ * Extrait l’UUID depuis la réponse InsForge (signUp / signIn).
+ * Même sans accessToken (ex. confirmation e-mail), l’API peut renvoyer `user.id`.
+ */
 export function extractUserIdFromAuthPayload(authData: unknown): string {
   if (!authData || typeof authData !== 'object') return '';
   const r = authData as Record<string, unknown>;
-  const u = (r.user ?? r.User) as Record<string, unknown> | undefined;
-  if (u && typeof u === 'object') {
-    const id = u.id ?? u.userId ?? u.sub;
-    if (typeof id === 'string' && id.length > 0) return id;
+
+  let id = readUserIdFromUserObject(r.user ?? r.User);
+  if (id) return id;
+
+  const session = r.session;
+  if (session && typeof session === 'object') {
+    id = readUserIdFromUserObject((session as Record<string, unknown>).user);
+    if (id) return id;
   }
+
+  const data = r.data;
+  if (data && typeof data === 'object') {
+    const d = data as Record<string, unknown>;
+    id = readUserIdFromUserObject(d.user ?? d.User);
+    if (id) return id;
+  }
+
   for (const k of ['userId', 'user_id']) {
     const v = r[k];
     if (typeof v === 'string' && v.length > 0) return v;
   }
+
   return '';
 }
 

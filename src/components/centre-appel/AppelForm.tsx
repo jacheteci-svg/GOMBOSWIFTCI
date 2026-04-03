@@ -265,35 +265,56 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
     <div className="modal-backdrop" onClick={onClose}>
       <div
         className="modal-content modal-nexus modal-nexus-wide card glass-effect"
-        style={{ maxWidth: '720px', padding: 0, maxHeight: '92vh', overflow: 'hidden', position: 'relative', borderRadius: '28px' }}
+        style={{
+          maxWidth: '720px',
+          padding: 0,
+          maxHeight: 'min(92vh, 900px)',
+          overflow: 'hidden',
+          position: 'relative',
+          borderRadius: '28px',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
         onClick={e => e.stopPropagation()}
       >
         <div className="modal-nexus-accent" />
-        <div style={{ padding: '2.5rem', maxHeight: '92vh', overflowY: 'auto' }}>
+        <div
+          style={{
+            position: 'relative',
+            flex: 1,
+            minHeight: 0,
+            overflowY: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            padding: '2.25rem 2.25rem 2rem',
+            paddingBottom: 'calc(2rem + env(safe-area-inset-bottom, 0px))',
+          }}
+        >
         <button 
+          type="button"
           onClick={onClose} 
           style={{ 
             position: 'absolute', 
-            top: '1.5rem', 
-            right: '1.5rem', 
-            background: '#f1f5f9', 
-            border: 'none', 
+            top: '1rem', 
+            right: '1rem', 
+            zIndex: 2,
+            background: 'rgba(15, 23, 42, 0.75)', 
+            border: '1px solid rgba(255,255,255,0.12)', 
             borderRadius: '12px',
-            width: '36px',
-            height: '36px',
+            width: '40px',
+            height: '40px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer', 
-            color: 'var(--text-muted)',
+            color: '#f1f5f9',
             transition: 'all 0.2s ease'
           }}
         >
           <X size={18} strokeWidth={2.5} />
         </button>
         
-        <div style={{ marginBottom: '2rem' }}>
-          <h2 className="text-premium" style={{ fontSize: '1.6rem', fontWeight: 800, margin: 0 }}>Traitement d'Appel</h2>
+        <div style={{ marginBottom: '2rem', paddingRight: '2.75rem' }}>
+          <h2 className="text-premium" style={{ fontSize: '1.6rem', fontWeight: 800, margin: 0 }}>Traitement d&apos;appel</h2>
           <div className="modal-panel-light" style={{ marginTop: '1rem', padding: '1.25rem', background: '#f8fafc', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
               <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Référence Commande</span>
@@ -337,16 +358,18 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
         </div>
 
         <div
+          className="modal-panel-light"
           style={{
             marginBottom: '1.5rem',
             padding: '1.25rem',
-            background: '#f0fdf4',
+            background: 'linear-gradient(180deg, #ecfdf5 0%, #f0fdf4 100%)',
             borderRadius: '16px',
-            border: '1px solid #86efac',
+            border: '1px solid #6ee7b7',
+            boxShadow: '0 1px 0 rgba(255,255,255,0.6) inset',
           }}
         >
-          <div style={{ fontWeight: 800, marginBottom: '0.75rem', color: '#166534' }}>Articles & quantités</div>
-          <p style={{ fontSize: '0.8rem', color: '#15803d', marginBottom: '1rem', lineHeight: 1.45 }}>
+          <div style={{ fontWeight: 800, marginBottom: '0.5rem', color: '#14532d', fontSize: '1rem' }}>Articles & quantités</div>
+          <p style={{ fontSize: '0.82rem', color: '#166534', marginBottom: '1rem', lineHeight: 1.5, fontWeight: 600 }}>
             Ajustez les quantités ou ajoutez des produits du catalogue. Les montants et le stock sont mis à jour à
             l’enregistrement.
           </p>
@@ -354,24 +377,26 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
             {lignesLocal.map((ligne, idx) => (
               <div
                 key={idx}
+                className="modal-panel-light"
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '1fr 88px 36px',
+                  gridTemplateColumns: '1fr 88px 40px',
                   gap: '0.5rem',
                   alignItems: 'center',
-                  background: 'white',
-                  padding: '0.65rem',
+                  background: '#ffffff',
+                  padding: '0.75rem',
                   borderRadius: '12px',
-                  border: '1px solid #e2e8f0',
+                  border: '1px solid #cbd5e1',
+                  boxShadow: '0 1px 2px rgba(15,23,42,0.06)',
                 }}
               >
                 <select
                   className="form-select"
-                  style={{ height: '40px', fontSize: '0.85rem' }}
+                  style={{ height: '42px', fontSize: '0.85rem', fontWeight: 600 }}
                   value={ligne.produit_id || ''}
                   onChange={(e) => updateLigne(idx, 'produit_id', e.target.value)}
                 >
-                  <option value="">Produit…</option>
+                  <option value="">Choisir un produit…</option>
                   {catalogue.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.nom}
@@ -382,7 +407,7 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
                   type="number"
                   min={1}
                   className="form-input"
-                  style={{ height: '40px', textAlign: 'center' }}
+                  style={{ height: '42px', textAlign: 'center', fontWeight: 700 }}
                   value={ligne.quantite ?? 1}
                   onChange={(e) => updateLigne(idx, 'quantite', e.target.value)}
                 />
@@ -393,7 +418,7 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
                     border: 'none',
                     background: '#fee2e2',
                     borderRadius: '10px',
-                    height: '40px',
+                    height: '42px',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -404,17 +429,18 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
                 >
                   <Trash2 size={18} />
                 </button>
-                <div style={{ gridColumn: '1 / -1', fontSize: '0.8rem', color: '#64748b' }}>
+                <div style={{ gridColumn: '1 / -1', fontSize: '0.8rem', color: '#475569', lineHeight: 1.45 }}>
                   {ligne.nom_produit ? (
                     <>
-                      <strong>{ligne.nom_produit}</strong> —{' '}
+                      <strong style={{ color: '#0f172a' }}>{ligne.nom_produit}</strong>
+                      {' — '}
                       {(Number(ligne.prix_unitaire) || 0).toLocaleString()} CFA × {ligne.quantite ?? 1} ={' '}
-                      <strong style={{ color: 'var(--primary)' }}>
+                      <strong style={{ color: '#0e7490' }}>
                         {(Number(ligne.montant_ligne) || 0).toLocaleString()} CFA
                       </strong>
                     </>
                   ) : (
-                    <span style={{ fontStyle: 'italic' }}>Choisissez un produit</span>
+                    <span style={{ fontStyle: 'italic', color: '#64748b' }}>Choisissez un produit</span>
                   )}
                 </div>
               </div>
@@ -427,26 +453,28 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
             style={{
               marginTop: '0.75rem',
               width: '100%',
-              height: '44px',
+              height: '46px',
               fontWeight: 700,
               borderStyle: 'dashed',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '0.5rem',
+              borderRadius: '12px',
             }}
           >
-            <Plus size={18} /> Ajouter un article
+            <Plus size={18} strokeWidth={2.5} /> Ajouter un article
           </button>
           <div
             style={{
               marginTop: '0.75rem',
-              padding: '0.75rem',
-              background: 'white',
+              padding: '0.85rem 1rem',
+              background: '#ffffff',
               borderRadius: '12px',
-              fontSize: '0.9rem',
-              fontWeight: 700,
-              color: '#166534',
+              fontSize: '0.95rem',
+              fontWeight: 800,
+              color: '#14532d',
+              border: '1px solid #bbf7d0',
             }}
           >
             Sous-total articles : {subtotalLignes.toLocaleString()} CFA
@@ -455,65 +483,65 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
         
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           
-          <div>
-            <label className="form-label" style={{ fontWeight: 800, fontSize: '0.85rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '1rem', display: 'block' }}>Résultat de l'échange</label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div className="modal-panel-light" style={{ padding: '1.25rem', borderRadius: '16px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+            <label className="form-label" style={{ fontWeight: 800, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: '#475569', marginBottom: '1rem', display: 'block' }}>Résultat de l&apos;échange</label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
               <label style={{ 
-                border: `2px solid ${resultat === 'validee' ? 'var(--primary)' : '#e2e8f0'}`, 
-                borderRadius: '16px', padding: '1rem', cursor: 'pointer', transition: 'all 0.3s ease',
-                background: resultat === 'validee' ? 'rgba(99, 102, 255, 0.05)' : 'white',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem',
-                boxShadow: resultat === 'validee' ? '0 10px 15px -3px rgba(99, 102, 255, 0.2)' : 'none'
+                border: `2px solid ${resultat === 'validee' ? '#06b6d4' : '#cbd5e1'}`, 
+                borderRadius: '14px', padding: '1rem', cursor: 'pointer', transition: 'all 0.2s ease',
+                background: resultat === 'validee' ? 'rgba(6, 182, 212, 0.08)' : '#ffffff',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.45rem',
+                boxShadow: resultat === 'validee' ? '0 4px 14px rgba(6, 182, 212, 0.2)' : '0 1px 2px rgba(15,23,42,0.06)'
               }}>
                 <input type="radio" checked={resultat === 'validee'} onChange={() => setResultat('validee')} style={{ display: 'none' }} />
-                <CheckCircle size={28} color={resultat === 'validee' ? 'var(--primary)' : '#94a3b8'} strokeWidth={2.5} />
-                <span style={{ fontSize: '0.9rem', fontWeight: 700, color: resultat === 'validee' ? 'var(--primary)' : '#64748b' }}>Valider</span>
+                <CheckCircle size={28} color={resultat === 'validee' ? '#0891b2' : '#94a3b8'} strokeWidth={2.5} />
+                <span style={{ fontSize: '0.88rem', fontWeight: 800, color: resultat === 'validee' ? '#0e7490' : '#64748b' }}>Valider</span>
               </label>
               
               <label style={{ 
-                border: `2px solid ${resultat === 'a_rappeler' ? '#f59e0b' : '#e2e8f0'}`, 
-                borderRadius: '16px', padding: '1rem', cursor: 'pointer', transition: 'all 0.3s ease',
-                background: resultat === 'a_rappeler' ? 'rgba(245, 158, 11, 0.05)' : 'white',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem',
-                boxShadow: resultat === 'a_rappeler' ? '0 10px 15px -3px rgba(245, 158, 11, 0.2)' : 'none'
+                border: `2px solid ${resultat === 'a_rappeler' ? '#f59e0b' : '#cbd5e1'}`, 
+                borderRadius: '14px', padding: '1rem', cursor: 'pointer', transition: 'all 0.2s ease',
+                background: resultat === 'a_rappeler' ? 'rgba(245, 158, 11, 0.1)' : '#ffffff',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.45rem',
+                boxShadow: resultat === 'a_rappeler' ? '0 4px 14px rgba(245, 158, 11, 0.2)' : '0 1px 2px rgba(15,23,42,0.06)'
               }}>
                 <input type="radio" checked={resultat === 'a_rappeler'} onChange={() => setResultat('a_rappeler')} style={{ display: 'none' }} />
-                <Clock size={28} color={resultat === 'a_rappeler' ? '#f59e0b' : '#94a3b8'} strokeWidth={2.5} />
-                <span style={{ fontSize: '0.9rem', fontWeight: 700, color: resultat === 'a_rappeler' ? '#d97706' : '#64748b' }}>À rappeler</span>
+                <Clock size={28} color={resultat === 'a_rappeler' ? '#d97706' : '#94a3b8'} strokeWidth={2.5} />
+                <span style={{ fontSize: '0.88rem', fontWeight: 800, color: resultat === 'a_rappeler' ? '#b45309' : '#64748b' }}>À rappeler</span>
               </label>
 
               <label style={{ 
-                border: `2px solid ${resultat === 'annulee' ? '#ef4444' : '#e2e8f0'}`, 
-                borderRadius: '16px', padding: '1rem', cursor: 'pointer', transition: 'all 0.3s ease',
-                background: resultat === 'annulee' ? 'rgba(239, 68, 68, 0.05)' : 'white',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem',
+                border: `2px solid ${resultat === 'annulee' ? '#ef4444' : '#cbd5e1'}`, 
+                borderRadius: '14px', padding: '1rem', cursor: 'pointer', transition: 'all 0.2s ease',
+                background: resultat === 'annulee' ? 'rgba(239, 68, 68, 0.08)' : '#ffffff',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.45rem',
                 gridColumn: 'span 2',
-                boxShadow: resultat === 'annulee' ? '0 10px 15px -3px rgba(239, 68, 68, 0.2)' : 'none'
+                boxShadow: resultat === 'annulee' ? '0 4px 14px rgba(239, 68, 68, 0.18)' : '0 1px 2px rgba(15,23,42,0.06)'
               }}>
                 <input type="radio" checked={resultat === 'annulee'} onChange={() => setResultat('annulee')} style={{ display: 'none' }} />
                 <XCircle size={28} color={resultat === 'annulee' ? '#ef4444' : '#94a3b8'} strokeWidth={2.5} />
-                <span style={{ fontSize: '0.9rem', fontWeight: 700, color: resultat === 'annulee' ? '#dc2626' : '#64748b' }}>Annuler la commande</span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 800, color: resultat === 'annulee' ? '#dc2626' : '#64748b' }}>Annuler la commande</span>
               </label>
             </div>
           </div>
 
           {resultat === 'validee' && (
-            <div style={{ padding: '1.5rem', background: '#fdf4ff', borderRadius: '20px', border: '2px solid #f5d0fe', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <div className="modal-panel-light" style={{ padding: '1.35rem', background: 'linear-gradient(180deg, #faf5ff 0%, #f5f3ff 100%)', borderRadius: '16px', border: '1px solid #c4b5fd', display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
               <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label" style={{ fontWeight: 700 }}>Zone de livraison finale</label>
-                <select className="form-select" required value={communeLocal} onChange={e => handleCommuneChange(e.target.value)} style={{ background: 'white', height: '44px' }}>
+                <label className="form-label" style={{ fontWeight: 800, color: '#334155' }}>Zone de livraison finale</label>
+                <select className="form-select" required value={communeLocal} onChange={e => handleCommuneChange(e.target.value)} style={{ height: '48px', fontWeight: 600 }}>
                   <option value="">Sélectionner une commune...</option>
                   {communesDb.map(c => <option key={c.id} value={c.nom}>{c.nom} ({c.tarif_livraison} CFA)</option>)}
                 </select>
               </div>
               <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label" style={{ fontWeight: 700 }}>Lieu exact (Confirmation)</label>
-                <input type="text" className="form-input" required value={adresseLocal} onChange={e => setAdresseLocal(e.target.value)} style={{ background: 'white', height: '44px' }} />
+                <label className="form-label" style={{ fontWeight: 800, color: '#334155' }}>Lieu exact (confirmation)</label>
+                <input type="text" className="form-input" required value={adresseLocal} onChange={e => setAdresseLocal(e.target.value)} style={{ height: '48px', fontWeight: 600 }} placeholder="Quartier, repère, instructions…" />
               </div>
-              <div className="modal-panel-light" style={{ padding: '1.25rem', background: 'white', borderRadius: '16px', border: '1px solid #f0abfc' }}>
-                 <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Montant total à encaisser</div>
-                 <div className="brand-glow" style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--primary)' }}>
-                   {totalEncaisser.toLocaleString()} <span style={{ fontSize: '0.8rem' }}>CFA</span>
+              <div className="modal-panel-light" style={{ padding: '1.15rem 1.25rem', background: '#ffffff', borderRadius: '14px', border: '1px solid #ddd6fe' }}>
+                 <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.35rem' }}>Montant total à encaisser</div>
+                 <div style={{ fontSize: '1.65rem', fontWeight: 900, color: '#0e7490', letterSpacing: '-0.02em' }}>
+                   {totalEncaisser.toLocaleString()} <span style={{ fontSize: '0.85rem', fontWeight: 800 }}>CFA</span>
                  </div>
               </div>
             </div>
@@ -532,9 +560,9 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
             />
           </div>
 
-          <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-            <button type="button" className="btn btn-outline" onClick={onClose} disabled={loading} style={{ flex: 1, height: '52px', fontWeight: 700, borderRadius: '14px' }}>Abandonner</button>
-            <button type="submit" className="btn btn-primary" disabled={loading} style={{ flex: 2, height: '52px', fontWeight: 800, borderRadius: '14px', boxShadow: '0 10px 15px -3px rgba(99, 102, 255, 0.4)' }}>
+          <div className="modal-footer-bar" style={{ marginTop: '1rem', borderRadius: '16px' }}>
+            <button type="button" className="btn btn-outline" onClick={onClose} disabled={loading} style={{ flex: 1, minHeight: '52px', fontWeight: 700, borderRadius: '14px' }}>Abandonner</button>
+            <button type="submit" className="btn btn-primary" disabled={loading} style={{ flex: 2, minHeight: '52px', fontWeight: 800, borderRadius: '14px', boxShadow: '0 10px 15px -3px rgba(6, 182, 212, 0.35)' }}>
               {loading ? 'Traitement...' : 'Enregistrer le résultat'}
             </button>
           </div>
