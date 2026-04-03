@@ -2041,9 +2041,11 @@ export const PerformanceDashboard = ({
                     Filtres & tri
                   </div>
                 </div>
-                <div className="flex flex-col gap-4 lg:flex-row lg:flex-wrap lg:items-end lg:gap-8">
-                  <div className="space-y-2 min-w-[min(100%,260px)]">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Périmètre</span>
+                <div className="flex flex-col gap-4 border-t border-white/[0.05] pt-4 md:flex-row md:items-end md:justify-between md:gap-6 md:pt-3">
+                  <div className="flex min-w-0 flex-1 flex-col gap-2 md:max-w-[min(100%,440px)]">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
+                      Périmètre
+                    </span>
                     <div style={NEXUS_TAB_BAR_WRAP} role="group" aria-label="Périmètre boutique">
                       {SUPER_ADMIN_SCOPE_DEFS.map((def) => (
                         <button
@@ -2058,11 +2060,20 @@ export const PerformanceDashboard = ({
                       ))}
                     </div>
                   </div>
-                  <div className="space-y-2 min-w-[min(100%,360px)] flex-1">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
+                  <div className="flex min-w-0 flex-1 flex-col gap-2 md:max-w-[min(100%,580px)] md:items-end">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500 md:text-right">
                       Tri du tableau
                     </span>
-                    <div style={NEXUS_TAB_BAR_WRAP} role="group" aria-label="Colonne de tri">
+                    <div
+                      style={{
+                        ...NEXUS_TAB_BAR_WRAP,
+                        justifyContent: 'flex-end',
+                        width: '100%',
+                        maxWidth: '100%',
+                      }}
+                      role="group"
+                      aria-label="Colonne de tri"
+                    >
                       {SUPER_ADMIN_SORT_DEFS.map((def) => (
                         <button
                           key={def.id}
