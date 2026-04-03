@@ -223,13 +223,13 @@ function App() {
     <ErrorBoundary>
       <ToastProvider>
         <AuthProvider>
-          <SaasProvider>
-            <BrowserRouter>
+          <BrowserRouter>
+            <SaasProvider>
               <Suspense fallback={<PageLoader />}>
                 <AppRoutes />
               </Suspense>
-            </BrowserRouter>
-          </SaasProvider>
+            </SaasProvider>
+          </BrowserRouter>
         </AuthProvider>
       </ToastProvider>
     </ErrorBoundary>

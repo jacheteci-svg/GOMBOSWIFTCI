@@ -2,6 +2,9 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { User, Role } from '../types';
 import { useToast } from './ToastContext';
 import { insforge } from '../lib/insforge';
+import { withTimeout } from '../lib/asyncTimeout';
+
+const AUTH_TIMEOUT_MS = 25000;
 
 interface AuthContextType {
   currentUser: User | null;
@@ -106,7 +109,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const initAuth = async () => {
       try {
         setLoading(true);
-        const { data, error: authError } = await insforge.auth.getCurrentUser();
+        const { data, error: authError } = await withTimeout(
+          insforge.auth.getCurrentUser(),
+          AUTH_TIMEOUT_MS,
+          'auth.getCurrentUser'
+        );
 
         if (authError || !data?.user) {
           setCurrentUser(null);
@@ -116,7 +123,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const userId = data.user.id;
         const email = data.user.email || '';
         
-        const profile = await fetchUserProfile(userId, email);
+        const profile = await withTimeout(
+          fetchUserProfile(userId, email),
+          AUTH_TIMEOUT_MS,
+          'fetchUserProfile'
+        );
 
         if (profile) {
           setCurrentUser(profile);
@@ -179,7 +190,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <AuthContext.Provider value={{ currentUser, loading, logout, hasRole, hasPermission }}>
-      {!loading && children}
+      {loading ? (
+        <div
+          className="login-v2"
+          style={{
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '1.25rem',
+          }}
+        >
+          <div className="spinner" style={{ width: 44, height: 44 }} />
+          <p style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.95rem' }}>Connexion au Nexus…</p>
+        </div>
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
 };

@@ -54,7 +54,26 @@ export const Layout = () => {
     }
   };
 
-  if (saasLoading) return null;
+  if (saasLoading) {
+    return (
+      <div
+        className="main-content"
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '60vh',
+          gap: '1rem',
+        }}
+      >
+        <div className="spinner" style={{ width: 44, height: 44 }} />
+        <p style={{ color: '#94a3b8', fontWeight: 600, fontSize: '0.9rem' }}>
+          {"Chargement de l'espace boutique…"}
+        </p>
+      </div>
+    );
+  }
 
   // GLOBAL LOCK SCREEN IF TENANT IS INACTIVE (and not SUPER_ADMIN)
   if (!isActive && currentUser?.role !== 'SUPER_ADMIN') {
@@ -120,7 +139,7 @@ export const Layout = () => {
       <Sidebar isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
       <main className="main-content">
         <Header onMenuClick={() => setIsMobileMenuOpen(true)} />
-        <div className="page-content">
+        <div className="page-content nexus-page-bg custom-scroll">
           <Outlet />
         </div>
       </main>
