@@ -1,3 +1,5 @@
+import { eachDayOfInterval, eachWeekOfInterval, endOfWeek, format, startOfWeek } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import { insforge } from '../lib/insforge';
 import type { Commande, StatutCommande } from '../types';
 
@@ -71,6 +73,14 @@ export interface TenantPerfRow {
   success_rate: number;
 }
 
+/** Point de série temporelle agrégée (super-admin — suivi plateforme) */
+export interface PlatformTimelinePoint {
+  label: string;
+  commandes: number;
+  ca_gmv: number;
+  annules: number;
+}
+
 const norm = (s: string | undefined) => (s || '').toLowerCase();
 
 /** Même logique que le Dashboard : création ou livraison effective dans la fenêtre */
@@ -104,6 +114,103 @@ export function getDateRangeForFilter(f: PerformanceFilter): { start: Date; end:
     start.setHours(0, 0, 0, 0);
   }
   return { start, end };
+}
+
+/**
+ * Agrège les commandes par jour (≤ 90 jours de plage) ou par semaine (lundi) si plage plus longue.
+ * Métriques par date de création de commande ; CA = montants livrées / terminées ce jour-là.
+ */
+function orderCreatedInRange(c: Commande, start: Date, end: Date): boolean {
+  const dc = new Date(c.date_creation as string);
+  return dc >= start && dc <= end;
+}
+
+export function buildPlatformTimeline(
+  commandes: Commande[],
+  range: { start: Date; end: Date }
+): PlatformTimelinePoint[] {
+  const cmdsInRange = commandes.filter((c) => orderCreatedInRange(c, range.start, range.end));
+  let dayList: Date[];
+  try {
+    dayList = eachDayOfInterval({ start: range.start, end: range.end });
+  } catch {
+    return [];
+  }
+  if (dayList.length === 0) return [];
+
+  const useWeekly = dayList.length > 90;
+
+  const bump = (row: { commandes: number; ca_gmv: number; annules: number }, c: Commande) => {
+    row.commandes += 1;
+    const st = norm(c.statut_commande);
+    if (st === 'livree' || st === 'terminee') {
+      const m =
+        Number(c.montant_encaisse) > 0
+          ? Number(c.montant_encaisse)
+          : Number(c.montant_total) || 0;
+      row.ca_gmv += Number.isFinite(m) ? m : 0;
+    } else if (st === 'annulee') {
+      row.annules += 1;
+    }
+  };
+
+  if (!useWeekly) {
+    const byDay = new Map<string, { commandes: number; ca_gmv: number; annules: number }>();
+    for (const d of dayList) {
+      byDay.set(format(d, 'yyyy-MM-dd'), { commandes: 0, ca_gmv: 0, annules: 0 });
+    }
+    for (const c of cmdsInRange) {
+      const dc = new Date(c.date_creation as string);
+      const k = format(dc, 'yyyy-MM-dd');
+      const row = byDay.get(k);
+      if (!row) continue;
+      bump(row, c);
+    }
+    return dayList.map((d) => {
+      const k = format(d, 'yyyy-MM-dd');
+      const v = byDay.get(k)!;
+      return {
+        label: format(d, 'd MMM', { locale: fr }),
+        commandes: v.commandes,
+        ca_gmv: Math.round(v.ca_gmv),
+        annules: v.annules,
+      };
+    });
+  }
+
+  let weekStarts: Date[];
+  try {
+    weekStarts = eachWeekOfInterval({ start: range.start, end: range.end }, { weekStartsOn: 1 });
+  } catch {
+    return [];
+  }
+  const byWeek = new Map<string, { commandes: number; ca_gmv: number; annules: number }>();
+  for (const w of weekStarts) {
+    const monday = startOfWeek(w, { weekStartsOn: 1 });
+    const k = format(monday, 'yyyy-MM-dd');
+    byWeek.set(k, { commandes: 0, ca_gmv: 0, annules: 0 });
+  }
+  for (const c of cmdsInRange) {
+    const dc = new Date(c.date_creation as string);
+    const monday = startOfWeek(dc, { weekStartsOn: 1 });
+    const k = format(monday, 'yyyy-MM-dd');
+    const row = byWeek.get(k);
+    if (!row) continue;
+    bump(row, c);
+  }
+  return weekStarts.map((w) => {
+    const monday = startOfWeek(w, { weekStartsOn: 1 });
+    const k = format(monday, 'yyyy-MM-dd');
+    const v = byWeek.get(k)!;
+    const wEnd = endOfWeek(monday, { weekStartsOn: 1 });
+    const label = `${format(monday, 'd MMM', { locale: fr })} → ${format(wEnd, 'd MMM', { locale: fr })}`;
+    return {
+      label,
+      commandes: v.commandes,
+      ca_gmv: Math.round(v.ca_gmv),
+      annules: v.annules,
+    };
+  });
 }
 
 const STATUT_TERRAIN: StatutCommande[] = [
@@ -448,7 +555,7 @@ export async function loadPerformanceDashboardData(
  */
 export async function loadSuperAdminTenantPerformance(
   filter: PerformanceFilter
-): Promise<TenantPerfRow[]> {
+): Promise<{ rows: TenantPerfRow[]; timeline: PlatformTimelinePoint[] }> {
   const range = getDateRangeForFilter(filter);
 
   const [{ data: tenantsData, error: te }, { data: usersData, error: ue }, { data: cmdData, error: ce }] =
@@ -544,5 +651,7 @@ export async function loadSuperAdminTenantPerformance(
     };
   });
 
-  return rows.sort((a, b) => b.ca_gmv - a.ca_gmv || b.commandes - a.commandes);
+  const sortedRows = rows.sort((a, b) => b.ca_gmv - a.ca_gmv || b.commandes - a.commandes);
+  const timeline = buildPlatformTimeline(cmds, range);
+  return { rows: sortedRows, timeline };
 }

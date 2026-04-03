@@ -12,6 +12,7 @@ import {
   loadSuperAdminTenantPerformance,
   type TenantPerfRow,
   type InventoryStaffPerfRow,
+  type PlatformTimelinePoint,
 } from '../../services/performanceService';
 import { NexusModuleFrame } from '../layout/NexusModuleFrame';
 import {
@@ -22,6 +23,10 @@ import {
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
+  ComposedChart,
+  Area,
+  Line,
+  Legend,
 } from 'recharts';
 import {
   Truck,
@@ -368,6 +373,7 @@ export const PerformanceDashboard = ({
     inventaireStaff: [],
   });
   const [tenantRows, setTenantRows] = useState<TenantPerfRow[]>([]);
+  const [platformTimeline, setPlatformTimeline] = useState<PlatformTimelinePoint[]>([]);
   const [superAdminSort, setSuperAdminSort] = useState<SuperAdminSortKey>('ca_gmv');
   const [superAdminScope, setSuperAdminScope] = useState<SuperAdminScope>('all');
 
@@ -376,8 +382,9 @@ export const PerformanceDashboard = ({
     setLoadError(null);
     try {
       if (isSuperAdmin) {
-        const rows = await loadSuperAdminTenantPerformance(filter);
+        const { rows, timeline } = await loadSuperAdminTenantPerformance(filter);
         setTenantRows(rows);
+        setPlatformTimeline(timeline);
         setDataUpdatedAt(new Date());
         return;
       }
@@ -1781,32 +1788,7 @@ export const PerformanceDashboard = ({
       }));
 
     const topTenant = rowsAll[0];
-
-    const SaStatTile = ({
-      label,
-      value,
-      hint,
-      valueClass,
-    }: {
-      label: string;
-      value: ReactNode;
-      hint?: string;
-      valueClass?: string;
-    }) => (
-      <div className="flex h-full w-[108px] shrink-0 flex-col justify-center rounded-lg border border-white/[0.07] bg-slate-900/40 px-2.5 py-2 shadow-inner sm:min-h-[4rem] sm:w-[118px] sm:rounded-xl sm:px-3 sm:py-2.5 lg:w-auto lg:min-w-0">
-        <p className="text-[8px] font-bold uppercase tracking-[0.1em] text-slate-500 leading-tight sm:text-[9px] sm:tracking-[0.12em]">
-          {label}
-        </p>
-        <p
-          className={`mt-0.5 text-base font-bold tabular-nums leading-none text-white sm:mt-1 sm:text-lg lg:text-xl ${valueClass ?? ''}`}
-        >
-          {value}
-        </p>
-        {hint ? (
-          <p className="mt-1 line-clamp-2 text-[9px] leading-tight text-slate-500 sm:text-[10px]">{hint}</p>
-        ) : null}
-      </div>
-    );
+    const tl = platformTimeline;
 
     return (
       <div className="space-y-8 lg:space-y-10">
@@ -1848,70 +1830,122 @@ export const PerformanceDashboard = ({
               </div>
             </div>
 
-            {/* Une rangée sur desktop ; défilement horizontal sur mobile (évite la pile verticale gênante) */}
-            <div className="-mx-1 overflow-x-auto overscroll-x-contain px-1 pb-0.5 [scrollbar-width:thin]">
-              <div className="flex w-max gap-2 lg:grid lg:w-full lg:grid-cols-7 lg:gap-2.5">
-              <SaStatTile
-                label="Commandes"
-                value={totalCmd.toLocaleString('fr-FR')}
-                hint="Volume total"
-              />
-              <SaStatTile
-                label="CA livré (GMV)"
-                value={
-                  <>
-                    {totalGmv.toLocaleString('fr-FR')}{' '}
-                    <span className="text-sm font-semibold text-slate-400">CFA</span>
-                  </>
-                }
-                hint="Livrées / terminées"
-              />
-              <SaStatTile
-                label="Boutiques actives"
-                value={
-                  <>
-                    {withActivity}
-                    <span className="text-slate-500 text-base font-semibold">/{rowsAll.length}</span>
-                  </>
-                }
-                hint={`${inactiveTenants} inactif(s)`}
-              />
-              <SaStatTile
-                label="Taux livraison"
-                value={
-                  <>
-                    {avgSuccPlat}
-                    <span className="text-cyan-400/90">%</span>
-                  </>
-                }
-                hint="Moy. pondérée terrain"
-              />
-              <SaStatTile
-                label="CA top 3"
-                value={`${ins.concentrationTop3}%`}
-                hint="Part du CA plateforme"
-              />
-              <SaStatTile
-                label="Panier moyen"
-                value={
-                  ins.panierMoyen > 0 ? (
-                    <>
-                      {ins.panierMoyen.toLocaleString('fr-FR')}{' '}
-                      <span className="text-sm font-semibold text-slate-400">CFA</span>
-                    </>
-                  ) : (
-                    '—'
-                  )
-                }
-                hint="GMV ÷ livrées"
-              />
-              <SaStatTile
-                label="Annulations"
-                value={`${ins.tauxAnnulPlateforme}%`}
-                hint="Des commandes (global)"
-              />
+            <p className="mb-3 text-[11px] leading-relaxed text-slate-500">
+              Vue globale :{' '}
+              <span className="font-semibold tabular-nums text-slate-200">{totalCmd}</span> cmd ·{' '}
+              <span className="font-semibold tabular-nums text-cyan-200/95">
+                {totalGmv.toLocaleString('fr-FR')} CFA
+              </span>{' '}
+              GMV ·{' '}
+              <span className="tabular-nums text-slate-300">
+                {withActivity}/{rowsAll.length}
+              </span>{' '}
+              boutiques ·{' '}
+              <span className="tabular-nums text-slate-300">{avgSuccPlat}%</span> livr. · top 3 CA{' '}
+              <span className="tabular-nums text-slate-300">{ins.concentrationTop3}%</span>
+              {ins.panierMoyen > 0 ? (
+                <>
+                  {' '}
+                  · panier{' '}
+                  <span className="tabular-nums text-slate-300">
+                    {ins.panierMoyen.toLocaleString('fr-FR')} CFA
+                  </span>
+                </>
+              ) : null}{' '}
+              · annul. <span className="tabular-nums text-slate-300">{ins.tauxAnnulPlateforme}%</span> ·{' '}
+              <span className="text-slate-500">{inactiveTenants} inactif(s)</span>
+            </p>
+
+            <div className="rounded-xl border border-white/[0.08] bg-gradient-to-b from-slate-950/80 to-[#0a0f18] p-3 sm:p-4">
+              <div className="mb-2 flex flex-wrap items-end justify-between gap-2">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">
+                    Suivi dans le temps
+                  </p>
+                  <p className="mt-0.5 text-[10px] text-slate-500">
+                    Par jour si ≤ 90 jours de plage, sinon par semaine · chaque point = commandes créées dans la
+                    fenêtre ; CA = montant livrées / terminées parmi elles
+                  </p>
+                </div>
               </div>
+              {tl.length > 0 ? (
+                <div className="h-[240px] w-full min-w-0 sm:h-[280px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ComposedChart data={tl} margin={{ top: 4, right: 12, left: 4, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="saCaAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#06b6d4" stopOpacity={0.45} />
+                          <stop offset="100%" stopColor="#06b6d4" stopOpacity={0.02} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
+                      <XAxis
+                        dataKey="label"
+                        tick={{ fill: C.textMuted, fontSize: 10 }}
+                        interval="preserveStartEnd"
+                        tickMargin={6}
+                        height={36}
+                      />
+                      <YAxis
+                        yAxisId="left"
+                        tick={{ fill: C.textMuted, fontSize: 10 }}
+                        width={36}
+                        allowDecimals={false}
+                      />
+                      <YAxis
+                        yAxisId="right"
+                        orientation="right"
+                        tick={{ fill: C.textMuted, fontSize: 10 }}
+                        width={44}
+                        tickFormatter={(v) => `${Number(v) >= 1000 ? `${Math.round(v / 1000)}k` : v}`}
+                      />
+                      <Tooltip
+                        {...chartTooltip}
+                        formatter={(value, name) => {
+                          const n = typeof value === 'number' ? value : Number(value);
+                          if (String(name) === 'CA (GMV)')
+                            return [`${Number.isFinite(n) ? n.toLocaleString('fr-FR') : '0'} CFA`, name];
+                          return [String(value ?? '0'), name];
+                        }}
+                      />
+                      <Legend wrapperStyle={{ fontSize: '11px', paddingTop: 8 }} />
+                      <Area
+                        yAxisId="right"
+                        type="monotone"
+                        dataKey="ca_gmv"
+                        name="CA (GMV)"
+                        stroke="#22d3ee"
+                        strokeWidth={2}
+                        fill="url(#saCaAreaGrad)"
+                        fillOpacity={1}
+                      />
+                      <Line
+                        yAxisId="left"
+                        type="monotone"
+                        dataKey="commandes"
+                        name="Commandes"
+                        stroke="#a78bfa"
+                        strokeWidth={2}
+                        dot={false}
+                        activeDot={{ r: 4 }}
+                      />
+                      <Line
+                        yAxisId="left"
+                        type="monotone"
+                        dataKey="annules"
+                        name="Annulations"
+                        stroke="#fb7185"
+                        strokeWidth={1.5}
+                        dot={false}
+                      />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <p className="py-10 text-center text-sm text-slate-500">Aucune donnée pour la période.</p>
+              )}
             </div>
+
           </div>
         )}
 
