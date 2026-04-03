@@ -1793,12 +1793,18 @@ export const PerformanceDashboard = ({
       hint?: string;
       valueClass?: string;
     }) => (
-      <div className="flex min-h-[4.5rem] flex-col justify-center rounded-xl border border-white/[0.07] bg-slate-900/35 px-3 py-2.5 shadow-inner">
-        <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500 leading-snug">{label}</p>
-        <p className={`mt-1 text-lg font-bold tabular-nums leading-tight text-white sm:text-xl ${valueClass ?? ''}`}>
+      <div className="flex h-full w-[108px] shrink-0 flex-col justify-center rounded-lg border border-white/[0.07] bg-slate-900/40 px-2.5 py-2 shadow-inner sm:min-h-[4rem] sm:w-[118px] sm:rounded-xl sm:px-3 sm:py-2.5 lg:w-auto lg:min-w-0">
+        <p className="text-[8px] font-bold uppercase tracking-[0.1em] text-slate-500 leading-tight sm:text-[9px] sm:tracking-[0.12em]">
+          {label}
+        </p>
+        <p
+          className={`mt-0.5 text-base font-bold tabular-nums leading-none text-white sm:mt-1 sm:text-lg lg:text-xl ${valueClass ?? ''}`}
+        >
           {value}
         </p>
-        {hint ? <p className="mt-0.5 text-[10px] text-slate-500 leading-snug">{hint}</p> : null}
+        {hint ? (
+          <p className="mt-1 line-clamp-2 text-[9px] leading-tight text-slate-500 sm:text-[10px]">{hint}</p>
+        ) : null}
       </div>
     );
 
@@ -1810,33 +1816,30 @@ export const PerformanceDashboard = ({
             role="region"
             aria-label="Synthèse plateforme"
           >
-            <div className="flex flex-wrap items-center justify-between gap-2 gap-y-3 border-b border-white/[0.06] pb-3 mb-3">
-              <div className="flex items-center gap-2 min-w-0">
+            <div className="mb-3 flex flex-col gap-3 border-b border-white/[0.06] pb-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+              <div className="flex min-w-0 items-center gap-2">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-cyan-500/20 bg-cyan-500/10 text-cyan-300">
                   <Target size={18} strokeWidth={2} aria-hidden />
                 </div>
-                <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">Synthèse plateforme</p>
-                  <p className="text-[11px] text-slate-500 mt-0.5 hidden sm:block">Période sélectionnée · agrégat multi-tenant</p>
-                </div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">Synthèse plateforme</p>
               </div>
-              <div className="flex flex-wrap items-center justify-end gap-1.5 w-full sm:w-auto sm:max-w-[70%]">
+              <div className="flex flex-shrink-0 flex-wrap items-center gap-2 sm:justify-end">
                 {ins.atRiskCount > 0 ? (
                   <span
-                    className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-100"
+                    className="inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-100"
                     title={`≥${SA_MIN_SORTIES_FOR_RISK} missions terrain et succès <${SA_LOGISTICS_RISK_THRESHOLD}%`}
                   >
                     <AlertTriangle className="size-3.5 shrink-0" aria-hidden />
                     Livraison · {ins.atRiskCount}
                   </span>
                 ) : (
-                  <span className="inline-flex items-center rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-200/95">
+                  <span className="inline-flex shrink-0 items-center rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-200/95">
                     Livraison OK
                   </span>
                 )}
                 {ins.dormantActiveCount > 0 ? (
                   <span
-                    className="inline-flex items-center rounded-full border border-violet-500/25 bg-violet-500/10 px-2.5 py-1 text-[11px] font-semibold text-violet-200"
+                    className="inline-flex shrink-0 items-center rounded-full border border-violet-500/25 bg-violet-500/10 px-2.5 py-1 text-[11px] font-semibold text-violet-200"
                     title="Comptes actifs sans commande sur la période"
                   >
                     Relance · {ins.dormantActiveCount}
@@ -1845,7 +1848,9 @@ export const PerformanceDashboard = ({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-2.5">
+            {/* Une rangée sur desktop ; défilement horizontal sur mobile (évite la pile verticale gênante) */}
+            <div className="-mx-1 overflow-x-auto overscroll-x-contain px-1 pb-0.5 [scrollbar-width:thin]">
+              <div className="flex w-max gap-2 lg:grid lg:w-full lg:grid-cols-7 lg:gap-2.5">
               <SaStatTile
                 label="Commandes"
                 value={totalCmd.toLocaleString('fr-FR')}
@@ -1905,6 +1910,7 @@ export const PerformanceDashboard = ({
                 value={`${ins.tauxAnnulPlateforme}%`}
                 hint="Des commandes (global)"
               />
+              </div>
             </div>
           </div>
         )}
