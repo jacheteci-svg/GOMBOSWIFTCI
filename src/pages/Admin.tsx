@@ -1,14 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { User, Commune, Permission } from '../types';
 import { getAdminUsers, createAdminUser, updateAdminUser, getCommunes, createCommune, updateCommune, deleteCommune } from '../services/adminService';
-import { Plus, Trash2, Users as UsersIcon, Map as MapIcon, CreditCard, CheckCircle } from 'lucide-react';
+import { Plus, Trash2, Users as UsersIcon, Map as MapIcon, CreditCard, CheckCircle, Building2 } from 'lucide-react';
 import { monerooService } from '../services/monerooService';
 import { useToast } from '../contexts/ToastContext';
 import { insforge } from '../lib/insforge';
 import { useAuth } from '../contexts/AuthContext';
 import { useSaas } from '../saas/SaasProvider';
 import { NexusModuleFrame } from '../components/layout/NexusModuleFrame';
+import { TenantIdentityPanel } from '../components/admin/TenantIdentityPanel';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 
 export const Admin = () => {
   const { showToast } = useToast();
@@ -17,12 +19,13 @@ export const Admin = () => {
   
   const canManageUsers = hasPermission('ADMIN') || hasPermission('GESTION_LIVREURS');
   const canManageCommunes = hasPermission('ADMIN') || hasPermission('COMMUNES');
+  const canManageEntreprise = hasPermission('ADMIN');
 
   const [searchParams] = useSearchParams();
   const tabParam = searchParams.get('tab') as any;
 
-  const [activeTab, setActiveTab] = useState<'utilisateurs' | 'communes' | 'abonnement'>(
-    (tabParam && ['utilisateurs', 'communes', 'abonnement'].includes(tabParam)) 
+  const [activeTab, setActiveTab] = useState<'utilisateurs' | 'communes' | 'abonnement' | 'entreprise'>(
+    (tabParam && ['utilisateurs', 'communes', 'abonnement', 'entreprise'].includes(tabParam)) 
       ? tabParam 
       : (canManageUsers ? 'utilisateurs' : 'communes')
   );
@@ -79,6 +82,21 @@ export const Admin = () => {
             <MapIcon size={18} strokeWidth={activeTab === 'communes' ? 3 : 2} /> Zones & Tarifs
           </button>
         )}
+        {canManageEntreprise && (
+          <button 
+            className="btn"
+            onClick={() => setActiveTab('entreprise')}
+            style={{ 
+              background: activeTab === 'entreprise' ? 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)' : 'transparent',
+              color: activeTab === 'entreprise' ? 'white' : 'var(--text-muted)',
+              boxShadow: activeTab === 'entreprise' ? '0 10px 20px rgba(6, 182, 212, 0.3)' : 'none',
+              border: 'none', padding: '0.8rem 1.8rem', borderRadius: '16px', fontWeight: 800, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.75rem',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+            }}
+          >
+            <Building2 size={18} strokeWidth={activeTab === 'entreprise' ? 3 : 2} /> Documents &amp; marque
+          </button>
+        )}
         <button 
           className="btn"
           onClick={() => setActiveTab('abonnement')}
@@ -103,6 +121,7 @@ export const Admin = () => {
         ) : (
           activeTab === 'utilisateurs' ? <UsersManager showToast={showToast} tenantId={tenant.id} /> : 
           activeTab === 'communes' ? <CommunesManager showToast={showToast} tenantId={tenant.id} /> :
+          activeTab === 'entreprise' ? <TenantIdentityPanel tenant={tenant} showToast={showToast} /> :
           <SubscriptionManager showToast={showToast} tenant={tenant} />
         )}
       </div>
@@ -138,18 +157,20 @@ const UsersManager = ({ showToast, tenantId }: { showToast: any, tenantId: strin
   const { planConfig } = useSaas();
   const isAdmin = hasPermission('ADMIN');
 
-  const isLimitReached = planConfig?.max_users && planConfig.max_users > 0 ? users.length >= planConfig.max_users : false;
+  /** Liste complète (tenant) — le filtre métier s’applique à l’affichage pour éviter les états incohérents si les permissions changent avant le 2e rendu. */
+  const visibleUsers = useMemo(
+    () => (!isAdmin ? users.filter((u) => u.role === 'LIVREUR') : users),
+    [users, isAdmin]
+  );
+
+  const isLimitReached =
+    planConfig?.max_users && planConfig.max_users > 0 ? users.length >= planConfig.max_users : false;
 
   const loadUsers = async () => {
     setLoading(true);
     try {
       const data = await getAdminUsers(tenantId);
-      // Filter for non-admins if they only have GESTION_LIVREURS
-      if (!isAdmin) {
-        setUsers(data?.filter(u => u.role === 'LIVREUR') || []);
-      } else {
-        setUsers(data || []);
-      }
+      setUsers(data || []);
     } catch (e) {
       showToast("Erreur chargement.", "error");
     } finally {
@@ -157,7 +178,9 @@ const UsersManager = ({ showToast, tenantId }: { showToast: any, tenantId: strin
     }
   };
 
-  useEffect(() => { loadUsers(); }, []);
+  useEffect(() => {
+    void loadUsers();
+  }, [tenantId, isAdmin]);
 
   const togglePermission = (p: Permission) => {
     const current = form.permissions || [];
@@ -183,60 +206,77 @@ const UsersManager = ({ showToast, tenantId }: { showToast: any, tenantId: strin
     setLoading(true);
     try {
       if (editingId === 'new') {
-        const { data: currentSession } = await insforge.auth.getCurrentUser();
-        const adminAccessToken = (currentSession as any)?.session?.access_token;
-        const adminRefreshToken = (currentSession as any)?.session?.refresh_token;
+        const { data: sessionData } = await insforge.auth.getCurrentUser();
+        const adminUserId = (sessionData as any)?.user?.id as string | undefined;
+        const adminAccessToken = (sessionData as any)?.session?.access_token as string | undefined;
+        const adminRefreshToken = (sessionData as any)?.session?.refresh_token as string | undefined;
 
-        let userId = '';
+        const restoreAdminSession = async () => {
+          if (!adminAccessToken || !adminRefreshToken) return;
+          await (insforge.auth as any).setSession({
+            access_token: adminAccessToken,
+            refresh_token: adminRefreshToken,
+          });
+          const { data: check } = await insforge.auth.getCurrentUser();
+          const nowId = (check as any)?.user?.id;
+          if (adminUserId && nowId && nowId !== adminUserId) {
+            await (insforge.auth as any).setSession({
+              access_token: adminAccessToken,
+              refresh_token: adminRefreshToken,
+            });
+          }
+        };
 
-        const { data: authData, error: signUpError } = await insforge.auth.signUp({ 
-          email: email as string, 
-          password: password as string
+        const { data: authData, error: signUpError } = await insforge.auth.signUp({
+          email: email as string,
+          password: password as string,
         });
 
         if (signUpError) {
           const msg = signUpError.message || '';
           if (msg.includes('already registered') || msg.includes('already been registered')) {
-            // Check if user is already in Auth but missing from our DB
             const { data: existingUsers } = await insforge.database
               .from('users')
               .select('id')
               .eq('email', email)
               .eq('tenant_id', tenantId)
               .single();
-            
+
             if (existingUsers?.id) {
-               throw new Error("Cet email/téléphone est déjà utilisé.");
-            } else {
-               // User exists in Auth but NOT in our 'users' table. 
-               // We don't have the Auth ID here because signUp failed, 
-               // and we shouldn't guess it. Best we can do is ask the user to use a different email or fix it.
-               // However, in InsForge, if a user is created in Auth, they MUST be in 'users'.
-               throw signUpError; 
+              throw new Error('Cet email/téléphone est déjà utilisé.');
             }
-          } else {
             throw signUpError;
           }
-        } else {
-          userId = authData?.user?.id || '';
+          throw signUpError;
         }
-        
-        // Restore admin session immediately after user creation
-        if (adminAccessToken && adminRefreshToken) {
-          await (insforge.auth as any).setSession({ access_token: adminAccessToken, refresh_token: adminRefreshToken });
+
+        let userId =
+          authData?.user?.id ||
+          (authData as any)?.session?.user?.id ||
+          '';
+
+        await restoreAdminSession();
+
+        if (!userId) {
+          throw new Error(
+            "Compte non finalisé : aucun identifiant retourné par l'authentification (vérifiez la confirmation e-mail côté plateforme)."
+          );
         }
-        
-        if (userId) {
-          await createAdminUser({
+
+        await createAdminUser(
+          {
             nom_complet: form.nom_complet || '',
             email: email as string,
             role: form.role as any,
             telephone: sanitizedTel,
             permissions: form.permissions || [],
             actif: true,
-            tenant_id: tenantId
-          }, userId);
-        }
+            tenant_id: tenantId,
+          },
+          userId
+        );
+
+        await restoreAdminSession();
       } else if (editingId) {
         // Clean form data for update: remove fields that shouldn't be sent
         const updateData: any = {
@@ -249,8 +289,10 @@ const UsersManager = ({ showToast, tenantId }: { showToast: any, tenantId: strin
         if (form.email) updateData.email = form.email;
         await updateAdminUser(tenantId, editingId, updateData);
       }
-      showToast("Enregistré avec succès !", "success");
-      setEditingId(null); setForm({}); loadUsers();
+      showToast('Enregistré avec succès !', 'success');
+      setEditingId(null);
+      setForm({});
+      await loadUsers();
     } catch (e: any) { 
       console.error('User save error:', e);
       const msg = e?.message || '';
@@ -269,7 +311,9 @@ const UsersManager = ({ showToast, tenantId }: { showToast: any, tenantId: strin
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2.5rem', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
         <div>
           <h3 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 900, color: 'white' }}>Membres de l'Organisation</h3>
-          <p style={{ color: 'var(--text-muted)', fontWeight: 600, fontSize: '0.9rem' }}>{users.length} compte(s) actif(s) sur cette instance.</p>
+          <p style={{ color: 'var(--text-muted)', fontWeight: 600, fontSize: '0.9rem' }}>
+            {visibleUsers.length} compte(s) affiché(s) sur cette instance.
+          </p>
         </div>
         <button 
           className="btn btn-primary" 
@@ -303,7 +347,7 @@ const UsersManager = ({ showToast, tenantId }: { showToast: any, tenantId: strin
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
-            {(editingId === 'new' || (editingId && users.find(u => u.id === editingId))) && (
+            {(editingId === 'new' || (editingId && users.find((u) => u.id === editingId))) && (
               <tr style={{ background: 'rgba(6, 182, 212, 0.05)' }}>
                 <td colSpan={4}>
                   <div style={{ padding: '2.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '2rem' }}>
@@ -363,7 +407,7 @@ const UsersManager = ({ showToast, tenantId }: { showToast: any, tenantId: strin
               </tr>
             )}
 
-            {users.map(u => (
+            {visibleUsers.map((u) => (
               <tr key={u.id}>
                 <td data-label="Identité" style={{ padding: '1.25rem 1.5rem' }}>
                   <div>
@@ -417,6 +461,7 @@ const CommunesManager = ({ showToast, tenantId }: { showToast: any, tenantId: st
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<Partial<Commune>>({});
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const loadCommunes = async () => {
     setLoading(true);
@@ -456,20 +501,30 @@ const CommunesManager = ({ showToast, tenantId }: { showToast: any, tenantId: st
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm("Supprimer cette zone ?")) {
-      try {
-        await deleteCommune(tenantId, id);
-        showToast("Zone supprimée.");
-        loadCommunes();
-      } catch (e) {
-        showToast("Erreur.", "error");
-      }
+  const confirmDeleteZone = async () => {
+    if (!deleteId) return;
+    try {
+      await deleteCommune(tenantId, deleteId);
+      showToast("Zone supprimée.");
+      loadCommunes();
+    } catch (e) {
+      showToast("Erreur.", "error");
+    } finally {
+      setDeleteId(null);
     }
   };
 
   return (
     <div className="card glass-effect" style={{ padding: '2.5rem', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '32px' }}>
+      <ConfirmDialog
+        open={!!deleteId}
+        title="Supprimer cette zone ?"
+        message="Les nouvelles commandes ne pourront plus utiliser ce secteur tel quel. Cette action est définitive."
+        variant="danger"
+        confirmLabel="Supprimer"
+        onCancel={() => setDeleteId(null)}
+        onConfirm={confirmDeleteZone}
+      />
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2.5rem', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
         <div>
           <h3 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 900, color: 'white' }}>Zonage & Tarification</h3>
@@ -533,7 +588,7 @@ const CommunesManager = ({ showToast, tenantId }: { showToast: any, tenantId: st
                 <td style={{ textAlign: 'right', padding: '1.25rem 1.5rem' }}>
                   <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
                     <button className="btn btn-outline" style={{ height: '36px', minHeight: '36px', padding: '0 1rem', fontSize: '0.8rem', borderRadius: '10px' }} onClick={() => {setEditingId(c.id); setForm(c);}}>Modifier</button>
-                    <button className="btn btn-outline" style={{ height: '36px', minHeight: '36px', padding: '0 0.8rem', borderRadius: '10px', color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.1)' }} onClick={() => handleDelete(c.id)}><Trash2 size={16} /></button>
+                    <button className="btn btn-outline" style={{ height: '36px', minHeight: '36px', padding: '0 0.8rem', borderRadius: '10px', color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.1)' }} onClick={() => setDeleteId(c.id)}><Trash2 size={16} /></button>
                   </div>
                 </td>
               </tr>

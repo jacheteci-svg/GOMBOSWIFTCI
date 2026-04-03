@@ -14,12 +14,16 @@ export const getAdminUsers = async (tenantId: string): Promise<User[]> => {
   return data || [];
 };
 
-export const createAdminUser = async (user: Omit<User, 'id'>, id?: string): Promise<void> => {
-  const { error } = await insforge.database
+export const createAdminUser = async (user: Omit<User, 'id'>, id?: string): Promise<User> => {
+  const rowId = id || crypto.randomUUID();
+  const { data, error } = await insforge.database
     .from('users')
-    .insert([{ ...user, id: id || crypto.randomUUID() }]);
-  
+    .insert([{ ...user, id: rowId }])
+    .select()
+    .single();
+
   if (error) throw error;
+  return data as User;
 };
 
 export const updateAdminUser = async (tenantId: string, id: string, data: Partial<User>): Promise<void> => {
