@@ -263,7 +263,13 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-content card" style={{ maxWidth: '720px', padding: '2.5rem', maxHeight: '92vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
+      <div
+        className="modal-content modal-nexus modal-nexus-wide card glass-effect"
+        style={{ maxWidth: '720px', padding: 0, maxHeight: '92vh', overflow: 'hidden', position: 'relative', borderRadius: '28px' }}
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="modal-nexus-accent" />
+        <div style={{ padding: '2.5rem', maxHeight: '92vh', overflowY: 'auto' }}>
         <button 
           onClick={onClose} 
           style={{ 
@@ -288,7 +294,7 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
         
         <div style={{ marginBottom: '2rem' }}>
           <h2 className="text-premium" style={{ fontSize: '1.6rem', fontWeight: 800, margin: 0 }}>Traitement d'Appel</h2>
-          <div style={{ marginTop: '1rem', padding: '1.25rem', background: '#f8fafc', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
+          <div className="modal-panel-light" style={{ marginTop: '1rem', padding: '1.25rem', background: '#f8fafc', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
               <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Référence Commande</span>
               <strong style={{ fontSize: '1rem', color: 'var(--text-main)' }}>#{commande.id.slice(0, 8).toUpperCase()}</strong>
@@ -504,7 +510,7 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
                 <label className="form-label" style={{ fontWeight: 700 }}>Lieu exact (Confirmation)</label>
                 <input type="text" className="form-input" required value={adresseLocal} onChange={e => setAdresseLocal(e.target.value)} style={{ background: 'white', height: '44px' }} />
               </div>
-              <div style={{ padding: '1.25rem', background: 'white', borderRadius: '16px', border: '1px solid #f0abfc' }}>
+              <div className="modal-panel-light" style={{ padding: '1.25rem', background: 'white', borderRadius: '16px', border: '1px solid #f0abfc' }}>
                  <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Montant total à encaisser</div>
                  <div className="brand-glow" style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--primary)' }}>
                    {totalEncaisser.toLocaleString()} <span style={{ fontSize: '0.8rem' }}>CFA</span>
@@ -513,13 +519,13 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
             </div>
           )}
 
-          <div className="form-group">
+          <div className="form-group modal-panel-light" style={{ padding: '1rem', borderRadius: '16px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
             <label className="form-label" style={{ fontWeight: 700 }}>Note d'appel</label>
             <textarea 
               className="form-input" 
               rows={3}
               required
-              style={{ background: '#f8fafc', borderRadius: '16px', padding: '1rem' }}
+              style={{ borderRadius: '16px', padding: '1rem' }}
               placeholder="Ex: Client confirmé, livraison OK pour demain matin..."
               value={commentaire}
               onChange={e => setCommentaire(e.target.value)}
@@ -533,6 +539,7 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
             </button>
           </div>
         </form>
+        </div>
       </div>
     </div>
   );

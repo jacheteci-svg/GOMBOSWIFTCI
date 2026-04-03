@@ -73,20 +73,23 @@ export const NotificationCenter = () => {
       </button>
 
       {isOpen && (
-        <div style={{
+        <div
+          className="modal-panel-light"
+          style={{
           position: 'absolute',
           top: '120%',
           right: 0,
           width: '350px',
-          background: 'rgba(255, 255, 255, 0.95)',
+          background: 'rgba(255, 255, 255, 0.98)',
           backdropFilter: 'blur(15px)',
           borderRadius: '20px',
           boxShadow: 'var(--shadow-premium)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
+          border: '1px solid #e2e8f0',
           zIndex: 1000,
           overflow: 'hidden',
           animation: 'modalEnter 0.3s ease'
-        }}>
+        }}
+        >
           <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800 }}>Alertes Business</h3>
             <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>{alerts.length} actives</span>

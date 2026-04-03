@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import type { Commande, StatutCommande } from '../../types';
 import { Eye, PhoneCall, Truck, Trash2, FileText } from 'lucide-react';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 
 interface CommandeListProps {
   commandes: Commande[];
@@ -49,6 +51,8 @@ export const CommandeList = ({
   actionIcon = 'Eye', 
   actionLabel = 'Voir détails' 
 }: CommandeListProps) => {
+  const [deleteTarget, setDeleteTarget] = useState<Commande | null>(null);
+
   const toggleSelectAll = () => {
     if (!onSelectionChange) return;
     if (selectedIds.length === commandes.length) {
@@ -78,6 +82,18 @@ export const CommandeList = ({
 
   return (
     <div className="card table-responsive-cards" style={{ padding: '0', background: 'transparent', boxShadow: 'none' }}>
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Supprimer cette commande ?"
+        message="La commande sera définitivement retirée du système. Cette action ne peut pas être annulée."
+        variant="danger"
+        confirmLabel="Supprimer"
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={() => {
+          if (deleteTarget && onDelete) onDelete(deleteTarget);
+          setDeleteTarget(null);
+        }}
+      />
       <div className="table-container">
         <table>
           <thead>
@@ -175,7 +191,7 @@ export const CommandeList = ({
                           className="btn btn-outline" 
                           style={{ padding: '0.6rem', borderRadius: '12px', color: '#ef4444', borderColor: 'transparent' }} 
                           title="Supprimer"
-                          onClick={() => { if(window.confirm('Supprimer cette commande définituvement ?')) onDelete(c); }}
+                          onClick={() => setDeleteTarget(c)}
                         >
                           <Trash2 size={18} />
                         </button>

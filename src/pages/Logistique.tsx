@@ -6,6 +6,7 @@ import type { Commande, User, FeuilleRoute } from '../types';
 import { Truck, Printer, Eye, Clock } from 'lucide-react';
 import { useToast } from '../contexts/ToastContext';
 import { generateDeliverySlipPDF } from '../services/pdfService';
+import { tenantToPdfBranding } from '../lib/tenantPdfBranding';
 import { format } from 'date-fns';
 import { CommandeDetails } from '../components/commandes/CommandeDetails';
 import { NexusModuleFrame } from '../components/layout/NexusModuleFrame';
@@ -87,7 +88,7 @@ export const Logistique = () => {
     try {
       if (!tenant?.id) return;
       const orders = await getCommandesByFeuille(tenant.id, feuille.id);
-      generateDeliverySlipPDF(feuille, orders);
+      await generateDeliverySlipPDF(feuille, orders, tenantToPdfBranding(tenant));
     } catch (error) {
       showToast("Erreur lors de l'impression.", "error");
     }
@@ -265,7 +266,9 @@ const FeuilleDetail = ({ feuille, onClose }: { feuille: FeuilleRoute, onClose: (
 
   return (
     <div className="modal-backdrop animate-fadeIn" onClick={onClose} style={{ backdropFilter: 'blur(12px)', background: 'rgba(0,0,0,0.85)' }}>
-      <div className="card glass-effect animate-modalUp" style={{ maxWidth: '900px', width: '95%', padding: '3.5rem', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '40px' }} onClick={e => e.stopPropagation()}>
+      <div className="modal-content modal-nexus modal-nexus-wide card glass-effect animate-modalUp" style={{ maxWidth: '900px', width: '95%', padding: 0, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '32px', position: 'relative' }} onClick={e => e.stopPropagation()}>
+        <div className="modal-nexus-accent" />
+        <div style={{ padding: '3rem 3.5rem 3.5rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
           <div>
             <h2 style={{ fontSize: '2rem', fontWeight: 950, margin: 0, color: 'white', letterSpacing: '-0.02em' }}>Tournée Opérationnelle</h2>
@@ -323,6 +326,7 @@ const FeuilleDetail = ({ feuille, onClose }: { feuille: FeuilleRoute, onClose: (
             </table>
           </div>
         )}
+        </div>
       </div>
     </div>
   );

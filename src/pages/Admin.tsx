@@ -6,6 +6,12 @@ import { Plus, Trash2, Users as UsersIcon, Map as MapIcon, CreditCard, CheckCirc
 import { monerooService } from '../services/monerooService';
 import { useToast } from '../contexts/ToastContext';
 import { insforge } from '../lib/insforge';
+import {
+  extractUserIdFromAuthPayload,
+  getUserIdFromSessionIfEmailMatches,
+  restoreAdminSession,
+  snapshotAdminSession,
+} from '../lib/insforgeSession';
 import { useAuth } from '../contexts/AuthContext';
 import { useSaas } from '../saas/SaasProvider';
 import { NexusModuleFrame } from '../components/layout/NexusModuleFrame';
@@ -206,26 +212,7 @@ const UsersManager = ({ showToast, tenantId }: { showToast: any, tenantId: strin
     setLoading(true);
     try {
       if (editingId === 'new') {
-        const { data: sessionData } = await insforge.auth.getCurrentUser();
-        const adminUserId = (sessionData as any)?.user?.id as string | undefined;
-        const adminAccessToken = (sessionData as any)?.session?.access_token as string | undefined;
-        const adminRefreshToken = (sessionData as any)?.session?.refresh_token as string | undefined;
-
-        const restoreAdminSession = async () => {
-          if (!adminAccessToken || !adminRefreshToken) return;
-          await (insforge.auth as any).setSession({
-            access_token: adminAccessToken,
-            refresh_token: adminRefreshToken,
-          });
-          const { data: check } = await insforge.auth.getCurrentUser();
-          const nowId = (check as any)?.user?.id;
-          if (adminUserId && nowId && nowId !== adminUserId) {
-            await (insforge.auth as any).setSession({
-              access_token: adminAccessToken,
-              refresh_token: adminRefreshToken,
-            });
-          }
-        };
+        const adminSnap = snapshotAdminSession(insforge);
 
         const { data: authData, error: signUpError } = await insforge.auth.signUp({
           email: email as string,
@@ -251,15 +238,26 @@ const UsersManager = ({ showToast, tenantId }: { showToast: any, tenantId: strin
         }
 
         let userId =
-          authData?.user?.id ||
-          (authData as any)?.session?.user?.id ||
-          '';
+          extractUserIdFromAuthPayload(authData) ||
+          getUserIdFromSessionIfEmailMatches(insforge, email);
 
-        await restoreAdminSession();
+        if (!userId) {
+          const { data: signInData, error: signInErr } = await insforge.auth.signInWithPassword({
+            email: email as string,
+            password: password as string,
+          });
+          if (!signInErr && signInData) {
+            userId =
+              extractUserIdFromAuthPayload(signInData) ||
+              getUserIdFromSessionIfEmailMatches(insforge, email);
+          }
+        }
+
+        restoreAdminSession(insforge, adminSnap);
 
         if (!userId) {
           throw new Error(
-            "Compte non finalisé : aucun identifiant retourné par l'authentification (vérifiez la confirmation e-mail côté plateforme)."
+            "Impossible d'obtenir l'identifiant du nouveau compte. Dans la console InsForge, désactivez la confirmation e-mail obligatoire pour les inscriptions, ou assurez-vous que l'inscription renvoie bien un utilisateur."
           );
         }
 
@@ -276,7 +274,7 @@ const UsersManager = ({ showToast, tenantId }: { showToast: any, tenantId: strin
           userId
         );
 
-        await restoreAdminSession();
+        restoreAdminSession(insforge, adminSnap);
       } else if (editingId) {
         // Clean form data for update: remove fields that shouldn't be sent
         const updateData: any = {

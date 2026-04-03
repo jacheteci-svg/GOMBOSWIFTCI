@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { getCommandesByFeuille } from '../services/logistiqueService';
 import { getCloturedFeuilles } from '../services/caisseService';
 import { Calendar, Search, Truck, X, Printer } from 'lucide-react';
@@ -6,6 +7,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { FeuilleRoute, Commande } from '../types';
 import { generateDeliverySlipPDF } from '../services/pdfService';
+import { tenantToPdfBranding } from '../lib/tenantPdfBranding';
 import { useToast } from '../contexts/ToastContext';
 import { useAuth } from '../contexts/AuthContext';
 import { reopenFeuilleRoute } from '../services/caisseService';
@@ -155,22 +157,23 @@ const ReviewModal = ({ feuille, commandes, loading, onClose, onRefresh, showToas
   const { tenant } = useSaas();
   const { currentUser } = useAuth();
   const isAdmin = currentUser?.role === 'ADMIN' || currentUser?.role === 'GESTIONNAIRE';
+  const [reopenConfirm, setReopenConfirm] = useState(false);
 
   const handleReprint = async () => {
     try {
-      await generateDeliverySlipPDF(feuille, commandes);
+      await generateDeliverySlipPDF(feuille, commandes, tenantToPdfBranding(tenant));
       showToast("Réimpression lancée.", "success");
     } catch (e) {
       showToast("Erreur lors de la génération PDF.", "error");
     }
   };
 
-  const handleReopen = async () => {
-    if (!window.confirm("Êtes-vous sûr de vouloir ré-ouvrir cette feuille ? Elle reviendra en caisse pour traitement.")) return;
+  const executeReopen = async () => {
     try {
       if (!tenant?.id) return;
       await reopenFeuilleRoute(tenant.id, feuille.id);
       showToast("Feuille ré-ouverte avec succès.", "success");
+      setReopenConfirm(false);
       onRefresh();
       onClose();
     } catch (e) {
@@ -182,10 +185,19 @@ const ReviewModal = ({ feuille, commandes, loading, onClose, onRefresh, showToas
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-content card glass-effect" onClick={e => e.stopPropagation()} style={{ maxWidth: '900px', padding: 0 }}>
-        
+      <ConfirmDialog
+        open={reopenConfirm}
+        title="Ré-ouvrir cette feuille ?"
+        message="Elle reviendra en caisse pour traitement. À utiliser uniquement en cas d'erreur de clôture."
+        variant="danger"
+        confirmLabel="Ré-ouvrir"
+        onCancel={() => setReopenConfirm(false)}
+        onConfirm={executeReopen}
+      />
+      <div className="modal-content modal-nexus modal-nexus-wide card glass-effect" onClick={e => e.stopPropagation()} style={{ maxWidth: '900px', padding: 0, overflow: 'hidden' }}>
+        <div className="modal-nexus-accent" />
         {/* Header Modal */}
-        <div style={{ padding: '2rem', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', borderRadius: '24px 24px 0 0' }}>
+        <div style={{ padding: '2rem', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'linear-gradient(180deg, rgba(6,182,212,0.08) 0%, rgba(15,23,42,0.4) 100%)' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.4rem' }}>
               <Truck size={24} color="var(--primary)" />
@@ -276,14 +288,14 @@ const ReviewModal = ({ feuille, commandes, loading, onClose, onRefresh, showToas
           )}
         </div>
 
-        <div style={{ padding: '1.5rem 2rem', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-           <button className="btn btn-outline" onClick={onClose}>Fermer</button>
+        <div className="modal-footer-bar">
+           <button type="button" className="btn btn-outline" onClick={onClose}>Fermer</button>
            {isAdmin && (
-             <button className="btn btn-outline" style={{ borderColor: '#ef4444', color: '#ef4444' }} onClick={handleReopen}>
+             <button type="button" className="btn btn-outline" style={{ borderColor: '#f87171', color: '#fecaca' }} onClick={() => setReopenConfirm(true)}>
                Ré-ouvrir la Feuille
              </button>
            )}
-           <button className="btn btn-primary" onClick={handleReprint}>
+           <button type="button" className="btn btn-primary" onClick={handleReprint}>
              <Printer size={18} /> Ré-imprimer
            </button>
         </div>

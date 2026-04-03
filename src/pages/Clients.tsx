@@ -221,7 +221,7 @@ export const Clients = () => {
         <div className="modal-backdrop" onClick={() => setSelectedClient(null)}>
           <div className="modal-content" style={{ maxWidth: '800px', padding: 0, overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
             {/* Modal Header */}
-            <div style={{ padding: '2rem', borderBottom: '1px solid #f1f5f9', background: '#f8fafc', position: 'relative' }}>
+            <div className="modal-panel-light" style={{ padding: '2rem', borderBottom: '1px solid #e2e8f0', background: '#f8fafc', position: 'relative' }}>
                <button onClick={() => setSelectedClient(null)} style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'white', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '0.5rem', cursor: 'pointer' }}>
                  <X size={20} />
                </button>
@@ -240,7 +240,7 @@ export const Clients = () => {
             </div>
 
             {/* Modal Body */}
-            <div style={{ padding: '2rem', maxHeight: '60vh', overflowY: 'auto' }}>
+            <div className="modal-panel-light" style={{ padding: '2rem', maxHeight: '60vh', overflowY: 'auto', background: '#ffffff' }}>
                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
                   <div style={{ padding: '1.25rem', borderRadius: '16px', background: '#f1f5f9' }}>
                     <div style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Volume Total</div>
@@ -293,8 +293,8 @@ export const Clients = () => {
                 </div>
             </div>
 
-            <div style={{ padding: '1.5rem 2rem', borderTop: '1px solid #f1f5f9', textAlign: 'right' }}>
-               <button className="btn btn-primary" onClick={() => setSelectedClient(null)}>Fermer l'Analyse</button>
+            <div className="modal-footer-bar" style={{ justifyContent: 'flex-end' }}>
+               <button type="button" className="btn btn-primary" onClick={() => setSelectedClient(null)}>Fermer l'Analyse</button>
             </div>
           </div>
         </div>

@@ -5,6 +5,7 @@ import { CommandeForm } from '../components/commandes/CommandeForm';
 import { CommandeDetails } from '../components/commandes/CommandeDetails';
 import { subscribeToCommandes, deleteCommande, getCommandeWithLines, bulkUpdateCommandeStatus } from '../services/commandeService';
 import { generateInvoicePDF } from '../services/pdfService';
+import { tenantToPdfBranding } from '../lib/tenantPdfBranding';
 import type { Commande } from '../types';
 import { useToast } from '../contexts/ToastContext';
 import { useSaas } from '../saas/SaasProvider';
@@ -26,7 +27,7 @@ export const Commandes = () => {
       if (!tenant?.id) return;
       showToast("Génération de la facture...", "info");
       const fullCommande = await getCommandeWithLines(tenant.id, commande.id);
-      generateInvoicePDF(fullCommande);
+      await generateInvoicePDF(fullCommande, tenantToPdfBranding(tenant));
       showToast("Facture générée !", "success");
     } catch (error) {
       console.error(error);

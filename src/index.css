@@ -1146,6 +1146,150 @@ tr:hover td {
   animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Variante Nexus : bordure accent, lisibilité, alignée sur --primary */
+.modal-content.modal-nexus {
+  max-width: min(520px, 100vw - 2rem);
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(6, 182, 212, 0.1);
+}
+
+.modal-nexus-accent {
+  height: 4px;
+  width: 100%;
+  background: linear-gradient(90deg, hsl(var(--p-h), var(--p-s), var(--p-l)), #3b82f6);
+  opacity: 0.95;
+}
+
+.modal-nexus-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: var(--text-main);
+  margin: 0;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+.modal-nexus-body {
+  margin: 0.5rem 0 0;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.modal-nexus-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  padding: 1.25rem 1.5rem 1.75rem;
+  background: rgba(0, 0, 0, 0.15);
+  border-top: 1px solid var(--glass-border);
+}
+
+.modal-nexus-btn {
+  min-height: 48px;
+  padding: 0 1.25rem;
+  border-radius: 14px;
+  font-weight: 800;
+}
+
+.modal-nexus-btn-danger {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  color: #fff;
+  border: none;
+}
+
+.modal-nexus-icon[data-variant="danger"] {
+  background: rgba(239, 68, 68, 0.1);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.modal-nexus-icon[data-variant="default"] {
+  background: rgba(6, 182, 212, 0.1);
+  color: var(--primary);
+  border: 1px solid rgba(6, 182, 212, 0.2);
+}
+
+/* Panneaux larges (formulaires) : même traitement, padding interne */
+.modal-content.modal-nexus.modal-nexus-wide {
+  max-width: min(920px, 100vw - 1.5rem);
+  padding: 0;
+  border-radius: var(--radius-xl);
+}
+
+/*
+ * Surfaces claires dans les modales / popovers :
+ * le thème global définit --text-main très clair pour le fond sombre ;
+ * sur fond blanc / gris, on réinjecte des couleurs lisibles.
+ */
+.modal-panel-light {
+  --text-main: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  color: #0f172a;
+}
+
+.modal-panel-light .form-label {
+  color: #334155;
+}
+
+.modal-panel-light .form-input,
+.modal-panel-light .form-select,
+.modal-panel-light textarea.form-input {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+.modal-panel-light .form-input:focus,
+.modal-panel-light .form-select:focus,
+.modal-panel-light textarea.form-input:focus {
+  border-color: var(--primary) !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 3px var(--primary-glow) !important;
+  outline: none;
+}
+
+.modal-panel-light .form-input::placeholder,
+.modal-panel-light textarea.form-input::placeholder {
+  color: #94a3b8;
+}
+
+.modal-panel-light .btn-outline {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #0f172a;
+}
+
+.modal-panel-light .btn-outline:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: rgba(6, 182, 212, 0.08);
+}
+
+/* Pied de page d’actions : fond sombre = boutons outline (texte clair) lisibles */
+.modal-footer-bar {
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid var(--glass-border);
+  background: rgba(0, 0, 0, 0.28);
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .modal-footer-bar {
+    padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 @media (max-width: 640px) {
   .modal-backdrop {
     padding: 0;

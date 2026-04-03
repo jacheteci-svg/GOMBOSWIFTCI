@@ -208,7 +208,13 @@ export const CommandeForm = ({ onClose, onSave }: { onClose: () => void, onSave:
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-content card glass-effect" style={{ maxWidth: '900px', padding: '3rem', borderRadius: '32px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }} onClick={e => e.stopPropagation()}>
+      <div
+        className="modal-content modal-nexus modal-nexus-wide card glass-effect"
+        style={{ maxWidth: '900px', padding: 0, overflow: 'hidden', borderRadius: '28px', position: 'relative' }}
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="modal-nexus-accent" />
+        <div style={{ padding: '2.5rem 3rem 3rem' }}>
         <button 
           onClick={onClose} 
           style={{ 
@@ -355,6 +361,7 @@ export const CommandeForm = ({ onClose, onSave }: { onClose: () => void, onSave:
             </button>
           </div>
         </form>
+        </div>
       </div>
     </div>
   );

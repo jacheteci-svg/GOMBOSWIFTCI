@@ -24,6 +24,9 @@ dist-ssr
 *.sw?
 .vercel
 
+# Copie locale du dépôt imbriquée (à ne pas versionner)
+/GOMBOSWIFTCI/
+
 # InsForge & AI agent skills
 .insforge
 .agent

@@ -232,10 +232,11 @@ export const Livraison = () => {
               {statusAction === 'livree' ? '🎉 Bravo ! Colis Livré' : '⚠️ Signalement d\'échec'}
             </h3>
             
+            <div className="modal-panel-light" style={{ padding: '1.25rem', borderRadius: '16px', background: '#f1f5f9', border: '1px solid #e2e8f0', marginBottom: '0.5rem' }}>
             {statusAction === 'livree' && (
               <div className="form-group">
                 <label className="form-label" style={{ fontWeight: 700 }}>Méthode d'encaissement</label>
-                <select className="form-select" value={modeForm} onChange={e => setModeForm(e.target.value)} style={{ background: '#f8fafc', height: '48px', fontWeight: 600 }}>
+                <select className="form-select" value={modeForm} onChange={e => setModeForm(e.target.value)} style={{ height: '48px', fontWeight: 600 }}>
                   <option value="Cash">Cash (Espèces)</option>
                   <option value="Mobile Money">Mobile Money (OM/Momo)</option>
                   <option value="Carte">Carte / Autre</option>
@@ -243,17 +244,18 @@ export const Livraison = () => {
               </div>
             )}
 
-            <div className="form-group">
+            <div className="form-group" style={{ marginBottom: 0 }}>
               <label className="form-label" style={{ fontWeight: 700 }}>Note du terrain</label>
               <textarea 
                 className="form-input" 
                 rows={3} 
                 required={statusAction === 'retour_livreur'}
-                style={{ background: '#f8fafc', padding: '1rem', borderRadius: '16px' }}
+                style={{ padding: '1rem', borderRadius: '16px' }}
                 value={noteForm}
                 onChange={e => setNoteForm(e.target.value)}
                 placeholder={statusAction === 'retour_livreur' ? "Ex: Client injoignable après 3 tentatives..." : "Commentaire additionnel (facultatif)"}
               />
+            </div>
             </div>
 
             <div style={{ display: 'flex', gap: '1rem', marginTop: '2.5rem' }}>
