@@ -27,6 +27,9 @@ import {
   Sparkles,
   LayoutDashboard,
   ArrowUpRight,
+  Activity,
+  Target,
+  Medal,
 } from 'lucide-react';
 
 type TabType = 'logistique' | 'call-center' | 'inventaire';
@@ -71,6 +74,55 @@ function sortHint(tab: TabType): string {
     default:
       return '';
   }
+}
+
+function StaffKpiCard({
+  accent,
+  icon,
+  label,
+  value,
+  sub,
+}: {
+  accent: 'cyan' | 'emerald' | 'violet' | 'amber' | 'rose';
+  icon: ReactNode;
+  label: string;
+  value: ReactNode;
+  sub: string;
+}) {
+  const ring =
+    accent === 'cyan'
+      ? 'from-cyan-500/25 to-transparent'
+      : accent === 'emerald'
+        ? 'from-emerald-500/20 to-transparent'
+        : accent === 'violet'
+          ? 'from-violet-500/20 to-transparent'
+          : accent === 'amber'
+            ? 'from-amber-500/20 to-transparent'
+            : 'from-rose-500/18 to-transparent';
+  return (
+    <div className="group relative overflow-hidden rounded-2xl border border-white/[0.07] p-4 sm:p-5 transition-transform duration-300 hover:-translate-y-0.5 hover:border-cyan-500/25">
+      <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${ring} opacity-80`} aria-hidden />
+      <div className="relative flex flex-col gap-3 h-full">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-slate-900/60 text-cyan-300 shadow-inner">
+            {icon}
+          </div>
+          <ArrowUpRight
+            size={16}
+            className="text-slate-600 opacity-0 transition-opacity group-hover:opacity-100"
+            strokeWidth={2}
+          />
+        </div>
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">{label}</p>
+          <p className="mt-1.5 text-xl sm:text-2xl font-bold tracking-tight text-white tabular-nums leading-none">
+            {value}
+          </p>
+          <p className="mt-1.5 text-[11px] text-slate-500 leading-snug">{sub}</p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDashboardProps) => {
@@ -148,7 +200,7 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
   );
 
   const panelClass =
-    'rounded-[12px] border border-white/[0.08] overflow-hidden bg-[var(--surface)] shadow-[var(--shadow-sm)]';
+    'rounded-2xl border border-white/[0.08] overflow-hidden bg-[var(--surface)] shadow-[var(--shadow-sm)]';
 
   const logisticsSorted = useMemo(() => {
     const data = stats.logistique as any[];
@@ -167,21 +219,217 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
     );
   }, [stats.inventaire]);
 
+  const staffKpiBundle = useMemo(() => {
+    if (isSuperAdmin) return null;
+    const log = logisticsSorted;
+    const cc = callCenterSorted;
+    const inv = inventorySorted;
+
+    const logSorties = log.reduce((a, s: any) => a + (Number(s.sorties) || 0), 0);
+    const logReuss = log.reduce((a, s: any) => a + (Number(s.reussies) || 0), 0);
+    const logAvg = logSorties > 0 ? Math.round((logReuss / logSorties) * 100) : 0;
+    const logCa = log.reduce((a, s: any) => a + (Number(s.ca_frais) || 0), 0);
+
+    const ccTh = cc.reduce((a, s: any) => a + (Number(s.total_handled) || 0), 0);
+    const ccTd = cc.reduce((a, s: any) => a + (Number(s.total_delivered) || 0), 0);
+    const ccVal = cc.reduce((a, s: any) => a + (Number(s.total_validations) || 0), 0);
+    const ccAvg = ccTh > 0 ? Math.round((ccTd / ccTh) * 100) : 0;
+
+    const invN = inv.length;
+    const invAlert = inv.filter((i: any) => i.stock_actuel <= (i.stock_minimum || 5)).length;
+    const invRotAvg =
+      invN > 0
+        ? Math.round(inv.reduce((a, i: any) => a + (Number(i.rotation_index) || 0), 0) / invN)
+        : 0;
+    const invCrit = inv.filter((i: any) => (Number(i.stock_actuel) || 0) <= 0).length;
+
+    return {
+      logistique: [
+        {
+          key: 'sorties',
+          label: 'Sorties',
+          value: logSorties.toLocaleString('fr-FR'),
+          sub: 'Missions sur la période',
+          accent: 'cyan' as const,
+          Icon: Truck,
+        },
+        {
+          key: 'livrés',
+          label: 'Livrés',
+          value: logReuss.toLocaleString('fr-FR'),
+          sub: 'Colis délivrés avec succès',
+          accent: 'emerald' as const,
+          Icon: Target,
+        },
+        {
+          key: 'taux',
+          label: 'Taux succès',
+          value: (
+            <span>
+              {logAvg}
+              <span className="text-cyan-400/90">%</span>
+            </span>
+          ),
+          sub: 'Moyenne équipe (pondérée)',
+          accent: 'violet' as const,
+          Icon: TrendingUp,
+        },
+        {
+          key: 'ca',
+          label: 'Gains livreurs',
+          value: (
+            <span className="text-[1.15rem] sm:text-2xl">
+              {logCa.toLocaleString('fr-FR')}{' '}
+              <span className="text-xs font-semibold text-slate-400">CFA</span>
+            </span>
+          ),
+          sub: 'CA frais sur livraisons',
+          accent: 'amber' as const,
+          Icon: Banknote,
+        },
+      ],
+      'call-center': [
+        {
+          key: 'dossiers',
+          label: 'Dossiers',
+          value: ccTh.toLocaleString('fr-FR'),
+          sub: 'Traités par les agents',
+          accent: 'cyan' as const,
+          Icon: PhoneCall,
+        },
+        {
+          key: 'valid',
+          label: 'Validations',
+          value: ccVal.toLocaleString('fr-FR'),
+          sub: 'Validations enregistrées',
+          accent: 'violet' as const,
+          Icon: Activity,
+        },
+        {
+          key: 'livr',
+          label: 'Livrées',
+          value: ccTd.toLocaleString('fr-FR'),
+          sub: 'Commandes finalisées',
+          accent: 'emerald' as const,
+          Icon: Package,
+        },
+        {
+          key: 'conv',
+          label: 'Conversion',
+          value: (
+            <span>
+              {ccAvg}
+              <span className="text-cyan-400/90">%</span>
+            </span>
+          ),
+          sub: 'Moyenne centre d’appel',
+          accent: 'amber' as const,
+          Icon: TrendingUp,
+        },
+      ],
+      inventaire: [
+        {
+          key: 'refs',
+          label: 'Références',
+          value: invN.toLocaleString('fr-FR'),
+          sub: 'Articles suivis',
+          accent: 'cyan' as const,
+          Icon: Package,
+        },
+        {
+          key: 'alert',
+          label: 'Alertes stock',
+          value: invAlert.toLocaleString('fr-FR'),
+          sub: 'Sous le seuil minimum',
+          accent: 'amber' as const,
+          Icon: Lightbulb,
+        },
+        {
+          key: 'rot',
+          label: 'Rotation moy.',
+          value: (
+            <span>
+              {invRotAvg}
+              <span className="text-cyan-400/90">%</span>
+            </span>
+          ),
+          sub: 'Indice moyen sur le catalogue',
+          accent: 'violet' as const,
+          Icon: TrendingUp,
+        },
+        {
+          key: 'rupt',
+          label: 'Ruptures',
+          value: invCrit.toLocaleString('fr-FR'),
+          sub: 'Stock à zéro',
+          accent: 'rose' as const,
+          Icon: Target,
+        },
+      ],
+    };
+  }, [isSuperAdmin, logisticsSorted, callCenterSorted, inventorySorted]);
+
   const renderLogistics = () => {
     const data = logisticsSorted;
     const totalSorties = data.reduce((acc: number, s: any) => acc + (Number(s.sorties) || 0), 0);
     const totalReussies = data.reduce((acc: number, s: any) => acc + (Number(s.reussies) || 0), 0);
     const avgSuccess = totalSorties > 0 ? Math.round((totalReussies / totalSorties) * 100) : 0;
+    const top = data[0];
 
     return (
-      <div className="space-y-6">
-        {/* Tableau — maquette : détails puis graphique */}
+      <div className="space-y-6 lg:space-y-8">
+        {top && (
+          <div
+            className="relative overflow-hidden rounded-2xl border border-cyan-500/30 p-5 sm:p-6"
+            style={{
+              background:
+                'linear-gradient(135deg, rgba(6, 182, 212, 0.12) 0%, rgba(15, 23, 42, 0.98) 50%, #0f172a 100%)',
+              boxShadow: '0 0 0 1px rgba(6, 182, 212, 0.1), 0 25px 50px -12px rgba(0,0,0,0.45)',
+            }}
+          >
+            <div className="absolute -right-6 -top-6 h-28 w-28 rounded-full bg-cyan-400/15 blur-3xl" aria-hidden />
+            <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-amber-400/35 bg-amber-500/15 text-amber-200">
+                  <Medal size={24} strokeWidth={2} />
+                </div>
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-cyan-400/95">
+                    Top livreur · période
+                  </p>
+                  <p className="mt-1 text-xl font-bold text-white tracking-tight">{top.nom}</p>
+                  <p className="text-sm text-slate-400 mt-0.5">
+                    {top.success_rate}% réussite · {Number(top.sorties) || 0} sorties
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-3 sm:gap-4">
+                <div className="rounded-xl bg-black/25 border border-white/5 px-4 py-3 min-w-[120px]">
+                  <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Livrés</p>
+                  <p className="text-lg font-bold tabular-nums mt-1" style={{ color: C.livres }}>
+                    {top.reussies}
+                  </p>
+                </div>
+                <div className="rounded-xl bg-black/25 border border-white/5 px-4 py-3 min-w-[120px]">
+                  <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Gains</p>
+                  <p className="text-lg font-bold text-white tabular-nums mt-1">
+                    {top.ca_frais != null ? Number(top.ca_frais).toLocaleString('fr-FR') : '—'}{' '}
+                    <span className="text-xs text-slate-500">CFA</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className={panelClass}>
-          <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-white/[0.06] bg-white/[0.02]">
-            <h2 className="text-lg font-bold text-[var(--text-main)]" style={{ fontFamily: 'Outfit, sans-serif' }}>
-              Détails des performances :{' '}
-              <span style={{ color: C.primary }}>Logistique</span>
-            </h2>
+          <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-white/[0.06] bg-gradient-to-r from-cyan-950/25 to-transparent">
+            <div>
+              <h2 className="text-lg font-bold text-[var(--text-main)]" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                Détail <span style={{ color: C.primary }}>logistique</span>
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">Livreurs · volumes et résultats</p>
+            </div>
             <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
               <Lightbulb size={16} className="text-amber-400/90 shrink-0" strokeWidth={2} />
               {sortHint('logistique')}
@@ -190,10 +438,10 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm min-w-[720px]">
               <thead>
-                <tr className="text-[10px] uppercase tracking-wider text-slate-500 border-b border-white/[0.06] bg-white/[0.03]">
-                  <th className="px-5 py-3.5 font-semibold">Livreur</th>
-                  <th className="px-3 py-3.5 font-semibold text-center">Sorties</th>
-                  <th className="px-3 py-3.5 font-semibold text-center" style={{ color: C.livres }}>
+                <tr className="text-[10px] uppercase tracking-[0.08em] text-slate-500 border-b border-white/[0.06] bg-black/20">
+                  <th className="px-5 py-3.5 font-bold">Livreur</th>
+                  <th className="px-3 py-3.5 font-bold text-center">Sorties</th>
+                  <th className="px-3 py-3.5 font-bold text-center" style={{ color: C.livres }}>
                     Livrés
                   </th>
                   <th className="px-3 py-3.5 font-semibold text-center" style={{ color: C.retours }}>
@@ -210,7 +458,7 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
               </thead>
               <tbody className="divide-y divide-white/[0.05]">
                 {data.map((s: any) => (
-                    <tr key={s.livreur_id} className="hover:bg-white/[0.02] transition-colors">
+                    <tr key={s.livreur_id} className="hover:bg-cyan-500/[0.04] transition-colors border-b border-white/[0.04]">
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
                           <div
@@ -255,15 +503,23 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
           )}
         </div>
 
-        {/* Graphique — pleine largeur, barres type maquette (succès %) */}
         <div className={`${panelClass} p-5 md:p-6`}>
-          <h3 className="text-base font-bold text-[var(--text-main)] mb-1" style={{ fontFamily: 'Outfit, sans-serif' }}>
-            Impact livraison (succès %)
-          </h3>
-          <p className="text-xs text-slate-500 mb-6">Comparaison par livreur — échelle 0 à 100</p>
+          <div className="mb-6">
+            <h3 className="text-base font-bold text-white mb-1 flex items-center gap-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
+              <Activity size={18} className="text-cyan-400" />
+              Efficacité livraison
+            </h3>
+            <p className="text-xs text-slate-500">Taux de succès par livreur (0–100 %)</p>
+          </div>
           <div style={{ height: 320 }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data} margin={{ top: 12, right: 8, left: 4, bottom: 8 }}>
+                <defs>
+                  <linearGradient id="staffLogBarGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#34d399" />
+                    <stop offset="100%" stopColor="#059669" />
+                  </linearGradient>
+                </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.06)" />
                 <XAxis
                   dataKey="nom"
@@ -279,13 +535,19 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
                   width={36}
                 />
                 <Tooltip {...chartTooltip} formatter={(v) => [`${v ?? 0}%`, 'Succès']} />
-                <Bar dataKey="success_rate" fill={C.livres} radius={[6, 6, 0, 0]} maxBarSize={48} />
+                <Bar
+                  dataKey="success_rate"
+                  fill="url(#staffLogBarGrad)"
+                  radius={[8, 8, 0, 0]}
+                  maxBarSize={48}
+                  animationDuration={500}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
-          <div className="mt-4 pt-4 border-t border-white/[0.06] flex justify-between items-center text-sm">
-            <span className="text-slate-500">Moyenne équipe</span>
-            <span className="font-bold tabular-nums" style={{ color: C.primary }}>
+          <div className="mt-4 pt-4 border-t border-white/[0.06] flex flex-wrap justify-between items-center gap-3 text-sm">
+            <span className="text-slate-500">Moyenne équipe (pondérée)</span>
+            <span className="inline-flex items-center gap-2 rounded-full border border-cyan-500/25 bg-cyan-500/10 px-4 py-1.5 font-bold tabular-nums text-cyan-200">
               {avgSuccess}%
             </span>
           </div>
@@ -299,15 +561,59 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
     const th = data.reduce((acc: number, s: any) => acc + (Number(s.total_handled) || 0), 0);
     const td = data.reduce((acc: number, s: any) => acc + (Number(s.total_delivered) || 0), 0);
     const avgConv = th > 0 ? Math.round((td / th) * 100) : 0;
+    const top = data[0];
 
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 lg:space-y-8">
+        {top && (
+          <div
+            className="relative overflow-hidden rounded-2xl border border-violet-500/25 p-5 sm:p-6"
+            style={{
+              background:
+                'linear-gradient(135deg, rgba(139, 92, 246, 0.12) 0%, rgba(15, 23, 42, 0.98) 45%, #0f172a 100%)',
+              boxShadow: '0 0 0 1px rgba(139, 92, 246, 0.12), 0 25px 50px -12px rgba(0,0,0,0.45)',
+            }}
+          >
+            <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-violet-500/15 blur-3xl" aria-hidden />
+            <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-violet-400/35 bg-violet-500/20 text-violet-200">
+                  <Medal size={24} strokeWidth={2} />
+                </div>
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-violet-300/95">
+                    Top agent · conversion
+                  </p>
+                  <p className="mt-1 text-xl font-bold text-white tracking-tight">{top.staff_name || 'Agent'}</p>
+                  <p className="text-sm text-slate-400 mt-0.5">
+                    {top.success_rate}% conversion · {top.total_handled} dossiers
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <div className="rounded-xl bg-black/25 border border-white/5 px-4 py-3 min-w-[110px]">
+                  <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Livrées</p>
+                  <p className="text-lg font-bold tabular-nums mt-1" style={{ color: C.livres }}>
+                    {top.total_delivered}
+                  </p>
+                </div>
+                <div className="rounded-xl bg-black/25 border border-white/5 px-4 py-3 min-w-[110px]">
+                  <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Validations</p>
+                  <p className="text-lg font-bold text-slate-100 tabular-nums mt-1">{top.total_validations}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className={panelClass}>
-          <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-white/[0.06] bg-white/[0.02]">
-            <h2 className="text-lg font-bold text-[var(--text-main)]" style={{ fontFamily: 'Outfit, sans-serif' }}>
-              Détails des performances :{' '}
-              <span style={{ color: C.primary }}>Centre d&apos;appel</span>
-            </h2>
+          <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-white/[0.06] bg-gradient-to-r from-violet-950/30 to-transparent">
+            <div>
+              <h2 className="text-lg font-bold text-[var(--text-main)]" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                Détail <span style={{ color: C.primary }}>centre d&apos;appel</span>
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">Agents · dossiers et conversion</p>
+            </div>
             <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
               <Lightbulb size={16} className="text-amber-400/90 shrink-0" strokeWidth={2} />
               {sortHint('call-center')}
@@ -316,8 +622,8 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm min-w-[640px]">
               <thead>
-                <tr className="text-[10px] uppercase tracking-wider text-slate-500 border-b border-white/[0.06] bg-white/[0.03]">
-                  <th className="px-5 py-3.5 font-semibold">Agent</th>
+                <tr className="text-[10px] uppercase tracking-[0.08em] text-slate-500 border-b border-white/[0.06] bg-black/20">
+                  <th className="px-5 py-3.5 font-bold">Agent</th>
                   <th className="px-3 py-3.5 font-semibold text-center">Dossiers</th>
                   <th className="px-3 py-3.5 font-semibold text-center">Validations</th>
                   <th className="px-3 py-3.5 font-semibold text-center" style={{ color: C.livres }}>
@@ -330,10 +636,10 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
               </thead>
               <tbody className="divide-y divide-white/[0.05]">
                 {data.map((agent: any) => (
-                  <tr key={agent.agent_id} className="hover:bg-white/[0.02]">
+                  <tr key={agent.agent_id} className="hover:bg-violet-500/[0.05] transition-colors border-b border-white/[0.04]">
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-violet-500/20 flex items-center justify-center text-violet-300 font-bold text-sm shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/40 to-cyan-500/20 flex items-center justify-center text-violet-100 font-bold text-sm shrink-0 border border-white/10">
                           {(agent.staff_name || 'A').charAt(0)}
                         </div>
                         <span className="font-semibold text-slate-100">{agent.staff_name || 'Agent'}</span>
@@ -358,15 +664,20 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
         </div>
 
         <div className={`${panelClass} p-5 md:p-6`}>
-          <h3 className="text-base font-bold text-[var(--text-main)] mb-4" style={{ fontFamily: 'Outfit, sans-serif' }}>
-            Synthèse conversion (%)
-          </h3>
+          <div className="mb-5">
+            <h3 className="text-base font-bold text-white mb-1 flex items-center gap-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
+              <PhoneCall size={18} className="text-cyan-400" />
+              Courbe de conversion
+            </h3>
+            <p className="text-xs text-slate-500">Taux de conversion par agent</p>
+          </div>
           <div style={{ height: 280 }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data} margin={{ top: 8, right: 8, left: 4, bottom: 8 }}>
                 <defs>
                   <linearGradient id="barCallGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#06b6d4" />
+                    <stop offset="0%" stopColor="#22d3ee" />
+                    <stop offset="55%" stopColor="#06b6d4" />
                     <stop offset="100%" stopColor="#3b82f6" />
                   </linearGradient>
                 </defs>
@@ -404,17 +715,59 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
   const renderInventory = () => {
     const data = inventorySorted;
     const itemsAlert = data.filter((i: any) => i.stock_actuel <= (i.stock_minimum || 5)).length;
+    const top = data[0];
 
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 lg:space-y-8">
+        {top && (
+          <div
+            className="relative overflow-hidden rounded-2xl border border-emerald-500/25 p-5 sm:p-6"
+            style={{
+              background:
+                'linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(15, 23, 42, 0.98) 50%, #0f172a 100%)',
+              boxShadow: '0 0 0 1px rgba(16, 185, 129, 0.12), 0 25px 50px -12px rgba(0,0,0,0.45)',
+            }}
+          >
+            <div className="absolute -right-6 -bottom-10 h-36 w-36 rounded-full bg-emerald-500/12 blur-3xl" aria-hidden />
+            <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-emerald-400/35 bg-emerald-500/15 text-emerald-200">
+                  <Package size={24} strokeWidth={2} />
+                </div>
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-300/95">
+                    Article le plus dynamique
+                  </p>
+                  <p className="mt-1 text-xl font-bold text-white tracking-tight">{top.nom}</p>
+                  <p className="text-sm text-slate-400 mt-0.5">
+                    Rotation {top.rotation_index}% · SKU {top.sku}
+                  </p>
+                </div>
+              </div>
+              <div className="rounded-xl bg-black/25 border border-white/5 px-4 py-3 min-w-[140px]">
+                <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Stock actuel</p>
+                <p
+                  className={`text-2xl font-bold tabular-nums mt-1 ${
+                    top.stock_actuel <= (top.stock_minimum || 5) ? 'text-amber-300' : 'text-emerald-300'
+                  }`}
+                >
+                  {top.stock_actuel}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className={panelClass}>
-          <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-white/[0.06] bg-white/[0.02]">
-            <h2 className="text-lg font-bold text-[var(--text-main)]" style={{ fontFamily: 'Outfit, sans-serif' }}>
-              Détails des performances :{' '}
-              <span style={{ color: C.primary }}>Inventaire</span>
-            </h2>
+          <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-white/[0.06] bg-gradient-to-r from-emerald-950/25 to-transparent">
+            <div>
+              <h2 className="text-lg font-bold text-[var(--text-main)]" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                Détail <span style={{ color: C.primary }}>inventaire</span>
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">Stocks, seuils et rotation</p>
+            </div>
             <div className="flex items-center gap-3">
-              <span className="text-xs font-semibold text-slate-500 px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.06]">
+              <span className="text-xs font-bold text-slate-300 px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/[0.08]">
                 {data.length} réf. · {itemsAlert} alerte(s)
               </span>
               <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
@@ -426,8 +779,8 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm min-w-[640px]">
               <thead>
-                <tr className="text-[10px] uppercase tracking-wider text-slate-500 border-b border-white/[0.06] bg-white/[0.03]">
-                  <th className="px-5 py-3.5 font-semibold">Produit</th>
+                <tr className="text-[10px] uppercase tracking-[0.08em] text-slate-500 border-b border-white/[0.06] bg-black/20">
+                  <th className="px-5 py-3.5 font-bold">Produit</th>
                   <th className="px-3 py-3.5 font-semibold text-center">Stock</th>
                   <th className="px-3 py-3.5 font-semibold text-center">Seuil</th>
                   <th className="px-3 py-3.5 font-semibold text-center" style={{ color: C.primary }}>
@@ -438,7 +791,7 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
               </thead>
               <tbody className="divide-y divide-white/[0.05]">
                 {data.map((item: any) => (
-                  <tr key={item.sku} className="hover:bg-white/[0.02]">
+                  <tr key={item.sku} className="hover:bg-emerald-500/[0.04] transition-colors border-b border-white/[0.04]">
                     <td className="px-5 py-4">
                       <div className="font-semibold text-slate-100">{item.nom}</div>
                       <div className="text-[11px] font-medium mt-0.5" style={{ color: C.primary }}>
@@ -501,14 +854,22 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
         </div>
 
         <div className={`${panelClass} p-5 md:p-6`}>
-          <h3 className="text-base font-bold text-[var(--text-main)] mb-1 flex items-center gap-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
-            <TrendingUp size={18} className="text-cyan-400" />
-            Indice de rotation par article
-          </h3>
-          <p className="text-xs text-slate-500 mb-6">Visualisation rapide (0–100 %)</p>
-          <div style={{ height: 260 }}>
+          <div className="mb-5">
+            <h3 className="text-base font-bold text-white mb-1 flex items-center gap-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
+              <TrendingUp size={18} className="text-cyan-400" />
+              Rotation par article
+            </h3>
+            <p className="text-xs text-slate-500">Indice 0–100 % — repérez les références à fort flux</p>
+          </div>
+          <div style={{ height: 280 }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data} margin={{ top: 8, right: 8, left: 4, bottom: 8 }}>
+                <defs>
+                  <linearGradient id="staffInvBarGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#06b6d4" />
+                    <stop offset="100%" stopColor="#0ea5e9" />
+                  </linearGradient>
+                </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.06)" />
                 <XAxis
                   dataKey="nom"
@@ -516,9 +877,9 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
                   axisLine={false}
                   tickLine={false}
                   interval={0}
-                  angle={-25}
+                  angle={-22}
                   textAnchor="end"
-                  height={70}
+                  height={72}
                 />
                 <YAxis
                   domain={[0, 100]}
@@ -528,7 +889,13 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
                   width={32}
                 />
                 <Tooltip {...chartTooltip} formatter={(v) => [`${v ?? 0}%`, 'Rotation']} />
-                <Bar dataKey="rotation_index" fill={C.primary} radius={[6, 6, 0, 0]} maxBarSize={40} />
+                <Bar
+                  dataKey="rotation_index"
+                  fill="url(#staffInvBarGrad)"
+                  radius={[8, 8, 0, 0]}
+                  maxBarSize={48}
+                  animationDuration={500}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -883,7 +1250,7 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
     >
       <div
         className={`mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10 pb-16 ${
-          isSuperAdmin ? 'max-w-[1400px]' : 'max-w-[1200px]'
+          isSuperAdmin ? 'max-w-[1400px]' : 'max-w-[1400px]'
         }`}
       >
         {isSuperAdmin ? (
@@ -937,100 +1304,131 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
             </div>
           </header>
         ) : (
-          <header className="flex flex-col gap-6 mb-10">
-            <div className="max-w-2xl">
-              <h1
-                className="text-2xl sm:text-3xl lg:text-[2rem] font-bold tracking-tight mb-2"
-                style={{
-                  fontFamily: 'Outfit, sans-serif',
-                  background: 'linear-gradient(135deg, #22d3ee 0%, #a78bfa 45%, #818cf8 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
-              >
-                Hub Performance Équipe
-              </h1>
-              <p className="text-slate-400 text-sm sm:text-base leading-relaxed">{subtitle}</p>
-            </div>
-
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              {renderFilterButtons()}
-              <div
-                className="flex items-center gap-2.5 text-xs sm:text-sm text-slate-300 px-4 py-2.5 rounded-xl border border-slate-600/35 shrink-0"
-                style={{ background: 'rgba(15, 23, 42, 0.65)' }}
-              >
-                <Clock size={16} className="shrink-0 text-cyan-400/90" strokeWidth={2} aria-hidden />
-                <span className="font-medium tabular-nums text-slate-200">
-                  {new Date().toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}
+          <header className="relative mb-10 lg:mb-12 overflow-hidden rounded-3xl border border-cyan-500/20 bg-gradient-to-br from-[#0c1222] via-[#0a0f1a] to-[#060911] px-6 py-8 sm:px-10 sm:py-10 shadow-[0_0_0_1px_rgba(6,182,212,0.08),0_40px_80px_-20px_rgba(0,0,0,0.65)]">
+            <div
+              className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-cyan-500/15 blur-[100px]"
+              aria-hidden
+            />
+            <div
+              className="pointer-events-none absolute -left-16 bottom-0 h-48 w-48 rounded-full bg-violet-600/10 blur-[80px]"
+              aria-hidden
+            />
+            <div className="relative flex flex-col xl:flex-row xl:items-end xl:justify-between gap-8">
+              <div className="max-w-2xl">
+                <span className="inline-flex items-center gap-2 rounded-full border border-cyan-500/25 bg-cyan-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-300/95">
+                  <Activity size={12} className="text-cyan-400" strokeWidth={2.5} />
+                  Nexus · Hub équipe terrain
                 </span>
+                <h1
+                  className="mt-4 text-3xl sm:text-4xl lg:text-[2.35rem] font-bold tracking-tight leading-[1.15]"
+                  style={{ fontFamily: 'Outfit, sans-serif' }}
+                >
+                  <span
+                    style={{
+                      background: 'linear-gradient(135deg, #e0f2fe 0%, #22d3ee 35%, #a78bfa 70%, #818cf8 100%)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                    }}
+                  >
+                    Performance équipe
+                  </span>
+                </h1>
+                <p className="mt-3 text-sm sm:text-base text-slate-400 leading-relaxed max-w-xl">
+                  {subtitle}
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row xl:flex-col xl:items-end gap-4 shrink-0">
+                {renderFilterButtons()}
+                <div
+                  className="flex items-center gap-2.5 text-xs sm:text-sm text-slate-200 px-4 py-3 rounded-2xl border border-white/10"
+                  style={{ background: 'rgba(8, 11, 20, 0.75)', backdropFilter: 'blur(12px)' }}
+                >
+                  <Clock size={17} className="shrink-0 text-cyan-400" strokeWidth={2} aria-hidden />
+                  <span className="font-medium tabular-nums">
+                    {new Date().toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}
+                  </span>
+                </div>
               </div>
             </div>
           </header>
         )}
 
         {isSuperAdmin ? null : (
-          <nav className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10" aria-label="Départements">
-            {tabDefs.map((tab) => {
-              const active = activeTab === tab.id;
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveTab(tab.id)}
-                  className={[
-                    'group flex items-center gap-4 min-h-[88px] p-4 sm:p-5 rounded-2xl text-left border transition-all duration-300',
-                    active
-                      ? 'ring-1 ring-cyan-400/35 shadow-[0_12px_40px_-8px_rgba(6,182,212,0.25)]'
-                      : 'hover:ring-1 hover:ring-white/10 hover:bg-slate-800/40',
-                  ].join(' ')}
-                  style={{
-                    background: active
-                      ? 'linear-gradient(145deg, rgba(6, 182, 212, 0.14) 0%, rgba(15, 23, 42, 0.95) 100%)'
-                      : 'linear-gradient(145deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.92) 100%)',
-                    borderColor: active ? 'rgba(34, 211, 238, 0.45)' : 'rgba(148, 163, 184, 0.2)',
-                  }}
-                >
-                  <div
-                    className={[
-                      'w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border transition-colors',
-                      active
-                        ? 'border-cyan-400/40 bg-cyan-500/20 text-cyan-200'
-                        : 'border-slate-500/35 bg-slate-800/90 text-cyan-300/95 group-hover:text-cyan-200',
-                    ].join(' ')}
-                  >
-                    <Icon size={22} strokeWidth={2} className="text-inherit" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div
-                      className={`font-bold text-base sm:text-[17px] leading-tight ${
-                        active ? 'text-white' : 'text-slate-100'
-                      }`}
+          <>
+            <nav
+              className="mb-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between"
+              aria-label="Départements"
+            >
+              <div className="inline-flex flex-wrap gap-2 p-1.5 rounded-2xl border border-white/10 bg-slate-950/60 backdrop-blur-md shadow-inner">
+                {tabDefs.map((tab) => {
+                  const active = activeTab === tab.id;
+                  const Icon = tab.icon;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveTab(tab.id)}
+                      className={[
+                        'inline-flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200',
+                        'focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/50',
+                        active
+                          ? 'text-white shadow-md'
+                          : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]',
+                      ].join(' ')}
+                      style={
+                        active
+                          ? {
+                              background: 'linear-gradient(135deg, #0891b2 0%, #2563eb 100%)',
+                              boxShadow: '0 4px 18px rgba(6, 182, 212, 0.35)',
+                            }
+                          : undefined
+                      }
                     >
-                      {tab.label}
-                    </div>
-                    <div
-                      className={`text-xs sm:text-[13px] mt-1 leading-snug ${
-                        active ? 'text-cyan-100/75' : 'text-slate-400 group-hover:text-slate-300'
-                      }`}
-                    >
-                      {tab.sub}
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
-          </nav>
+                      <Icon size={18} strokeWidth={2} className="shrink-0 opacity-90" />
+                      <span>{tab.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-slate-500 max-w-md sm:text-right">
+                {tabDefs.find((t) => t.id === activeTab)?.sub} — sélectionnez un pôle pour afficher les indicateurs
+                détaillés.
+              </p>
+            </nav>
+
+            {staffKpiBundle && !loading && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-5 mb-10">
+                {staffKpiBundle[activeTab].map((k) => {
+                  const IconComp = k.Icon;
+                  return (
+                    <StaffKpiCard
+                      key={k.key}
+                      accent={k.accent}
+                      icon={<IconComp size={20} strokeWidth={2} />}
+                      label={k.label}
+                      value={k.value}
+                      sub={k.sub}
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </>
         )}
 
         {loading ? (
           <div
-            className="flex flex-col items-center justify-center py-24 rounded-[12px] border border-white/[0.06]"
-            style={{ background: 'var(--surface)' }}
+            className={`flex flex-col items-center justify-center py-20 sm:py-28 rounded-2xl border border-white/[0.08] ${
+              isSuperAdmin ? '' : 'bg-gradient-to-b from-slate-900/40 to-transparent'
+            }`}
+            style={{ background: isSuperAdmin ? 'var(--surface)' : undefined }}
           >
-            <div className="w-11 h-11 border-2 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin" />
-            <p className="mt-6 text-sm font-medium text-slate-500">Chargement…</p>
+            <div className="relative">
+              <div className="w-12 h-12 border-2 border-cyan-500/25 border-t-cyan-400 rounded-full animate-spin" />
+              <div className="absolute inset-0 rounded-full bg-cyan-500/10 blur-xl animate-pulse" aria-hidden />
+            </div>
+            <p className="mt-6 text-sm font-medium text-slate-400">Chargement des indicateurs…</p>
           </div>
         ) : (
           <div style={{ animation: 'fadeIn 0.35s ease' }}>
