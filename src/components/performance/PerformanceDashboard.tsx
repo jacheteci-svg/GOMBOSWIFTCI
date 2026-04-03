@@ -78,15 +78,7 @@ const C = {
   textMuted: '#94a3b8',
 };
 
-/** Aligné sur Commandes.tsx : barre d’onglets / filtres */
-const NEXUS_MODULE_TOOLBAR_ROW: CSSProperties = {
-  display: 'flex',
-  flexWrap: 'wrap',
-  gap: '2rem',
-  marginBottom: '3.5rem',
-  alignItems: 'center',
-};
-
+/** Aligné sur Commandes.tsx : conteneur de pastilles */
 const NEXUS_TAB_BAR_WRAP: CSSProperties = {
   display: 'flex',
   gap: '0.5rem',
@@ -199,12 +191,15 @@ function StaffKpiCard({
   label,
   value,
   sub,
+  layout = 'card',
 }: {
   accent: 'cyan' | 'emerald' | 'violet' | 'amber' | 'rose';
   icon: ReactNode;
   label: string;
   value: ReactNode;
   sub: string;
+  /** `strip` : ligne compacte (bandeau), idéal pour plusieurs blocs sur une rangée */
+  layout?: 'card' | 'strip';
 }) {
   const ring =
     accent === 'cyan'
@@ -216,10 +211,31 @@ function StaffKpiCard({
           : accent === 'amber'
             ? 'from-amber-500/20 to-transparent'
             : 'from-rose-500/18 to-transparent';
+
+  if (layout === 'strip') {
+    return (
+      <div className="group relative min-h-0 overflow-hidden rounded-xl border border-white/10 bg-slate-950/50 p-3 shadow-[0_4px_24px_-12px_rgba(0,0,0,0.45)] transition-transform duration-200 hover:border-cyan-500/30 sm:p-3.5">
+        <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${ring} opacity-70`} aria-hidden />
+        <div className="relative flex min-w-0 flex-row items-center gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-slate-900/70 text-cyan-300 shadow-inner">
+            {icon}
+          </div>
+          <div className="min-w-0 flex-1 text-left">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">{label}</p>
+            <p className="mt-0.5 text-lg font-bold leading-tight tracking-tight text-white tabular-nums sm:text-xl">
+              {value}
+            </p>
+            <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-slate-500">{sub}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="group relative overflow-hidden rounded-2xl border border-white/[0.07] p-4 sm:p-5 transition-transform duration-300 hover:-translate-y-0.5 hover:border-cyan-500/25">
       <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${ring} opacity-80`} aria-hidden />
-      <div className="relative flex flex-col gap-3 h-full">
+      <div className="relative flex h-full flex-col gap-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-slate-900/60 text-cyan-300 shadow-inner">
             {icon}
@@ -2054,51 +2070,30 @@ export const PerformanceDashboard = ({
           </div>
         ) : (
           <>
-            {/* Même disposition que Commandes : barre période + pastilles */}
-            <div style={NEXUS_MODULE_TOOLBAR_ROW}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
-                <span
+            {/* Période (gauche) + Pôle (droite) sur une même ligne — responsive */}
+            <nav
+              style={{ marginBottom: '2rem' }}
+              aria-label="Filtres période et département"
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '1rem 1.5rem',
+                }}
+              >
+                <div
                   style={{
-                    fontSize: '0.75rem',
-                    fontWeight: 800,
-                    color: 'var(--text-muted)',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.15em',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem',
+                    flexWrap: 'wrap',
+                    flex: '1 1 auto',
+                    minWidth: 'min(100%, 260px)',
                   }}
                 >
-                  Période
-                </span>
-                <div style={NEXUS_TAB_BAR_WRAP} role="group" aria-label="Période">
-                  {periodFilterDefs.map((f) => (
-                    <button
-                      key={f.id}
-                      type="button"
-                      onClick={() => setFilter(f.id)}
-                      style={nexusPillButtonStyle(filter === f.id, f.color)}
-                    >
-                      {f.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              {dataUpdatedAt && !loadError ? (
-                <span
-                  style={{
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                    color: 'var(--text-muted)',
-                    marginLeft: 'auto',
-                  }}
-                >
-                  Mis à jour :{' '}
-                  {dataUpdatedAt.toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}
-                </span>
-              ) : null}
-            </div>
-
-            <nav style={{ ...NEXUS_MODULE_TOOLBAR_ROW, marginBottom: '2rem' }} aria-label="Départements">
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
                   <span
                     style={{
                       fontSize: '0.75rem',
@@ -2106,6 +2101,44 @@ export const PerformanceDashboard = ({
                       color: 'var(--text-muted)',
                       textTransform: 'uppercase',
                       letterSpacing: '0.15em',
+                      flexShrink: 0,
+                    }}
+                  >
+                    Période
+                  </span>
+                  <div style={NEXUS_TAB_BAR_WRAP} role="group" aria-label="Période">
+                    {periodFilterDefs.map((f) => (
+                      <button
+                        key={f.id}
+                        type="button"
+                        onClick={() => setFilter(f.id)}
+                        style={nexusPillButtonStyle(filter === f.id, f.color)}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem',
+                    flexWrap: 'wrap',
+                    flex: '1 1 auto',
+                    minWidth: 'min(100%, 260px)',
+                    justifyContent: 'flex-end',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: '0.75rem',
+                      fontWeight: 800,
+                      color: 'var(--text-muted)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.15em',
+                      flexShrink: 0,
                     }}
                   >
                     Pôle
@@ -2128,10 +2161,42 @@ export const PerformanceDashboard = ({
                     })}
                   </div>
                 </div>
-                <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-muted)', maxWidth: '42rem' }}>
+              </div>
+
+              <div
+                style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: '0.75rem',
+                  marginTop: '0.85rem',
+                }}
+              >
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: '0.85rem',
+                    color: 'var(--text-muted)',
+                    maxWidth: '42rem',
+                  }}
+                >
                   {tabDefs.find((t) => t.id === activeTab)?.sub} — sélectionnez un pôle pour afficher les indicateurs
                   détaillés.
                 </p>
+                {dataUpdatedAt && !loadError ? (
+                  <span
+                    style={{
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      color: 'var(--text-muted)',
+                      flexShrink: 0,
+                    }}
+                  >
+                    Mis à jour :{' '}
+                    {dataUpdatedAt.toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}
+                  </span>
+                ) : null}
               </div>
             </nav>
 
@@ -2148,7 +2213,7 @@ export const PerformanceDashboard = ({
               >
                 <p
                   style={{
-                    margin: '0 0 1.25rem 0',
+                    margin: '0 0 1rem 0',
                     fontSize: '0.7rem',
                     fontWeight: 800,
                     letterSpacing: '0.14em',
@@ -2158,12 +2223,13 @@ export const PerformanceDashboard = ({
                 >
                   Synthèse indicateurs
                 </p>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 lg:gap-5">
+                <div className="perf-embedded-kpi-grid w-full">
                   {staffKpiBundle[activeTab].map((k) => {
                     const IconComp = k.Icon;
                     return (
                       <StaffKpiCard
                         key={k.key}
+                        layout="strip"
                         accent={k.accent}
                         icon={<IconComp size={20} strokeWidth={2} />}
                         label={k.label}
