@@ -30,9 +30,7 @@ import {
   TrendingUp,
   Clock,
   Lightbulb,
-  Building2,
   Users,
-  ShoppingCart,
   Banknote,
   Sparkles,
   LayoutDashboard,
@@ -1785,166 +1783,138 @@ export const PerformanceDashboard = ({
 
     const topTenant = rowsAll[0];
 
-    const BentoKpi = ({
-      accent,
-      icon,
+    const SaStatTile = ({
       label,
       value,
-      sub,
+      hint,
+      valueClass,
     }: {
-      accent: 'cyan' | 'emerald' | 'violet' | 'amber';
-      icon: ReactNode;
       label: string;
       value: ReactNode;
-      sub: string;
-    }) => {
-      const ring =
-        accent === 'cyan'
-          ? 'from-cyan-500/25 to-transparent'
-          : accent === 'emerald'
-            ? 'from-emerald-500/20 to-transparent'
-            : accent === 'violet'
-              ? 'from-violet-500/20 to-transparent'
-              : 'from-amber-500/20 to-transparent';
-      return (
-        <div className="group relative overflow-hidden rounded-2xl border border-white/[0.07] p-5 sm:p-6 transition-transform duration-300 hover:-translate-y-0.5 hover:border-cyan-500/25">
-          <div
-            className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${ring} opacity-80`}
-            aria-hidden
-          />
-          <div className="relative flex flex-col gap-4 h-full">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-slate-900/60 text-cyan-300 shadow-inner">
-                {icon}
-              </div>
-              <ArrowUpRight
-                size={18}
-                className="text-slate-600 opacity-0 transition-opacity group-hover:opacity-100"
-                strokeWidth={2}
-              />
-            </div>
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">{label}</p>
-              <p className="mt-2 text-2xl sm:text-[1.65rem] font-bold tracking-tight text-white tabular-nums leading-none">
-                {value}
-              </p>
-              <p className="mt-2 text-xs text-slate-500 leading-snug">{sub}</p>
-            </div>
-          </div>
-        </div>
-      );
-    };
+      hint?: string;
+      valueClass?: string;
+    }) => (
+      <div className="flex min-h-[4.5rem] flex-col justify-center rounded-xl border border-white/[0.07] bg-slate-900/35 px-3 py-2.5 shadow-inner">
+        <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-slate-500 leading-snug">{label}</p>
+        <p className={`mt-1 text-lg font-bold tabular-nums leading-tight text-white sm:text-xl ${valueClass ?? ''}`}>
+          {value}
+        </p>
+        {hint ? <p className="mt-0.5 text-[10px] text-slate-500 leading-snug">{hint}</p> : null}
+      </div>
+    );
 
     return (
       <div className="space-y-8 lg:space-y-10">
         {rowsAll.length > 0 && (
           <div
-            className="rounded-2xl border border-cyan-500/15 bg-gradient-to-br from-slate-900/50 via-slate-950/60 to-[#0a0f1a] p-4 sm:p-5 shadow-[0_0_0_1px_rgba(6,182,212,0.06)]"
+            className="rounded-2xl border border-cyan-500/15 bg-gradient-to-br from-slate-900/50 via-slate-950/60 to-[#0a0f1a] p-3 sm:p-4 shadow-[0_0_0_1px_rgba(6,182,212,0.06)]"
             role="region"
             aria-label="Synthèse plateforme"
           >
-            <div className="flex flex-wrap items-start gap-3 sm:gap-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-cyan-500/20 bg-cyan-500/10 text-cyan-300">
-                <Target size={20} strokeWidth={2} aria-hidden />
+            <div className="flex flex-wrap items-center justify-between gap-2 gap-y-3 border-b border-white/[0.06] pb-3 mb-3">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-cyan-500/20 bg-cyan-500/10 text-cyan-300">
+                  <Target size={18} strokeWidth={2} aria-hidden />
+                </div>
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">Synthèse plateforme</p>
+                  <p className="text-[11px] text-slate-500 mt-0.5 hidden sm:block">Période sélectionnée · agrégat multi-tenant</p>
+                </div>
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">Lecture métier</p>
-                <p className="mt-1.5 text-sm text-slate-300 leading-relaxed">
-                  {ins.atRiskCount > 0 ? (
-                    <span className="text-amber-200/95">
-                      <AlertTriangle className="inline size-4 -mt-0.5 mr-1 text-amber-400" aria-hidden />
-                      {ins.atRiskCount} boutique(s) avec charge terrain et succès livraison {'<'}
-                      {SA_LOGISTICS_RISK_THRESHOLD}% — prioriser coaching livreurs ou support terrain.{' '}
-                    </span>
-                  ) : (
-                    <span className="text-emerald-200/90">
-                      Aucune alerte livraison sur les seuils (≥{SA_MIN_SORTIES_FOR_RISK} missions, {'<'}
-                      {SA_LOGISTICS_RISK_THRESHOLD}% succès).{' '}
-                    </span>
-                  )}
-                  {ins.dormantActiveCount > 0 ? (
-                    <span className="text-slate-400">
-                      {ins.dormantActiveCount} compte(s) actif(s) sans commande sur la période — opportunité de relance
-                      commerciale ou onboarding.
-                    </span>
-                  ) : null}
-                </p>
+              <div className="flex flex-wrap items-center justify-end gap-1.5 w-full sm:w-auto sm:max-w-[70%]">
+                {ins.atRiskCount > 0 ? (
+                  <span
+                    className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-100"
+                    title={`≥${SA_MIN_SORTIES_FOR_RISK} missions terrain et succès <${SA_LOGISTICS_RISK_THRESHOLD}%`}
+                  >
+                    <AlertTriangle className="size-3.5 shrink-0" aria-hidden />
+                    Livraison · {ins.atRiskCount}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-200/95">
+                    Livraison OK
+                  </span>
+                )}
+                {ins.dormantActiveCount > 0 ? (
+                  <span
+                    className="inline-flex items-center rounded-full border border-violet-500/25 bg-violet-500/10 px-2.5 py-1 text-[11px] font-semibold text-violet-200"
+                    title="Comptes actifs sans commande sur la période"
+                  >
+                    Relance · {ins.dormantActiveCount}
+                  </span>
+                ) : null}
               </div>
             </div>
-            <div className="mt-4 grid grid-cols-2 lg:grid-cols-4 gap-3">
-              <div className="rounded-xl border border-white/[0.06] bg-black/25 px-3 py-3">
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">CA — top 3 boutiques</p>
-                <p className="text-xl font-bold text-white tabular-nums mt-1">{ins.concentrationTop3}%</p>
-                <p className="text-[11px] text-slate-500 mt-0.5">Part du CA plateforme (concentration)</p>
-              </div>
-              <div className="rounded-xl border border-white/[0.06] bg-black/25 px-3 py-3">
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Panier moyen livré</p>
-                <p className="text-xl font-bold text-white tabular-nums mt-1">
-                  {ins.panierMoyen > 0 ? ins.panierMoyen.toLocaleString('fr-FR') : '—'}{' '}
-                  {ins.panierMoyen > 0 ? <span className="text-xs font-semibold text-slate-500">CFA</span> : null}
-                </p>
-                <p className="text-[11px] text-slate-500 mt-0.5">GMV ÷ commandes livrées / terminées</p>
-              </div>
-              <div className="rounded-xl border border-white/[0.06] bg-black/25 px-3 py-3">
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Annulations (ligne)</p>
-                <p className="text-xl font-bold text-white tabular-nums mt-1">{ins.tauxAnnulPlateforme}%</p>
-                <p className="text-[11px] text-slate-500 mt-0.5">Part des commandes annulées (toutes boutiques)</p>
-              </div>
-              <div className="rounded-xl border border-white/[0.06] bg-black/25 px-3 py-3">
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">À surveiller (liv.)</p>
-                <p className="text-xl font-bold tabular-nums mt-1 text-amber-200">{ins.atRiskCount}</p>
-                <p className="text-[11px] text-slate-500 mt-0.5">Boutiques sous le seuil de qualité livraison</p>
-              </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
+              <SaStatTile
+                label="Commandes"
+                value={totalCmd.toLocaleString('fr-FR')}
+                hint="Volume total"
+              />
+              <SaStatTile
+                label="CA livré (GMV)"
+                value={
+                  <>
+                    {totalGmv.toLocaleString('fr-FR')}{' '}
+                    <span className="text-sm font-semibold text-slate-400">CFA</span>
+                  </>
+                }
+                hint="Livrées / terminées"
+              />
+              <SaStatTile
+                label="Boutiques actives"
+                value={
+                  <>
+                    {withActivity}
+                    <span className="text-slate-500 text-base font-semibold">/{rowsAll.length}</span>
+                  </>
+                }
+                hint={`${inactiveTenants} inactif(s)`}
+              />
+              <SaStatTile
+                label="Taux livraison"
+                value={
+                  <>
+                    {avgSuccPlat}
+                    <span className="text-cyan-400/90">%</span>
+                  </>
+                }
+                hint="Moy. pondérée terrain"
+              />
+              <SaStatTile
+                label="CA top 3"
+                value={`${ins.concentrationTop3}%`}
+                hint="Part du CA plateforme"
+              />
+              <SaStatTile
+                label="Panier moyen"
+                value={
+                  ins.panierMoyen > 0 ? (
+                    <>
+                      {ins.panierMoyen.toLocaleString('fr-FR')}{' '}
+                      <span className="text-sm font-semibold text-slate-400">CFA</span>
+                    </>
+                  ) : (
+                    '—'
+                  )
+                }
+                hint="GMV ÷ livrées"
+              />
+              <SaStatTile
+                label="Annulations"
+                value={`${ins.tauxAnnulPlateforme}%`}
+                hint="Des commandes (global)"
+              />
+              <SaStatTile
+                label="À surveiller"
+                value={ins.atRiskCount}
+                hint="Qualité livraison"
+                valueClass={ins.atRiskCount > 0 ? 'text-amber-200' : undefined}
+              />
             </div>
           </div>
         )}
-
-        {/* Grille bento — métriques clés */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-5">
-          <BentoKpi
-            accent="cyan"
-            icon={<ShoppingCart size={22} strokeWidth={2} />}
-            label="Volume commandes"
-            value={totalCmd.toLocaleString('fr-FR')}
-            sub="Toutes organisations · période sélectionnée"
-          />
-          <BentoKpi
-            accent="emerald"
-            icon={<Banknote size={22} strokeWidth={2} />}
-            value={
-              <span className="text-[1.35rem] sm:text-[1.65rem]">
-                {totalGmv.toLocaleString('fr-FR')}{' '}
-                <span className="text-sm font-semibold text-slate-400">CFA</span>
-              </span>
-            }
-            label="CA livré (GMV)"
-            sub="Sur commandes livrées / terminées"
-          />
-          <BentoKpi
-            accent="violet"
-            icon={<Building2 size={22} strokeWidth={2} />}
-            value={
-              <span>
-                {withActivity}
-                <span className="text-slate-500 text-lg font-semibold"> / {rowsAll.length}</span>
-              </span>
-            }
-            label="Boutiques avec ventes"
-            sub={`${inactiveTenants} compte(s) inactif(s) au catalogue`}
-          />
-          <BentoKpi
-            accent="amber"
-            icon={<TrendingUp size={22} strokeWidth={2} />}
-            value={
-              <span>
-                {avgSuccPlat}
-                <span className="text-cyan-400/90">%</span>
-              </span>
-            }
-            label="Taux livraison"
-            sub="Moyenne pondérée par missions terrain"
-          />
-        </div>
 
         {/* Carte "leader" + grille 2 colonnes */}
         <div className="grid grid-cols-1 xl:grid-cols-5 gap-6 lg:gap-8">
@@ -1982,8 +1952,8 @@ export const PerformanceDashboard = ({
                 </div>
               </div>
             ) : (
-              <div className="rounded-2xl border border-dashed border-slate-600/50 p-8 text-center text-slate-500 text-sm">
-                Aucune activité sur cette période — élargissez la fenêtre temporelle.
+              <div className="rounded-xl border border-dashed border-slate-600/40 px-4 py-3 text-center text-xs text-slate-500">
+                Aucune activité sur cette période — élargir la période ou vérifier les filtres.
               </div>
             )}
 
