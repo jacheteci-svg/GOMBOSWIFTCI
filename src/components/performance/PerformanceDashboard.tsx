@@ -43,7 +43,6 @@ import {
   AlertCircle,
   AlertTriangle,
   ExternalLink,
-  Filter,
 } from 'lucide-react';
 
 type TabType = 'logistique' | 'call-center' | 'inventaire';
@@ -1846,7 +1845,7 @@ export const PerformanceDashboard = ({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-2.5">
               <SaStatTile
                 label="Commandes"
                 value={totalCmd.toLocaleString('fr-FR')}
@@ -1905,12 +1904,6 @@ export const PerformanceDashboard = ({
                 label="Annulations"
                 value={`${ins.tauxAnnulPlateforme}%`}
                 hint="Des commandes (global)"
-              />
-              <SaStatTile
-                label="À surveiller"
-                value={ins.atRiskCount}
-                hint="Qualité livraison"
-                valueClass={ins.atRiskCount > 0 ? 'text-amber-200' : undefined}
               />
             </div>
           </div>
@@ -2026,20 +2019,15 @@ export const PerformanceDashboard = ({
               }}
             >
               <div className="flex flex-col gap-4 px-5 py-4 border-b border-white/[0.06] bg-gradient-to-r from-cyan-950/30 to-transparent">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <h2 className="text-lg font-bold text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>
-                      Matrice <span style={{ color: C.primary }}>tenants</span>
-                    </h2>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      {rows.length} ligne(s) · données agrégées sur la période · ligne surlignée = qualité livraison à
-                      surveiller
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 rounded-full bg-slate-800/80 border border-white/10 px-3 py-1.5 text-[11px] font-medium text-slate-400">
-                    <Filter size={14} className="text-cyan-400/90 shrink-0" aria-hidden />
-                    Filtres & tri
-                  </div>
+                <div>
+                  <h2 className="text-lg font-bold text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                    Matrice <span style={{ color: C.primary }}>tenants</span>
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    {rows.length} boutique{rows.length > 1 ? 's' : ''} affichée{rows.length > 1 ? 's' : ''} · ligne ambre
+                    = livraison à surveiller (≥{SA_MIN_SORTIES_FOR_RISK} missions, {'<'}
+                    {SA_LOGISTICS_RISK_THRESHOLD}% succès)
+                  </p>
                 </div>
                 <div className="flex flex-col gap-4 border-t border-white/[0.05] pt-4 md:flex-row md:items-end md:justify-between md:gap-6 md:pt-3">
                   <div className="flex min-w-0 flex-1 flex-col gap-2 md:max-w-[min(100%,440px)]">
@@ -2513,7 +2501,7 @@ export const PerformanceDashboard = ({
           <NexusModuleFrame
             badge="Nexus Intelligence"
             title="Performance des boutiques"
-            description="Comparez le volume, le CA (GMV) et la qualité de livraison de chaque organisation sur la période sélectionnée."
+            description="Pilotage multi-boutiques : volume, CA (GMV) et indicateurs de livraison."
             actions={
               <div
                 style={{
@@ -2621,60 +2609,31 @@ export const PerformanceDashboard = ({
                     ))}
                   </div>
                 </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    flexWrap: 'wrap',
-                    flexShrink: 0,
-                  }}
-                >
+                {dataUpdatedAt && !loadError ? (
                   <div
-                    className="flex items-center gap-2 text-xs sm:text-sm text-slate-200 px-4 py-3 rounded-2xl border border-white/10"
+                    className="flex items-center gap-2 text-xs sm:text-sm text-slate-300 px-3 py-2 rounded-xl border border-white/10"
                     style={{ background: 'rgba(8, 11, 20, 0.75)', backdropFilter: 'blur(12px)' }}
                   >
-                    <Clock size={17} className="shrink-0 text-cyan-400" strokeWidth={2} aria-hidden />
-                    <span className="font-medium tabular-nums">
-                      {new Date().toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}
+                    <Clock size={16} className="shrink-0 text-cyan-400/90" strokeWidth={2} aria-hidden />
+                    <span className="font-semibold tabular-nums">
+                      Données :{' '}
+                      {dataUpdatedAt.toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}
                     </span>
                   </div>
-                </div>
-              </div>
-              <div
-                style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '0.75rem',
-                  marginTop: '0.85rem',
-                }}
-              >
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: '0.85rem',
-                    color: 'var(--text-muted)',
-                    maxWidth: '42rem',
-                  }}
-                >
-                  Agrégat multi-tenant sur la fenêtre sélectionnée — comparez les boutiques et le CA par organisation.
-                </p>
-                {dataUpdatedAt && !loadError ? (
-                  <span
-                    style={{
-                      fontSize: '0.8rem',
-                      fontWeight: 600,
-                      color: 'var(--text-muted)',
-                      flexShrink: 0,
-                    }}
-                  >
-                    Mis à jour :{' '}
-                    {dataUpdatedAt.toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}
-                  </span>
                 ) : null}
               </div>
+              <p
+                style={{
+                  margin: '0.85rem 0 0 0',
+                  fontSize: '0.8rem',
+                  color: 'var(--text-muted)',
+                  maxWidth: '48rem',
+                  lineHeight: 1.45,
+                }}
+              >
+                La synthèse plateforme utilise toujours toutes les boutiques ; le périmètre et le tri agissent uniquement
+                sur le tableau.
+              </p>
             </nav>
 
             {loading ? (
