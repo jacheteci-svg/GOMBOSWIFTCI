@@ -1,14 +1,28 @@
 import { useState, useEffect } from 'react';
 import { insforge } from '../../lib/insforge';
-import { 
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, 
-  Cell, AreaChart, Area, CartesianGrid, PieChart, Pie
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+  CartesianGrid,
 } from 'recharts';
-import { 
-  Truck, PhoneCall, Package, Lightbulb, TrendingUp, 
-  Target, ShieldCheck, Zap, AlertTriangle, Coins,
-  Clock, Activity, PieChart as PieChartIcon, 
-  ArrowUpRight, ArrowDownRight, Layers, FileText
+import {
+  Truck,
+  PhoneCall,
+  Package,
+  TrendingUp,
+  Target,
+  ShieldCheck,
+  Zap,
+  AlertTriangle,
+  Coins,
+  Clock,
+  Activity,
+  Layers,
 } from 'lucide-react';
 
 type TabType = 'logistique' | 'call-center' | 'inventaire';
@@ -19,6 +33,27 @@ interface PerformanceDashboardProps {
   isSuperAdmin?: boolean;
 }
 
+const chartTooltip = {
+  contentStyle: {
+    background: '#12182b',
+    border: '1px solid rgba(255,255,255,0.08)',
+    borderRadius: 14,
+    padding: '12px 16px',
+    boxShadow: '0 20px 40px rgba(0,0,0,0.45)',
+  },
+  labelStyle: { color: '#f8fafc', fontWeight: 700 },
+  itemStyle: { color: '#cbd5e1' },
+};
+
+const accentIcon: Record<string, string> = {
+  cyan: 'bg-cyan-500/15 text-cyan-400',
+  emerald: 'bg-emerald-500/15 text-emerald-400',
+  violet: 'bg-violet-500/15 text-violet-400',
+  amber: 'bg-amber-500/15 text-amber-400',
+  rose: 'bg-rose-500/15 text-rose-400',
+  slate: 'bg-slate-500/15 text-slate-300',
+};
+
 export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDashboardProps) => {
   const [activeTab, setActiveTab] = useState<TabType>('logistique');
   const [filter, setFilter] = useState<FilterType>('mois');
@@ -28,7 +63,7 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
   const fetchData = async () => {
     const effectiveTenantId = tenantId;
     if (!effectiveTenantId && !isSuperAdmin) return;
-    
+
     setLoading(true);
     try {
       let queryLog = insforge.database.from('logistics_performance_summary').select('*');
@@ -41,19 +76,15 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
         queryInv = queryInv.eq('tenant_id', effectiveTenantId);
       }
 
-      const [logData, callData, invData] = await Promise.all([
-        queryLog,
-        queryCall,
-        queryInv
-      ]);
+      const [logData, callData, invData] = await Promise.all([queryLog, queryCall, queryInv]);
 
       setStats({
         logistique: logData.data || [],
         callCenter: callData.data || [],
-        inventaire: invData.data || []
+        inventaire: invData.data || [],
       });
     } catch (err) {
-      console.error("Hub Performance Error:", err);
+      console.error('Hub Performance Error:', err);
     } finally {
       setLoading(false);
     }
@@ -64,21 +95,33 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
   }, [tenantId, filter]);
 
   const renderFilterButtons = () => (
-    <div className="flex bg-white/40 backdrop-blur-xl p-1.5 rounded-[20px] shadow-sm border border-slate-200/50 gap-1">
+    <div
+      className="inline-flex flex-wrap gap-1 p-1 rounded-2xl border border-white/[0.08]"
+      style={{ background: 'var(--surface)' }}
+    >
       {[
-        { id: 'mois', label: 'Ce Mois' },
-        { id: '7jours', label: '7 Jours' },
-        { id: 'aujourdhui', label: 'Aujourd\'hui' },
-        { id: 'toujours', label: 'Toujours' }
+        { id: 'mois' as const, label: 'Ce mois' },
+        { id: '7jours' as const, label: '7 jours' },
+        { id: 'aujourdhui' as const, label: "Aujourd'hui" },
+        { id: 'toujours' as const, label: 'Tout' },
       ].map((f) => (
         <button
           key={f.id}
-          onClick={() => setFilter(f.id as FilterType)}
-          className={`px-5 py-2 rounded-xl text-xs font-black transition-all duration-300 ${
-            filter === f.id 
-              ? 'bg-[#5e5ce6] text-white shadow-lg shadow-[#5e5ce6]/30' 
-              : 'text-slate-500 hover:text-slate-800 hover:bg-white/50'
+          type="button"
+          onClick={() => setFilter(f.id)}
+          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+            filter === f.id
+              ? 'text-white shadow-md'
+              : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
           }`}
+          style={
+            filter === f.id
+              ? {
+                  background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
+                  boxShadow: '0 4px 20px rgba(6, 182, 212, 0.35)',
+                }
+              : undefined
+          }
         >
           {f.label}
         </button>
@@ -86,40 +129,43 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
     </div>
   );
 
-  const renderStatsRow = (items: { label: string, value: string | number, icon: any, color: string, trend?: string }[]) => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-fadeIn">
-      {items.map((item, idx) => (
-        <div key={idx} className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 flex flex-col justify-between group hover:shadow-xl transition-all duration-500 relative overflow-hidden">
-          <div className="absolute -right-6 -top-6 w-24 h-24 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity bg-slate-400 rounded-full blur-2xl"></div>
-          <div className="flex justify-between items-start mb-6">
-            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${item.color.replace('text-', 'bg-').replace('600', '50/80')}`}>
-               <item.icon size={26} className={item.color} strokeWidth={2.2} />
-            </div>
-            {item.trend && (
-              <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border-2 font-black text-[10px] tracking-tight ${item.trend.startsWith('+') ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 'bg-rose-50 border-rose-100 text-rose-600'}`}>
-                {item.trend.startsWith('+') ? <ArrowUpRight size={14} strokeWidth={3} /> : <ArrowDownRight size={14} strokeWidth={3} />}
-                {item.trend}
-              </div>
-            )}
-          </div>
-          <div>
-            <div className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1.5">{item.label}</div>
-            <div className="text-3xl font-black text-slate-900 tracking-tighter" style={{ letterSpacing: '-0.04em' }}>{item.value}</div>
-          </div>
-        </div>
-      ))}
+  const StatCard = ({
+    label,
+    value,
+    icon: Icon,
+    accent,
+  }: {
+    label: string;
+    value: string | number;
+    icon: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>;
+    accent: keyof typeof accentIcon;
+  }) => (
+    <div
+      className="rounded-[var(--radius-xl)] p-6 border border-white/[0.06] flex flex-col gap-4 transition-all duration-300 hover:border-cyan-500/20"
+      style={{
+        background: 'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)',
+        boxShadow: 'var(--shadow-sm)',
+      }}
+    >
+      <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${accentIcon[accent]}`}>
+        <Icon size={22} strokeWidth={2} />
+      </div>
+      <div>
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1">{label}</p>
+        <p className="text-2xl font-bold text-[var(--text-main)] tracking-tight tabular-nums">{value}</p>
+      </div>
     </div>
   );
 
-  const Ship = (props: any) => (
-    <svg 
-      {...props} 
-      xmlns="http://www.w3.org/2000/svg" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
+  const Ship = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
       strokeLinejoin="round"
     >
       <path d="M2.2 9l-.5 4c-.1.7.4 1 1 1h18.6c.6 0 1.1-.3 1-1l-.5-4a1 1 0 0 0-1-1H3.2a1 1 0 0 0-1 1z" />
@@ -134,119 +180,144 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
     const data = stats.logistique;
     const totalSorties = data.reduce((acc: number, s: any) => acc + (Number(s.sorties) || 0), 0);
     const totalReussies = data.reduce((acc: number, s: any) => acc + (Number(s.reussies) || 0), 0);
-    const totalRetours = data.reduce((acc: number, s: any) => acc + (Number(s.retours) || 0), 0);
     const totalGains = data.reduce((acc: number, s: any) => acc + (Number(s.ca_frais) || 0), 0);
     const avgSuccess = totalSorties > 0 ? Math.round((totalReussies / totalSorties) * 100) : 0;
 
     return (
-      <div className="space-y-12">
-        {renderStatsRow([
-          { label: 'Taux de Succès Global', value: `${avgSuccess}%`, icon: Target, color: 'text-[#10b981]', trend: '+2.4%' },
-          { label: 'Volume d\'Expédition', value: totalSorties, icon: Layers, color: 'text-[#5e5ce6]', trend: '+12%' },
-          { label: 'Efficacité Livraisons', value: totalReussies, icon: Ship, color: 'text-[#0ea5e9]' },
-          { label: 'CA Potentiel Frais', value: `${totalGains.toLocaleString()} F`, icon: Coins, color: 'text-[#f59e0b]', trend: '+8.1%' }
-        ])}
+      <div className="space-y-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <StatCard label="Taux de réussite" value={`${avgSuccess}%`} icon={Target} accent="emerald" />
+          <StatCard label="Missions (sorties)" value={totalSorties} icon={Layers} accent="cyan" />
+          <StatCard label="Livraisons réussies" value={totalReussies} icon={Ship} accent="violet" />
+          <StatCard label="CA frais (estim.)" value={`${totalGains.toLocaleString('fr-FR')} F`} icon={Coins} accent="amber" />
+        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-          <div className="lg:col-span-2 space-y-8">
-            <div className="flex justify-between items-center px-4">
-               <div>
-                  <h3 className="text-2xl font-black text-slate-900 leading-tight">Détail des Agents</h3>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Audit de performance en temps réel</p>
-               </div>
-               <div className="flex items-center gap-3 bg-white p-3 rounded-2xl shadow-sm border border-slate-100">
-                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                  <span className="text-[11px] font-black text-slate-500 uppercase tracking-wider">Sync Active</span>
-               </div>
+        <div className="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
+          <div className="xl:col-span-3 space-y-4">
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-bold text-[var(--text-main)]">Équipe terrain</h3>
+                <p className="text-sm text-slate-500 mt-0.5">Livreurs — missions, succès, retours</p>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-slate-500">
+                <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                Données synchronisées
+              </div>
             </div>
 
-            <div className="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden group transition-all duration-700">
+            <div
+              className="rounded-[var(--radius-xl)] border border-white/[0.06] overflow-hidden"
+              style={{ background: 'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)' }}
+            >
               <div className="overflow-x-auto">
-                <table className="w-full text-left">
+                <table className="w-full text-left text-sm">
                   <thead>
-                    <tr className="text-[11px] uppercase tracking-widest text-slate-400 font-extrabold bg-slate-50/50">
-                      <th className="p-8">Livreur</th>
-                      <th className="p-8 text-center">Missions</th>
-                      <th className="p-8 text-center text-emerald-600">Succès</th>
-                      <th className="p-8 text-center text-rose-500">Retours</th>
-                      <th className="p-8 text-right">CA Livraison</th>
+                    <tr className="text-[11px] uppercase tracking-wider text-slate-500 border-b border-white/[0.06] bg-white/[0.03]">
+                      <th className="px-5 py-4 font-semibold">Livreur</th>
+                      <th className="px-5 py-4 font-semibold text-center">Missions</th>
+                      <th className="px-5 py-4 font-semibold text-center text-emerald-400/90">Succès</th>
+                      <th className="px-5 py-4 font-semibold text-center text-rose-400/90">Retours</th>
+                      <th className="px-5 py-4 font-semibold text-right">CA livraison</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-50">
+                  <tbody className="divide-y divide-white/[0.04]">
                     {data.map((s: any) => (
-                      <tr key={s.livreur_id} className="hover:bg-[#5e5ce6]/[0.02] transition-colors group/row">
-                        <td className="p-8">
-                           <div className="flex items-center gap-5">
-                              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#5e5ce6] to-[#afacff] text-white flex items-center justify-center font-black text-xl shadow-lg shadow-[#5e5ce6]/20">
-                                 {s.nom?.charAt(0)}
+                      <tr key={s.livreur_id} className="hover:bg-white/[0.02] transition-colors">
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-3">
+                            <div
+                              className="w-11 h-11 rounded-xl flex items-center justify-center text-sm font-bold text-white shrink-0"
+                              style={{
+                                background: 'linear-gradient(135deg, #06b6d4 0%, #6366f1 100%)',
+                                boxShadow: '0 8px 24px rgba(6, 182, 212, 0.25)',
+                              }}
+                            >
+                              {s.nom?.charAt(0) ?? '?'}
+                            </div>
+                            <div>
+                              <div className="font-semibold text-slate-100">{s.nom}</div>
+                              <div className="flex items-center gap-1.5 mt-0.5">
+                                <span
+                                  className={`h-1.5 w-1.5 rounded-full ${
+                                    s.success_rate >= 85
+                                      ? 'bg-emerald-500'
+                                      : s.success_rate >= 60
+                                        ? 'bg-amber-500'
+                                        : 'bg-rose-500'
+                                  }`}
+                                />
+                                <span className="text-xs text-slate-500">{s.success_rate}% réussite</span>
                               </div>
-                              <div>
-                                 <div className="font-black text-slate-800 text-lg leading-tight group-hover/row:text-[#5e5ce6] transition-colors">{s.nom}</div>
-                                 <div className="flex items-center gap-2 mt-1">
-                                    <div className={`w-2 h-2 rounded-full ${s.success_rate >= 85 ? 'bg-emerald-500' : s.success_rate >= 60 ? 'bg-amber-500' : 'bg-rose-500'}`}></div>
-                                    <span className="text-[11px] font-bold text-slate-400 uppercase">{s.success_rate}% de réussite</span>
-                                 </div>
-                              </div>
-                           </div>
+                            </div>
+                          </div>
                         </td>
-                        <td className="p-8 text-center font-black text-slate-800 text-lg">{s.sorties}</td>
-                        <td className="p-8 text-center font-black text-emerald-500 text-lg">{s.reussies}</td>
-                        <td className="p-8 text-center font-black text-rose-400 text-lg">{s.retours}</td>
-                        <td className="p-8 text-right font-black text-slate-900 text-xl tracking-tighter">{s.ca_frais?.toLocaleString()} <span className="text-xs text-slate-400 font-bold ml-1">F</span></td>
+                        <td className="px-5 py-4 text-center font-semibold text-slate-200 tabular-nums">{s.sorties}</td>
+                        <td className="px-5 py-4 text-center font-semibold text-emerald-400 tabular-nums">{s.reussies}</td>
+                        <td className="px-5 py-4 text-center font-semibold text-rose-400/90 tabular-nums">{s.retours}</td>
+                        <td className="px-5 py-4 text-right font-semibold text-slate-100 tabular-nums">
+                          {s.ca_frais?.toLocaleString('fr-FR')}{' '}
+                          <span className="text-slate-500 text-xs font-medium">F</span>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
+              {data.length === 0 && (
+                <p className="p-10 text-center text-slate-500 text-sm">Aucune donnée logistique pour cette période.</p>
+              )}
             </div>
           </div>
 
-          <div className="space-y-8">
-             <div className="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-slate-200/30 border border-slate-100 h-full relative overflow-hidden">
-                <div className="relative z-10">
-                   <h3 className="text-xl font-black text-slate-900 mb-8 flex items-center gap-3">
-                      <Zap className="text-[#5e5ce6]" size={24} strokeWidth={2.5} /> Impact Succès
-                   </h3>
-                   <div style={{ height: 320 }}>
-                      <ResponsiveContainer width="100%" height="100%">
-                         <BarChart data={data}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                            <XAxis 
-                               dataKey="nom" 
-                               hide 
-                            />
-                            <YAxis 
-                               axisLine={false} 
-                               tickLine={false} 
-                               tick={{fill: '#94a3b8', fontSize: 10, fontWeight: 800}}
-                               domain={[0, 100]}
-                            />
-                            <Tooltip 
-                               cursor={{fill: 'rgba(94, 92, 230, 0.05)'}} 
-                               contentStyle={{borderRadius: '20px', border: 'none', boxShadow: '0 25px 50px rgba(0,0,0,0.1)', padding: '1.25rem'}} 
-                            />
-                            <Bar dataKey="success_rate" barSize={32} radius={[10, 10, 10, 10]}>
-                               {data.map((_: any, index: number) => (
-                                  <Cell key={index} fill={index % 2 === 0 ? '#5e5ce6' : '#10b981'} />
-                               ))}
-                            </Bar>
-                         </BarChart>
-                      </ResponsiveContainer>
-                   </div>
-                   <div className="mt-8 pt-8 border-t border-slate-50">
-                      <div className="flex justify-between items-center mb-5">
-                         <span className="text-xs font-black text-slate-500 tracking-widest uppercase">Efficacité Moyenne</span>
-                         <span className="text-xl font-black text-[#5e5ce6]">{avgSuccess}%</span>
-                      </div>
-                      <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
-                         <div 
-                           className="h-full bg-gradient-to-r from-[#5e5ce6] to-[#10b981] transition-all duration-1000"
-                           style={{ width: `${avgSuccess}%` }}
-                         />
-                      </div>
-                   </div>
+          <div className="xl:col-span-2">
+            <div
+              className="rounded-[var(--radius-xl)] border border-white/[0.06] p-6 h-full"
+              style={{ background: 'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)' }}
+            >
+              <h3 className="text-base font-bold text-[var(--text-main)] mb-1 flex items-center gap-2">
+                <Zap className="text-cyan-400" size={20} />
+                Taux de succès par agent
+              </h3>
+              <p className="text-xs text-slate-500 mb-6">Comparaison visuelle (%)</p>
+              <div style={{ height: 280 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={data} margin={{ top: 8, right: 8, left: -8, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.06)" />
+                    <XAxis dataKey="nom" tick={{ fill: '#64748b', fontSize: 10 }} axisLine={false} tickLine={false} />
+                    <YAxis
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: '#64748b', fontSize: 10 }}
+                      domain={[0, 100]}
+                    />
+                    <Tooltip
+                      {...chartTooltip}
+                      formatter={(v) => [`${v ?? 0}%`, 'Succès']}
+                    />
+                    <Bar dataKey="success_rate" radius={[6, 6, 0, 0]} maxBarSize={36}>
+                      {data.map((_: any, index: number) => (
+                        <Cell key={index} fill={index % 2 === 0 ? '#06b6d4' : '#34d399'} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="mt-6 pt-6 border-t border-white/[0.06]">
+                <div className="flex justify-between items-center text-sm mb-2">
+                  <span className="text-slate-500">Moyenne plateforme</span>
+                  <span className="font-bold text-cyan-400 tabular-nums">{avgSuccess}%</span>
                 </div>
-             </div>
+                <div className="h-2 rounded-full bg-white/[0.06] overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-700"
+                    style={{
+                      width: `${avgSuccess}%`,
+                      background: 'linear-gradient(90deg, #06b6d4, #34d399)',
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -261,67 +332,85 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
     const avgConv = totalHandled > 0 ? Math.round((totalDelivered / totalHandled) * 100) : 0;
 
     return (
-      <div className="space-y-12">
-        {renderStatsRow([
-          { label: 'Conversion Client', value: `${avgConv}%`, icon: Zap, color: 'text-[#8b5cf6]', trend: '+1.8%' },
-          { label: 'Appels Qualifiés', value: totalHandled, icon: Activity, color: 'text-[#3b82f6]', trend: '+5%' },
-          { label: 'Validations Fermes', value: totalValidations, icon: ShieldCheck, color: 'text-[#10b981]' },
-          { label: 'Pertes Opérationnelles', value: `${100-avgConv}%`, icon: AlertTriangle, color: 'text-[#f43f5e]', trend: '-0.5%' }
-        ])}
+      <div className="space-y-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <StatCard label="Conversion (livraisons / dossiers)" value={`${avgConv}%`} icon={Zap} accent="violet" />
+          <StatCard label="Dossiers traités" value={totalHandled} icon={Activity} accent="cyan" />
+          <StatCard label="Validations fermes" value={totalValidations} icon={ShieldCheck} accent="emerald" />
+          <StatCard label="Écart conversion" value={`${Math.max(0, 100 - avgConv)}%`} icon={AlertTriangle} accent="rose" />
+        </div>
 
-        <div className="bg-white rounded-[2.5rem] p-10 shadow-xl border border-slate-100 relative overflow-hidden">
-           <div className="flex justify-between items-center mb-12">
-              <div>
-                <h3 className="text-2xl font-black text-slate-900 leading-tight">Staff Centre d'Appel</h3>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Audit Conversions Réelles / Validations</p>
-              </div>
-              <div className="w-12 h-12 bg-[#8b5cf6]/10 rounded-2xl flex items-center justify-center text-[#8b5cf6]">
-                 <PhoneCall size={24} strokeWidth={2.5} />
-              </div>
-           </div>
+        <div
+          className="rounded-[var(--radius-xl)] border border-white/[0.06] p-6 md:p-8"
+          style={{ background: 'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)' }}
+        >
+          <div className="flex flex-wrap items-start justify-between gap-4 mb-8">
+            <div>
+              <h3 className="text-lg font-bold text-[var(--text-main)]">Centre d&apos;appel</h3>
+              <p className="text-sm text-slate-500 mt-0.5">Performance par agent</p>
+            </div>
+            <div className="w-11 h-11 rounded-xl bg-violet-500/15 flex items-center justify-center text-violet-400">
+              <PhoneCall size={22} strokeWidth={2} />
+            </div>
+          </div>
 
-           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-              <div className="space-y-10">
-                 {data.map((agent: any) => (
-                    <div key={agent.agent_id} className="group cursor-default">
-                       <div className="flex justify-between items-end mb-4">
-                          <div>
-                             <h4 className="text-xl font-black text-slate-900 leading-tight group-hover:text-[#8b5cf6] transition-colors">{agent.staff_name || 'Agent Nexus'}</h4>
-                             <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-1">{agent.total_handled} Dossiers Traités</p>
-                          </div>
-                          <div className="text-right">
-                             <div className="text-3xl font-black text-slate-900 tracking-tighter">{agent.success_rate}%</div>
-                             <p className="text-[11px] font-black text-emerald-500 uppercase tracking-widest">Conversion</p>
-                          </div>
-                       </div>
-                       <div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden p-1">
-                          <div 
-                             className="h-full bg-gradient-to-r from-[#8b5cf6] to-[#3b82f6] rounded-full transition-all duration-1000 shadow-lg shadow-[#8b5cf6]/20"
-                             style={{ width: `${agent.success_rate}%` }}
-                          />
-                       </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+            <div className="space-y-6">
+              {data.map((agent: any) => (
+                <div key={agent.agent_id}>
+                  <div className="flex justify-between items-end gap-4 mb-2">
+                    <div>
+                      <h4 className="font-semibold text-slate-100">{agent.staff_name || 'Agent'}</h4>
+                      <p className="text-xs text-slate-500 mt-0.5">{agent.total_handled} dossiers</p>
                     </div>
-                 ))}
-                 {data.length === 0 && <div className="p-12 text-center text-slate-400 font-bold italic">Aucune donnée disponible.</div>}
-              </div>
-
-              <div className="bg-slate-50/50 rounded-[2rem] p-10 flex flex-col items-center justify-center text-center">
-                 <div className="w-32 h-32 mb-10 relative">
-                    <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
-                       <circle cx="50" cy="50" r="45" fill="none" stroke="#e2e8f0" strokeWidth="8" />
-                       <circle cx="50" cy="50" r="45" fill="none" stroke="#8b5cf6" strokeWidth="10" strokeDasharray={`${avgConv * 2.82}, 282`} strokeLinecap="round" className="transition-all duration-1000" />
-                    </svg>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                       <span className="text-3xl font-black text-slate-900 tracking-tighter">{avgConv}%</span>
-                       <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Global</span>
+                    <div className="text-right">
+                      <div className="text-xl font-bold text-slate-100 tabular-nums">{agent.success_rate}%</div>
+                      <p className="text-[10px] uppercase tracking-wider text-emerald-400/90 font-semibold">Conversion</p>
                     </div>
-                 </div>
-                 <h4 className="text-xl font-black text-slate-900 mb-3 tracking-tight">Efficacité Conversationnelle</h4>
-                 <p className="text-sm text-slate-400 font-semibold max-w-[280px] leading-relaxed">
-                    Ce score mesure la capacité de votre équipe à transformer une validation en livraison réussie sur le terrain.
-                 </p>
+                  </div>
+                  <div className="h-2.5 rounded-full bg-white/[0.06] overflow-hidden p-0.5">
+                    <div
+                      className="h-full rounded-full transition-all duration-700"
+                      style={{
+                        width: `${Math.min(100, agent.success_rate)}%`,
+                        background: 'linear-gradient(90deg, #8b5cf6, #3b82f6)',
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+              {data.length === 0 && <p className="text-center text-slate-500 text-sm py-8">Aucune donnée centre d&apos;appel.</p>}
+            </div>
+
+            <div
+              className="flex flex-col items-center justify-center text-center rounded-2xl border border-white/[0.06] p-8 bg-white/[0.02]"
+            >
+              <div className="relative w-36 h-36 mb-6">
+                <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+                  <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="10" />
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="42"
+                    fill="none"
+                    stroke="#8b5cf6"
+                    strokeWidth="10"
+                    strokeDasharray={`${avgConv * 2.64}, 264`}
+                    strokeLinecap="round"
+                    className="transition-all duration-1000"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-3xl font-bold text-slate-100 tabular-nums">{avgConv}%</span>
+                  <span className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Global</span>
+                </div>
               </div>
-           </div>
+              <h4 className="text-base font-bold text-slate-100 mb-2">Efficacité conversationnelle</h4>
+              <p className="text-sm text-slate-500 max-w-xs leading-relaxed">
+                Part des dossiers ayant abouti à une livraison réussie, sur la période affichée.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -330,143 +419,197 @@ export const PerformanceDashboard = ({ tenantId, isSuperAdmin }: PerformanceDash
   const renderInventory = () => {
     const data = stats.inventaire;
     const itemsAlert = data.filter((i: any) => i.stock_actuel <= (i.stock_minimum || 5)).length;
+    const healthPct =
+      data.length > 0 ? Math.round((1 - itemsAlert / data.length) * 100) : 0;
+    const avgRotation =
+      data.length > 0
+        ? Math.round(data.reduce((acc: number, i: any) => acc + (Number(i.rotation_index) || 0), 0) / data.length)
+        : 0;
 
     return (
-      <div className="space-y-12">
-        {renderStatsRow([
-          { label: 'Santé des Stocks', value: `${data.length > 0 ? Math.round((1 - itemsAlert/data.length)*100) : 0}%`, icon: Layers, color: 'text-[#6366f1]', trend: '+4%' },
-          { label: 'Articles Alertés', value: itemsAlert, icon: AlertTriangle, color: 'text-[#f43f5e]', trend: itemsAlert > 5 ? '+2' : '-1' },
-          { label: 'Rotation Globale', value: `${data.length > 0 ? Math.round(data.reduce((acc: any, i: any) => acc + (Number(i.rotation_index)||0), 0)/data.length) : 0}%`, icon: TrendingUp, color: 'text-[#06b6d4]' },
-          { label: 'Ruptures Totales', value: data.filter((i: any) => i.stock_actuel === 0).length, icon: Package, color: 'text-[#1e293b]' }
-        ])}
+      <div className="space-y-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <StatCard label="Santé des stocks" value={`${healthPct}%`} icon={Layers} accent="cyan" />
+          <StatCard label="Articles sous seuil" value={itemsAlert} icon={AlertTriangle} accent="amber" />
+          <StatCard label="Rotation moyenne" value={`${avgRotation}%`} icon={TrendingUp} accent="emerald" />
+          <StatCard label="Ruptures" value={data.filter((i: any) => i.stock_actuel === 0).length} icon={Package} accent="rose" />
+        </div>
 
-        <div className="bg-white rounded-[2.5rem] p-10 shadow-xl border border-slate-100">
-           <div className="flex justify-between items-center mb-12">
-              <div>
-                <h3 className="text-2xl font-black text-slate-900 leading-tight">Moniteur de Stocks</h3>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Audit des niveaux critiques et rotation</p>
-              </div>
-              <div className="flex gap-3">
-                 <div className="px-5 py-3 rounded-2xl bg-slate-50 border border-slate-100 text-xs font-black text-slate-500 uppercase tracking-widest">
-                    {data.length} Références
-                 </div>
-              </div>
-           </div>
-
-           <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                 <thead>
-                    <tr className="text-[11px] uppercase tracking-widest text-slate-400 font-extrabold bg-slate-50/50">
-                       <th className="p-8">Produit</th>
-                       <th className="p-8 text-center">Quantité Actuelle</th>
-                       <th className="p-8 text-center">Seuil Alerte</th>
-                       <th className="p-8 text-center">Indice de Rotation</th>
-                       <th className="p-8 text-right">Statut Vital</th>
-                    </tr>
-                 </thead>
-                 <tbody className="divide-y divide-slate-50">
-                    {data.map((item: any) => (
-                       <tr key={item.sku} className="hover:bg-slate-50/50 transition-colors">
-                          <td className="p-8">
-                             <div>
-                                <div className="font-black text-slate-800 text-lg leading-tight">{item.nom}</div>
-                                <div className="text-[11px] font-bold text-[#5e5ce6] uppercase tracking-widest mt-1">SKU: {item.sku}</div>
-                             </div>
-                          </td>
-                          <td className="p-8 text-center">
-                             <div className={`inline-flex items-center gap-3 px-6 py-2 rounded-2xl font-black text-lg ${item.stock_actuel <= (item.stock_minimum || 5) ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'}`}>
-                                {item.stock_actuel}
-                             </div>
-                          </td>
-                          <td className="p-8 text-center font-bold text-slate-400 text-sm">{item.stock_minimum || 5} u.</td>
-                          <td className="p-8 text-center">
-                             <div className="flex items-center justify-center gap-3">
-                                <div className="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
-                                   <div 
-                                      className="h-full bg-[#06b6d4] transition-all duration-1000"
-                                      style={{ width: `${item.rotation_index}%` }}
-                                   />
-                                </div>
-                                <span className="font-black text-slate-700 text-sm whitespace-nowrap">{item.rotation_index}%</span>
-                             </div>
-                          </td>
-                          <td className="p-8 text-right">
-                             <span className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${item.stock_actuel > (item.stock_minimum || 5) ? 'bg-emerald-100 text-emerald-700' : item.stock_actuel > 0 ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700'}`}>
-                                {item.stock_actuel > (item.stock_minimum || 5) ? 'Optimal' : item.stock_actuel > 0 ? 'Réapprovisionner' : 'Rupture'}
-                             </span>
-                          </td>
-                       </tr>
-                    ))}
-                    {data.length === 0 && <tr><td colSpan={5} className="p-12 text-center text-slate-400 font-bold italic">Aucun produit configuré pour le suivi des performances.</td></tr>}
-                 </tbody>
-              </table>
-           </div>
+        <div
+          className="rounded-[var(--radius-xl)] border border-white/[0.06] overflow-hidden"
+          style={{ background: 'linear-gradient(145deg, #1e293b 0%, #0f172a 100%)' }}
+        >
+          <div className="px-6 py-5 border-b border-white/[0.06] flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h3 className="text-lg font-bold text-[var(--text-main)]">Inventaire</h3>
+              <p className="text-sm text-slate-500 mt-0.5">Seuils, rotation et statut</p>
+            </div>
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06]">
+              {data.length} réf.
+            </span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="text-[11px] uppercase tracking-wider text-slate-500 border-b border-white/[0.06] bg-white/[0.03]">
+                  <th className="px-5 py-4 font-semibold">Produit</th>
+                  <th className="px-5 py-4 font-semibold text-center">Stock</th>
+                  <th className="px-5 py-4 font-semibold text-center">Seuil</th>
+                  <th className="px-5 py-4 font-semibold text-center">Rotation</th>
+                  <th className="px-5 py-4 font-semibold text-right">Statut</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/[0.04]">
+                {data.map((item: any) => (
+                  <tr key={item.sku} className="hover:bg-white/[0.02]">
+                    <td className="px-5 py-4">
+                      <div className="font-semibold text-slate-100">{item.nom}</div>
+                      <div className="text-[11px] text-cyan-400/80 font-medium mt-0.5">SKU {item.sku}</div>
+                    </td>
+                    <td className="px-5 py-4 text-center">
+                      <span
+                        className={`inline-flex min-w-[3rem] justify-center px-3 py-1 rounded-lg text-sm font-semibold tabular-nums ${
+                          item.stock_actuel <= (item.stock_minimum || 5)
+                            ? 'bg-rose-500/15 text-rose-300'
+                            : 'bg-emerald-500/15 text-emerald-300'
+                        }`}
+                      >
+                        {item.stock_actuel}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4 text-center text-slate-500 tabular-nums">{item.stock_minimum || 5}</td>
+                    <td className="px-5 py-4 text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="w-20 h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
+                          <div
+                            className="h-full bg-cyan-500/80 rounded-full"
+                            style={{ width: `${Math.min(100, item.rotation_index)}%` }}
+                          />
+                        </div>
+                        <span className="text-xs font-semibold text-slate-300 tabular-nums w-9">{item.rotation_index}%</span>
+                      </div>
+                    </td>
+                    <td className="px-5 py-4 text-right">
+                      <span
+                        className={`inline-block px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${
+                          item.stock_actuel > (item.stock_minimum || 5)
+                            ? 'bg-emerald-500/15 text-emerald-300'
+                            : item.stock_actuel > 0
+                              ? 'bg-amber-500/15 text-amber-200'
+                              : 'bg-rose-500/15 text-rose-300'
+                        }`}
+                      >
+                        {item.stock_actuel > (item.stock_minimum || 5)
+                          ? 'OK'
+                          : item.stock_actuel > 0
+                            ? 'À réappro.'
+                            : 'Rupture'}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {data.length === 0 && (
+            <p className="p-10 text-center text-slate-500 text-sm">Aucun produit suivi pour l&apos;inventaire.</p>
+          )}
         </div>
       </div>
     );
   };
 
-  return (
-    <div className="min-h-screen bg-[#f8fafc] p-6 lg:p-14 font-sans overflow-x-hidden selection:bg-[#5e5ce6]/20">
-      <div className="max-w-[1700px] mx-auto pb-20">
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-16 gap-10 animate-pageEnter">
-          <div className="relative">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-1.5 bg-gradient-to-r from-[#5e5ce6] to-[#10b981] rounded-full"></div>
-              <span className="text-[#5e5ce6] font-black uppercase tracking-[0.4em] text-[10px]">Intelligence Performance Monitoring</span>
-            </div>
-            <h1 className="text-5xl lg:text-7xl font-black text-slate-900 tracking-tighter leading-none mb-6" style={{ fontFamily: 'Outfit, sans-serif', letterSpacing: '-0.05em' }}>
-              Nexus Hub Performance
-            </h1>
-            <p className="text-slate-400 font-bold text-xl max-w-2xl leading-relaxed">
-              Tableau de bord décisionnel automatisé pour le pilotage de vos départements logistiques et ventes.
-            </p>
-          </div>
-          <div className="flex flex-col items-end gap-6">
-             {renderFilterButtons()}
-             <div className="flex items-center gap-4 text-xs font-black text-slate-400 bg-white p-4 rounded-3xl border border-slate-100 shadow-sm">
-                <Clock size={16} />
-                <span>Mis à jour le {new Date().toLocaleDateString('fr-FR')} à {new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
-             </div>
-          </div>
-        </div>
+  const scopeLine = isSuperAdmin
+    ? 'Vue consolidée — toutes les boutiques de la plateforme.'
+    : 'Indicateurs de votre activité et de vos équipes.';
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16 animate-pageEnter" style={{ animationDelay: '0.1s' }}>
-          {[
-            { id: 'logistique', label: 'Département Logistique', sub: 'Livraisons & Capacités Terrain', icon: Truck, color: 'text-[#5e5ce6]', bg: 'bg-[#5e5ce6]/10' },
-            { id: 'call-center', label: 'Centre de Validation', sub: 'Efficacité & Conversions', icon: PhoneCall, color: 'text-[#10b981]', bg: 'bg-[#10b981]/10' },
-            { id: 'inventaire', label: 'Gestion Inventaire', sub: 'Rotation & Ruptures', icon: Package, color: 'text-[#3b82f6]', bg: 'bg-[#3b82f6]/10' }
-          ].map((tab) => (
-             <button
-               key={tab.id}
-               onClick={() => setActiveTab(tab.id as TabType)}
-               className={`group flex items-center gap-6 p-10 rounded-[2.5rem] text-left transition-all duration-700 bg-white border-4 relative overflow-hidden ${
-                  activeTab === tab.id 
-                    ? 'border-[#5e5ce6] shadow-2xl shadow-[#5e5ce6]/20 scale-[1.03]' 
-                    : 'border-transparent shadow-xl shadow-slate-200/40 hover:border-[#5e5ce6]/20'
-               }`}
-             >
-                <div className={`absolute -right-10 -bottom-10 opacity-[0.05] group-hover:opacity-[0.1] transition-opacity duration-700 ${tab.color}`}>
-                   <tab.icon size={150} />
+  const tabDefs: { id: TabType; label: string; sub: string; icon: typeof Truck }[] = [
+    { id: 'logistique', label: 'Logistique', sub: 'Livreurs & missions', icon: Truck },
+    { id: 'call-center', label: "Centre d'appel", sub: 'Conversions & dossiers', icon: PhoneCall },
+    { id: 'inventaire', label: 'Inventaire', sub: 'Stocks & rotation', icon: Package },
+  ];
+
+  return (
+    <div
+      className="min-h-full w-full font-sans overflow-x-hidden selection:bg-cyan-500/20"
+      style={{
+        background:
+          'linear-gradient(180deg, var(--bg-app) 0%, #0a0f1a 40%, var(--bg-app) 100%)',
+        color: 'var(--text-main)',
+      }}
+    >
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-8 lg:py-10 pb-16">
+        <header className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-10">
+          <div className="max-w-2xl">
+            <div className="flex items-center gap-3 mb-3">
+              <span className="h-px w-8 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full" />
+              <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-400/90">Performance</span>
+            </div>
+            <h1 className="text-3xl sm:text-4xl lg:text-[2.35rem] font-bold tracking-tight text-[var(--text-main)] mb-3" style={{ fontFamily: 'Outfit, sans-serif' }}>
+              Pilotage opérationnel
+            </h1>
+            <p className="text-slate-400 text-base leading-relaxed">{scopeLine}</p>
+          </div>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 lg:gap-6 shrink-0">
+            {renderFilterButtons()}
+            <div className="flex items-center gap-2 text-xs text-slate-500 px-3 py-2 rounded-xl border border-white/[0.06] bg-white/[0.02]">
+              <Clock size={14} className="text-slate-500 shrink-0" />
+              <span>
+                {new Date().toLocaleDateString('fr-FR')} ·{' '}
+                {new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
+          </div>
+        </header>
+
+        <nav className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-10" aria-label="Domaines">
+          {tabDefs.map((tab) => {
+            const active = activeTab === tab.id;
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-start gap-4 p-5 rounded-[var(--radius-xl)] text-left border transition-all duration-300 ${
+                  active
+                    ? 'border-cyan-500/40 shadow-[0_0_0_1px_rgba(6,182,212,0.15)]'
+                    : 'border-white/[0.06] hover:border-white/10'
+                }`}
+                style={{
+                  background: active ? 'rgba(6, 182, 212, 0.08)' : 'var(--surface)',
+                  boxShadow: active ? '0 12px 40px rgba(0,0,0,0.35)' : undefined,
+                }}
+              >
+                <div
+                  className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+                    active ? 'bg-cyan-500/20 text-cyan-300' : 'bg-white/[0.05] text-slate-400'
+                  }`}
+                >
+                  <Icon size={22} strokeWidth={2} />
                 </div>
-                <div className={`w-20 h-20 rounded-3xl flex items-center justify-center transition-transform duration-700 group-hover:scale-110 ${tab.bg}`}>
-                   <tab.icon size={32} strokeWidth={2.5} className={tab.color} />
+                <div>
+                  <div className={`font-bold text-base ${active ? 'text-white' : 'text-slate-200'}`}>{tab.label}</div>
+                  <div className="text-xs text-slate-500 mt-0.5">{tab.sub}</div>
                 </div>
-                <div className="relative z-10">
-                   <div className="text-xl font-black text-slate-900 leading-tight tracking-tight mb-2 group-hover:text-[#5e5ce6] transition-colors">{tab.label}</div>
-                   <div className="text-xs font-black text-slate-400 uppercase tracking-widest">{tab.sub}</div>
-                </div>
-             </button>
-          ))}
-        </div>
+              </button>
+            );
+          })}
+        </nav>
 
         {loading ? (
-          <div className="flex flex-col items-center justify-center p-48 bg-white/50 backdrop-blur-2xl rounded-[4rem] shadow-inner border border-white/50 animate-pulse">
-             <div className="w-16 h-16 border-4 border-[#5e5ce6] border-t-transparent rounded-full animate-spin"></div>
-             <p className="mt-8 text-slate-500 font-black tracking-[0.3em] uppercase text-xs">Analyse des flux opérationnels...</p>
+          <div
+            className="flex flex-col items-center justify-center py-24 rounded-[var(--radius-xl)] border border-white/[0.06]"
+            style={{ background: 'var(--surface)' }}
+          >
+            <div
+              className="w-12 h-12 border-2 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin"
+              aria-hidden
+            />
+            <p className="mt-6 text-sm font-medium text-slate-500 uppercase tracking-wider">Chargement des indicateurs…</p>
           </div>
         ) : (
-          <div className="animate-pageEnter" style={{ animationDelay: '0.2s' }}>
+          <div style={{ animation: 'fadeIn 0.4s ease' }}>
             {activeTab === 'logistique' && renderLogistics()}
             {activeTab === 'call-center' && renderCallCenter()}
             {activeTab === 'inventaire' && renderInventory()}

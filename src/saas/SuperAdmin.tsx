@@ -68,10 +68,12 @@ export const SuperAdmin: React.FC = () => {
   return (
     <div className="nexus-container" style={{ 
       animation: 'pageEnter 0.35s ease', 
-      paddingBottom: '4rem',
+      paddingBottom: activeTab === 'PERFORMANCE' ? '0' : '4rem',
       minHeight: '100%'
     }}>
       
+      {activeTab !== 'PERFORMANCE' && (
+      <>
       {/* Header Nexus */}
       <div style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
@@ -117,9 +119,11 @@ export const SuperAdmin: React.FC = () => {
            </button>
         </div>
       </div>
+      </>
+      )}
 
       {/* TABS CONTENT */}
-      <div style={{ marginTop: '1rem', animation: 'fadeIn 0.5s ease' }}>
+      <div style={{ marginTop: activeTab === 'PERFORMANCE' ? 0 : '1rem', animation: 'fadeIn 0.5s ease' }}>
         {activeTab === 'OVERVIEW' && <OverviewTab stats={platformStats} tenants={tenants} />}
         {activeTab === 'TENANTS' && <TenantsTab tenants={tenants} fetchData={fetchData} loading={loading} />}
         {activeTab === 'PERFORMANCE' && <PerformanceHub />}
@@ -355,7 +359,7 @@ const OverviewTab = ({ stats, tenants }: { stats: any, tenants: Tenant[] }) => {
 /* -------------------------------------------------------------------------- */
 const PerformanceHub = () => {
   return (
-    <div className="absolute inset-0 bg-white" style={{ minHeight: 'calc(100vh - 150px)' }}>
+    <div className="w-full -mx-6" style={{ marginTop: '-0.5rem' }}>
        <PerformanceDashboard isSuperAdmin={true} />
     </div>
   );
