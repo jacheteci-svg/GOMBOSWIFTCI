@@ -264,9 +264,11 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div
-        className="modal-content modal-nexus modal-nexus-wide card glass-effect"
+        className="modal-content modal-nexus modal-nexus-wide card glass-effect modal-appel-form"
         style={{
-          maxWidth: '720px',
+          maxWidth: 'min(720px, calc(100vw - 1rem))',
+          width: '100%',
+          minWidth: 0,
           padding: 0,
           overflow: 'hidden',
           position: 'relative',
@@ -277,7 +279,7 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
         <div className="modal-shell">
         <div className="modal-nexus-accent" />
         <div
-          className="modal-body-scroll"
+          className="modal-body-scroll modal-appel-form-body"
           style={{
             position: 'relative',
             padding: '2.25rem 2.25rem 2rem',
@@ -308,8 +310,8 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
           <X size={18} strokeWidth={2.5} />
         </button>
         
-        <div style={{ marginBottom: '2rem', paddingRight: '2.75rem' }}>
-          <h2 className="text-premium" style={{ fontSize: '1.6rem', fontWeight: 800, margin: 0 }}>Traitement d&apos;appel</h2>
+        <div className="modal-appel-form-header" style={{ marginBottom: '2rem', paddingRight: '2.75rem' }}>
+          <h2 className="text-premium" style={{ fontSize: 'clamp(1.25rem, 4.5vw, 1.6rem)', fontWeight: 800, margin: 0 }}>Traitement d&apos;appel</h2>
           <div className="modal-panel-light" style={{ marginTop: '1rem', padding: '1.25rem', background: '#f8fafc', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
               <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Référence Commande</span>
@@ -353,7 +355,7 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
         </div>
 
         <div
-          className="modal-panel-light"
+          className="modal-panel-light modal-appel-articles"
           style={{
             marginBottom: '1.5rem',
             padding: '1.25rem',
@@ -361,6 +363,9 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
             borderRadius: '16px',
             border: '1px solid #6ee7b7',
             boxShadow: '0 1px 0 rgba(255,255,255,0.6) inset',
+            minWidth: 0,
+            maxWidth: '100%',
+            boxSizing: 'border-box',
           }}
         >
           <div style={{ fontWeight: 800, marginBottom: '0.5rem', color: '#14532d', fontSize: '1rem' }}>Articles & quantités</div>
@@ -372,59 +377,64 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
             {lignesLocal.map((ligne, idx) => (
               <div
                 key={idx}
-                className="modal-panel-light"
+                className="modal-panel-light appel-form-ligne-produit"
                 style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 88px 40px',
-                  gap: '0.5rem',
-                  alignItems: 'center',
                   background: '#ffffff',
                   padding: '0.75rem',
                   borderRadius: '12px',
                   border: '1px solid #cbd5e1',
                   boxShadow: '0 1px 2px rgba(15,23,42,0.06)',
+                  minWidth: 0,
+                  maxWidth: '100%',
+                  boxSizing: 'border-box',
                 }}
               >
-                <select
-                  className="form-select"
-                  style={{ height: '42px', fontSize: '0.85rem', fontWeight: 600 }}
-                  value={ligne.produit_id || ''}
-                  onChange={(e) => updateLigne(idx, 'produit_id', e.target.value)}
-                >
-                  <option value="">Choisir un produit…</option>
-                  {catalogue.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.nom}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  type="number"
-                  min={1}
-                  className="form-input"
-                  style={{ height: '42px', textAlign: 'center', fontWeight: 700 }}
-                  value={ligne.quantite ?? 1}
-                  onChange={(e) => updateLigne(idx, 'quantite', e.target.value)}
-                />
-                <button
-                  type="button"
-                  onClick={() => removeLigne(idx)}
-                  style={{
-                    border: 'none',
-                    background: '#fee2e2',
-                    borderRadius: '10px',
-                    height: '42px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#b91c1c',
-                  }}
-                  title="Retirer la ligne"
-                >
-                  <Trash2 size={18} />
-                </button>
-                <div style={{ gridColumn: '1 / -1', fontSize: '0.8rem', color: '#475569', lineHeight: 1.45 }}>
+                <div className="appel-select-wrap">
+                  <select
+                    className="form-select appel-produit-select"
+                    style={{ height: '42px', fontSize: '0.85rem', fontWeight: 600 }}
+                    value={ligne.produit_id || ''}
+                    onChange={(e) => updateLigne(idx, 'produit_id', e.target.value)}
+                  >
+                    <option value="">Choisir un produit…</option>
+                    {catalogue.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.nom}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="appel-qty-actions">
+                  <input
+                    type="number"
+                    min={1}
+                    className="form-input"
+                    style={{ height: '42px', textAlign: 'center', fontWeight: 700 }}
+                    value={ligne.quantite ?? 1}
+                    onChange={(e) => updateLigne(idx, 'quantite', e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeLigne(idx)}
+                    style={{
+                      border: 'none',
+                      background: '#fee2e2',
+                      borderRadius: '10px',
+                      height: '42px',
+                      width: '42px',
+                      flexShrink: 0,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#b91c1c',
+                    }}
+                    title="Retirer la ligne"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+                <div className="appel-ligne-meta" style={{ gridColumn: '1 / -1', fontSize: '0.8rem', color: '#475569', lineHeight: 1.45 }}>
                   {ligne.nom_produit ? (
                     <>
                       <strong style={{ color: '#0f172a' }}>{ligne.nom_produit}</strong>
@@ -480,7 +490,7 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
           
           <div className="modal-panel-light" style={{ padding: '1.25rem', borderRadius: '16px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
             <label className="form-label" style={{ fontWeight: 800, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: '#475569', marginBottom: '1rem', display: 'block' }}>Résultat de l&apos;échange</label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+            <div className="appel-resultat-grid">
               <label style={{ 
                 border: `2px solid ${resultat === 'validee' ? '#06b6d4' : '#cbd5e1'}`, 
                 borderRadius: '14px', padding: '1rem', cursor: 'pointer', transition: 'all 0.2s ease',
@@ -510,7 +520,7 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
                 borderRadius: '14px', padding: '1rem', cursor: 'pointer', transition: 'all 0.2s ease',
                 background: resultat === 'annulee' ? 'rgba(239, 68, 68, 0.08)' : '#ffffff',
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.45rem',
-                gridColumn: 'span 2',
+                gridColumn: '1 / -1',
                 boxShadow: resultat === 'annulee' ? '0 4px 14px rgba(239, 68, 68, 0.18)' : '0 1px 2px rgba(15,23,42,0.06)'
               }}>
                 <input type="radio" checked={resultat === 'annulee'} onChange={() => setResultat('annulee')} style={{ display: 'none' }} />
@@ -524,14 +534,14 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
             <div className="modal-panel-light" style={{ padding: '1.35rem', background: 'linear-gradient(180deg, #faf5ff 0%, #f5f3ff 100%)', borderRadius: '16px', border: '1px solid #c4b5fd', display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label" style={{ fontWeight: 800, color: '#334155' }}>Zone de livraison finale</label>
-                <select className="form-select" required value={communeLocal} onChange={e => handleCommuneChange(e.target.value)} style={{ height: '48px', fontWeight: 600 }}>
+                <select className="form-select appel-fullwidth-input" required value={communeLocal} onChange={e => handleCommuneChange(e.target.value)} style={{ height: '48px', fontWeight: 600, width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
                   <option value="">Sélectionner une commune...</option>
                   {communesDb.map(c => <option key={c.id} value={c.nom}>{c.nom} ({c.tarif_livraison} CFA)</option>)}
                 </select>
               </div>
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label" style={{ fontWeight: 800, color: '#334155' }}>Lieu exact (confirmation)</label>
-                <input type="text" className="form-input" required value={adresseLocal} onChange={e => setAdresseLocal(e.target.value)} style={{ height: '48px', fontWeight: 600 }} placeholder="Quartier, repère, instructions…" />
+                <input type="text" className="form-input appel-fullwidth-input" required value={adresseLocal} onChange={e => setAdresseLocal(e.target.value)} style={{ height: '48px', fontWeight: 600, width: '100%', maxWidth: '100%', boxSizing: 'border-box' }} placeholder="Quartier, repère, instructions…" />
               </div>
               <div className="modal-panel-light" style={{ padding: '1.15rem 1.25rem', background: '#ffffff', borderRadius: '14px', border: '1px solid #ddd6fe' }}>
                  <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.35rem' }}>Montant total à encaisser</div>
@@ -545,17 +555,17 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
           <div className="form-group modal-panel-light" style={{ padding: '1rem', borderRadius: '16px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
             <label className="form-label" style={{ fontWeight: 700 }}>Note d'appel</label>
             <textarea 
-              className="form-input" 
+              className="form-input appel-fullwidth-input" 
               rows={3}
               required
-              style={{ borderRadius: '16px', padding: '1rem' }}
+              style={{ borderRadius: '16px', padding: '1rem', width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}
               placeholder="Ex: Client confirmé, livraison OK pour demain matin..."
               value={commentaire}
               onChange={e => setCommentaire(e.target.value)}
             />
           </div>
 
-          <div className="modal-footer-bar" style={{ marginTop: '1rem', borderRadius: '16px' }}>
+          <div className="modal-footer-bar modal-appel-footer" style={{ marginTop: '1rem', borderRadius: '16px', flexShrink: 0 }}>
             <button type="button" className="btn btn-outline" onClick={onClose} disabled={loading} style={{ flex: 1, minHeight: '52px', fontWeight: 700, borderRadius: '14px' }}>Abandonner</button>
             <button type="submit" className="btn btn-primary" disabled={loading} style={{ flex: 2, minHeight: '52px', fontWeight: 800, borderRadius: '14px', boxShadow: '0 10px 15px -3px rgba(6, 182, 212, 0.35)' }}>
               {loading ? 'Traitement...' : 'Enregistrer le résultat'}

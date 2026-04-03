@@ -1,4 +1,5 @@
 -- À exécuter une fois sur la base Postgres InsForge (éditeur SQL du tableau de bord).
+-- (Copie également incluse à la fin de « ensure_core_schema.sql » pour tout appliquer en un seul script.)
 --
 -- Pourquoi : après « Créer un profil », le SDK appelle signUp. Si la confirmation e-mail est
 -- obligatoire, souvent il n’y a pas d’UUID exploitable côté navigateur : cette fonction lit

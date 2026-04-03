@@ -1815,7 +1815,7 @@ export const PerformanceDashboard = ({
       { name: 'Autres boutiques', value: Math.max(0, 100 - concTop3Clamped), color: '#1e293b' },
     ];
 
-    return (
+      return (
       <div className="space-y-8 lg:space-y-10">
         <div
           className="perf-super-synth-root relative overflow-hidden rounded-2xl border border-cyan-500/25 bg-gradient-to-br from-slate-900/70 via-slate-950/80 to-[#05080f] p-4 sm:p-6 shadow-[0_24px_70px_-20px_rgba(0,0,0,0.9),0_0_0_1px_rgba(6,182,212,0.18)] ring-1 ring-cyan-400/15"
@@ -1834,14 +1834,14 @@ export const PerformanceDashboard = ({
             <div className="flex min-w-0 flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-cyan-500/25 bg-gradient-to-br from-cyan-500/15 to-slate-900/80 text-cyan-300 shadow-inner">
                 <Target size={20} strokeWidth={2} aria-hidden />
-              </div>
-              <div>
+            </div>
+            <div>
                 <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">Synthèse plateforme</p>
                 <p className="mt-0.5 text-xs text-slate-500">
                   KPI, camemberts et courbe temporelle — toujours visibles pour la période choisie
                 </p>
-              </div>
             </div>
+          </div>
               <div className="perf-super-badge-row flex-shrink-0 sm:justify-end">
                 {ins.atRiskCount > 0 ? (
                   <span
@@ -1864,7 +1864,7 @@ export const PerformanceDashboard = ({
                     Relance · {ins.dormantActiveCount}
                   </span>
                 ) : null}
-              </div>
+        </div>
             </div>
 
             <div className="relative z-10 space-y-5">
@@ -1943,7 +1943,7 @@ export const PerformanceDashboard = ({
                     Panier moy.{' '}
                     <span className="font-semibold tabular-nums text-slate-400">
                       {ins.panierMoyen.toLocaleString('fr-FR')} CFA
-                    </span>
+              </span>
                   </p>
                 ) : (
                   <p className="mt-1 text-[10px] text-slate-600">—</p>
@@ -2129,7 +2129,7 @@ export const PerformanceDashboard = ({
             </div>
 
             </div>
-          </div>
+        </div>
 
         {/* Carte "leader" + grille 2 colonnes */}
         <div className="grid grid-cols-1 xl:grid-cols-5 gap-6 lg:gap-8">
@@ -2520,9 +2520,9 @@ export const PerformanceDashboard = ({
                   justifyContent: 'space-between',
                   gap: '1rem 1.5rem',
                 }}
-              >
-                <div
-                  style={{
+          >
+            <div
+              style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '1rem',
@@ -2534,9 +2534,9 @@ export const PerformanceDashboard = ({
                   <span
                     style={{
                       fontSize: '0.75rem',
-                      fontWeight: 800,
+                fontWeight: 800,
                       color: 'var(--text-muted)',
-                      textTransform: 'uppercase',
+                textTransform: 'uppercase',
                       letterSpacing: '0.15em',
                       flexShrink: 0,
                     }}
@@ -2554,13 +2554,13 @@ export const PerformanceDashboard = ({
                         {f.label}
                       </button>
                     ))}
-                  </div>
+          </div>
                 </div>
 
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
                     gap: '1rem',
                     flexWrap: 'wrap',
                     flex: '1 1 auto',
@@ -2581,22 +2581,22 @@ export const PerformanceDashboard = ({
                     Pôle
                   </span>
                   <div style={NEXUS_TAB_BAR_WRAP}>
-                    {tabDefs.map((tab) => {
-                      const active = activeTab === tab.id;
-                      return (
-                        <button
-                          key={tab.id}
-                          type="button"
+                {tabDefs.map((tab) => {
+                  const active = activeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
                           role="tab"
                           aria-selected={active}
-                          onClick={() => setActiveTab(tab.id)}
+                      onClick={() => setActiveTab(tab.id)}
                           style={nexusPillButtonStyle(active, tab.color)}
-                        >
-                          {tab.label}
-                        </button>
-                      );
-                    })}
-                  </div>
+                    >
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
                 </div>
               </div>
 
@@ -2634,7 +2634,7 @@ export const PerformanceDashboard = ({
                     {dataUpdatedAt.toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}
                   </span>
                 ) : null}
-              </div>
+            </div>
             </nav>
 
             {staffKpiBundle && !loading && !loadError ? (
@@ -2661,28 +2661,28 @@ export const PerformanceDashboard = ({
                   Synthèse indicateurs
                 </p>
                 <div className="perf-embedded-kpi-grid w-full">
-                  {staffKpiBundle[activeTab].map((k) => {
-                    const IconComp = k.Icon;
-                    return (
-                      <StaffKpiCard
-                        key={k.key}
+                {staffKpiBundle[activeTab].map((k) => {
+                  const IconComp = k.Icon;
+                  return (
+                    <StaffKpiCard
+                      key={k.key}
                         layout="strip"
-                        accent={k.accent}
-                        icon={<IconComp size={20} strokeWidth={2} />}
-                        label={k.label}
-                        value={k.value}
-                        sub={k.sub}
-                      />
-                    );
-                  })}
-                </div>
+                      accent={k.accent}
+                      icon={<IconComp size={20} strokeWidth={2} />}
+                      label={k.label}
+                      value={k.value}
+                      sub={k.sub}
+                    />
+                  );
+                })}
+              </div>
               </div>
             ) : null}
 
-            {loading ? (
-              <div
+              {loading ? (
+                <div
                 className="card glass-effect overflow-hidden"
-                style={{
+                    style={{
                   border: '1px solid rgba(255,255,255,0.03)',
                   borderRadius: '32px',
                   background: 'transparent',
@@ -2701,7 +2701,7 @@ export const PerformanceDashboard = ({
                   {activeTab === 'call-center' && renderCallCenter()}
                   {activeTab === 'inventaire' && renderInventory()}
                 </div>
-              </div>
+            </div>
             )}
           </>
         )}
@@ -2710,15 +2710,15 @@ export const PerformanceDashboard = ({
   }
 
   if (isSuperAdmin) {
-    return (
-      <div
-        className="min-h-full w-full font-sans overflow-x-hidden selection:bg-cyan-500/20"
-        style={{
-          background: 'linear-gradient(180deg, var(--bg-app) 0%, #0a0f1a 50%, var(--bg-app) 100%)',
-          color: 'var(--text-main)',
-          colorScheme: 'dark',
-        }}
-      >
+  return (
+    <div
+      className="min-h-full w-full font-sans overflow-x-hidden selection:bg-cyan-500/20"
+      style={{
+        background: 'linear-gradient(180deg, var(--bg-app) 0%, #0a0f1a 50%, var(--bg-app) 100%)',
+        color: 'var(--text-main)',
+        colorScheme: 'dark',
+      }}
+    >
         <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 py-6 lg:py-8 pb-16">
           <NexusModuleFrame
             badge="Nexus Intelligence"
@@ -2829,19 +2829,19 @@ export const PerformanceDashboard = ({
                         {f.label}
                       </button>
                     ))}
-                  </div>
+              </div>
                 </div>
                 {dataUpdatedAt && !loadError ? (
-                  <div
+                <div
                     className="flex items-center gap-2 text-xs sm:text-sm text-slate-300 px-3 py-2 rounded-xl border border-white/10"
-                    style={{ background: 'rgba(8, 11, 20, 0.75)', backdropFilter: 'blur(12px)' }}
-                  >
+                  style={{ background: 'rgba(8, 11, 20, 0.75)', backdropFilter: 'blur(12px)' }}
+                >
                     <Clock size={16} className="shrink-0 text-cyan-400/90" strokeWidth={2} aria-hidden />
                     <span className="font-semibold tabular-nums">
                       Données :{' '}
                       {dataUpdatedAt.toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}
-                    </span>
-                  </div>
+                  </span>
+                </div>
                 ) : null}
               </div>
               <p
@@ -2870,7 +2870,7 @@ export const PerformanceDashboard = ({
                 <div className="flex items-center gap-3 border-b border-white/[0.06] px-5 py-4">
                   <div className="h-8 w-8 animate-spin rounded-full border-2 border-cyan-500/25 border-t-cyan-400" />
                   <p className="m-0 text-sm font-medium text-slate-400">Chargement des indicateurs…</p>
-                </div>
+            </div>
                 <NexusTableSkeleton rows={6} cols={4} />
               </div>
             ) : loadError ? null : (
@@ -3025,11 +3025,11 @@ export const PerformanceDashboard = ({
           </div>
         ) : (
           <div style={{ animation: 'fadeIn 0.35s ease' }}>
-            <>
-              {activeTab === 'logistique' && renderLogistics()}
-              {activeTab === 'call-center' && renderCallCenter()}
-              {activeTab === 'inventaire' && renderInventory()}
-            </>
+              <>
+                {activeTab === 'logistique' && renderLogistics()}
+                {activeTab === 'call-center' && renderCallCenter()}
+                {activeTab === 'inventaire' && renderInventory()}
+              </>
           </div>
         )}
       </div>

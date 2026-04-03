@@ -299,7 +299,7 @@ const UsersManager = ({ showToast, tenantId }: { showToast: any, tenantId: strin
         if (!userId) {
           if (inviteRpc?.rpcMissing) {
             throw new Error(
-              "La fonction SQL « admin_finalize_user_invite » n’est pas installée sur la base. Dans InsForge : éditeur SQL → exécutez le fichier « rpc_admin_finalize_user_invite.sql » du dépôt, puis réessayez."
+              "La fonction SQL « admin_finalize_user_invite » est absente sur la base InsForge. Dans le tableau de bord : SQL → exécutez tout le fichier « ensure_core_schema.sql » du dépôt (recommandé), ou « rpc_admin_finalize_user_invite.sql » seul. Si besoin, rechargez le cache schéma / API, puis réessayez la création du compte."
             );
           }
           if (inviteRpc?.noAuthUserRow) {

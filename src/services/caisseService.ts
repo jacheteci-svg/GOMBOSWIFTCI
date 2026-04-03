@@ -152,33 +152,71 @@ export const reopenFeuilleRoute = async (tenantId: string, id: string): Promise<
   if (error) throw error;
 };
 
+const COMMANDES_FINANCE_SELECT =
+  'id, montant_total, statut_commande, mode_paiement, frais_livraison, updated_at, date_livraison_effective, lignes:lignes_commandes(*)';
+
+/**
+ * Fusionne deux listes de commandes par id (évite les doublons).
+ * Les filtres `.or()` avec timestamps ISO dans une seule chaîne cassent souvent PostgREST
+ * (caractères `:` et `.` dans la date) — d’où deux requêtes + fusion.
+ */
+function mergeCommandesById(
+  a: Commande[] | null | undefined,
+  b: Commande[] | null | undefined
+): Commande[] {
+  const map = new Map<string, Commande>();
+  for (const c of a || []) {
+    if (c?.id) map.set(c.id, c);
+  }
+  for (const c of b || []) {
+    if (c?.id) map.set(c.id, c);
+  }
+  return Array.from(map.values());
+}
+
 export const getRangeFinancials = async (tenantId: string, startDateStr: string, endDateStr?: string): Promise<any> => {
   const start = new Date(startDateStr);
-  start.setHours(0,0,0,0);
-  
-  const end = endDateStr ? new Date(endDateStr) : new Date(startDateStr);
-  end.setHours(23,59,59,999);
+  start.setHours(0, 0, 0, 0);
 
-  // 1. Get Caisse Retours for the range
+  const end = endDateStr ? new Date(endDateStr) : new Date(startDateStr);
+  end.setHours(23, 59, 59, 999);
+
+  const startIso = start.toISOString();
+  const endIso = end.toISOString();
+
+  // 1. Caisse retours sur la période
   const { data: retours, error: retoursError } = await insforge.database
     .from('caisse_retours')
     .select('*')
     .eq('tenant_id', tenantId)
-    .gte('date', start.toISOString())
-    .lte('date', end.toISOString());
+    .gte('date', startIso)
+    .lte('date', endIso);
 
   if (retoursError) throw retoursError;
 
-  // 2. Get All Commandes modified or delivered in range for stats
-  const filterStr = `and(date_livraison_effective.gte.${start.toISOString()},date_livraison_effective.lte.${end.toISOString()}),and(updated_at.gte.${start.toISOString()},updated_at.lte.${end.toISOString()})`;
-
-  const { data: commandes, error: cmdError } = await insforge.database
+  // 2. Commandes : livraison effective dans la période OU dernière mise à jour dans la période (deux requêtes, pas un .or() avec ISO brut)
+  const { data: byLivraison, error: errLiv } = await insforge.database
     .from('commandes')
-    .select('id, montant_total, statut_commande, mode_paiement, frais_livraison, updated_at, date_livraison_effective, lignes:lignes_commandes(*)')
+    .select(COMMANDES_FINANCE_SELECT)
     .eq('tenant_id', tenantId)
-    .or(filterStr);
+    .gte('date_livraison_effective', startIso)
+    .lte('date_livraison_effective', endIso);
 
-  if (cmdError) throw cmdError;
+  if (errLiv) throw errLiv;
 
-  return { retours, commandes };
+  const { data: byUpdated, error: errUpd } = await insforge.database
+    .from('commandes')
+    .select(COMMANDES_FINANCE_SELECT)
+    .eq('tenant_id', tenantId)
+    .gte('updated_at', startIso)
+    .lte('updated_at', endIso);
+
+  if (errUpd) throw errUpd;
+
+  const commandes = mergeCommandesById(
+    byLivraison as unknown as Commande[],
+    byUpdated as unknown as Commande[]
+  );
+
+  return { retours: retours ?? [], commandes };
 };

@@ -55,7 +55,10 @@ export const FinancialReport = () => {
       setLoading(true);
       try {
         const res = await getRangeFinancials(tenant.id, startDate, endDate);
-        setData(res);
+        setData({
+          retours: Array.isArray(res?.retours) ? res.retours : [],
+          commandes: Array.isArray(res?.commandes) ? res.commandes : [],
+        });
       } catch (e) {
         console.error(e);
         showToast("Erreur de chargement", "error");
@@ -69,7 +72,7 @@ export const FinancialReport = () => {
   // Calculations
   const stats = useMemo(() => {
     if (!data) return null;
-    return calculateProfitMetrics(data.commandes, []);
+    return calculateProfitMetrics(data.commandes ?? [], []);
   }, [data]);
 
   const diffDays = useMemo(() => {
@@ -81,7 +84,7 @@ export const FinancialReport = () => {
 
   const logStats = useMemo(() => {
     if (!data) return null;
-    return calculateLogisticalStats(data.commandes);
+    return calculateLogisticalStats(data.commandes ?? []);
   }, [data]);
 
   if (!tenant) {
@@ -110,22 +113,26 @@ export const FinancialReport = () => {
     return 1000;
   };
 
-  const succesCommandes = data.commandes.filter(c => {
+  const commandesList = data.commandes ?? [];
+
+  const succesCommandes = commandesList.filter(c => {
     const s = c.statut_commande?.toLowerCase();
     return s === 'terminee' || s === 'livree';
   });
 
   const isSingleDay = startDate === endDate;
-  const totalEncaisseBrut = isSingleDay && data.retours && data.retours.length > 0
-    ? data.retours.reduce((acc, r) => acc + (r.montant_remis_par_livreur || 0), 0)
-    : succesCommandes.reduce((acc, c) => acc + (c.montant_total || 0), 0);
+  const retoursList = data.retours ?? [];
+  const totalEncaisseBrut =
+    isSingleDay && retoursList.length > 0
+      ? retoursList.reduce((acc, r) => acc + (r.montant_remis_par_livreur || 0), 0)
+      : succesCommandes.reduce((acc, c) => acc + (c.montant_total || 0), 0);
     
   const totalFraisLivraison = succesCommandes.reduce((acc, c) => acc + getFrais(c), 0);
   const totalProduitsNet = totalEncaisseBrut - totalFraisLivraison;
 
   const successRate = logStats?.taux_succes || 0;
 
-  const timeSeries = generateTimeSeriesData(data.commandes, diffDays > 31 ? 'monthly' : 'daily');
+  const timeSeries = generateTimeSeriesData(commandesList, diffDays > 31 ? 'monthly' : 'daily');
 
   const generateInsights = () => {
     const insights: any[] = [];
@@ -256,7 +263,7 @@ export const FinancialReport = () => {
                 <BarChart size={20} style={{ color: 'var(--primary)' }} /> Tendances des Ventes
               </h3>
               <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', background: '#f1f5f9', padding: '0.4rem 0.8rem', borderRadius: '8px' }}>
-                Basé sur {data.commandes.length} commandes
+                Basé sur {commandesList.length} commandes
               </div>
             </div>
             <div style={{ height: '280px', display: 'flex', alignItems: 'flex-end', gap: '12px', paddingBottom: '1rem', borderBottom: '1px solid #f1f5f9' }}>

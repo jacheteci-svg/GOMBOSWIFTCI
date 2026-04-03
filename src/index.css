@@ -1245,6 +1245,106 @@ tr:hover td {
   flex-shrink: 0;
 }
 
+/* Modal « Traitement d'appel » — pas de débordement horizontal, scroll confortable sur mobile */
+.modal-appel-form.modal-content.modal-nexus.modal-nexus-wide {
+  width: 100% !important;
+  max-width: min(720px, calc(100vw - 1rem)) !important;
+  min-width: 0;
+}
+
+.modal-appel-form .modal-appel-form-body {
+  overflow-x: hidden;
+}
+
+@media (max-width: 768px) {
+  .modal-appel-form .modal-appel-form-body {
+    padding: 1.1rem 0.65rem 1.25rem !important;
+    padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  .modal-appel-form .modal-appel-form-header {
+    padding-right: 3rem !important;
+  }
+}
+
+.appel-form-ligne-produit {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.appel-form-ligne-produit .appel-select-wrap {
+  min-width: 0;
+  width: 100%;
+}
+
+.appel-form-ligne-produit .appel-produit-select {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.appel-form-ligne-produit .appel-qty-actions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.appel-form-ligne-produit .appel-qty-actions .form-input {
+  width: 72px;
+  min-width: 72px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.appel-ligne-meta {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.appel-resultat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.appel-resultat-grid > label {
+  min-width: 0;
+}
+
+@media (max-width: 420px) {
+  .appel-resultat-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.modal-appel-form .appel-fullwidth-input {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+@media (max-width: 520px) {
+  .appel-form-ligne-produit {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .appel-form-ligne-produit .appel-qty-actions {
+    justify-content: flex-start;
+  }
+}
+
+.modal-appel-form .modal-appel-footer.modal-footer-bar {
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px)) !important;
+}
+
 /* Grille WhatsApp / actions marketing (Clients) */
 .modal-whatsapp-row {
   display: grid;

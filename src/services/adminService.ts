@@ -123,6 +123,25 @@ export const finalizeUserInviteViaRpc = async (
     ...flags,
   });
 
+  const looksLikeRpcMissing = (msgRaw: string, codeRaw: string): boolean => {
+    const msg = msgRaw.toLowerCase();
+    const code = String(codeRaw || '');
+    if (code === '42883' || code === 'PGRST202') return true;
+    // Erreur métier RPC (mauvais tenant) — ne pas confondre avec « fonction absente »
+    if ((msg.includes('refusé') || msg.includes('refuse')) && msg.includes('tenant')) return false;
+    if (msg.includes('permission denied') || msg.includes('jwt')) return false;
+    return (
+      msg.includes('does not exist') ||
+      msg.includes('introuvable') ||
+      msg.includes('could not find') ||
+      msg.includes('schema cache') ||
+      msg.includes('unknown function') ||
+      msg.includes('no function matches') ||
+      msg.includes('function public.admin_finalize_user_invite') ||
+      msg.includes('admin_finalize_user_invite') && (msg.includes('not found') || msg.includes('introuvable'))
+    );
+  };
+
   try {
     const { data, error } = await insforge.database.rpc('admin_finalize_user_invite', {
       p_email: payload.email.trim().toLowerCase(),
@@ -136,13 +155,8 @@ export const finalizeUserInviteViaRpc = async (
     if (error) {
       const msg = (error as { message?: string }).message || '';
       const code = (error as { code?: string }).code || '';
-      if (
-        code === '42883' ||
-        msg.includes('does not exist') ||
-        msg.includes('introuvable') ||
-        msg.includes('Could not find') ||
-        msg.includes('function public.admin_finalize_user_invite')
-      ) {
+      console.warn('[finalizeUserInviteViaRpc]', { code, message: msg, error });
+      if (looksLikeRpcMissing(msg, code)) {
         return empty({ rpcMissing: true });
       }
       throw error;
@@ -155,7 +169,10 @@ export const finalizeUserInviteViaRpc = async (
     return { userId, rpcMissing: false, noAuthUserRow: false };
   } catch (e: unknown) {
     const msg = e && typeof e === 'object' && 'message' in e ? String((e as Error).message) : '';
-    if (msg.includes('does not exist') || msg.includes('42883')) {
+    const code =
+      e && typeof e === 'object' && 'code' in e ? String((e as { code?: string }).code || '') : '';
+    console.warn('[finalizeUserInviteViaRpc] catch', { code, message: msg, e });
+    if (looksLikeRpcMissing(msg, code)) {
       return empty({ rpcMissing: true });
     }
     throw e;
