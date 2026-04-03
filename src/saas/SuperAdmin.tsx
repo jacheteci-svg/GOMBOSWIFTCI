@@ -12,6 +12,7 @@ import { useLocation, Navigate, useNavigate } from 'react-router-dom';
 import { BlogTab } from './BlogTab';
 import { EmailLogsTab } from './EmailLogsTab';
 import { emailService } from '../services/emailService';
+import { PerformanceDashboard } from '../components/performance/PerformanceDashboard';
 
 export const SuperAdmin: React.FC = () => {
   const location = useLocation();
@@ -121,7 +122,7 @@ export const SuperAdmin: React.FC = () => {
       <div style={{ marginTop: '1rem', animation: 'fadeIn 0.5s ease' }}>
         {activeTab === 'OVERVIEW' && <OverviewTab stats={platformStats} tenants={tenants} />}
         {activeTab === 'TENANTS' && <TenantsTab tenants={tenants} fetchData={fetchData} loading={loading} />}
-        {activeTab === 'PERFORMANCE' && <PerformanceHub tenants={tenants} stats={platformStats} />}
+        {activeTab === 'PERFORMANCE' && <PerformanceHub />}
         {activeTab === 'PLANS' && <PlansTab />}
         {activeTab === 'BILLING' && <BillingTab tenants={tenants} />}
         {activeTab === 'SUPPORT' && <SupportTab />}
@@ -352,73 +353,10 @@ const OverviewTab = ({ stats, tenants }: { stats: any, tenants: Tenant[] }) => {
 /* -------------------------------------------------------------------------- */
 /*                               PERFORMANCE HUB                              */
 /* -------------------------------------------------------------------------- */
-const PerformanceHub = ({ tenants, stats }: { tenants: Tenant[], stats: any }) => {
-  const topTenants = [...tenants]
-    .sort((a, b) => (b.metrics?.total_orders || 0) - (a.metrics?.total_orders || 0))
-    .slice(0, 5);
-
-  const churnRisk = tenants.filter(t => t.actif && (!t.metrics?.last_order_at || new Date(t.metrics.last_order_at).getTime() < Date.now() - 7 * 24 * 60 * 60 * 1000));
-
+const PerformanceHub = () => {
   return (
-    <div className="nexus-theme-dark space-y-8 animate-fadeIn">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="nexus-card-lite">
-          <h3 className="text-xl font-black mb-6 flex items-center gap-2">
-            <TrendingUp size={20} className="text-primary" /> Top 5 Tenants (Volume)
-          </h3>
-          <div className="space-y-4">
-            {topTenants.map((t, i) => (
-              <div key={t.id} className="flex justify-between items-center p-4 bg-white/5 rounded-xl border border-white/5">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-primary/20 text-primary flex items-center justify-center font-black">{i+1}</div>
-                  <div>
-                    <div className="font-bold">{t.nom}</div>
-                    <div className="text-[10px] text-slate-500 uppercase font-black">Plan: {t.plan}</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="font-black text-lg">{t.metrics?.total_orders || 0} cmd.</div>
-                  <div className="text-[10px] text-emerald-400 font-bold">Active</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="nexus-card-lite">
-          <h3 className="text-xl font-black mb-6 flex items-center gap-2 text-rose-400">
-            <Activity size={20} /> Risque de Churn (Inactifs 7J+)
-          </h3>
-          {churnRisk.length > 0 ? (
-            <div className="space-y-4">
-              {churnRisk.slice(0, 5).map(t => (
-                <div key={t.id} className="flex justify-between items-center p-4 bg-rose-500/5 rounded-xl border border-rose-500/10">
-                  <div className="font-bold">{t.nom}</div>
-                  <div className="text-xs font-black text-rose-400">INACTIF</div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-48 text-slate-500 italic">
-               Aucun risque immédiat détecté.
-            </div>
-          )}
-        </div>
-      </div>
-      
-      <div className="nexus-card-lite p-6">
-         <h3 className="text-lg font-black mb-6">Visualisation de l'Infrastructure</h3>
-         <div style={{ height: 260 }}>
-            <ResponsiveContainer width="100%" height="100%">
-               <AreaChart data={stats.growth_chart || []}>
-                  <XAxis dataKey="name" stroke="#64748b" fontSize={11} tickLine={false} axisLine={false} />
-                  <YAxis hide />
-                  <Tooltip contentStyle={{ background: '#0f172a', border: 'none', borderRadius: '12px' }} />
-                  <Area type="monotone" dataKey="val" stroke="var(--primary)" strokeWidth={4} fill="rgba(99, 102, 241, 0.1)" />
-               </AreaChart>
-            </ResponsiveContainer>
-         </div>
-      </div>
+    <div className="absolute inset-0 bg-white" style={{ minHeight: 'calc(100vh - 150px)' }}>
+       <PerformanceDashboard isSuperAdmin={true} />
     </div>
   );
 };
@@ -1313,7 +1251,7 @@ const SecurityLogsTab = () => {
                        </tr>
                     </thead>
                     <tbody>
-                       {logs.map(log => (
+                       {logs.map((log: any) => (
                           <tr key={log.id}>
                              <td style={{ fontWeight: 950, color: '#06b6d4' }}>{log.action}</td>
                              <td style={{ fontSize: '0.85rem', color: '#cbd5e1' }}>{typeof log.details === 'string' ? log.details : JSON.stringify(log.details)}</td>
