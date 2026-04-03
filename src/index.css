@@ -1324,3 +1324,137 @@ tr:hover td {
   /* Prevent child elements inheriting incorrect colors */
   opacity: 1 !important;
 }
+
+/* -------------------------------------------------------------------------- */
+/* Super-admin · Performance — synthèse (grille fiable + hauteurs graphiques)   */
+/* -------------------------------------------------------------------------- */
+.perf-super-synth-root {
+  position: relative;
+  isolation: isolate;
+}
+
+.perf-super-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .perf-super-kpi-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .perf-super-kpi-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0.85rem;
+  }
+}
+
+.perf-super-kpi-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;
+  padding: 0.95rem 1rem 1.05rem;
+  min-width: 0;
+  background: linear-gradient(165deg, rgba(30, 41, 59, 0.55) 0%, rgba(15, 23, 42, 0.98) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 8px 24px -8px rgba(0, 0, 0, 0.55);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.perf-super-kpi-card:hover {
+  border-color: rgba(6, 182, 212, 0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 12px 32px -10px rgba(6, 182, 212, 0.12);
+}
+
+.perf-super-kpi-card .perf-super-kpi-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 10px;
+  margin-bottom: 0.5rem;
+  background: rgba(6, 182, 212, 0.12);
+  border: 1px solid rgba(6, 182, 212, 0.2);
+}
+
+.perf-super-chart-pair {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .perf-super-chart-pair {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.1rem;
+  }
+}
+
+.perf-super-chart-box {
+  min-width: 0;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 16px;
+  padding: 1rem 1.1rem 0.75rem;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.92) 0%, rgba(8, 11, 20, 0.98) 100%);
+  border: 1px solid rgba(6, 182, 212, 0.15);
+  box-shadow: 0 14px 40px -12px rgba(0, 0, 0, 0.55);
+}
+
+.perf-super-chart-box h4 {
+  margin: 0 0 0.35rem 0;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.perf-super-chart-inner {
+  flex: 1;
+  width: 100%;
+  min-height: 220px;
+  min-width: 0;
+  position: relative;
+}
+
+.perf-super-chart-inner .recharts-responsive-container {
+  min-height: 220px !important;
+}
+
+.perf-super-line-box {
+  border-radius: 16px;
+  padding: 1rem 1.1rem 1rem;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.92) 0%, rgba(8, 11, 20, 0.98) 100%);
+  border: 1px solid rgba(139, 92, 246, 0.12);
+  box-shadow: 0 14px 40px -12px rgba(0, 0, 0, 0.55);
+}
+
+.perf-super-line-inner {
+  width: 100%;
+  min-height: 280px;
+  min-width: 0;
+  position: relative;
+}
+
+.perf-super-line-inner .recharts-responsive-container {
+  min-height: 280px !important;
+}
+
+.perf-super-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}

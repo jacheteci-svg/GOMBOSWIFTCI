@@ -3,6 +3,7 @@ import {
   useEffect,
   useMemo,
   useCallback,
+  useId,
   type ReactNode,
   type CSSProperties,
 } from 'react';
@@ -381,6 +382,8 @@ export const PerformanceDashboard = ({
   const [platformTimeline, setPlatformTimeline] = useState<PlatformTimelinePoint[]>([]);
   const [superAdminSort, setSuperAdminSort] = useState<SuperAdminSortKey>('ca_gmv');
   const [superAdminScope, setSuperAdminScope] = useState<SuperAdminScope>('all');
+  /** Id unique pour le dégradé du graphique temporel (évite collisions SVG) */
+  const superAdminLineGradId = useId().replace(/:/g, '');
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -1768,6 +1771,8 @@ export const PerformanceDashboard = ({
 
   /** Vue Nexus — refonte UI : bento KPI, tableau dense, graphique GMV (couleurs natives) */
   const renderSuperAdminTenants = () => {
+    const PIE_PX = 220;
+    const LINE_PX = 280;
     const rowsAll = tenantRows;
     const rows = superAdminDisplayRows;
     const ins = superAdminInsights;
@@ -1813,7 +1818,7 @@ export const PerformanceDashboard = ({
     return (
       <div className="space-y-8 lg:space-y-10">
         <div
-          className="relative overflow-hidden rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-slate-900/60 via-slate-950/70 to-[#070b12] p-4 sm:p-5 shadow-[0_20px_60px_-24px_rgba(0,0,0,0.85),0_0_0_1px_rgba(6,182,212,0.12)] ring-1 ring-cyan-500/10"
+          className="perf-super-synth-root relative overflow-hidden rounded-2xl border border-cyan-500/25 bg-gradient-to-br from-slate-900/70 via-slate-950/80 to-[#05080f] p-4 sm:p-6 shadow-[0_24px_70px_-20px_rgba(0,0,0,0.9),0_0_0_1px_rgba(6,182,212,0.18)] ring-1 ring-cyan-400/15"
           role="region"
           aria-label="Synthèse plateforme"
         >
@@ -1837,7 +1842,7 @@ export const PerformanceDashboard = ({
                 </p>
               </div>
             </div>
-              <div className="flex flex-shrink-0 flex-wrap items-center gap-2 sm:justify-end">
+              <div className="perf-super-badge-row flex-shrink-0 sm:justify-end">
                 {ins.atRiskCount > 0 ? (
                   <span
                     className="inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-100"
@@ -1862,32 +1867,31 @@ export const PerformanceDashboard = ({
               </div>
             </div>
 
-            <div className="relative z-10 space-y-4">
-            {/* Vue globale : cartes KPI + diagrammes */}
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-6">
-              <div className="rounded-xl border border-white/[0.06] bg-slate-950/50 p-3 shadow-sm">
-                <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">
-                  <Package className="size-3.5 shrink-0 text-cyan-400/90" aria-hidden />
-                  Commandes
+            <div className="relative z-10 space-y-5">
+            <div className="perf-super-kpi-grid">
+              <div className="perf-super-kpi-card">
+                <div className="perf-super-kpi-icon">
+                  <Package className="size-4 text-cyan-300" aria-hidden />
                 </div>
-                <p className="mt-1.5 text-2xl font-bold tabular-nums leading-none text-white">{totalCmd}</p>
+                <p className="m-0 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Commandes</p>
+                <p className="mt-1 text-2xl font-bold tabular-nums leading-none text-white">{totalCmd}</p>
               </div>
-              <div className="rounded-xl border border-white/[0.06] bg-slate-950/50 p-3 shadow-sm">
-                <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">
-                  <Banknote className="size-3.5 shrink-0 text-cyan-400/90" aria-hidden />
-                  GMV
+              <div className="perf-super-kpi-card">
+                <div className="perf-super-kpi-icon">
+                  <Banknote className="size-4 text-cyan-300" aria-hidden />
                 </div>
-                <p className="mt-1.5 text-lg font-bold tabular-nums leading-tight text-cyan-200/95 sm:text-xl">
+                <p className="m-0 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">GMV</p>
+                <p className="mt-1 text-lg font-bold tabular-nums leading-tight text-cyan-200/95 sm:text-xl">
                   {totalGmv.toLocaleString('fr-FR')}
                 </p>
                 <p className="mt-0.5 text-[10px] text-slate-500">CFA</p>
               </div>
-              <div className="rounded-xl border border-white/[0.06] bg-slate-950/50 p-3 shadow-sm">
-                <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">
-                  <Store className="size-3.5 shrink-0 text-emerald-400/90" aria-hidden />
-                  Boutiques actives
+              <div className="perf-super-kpi-card">
+                <div className="perf-super-kpi-icon" style={{ background: 'rgba(16, 185, 129, 0.12)', borderColor: 'rgba(16, 185, 129, 0.25)' }}>
+                  <Store className="size-4 text-emerald-300" aria-hidden />
                 </div>
-                <p className="mt-1.5 text-2xl font-bold tabular-nums leading-none text-white">
+                <p className="m-0 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Boutiques actives</p>
+                <p className="mt-1 text-2xl font-bold tabular-nums leading-none text-white">
                   {withActivity}
                   <span className="text-base font-semibold text-slate-500">/{rowsAll.length}</span>
                 </p>
@@ -1900,12 +1904,12 @@ export const PerformanceDashboard = ({
                   />
                 </div>
               </div>
-              <div className="rounded-xl border border-white/[0.06] bg-slate-950/50 p-3 shadow-sm">
-                <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">
-                  <Truck className="size-3.5 shrink-0 text-violet-400/90" aria-hidden />
-                  Livraison
+              <div className="perf-super-kpi-card">
+                <div className="perf-super-kpi-icon" style={{ background: 'rgba(139, 92, 246, 0.12)', borderColor: 'rgba(139, 92, 246, 0.25)' }}>
+                  <Truck className="size-4 text-violet-300" aria-hidden />
                 </div>
-                <p className="mt-1.5 text-2xl font-bold tabular-nums leading-none text-white">{avgSuccPlat}%</p>
+                <p className="m-0 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Livraison</p>
+                <p className="mt-1 text-2xl font-bold tabular-nums leading-none text-white">{avgSuccPlat}%</p>
                 <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
                   <div
                     className="h-full rounded-full bg-violet-500/75"
@@ -1913,12 +1917,12 @@ export const PerformanceDashboard = ({
                   />
                 </div>
               </div>
-              <div className="rounded-xl border border-white/[0.06] bg-slate-950/50 p-3 shadow-sm">
-                <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">
-                  <Percent className="size-3.5 shrink-0 text-rose-400/90" aria-hidden />
-                  Annulations
+              <div className="perf-super-kpi-card">
+                <div className="perf-super-kpi-icon" style={{ background: 'rgba(251, 113, 133, 0.1)', borderColor: 'rgba(251, 113, 133, 0.22)' }}>
+                  <Percent className="size-4 text-rose-300" aria-hidden />
                 </div>
-                <p className="mt-1.5 text-2xl font-bold tabular-nums leading-none text-rose-200/95">
+                <p className="m-0 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Annulations</p>
+                <p className="mt-1 text-2xl font-bold tabular-nums leading-none text-rose-200/95">
                   {ins.tauxAnnulPlateforme}%
                 </p>
                 <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
@@ -1928,12 +1932,12 @@ export const PerformanceDashboard = ({
                   />
                 </div>
               </div>
-              <div className="rounded-xl border border-white/[0.06] bg-slate-950/50 p-3 shadow-sm">
-                <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">
-                  <AlertCircle className="size-3.5 shrink-0 text-slate-400" aria-hidden />
-                  Inactifs
+              <div className="perf-super-kpi-card">
+                <div className="perf-super-kpi-icon" style={{ background: 'rgba(148, 163, 184, 0.1)', borderColor: 'rgba(148, 163, 184, 0.2)' }}>
+                  <AlertCircle className="size-4 text-slate-300" aria-hidden />
                 </div>
-                <p className="mt-1.5 text-2xl font-bold tabular-nums leading-none text-slate-200">{inactiveTenants}</p>
+                <p className="m-0 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Inactifs</p>
+                <p className="mt-1 text-2xl font-bold tabular-nums leading-none text-slate-100">{inactiveTenants}</p>
                 {ins.panierMoyen > 0 ? (
                   <p className="mt-1 text-[10px] text-slate-500">
                     Panier moy.{' '}
@@ -1947,13 +1951,11 @@ export const PerformanceDashboard = ({
               </div>
             </div>
 
-            <div className="mb-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
-              <div className="rounded-xl border border-white/[0.08] bg-gradient-to-b from-slate-950/80 to-[#0a0f18] p-3 sm:p-4">
-                <p className="mb-2 text-center text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
-                  Répartition boutiques
-                </p>
-                <div className="h-[200px] w-full min-w-0 sm:h-[220px]">
-                  <ResponsiveContainer width="100%" height="100%">
+            <div className="perf-super-chart-pair mb-1">
+              <div className="perf-super-chart-box nexus-chart-dark">
+                <h4>Répartition boutiques</h4>
+                <div className="perf-super-chart-inner">
+                  <ResponsiveContainer width="100%" height={PIE_PX}>
                     <PieChart>
                       <Pie
                         data={boutiquePieData}
@@ -1961,10 +1963,10 @@ export const PerformanceDashboard = ({
                         nameKey="name"
                         cx="50%"
                         cy="50%"
-                        innerRadius={52}
-                        outerRadius={78}
+                        innerRadius={48}
+                        outerRadius={74}
                         paddingAngle={2}
-                        stroke="rgba(255,255,255,0.06)"
+                        stroke="rgba(255,255,255,0.08)"
                         strokeWidth={1}
                       >
                         {boutiquePieData.map((entry) => (
@@ -1980,19 +1982,17 @@ export const PerformanceDashboard = ({
                       />
                       <Legend
                         verticalAlign="bottom"
-                        height={28}
-                        wrapperStyle={{ fontSize: '11px', paddingTop: 4 }}
+                        height={32}
+                        wrapperStyle={{ fontSize: '11px', paddingTop: 6, color: '#94a3b8' }}
                       />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
               </div>
-              <div className="rounded-xl border border-white/[0.08] bg-gradient-to-b from-slate-950/80 to-[#0a0f18] p-3 sm:p-4">
-                <p className="mb-2 text-center text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
-                  Concentration CA — top 3
-                </p>
-                <div className="h-[200px] w-full min-w-0 sm:h-[220px]">
-                  <ResponsiveContainer width="100%" height="100%">
+              <div className="perf-super-chart-box nexus-chart-dark">
+                <h4>Concentration CA — top 3</h4>
+                <div className="perf-super-chart-inner">
+                  <ResponsiveContainer width="100%" height={PIE_PX}>
                     <PieChart>
                       <Pie
                         data={concPieData}
@@ -2000,10 +2000,10 @@ export const PerformanceDashboard = ({
                         nameKey="name"
                         cx="50%"
                         cy="50%"
-                        innerRadius={52}
-                        outerRadius={78}
+                        innerRadius={48}
+                        outerRadius={74}
                         paddingAngle={2}
-                        stroke="rgba(255,255,255,0.06)"
+                        stroke="rgba(255,255,255,0.08)"
                         strokeWidth={1}
                       >
                         {concPieData.map((entry) => (
@@ -2019,8 +2019,8 @@ export const PerformanceDashboard = ({
                       />
                       <Legend
                         verticalAlign="bottom"
-                        height={28}
-                        wrapperStyle={{ fontSize: '11px', paddingTop: 4 }}
+                        height={32}
+                        wrapperStyle={{ fontSize: '11px', paddingTop: 6, color: '#94a3b8' }}
                       />
                     </PieChart>
                   </ResponsiveContainer>
@@ -2028,24 +2028,24 @@ export const PerformanceDashboard = ({
               </div>
             </div>
 
-            <div className="rounded-xl border border-white/[0.08] bg-gradient-to-b from-slate-950/80 to-[#0a0f18] p-3 sm:p-4">
-              <div className="mb-2 flex flex-wrap items-end justify-between gap-2">
+            <div className="perf-super-line-box nexus-chart-dark">
+              <div className="mb-3 flex flex-wrap items-end justify-between gap-3 border-b border-white/[0.06] pb-3">
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">
+                  <p className="m-0 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">
                     Suivi dans le temps
                   </p>
-                  <p className="mt-0.5 max-w-2xl text-[10px] leading-snug text-slate-500">
+                  <p className="mt-1 max-w-2xl text-[10px] leading-relaxed text-slate-500">
                     Agrégation par jour (≤ 90 j) ou par semaine · commandes créées dans la fenêtre · CA = montants
                     livrées / terminées
                   </p>
                 </div>
               </div>
               {tl.length > 0 ? (
-                <div className="h-[240px] w-full min-w-0 sm:h-[280px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <ComposedChart data={tl} margin={{ top: 4, right: 12, left: 4, bottom: 0 }}>
+                <div className="perf-super-line-inner">
+                  <ResponsiveContainer width="100%" height={LINE_PX}>
+                    <ComposedChart data={tl} margin={{ top: 8, right: 14, left: 4, bottom: 4 }}>
                       <defs>
-                        <linearGradient id="saCaAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                        <linearGradient id={`saCaAreaGrad-${superAdminLineGradId}`} x1="0" y1="0" x2="0" y2="1">
                           <stop offset="0%" stopColor="#06b6d4" stopOpacity={0.45} />
                           <stop offset="100%" stopColor="#06b6d4" stopOpacity={0.02} />
                         </linearGradient>
@@ -2088,7 +2088,7 @@ export const PerformanceDashboard = ({
                         name="CA (GMV)"
                         stroke="#22d3ee"
                         strokeWidth={2}
-                        fill="url(#saCaAreaGrad)"
+                        fill={`url(#saCaAreaGrad-${superAdminLineGradId})`}
                         fillOpacity={1}
                       />
                       <Line
@@ -2114,12 +2114,14 @@ export const PerformanceDashboard = ({
                   </ResponsiveContainer>
                 </div>
               ) : (
-                <div className="relative flex min-h-[240px] flex-col items-center justify-center rounded-lg border border-dashed border-white/[0.08] bg-slate-950/30 py-10 sm:min-h-[280px]">
-                  <Activity className="mb-3 size-10 text-slate-600" aria-hidden />
-                  <p className="max-w-sm px-4 text-center text-sm font-medium text-slate-400">
+                <div className="relative flex min-h-[280px] flex-col items-center justify-center rounded-xl border border-dashed border-cyan-500/15 bg-gradient-to-b from-slate-950/40 to-slate-900/20 py-10">
+                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-cyan-500/20 bg-cyan-500/10">
+                    <Activity className="size-7 text-cyan-400/80" aria-hidden />
+                  </div>
+                  <p className="max-w-sm px-4 text-center text-sm font-semibold text-slate-300">
                     Aucune activité sur cette période
                   </p>
-                  <p className="mt-1 max-w-md px-4 text-center text-xs text-slate-500">
+                  <p className="mt-2 max-w-md px-4 text-center text-xs leading-relaxed text-slate-500">
                     Élargissez la période ou vérifiez les filtres (périmètre, dates).
                   </p>
                 </div>
@@ -2876,13 +2878,15 @@ export const PerformanceDashboard = ({
                 className="card glass-effect"
                 style={{
                   padding: 0,
-                  border: '1px solid rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.06)',
                   borderRadius: '32px',
-                  overflow: 'hidden',
+                  overflow: 'visible',
                   background: 'transparent',
                 }}
               >
-                <div style={{ animation: 'fadeIn 0.35s ease' }}>{renderSuperAdminTenants()}</div>
+                <div style={{ animation: 'fadeIn 0.35s ease', padding: '0.5rem 0.25rem 1rem' }}>
+                  {renderSuperAdminTenants()}
+                </div>
               </div>
             )}
           </NexusModuleFrame>
