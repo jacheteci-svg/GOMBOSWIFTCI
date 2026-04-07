@@ -154,7 +154,7 @@ export const NotificationCenter = () => {
           70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
           100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
-        .hover-card:hover { background: #f8fafc !important; }
+        .hover-card:hover { background: rgba(99, 102, 255, 0.08); }
       `}</style>
     </div>
   );
