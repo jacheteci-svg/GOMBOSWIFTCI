@@ -49,24 +49,24 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchSaasData = useCallback(async (opts?: { force?: boolean }) => {
     const force = opts?.force === true;
-    const hostname = window.location.hostname;
+    let targetSlug: string | null = null;
     const pathParts = location.pathname.split('/').filter(Boolean);
     const urlSlug = pathParts[0];
 
-    let targetSlug: string | null = null;
-    const isSpecialPath = ['super-admin', 'platform', 'login', 'register'].includes(urlSlug || '');
-
-    if (!isSpecialPath && urlSlug && urlSlug !== 'gombo') {
-      targetSlug = urlSlug;
-    } else {
-      const parts = hostname.split('.');
-      if (parts.length >= 2) {
-        const sub = parts[0];
-        const isDomainPart = ['gomboswiftci', 'localhost', 'www', 'vercel', 'app'].includes(sub.toLowerCase());
-        if (!isDomainPart) {
-          targetSlug = sub;
-        }
+    // 1. Detection par sous-domaine (Priorite #1 car plus stable)
+    const hostname = window.location.hostname;
+    const parts = hostname.split('.');
+    if (parts.length >= 2) {
+      const sub = parts[0].toLowerCase();
+      const reserved = ['gomboswiftci', 'localhost', 'www', 'vercel', 'app', 'next', 'vite', 'system'];
+      if (!reserved.includes(sub)) {
+        targetSlug = sub;
       }
+    }
+
+    // 2. Detection par URL Path (Pour compatibilite descendante)
+    if (!targetSlug && urlSlug && !['super-admin', 'platform', 'login', 'register', 'gombo', 'saas', 'demo', 'api', 'help'].includes(urlSlug)) {
+       targetSlug = urlSlug;
     }
 
     if (urlSlug === 'gombo') targetSlug = 'gombo';

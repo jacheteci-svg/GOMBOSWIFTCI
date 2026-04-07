@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastProvider } from './contexts/ToastContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Layout } from './components/layout/Layout';
-import { SaasProvider } from './saas/SaasProvider';
+import { SaasProvider, useSaas } from './saas/SaasProvider';
 import { Pricing } from './saas/Pricing';
 import { SubscriptionGuard } from './saas/SubscriptionGuard';
 import { LandingPage } from './saas/LandingPage';
@@ -120,6 +120,45 @@ const ProtectedRoute = ({ children, requiredPermission }: { children: React.Reac
 
 const AppRoutes = () => {
   const { currentUser } = useAuth();
+  useSaas(); // Ensure context is loaded
+  const hostname = window.location.hostname;
+  const isSubdomain = hostname.split('.').length >= 2 && !['www', 'gomboswiftci', 'localhost', 'vercel', 'app'].includes(hostname.split('.')[0].toLowerCase());
+
+  // Define the core tenant routes as a reusable element to avoid duplication
+  const tenantRoutes = (
+    <>
+      <Route index element={<Dashboard />} />
+      <Route path="home" element={<Home />} />
+      <Route path="dashboard" element={<ProtectedRoute requiredPermission="DASHBOARD"><Dashboard /></ProtectedRoute>} />
+      <Route path="produits" element={<ProtectedRoute requiredPermission="PRODUITS"><Produits /></ProtectedRoute>} />
+      <Route path="commandes" element={<ProtectedRoute requiredPermission="COMMANDES"><Commandes /></ProtectedRoute>} />
+      <Route path="centre-appel" element={<ProtectedRoute requiredPermission="CENTRE_APPEL"><CentreAppel /></ProtectedRoute>} />
+      <Route path="logistique" element={<ProtectedRoute requiredPermission="LOGISTIQUE"><Logistique /></ProtectedRoute>} />
+      <Route path="livraison" element={<ProtectedRoute requiredPermission="LIVREUR"><Livraison /></ProtectedRoute>} />
+      <Route path="caisse" element={
+        <ProtectedRoute requiredPermission="CAISSE">
+          <SubscriptionGuard requiredModule="module_caisse" moduleNameFriendly="Caisse & Retours">
+            <Caisse />
+          </SubscriptionGuard>
+        </ProtectedRoute>
+      } />
+      <Route path="rapport-financier" element={<ProtectedRoute requiredPermission="FINANCE"><FinancialReport /></ProtectedRoute>} />
+      <Route path="historique" element={<ProtectedRoute requiredPermission="HISTORIQUE"><Historique /></ProtectedRoute>} />
+      <Route path="clients" element={<ProtectedRoute requiredPermission="CLIENTS"><Clients /></ProtectedRoute>} />
+      <Route path="performance-staff" element={<ProtectedRoute requiredPermission="GESTION_LIVREURS"><StaffPerformance /></ProtectedRoute>} />
+      <Route path="net-profit" element={<ProtectedRoute requiredPermission="ADMIN"><NetProfit /></ProtectedRoute>} />
+      <Route path="admin/tresorerie" element={<ProtectedRoute requiredPermission="TRESORERIE"><AdminTresorerie /></ProtectedRoute>} />
+      <Route path="audit-tresorerie" element={
+        <ProtectedRoute requiredPermission="ADMIN">
+          <SubscriptionGuard requiredModule="module_audit" moduleNameFriendly="Audit Expert">
+            <AuditTresorerie />
+          </SubscriptionGuard>
+        </ProtectedRoute>
+      } />
+      <Route path="profil" element={<ProtectedRoute requiredPermission="PROFIL"><Profil /></ProtectedRoute>} />
+      <Route path="admin" element={<ProtectedRoute requiredPermission="ADMIN"><Admin /></ProtectedRoute>} />
+    </>
+  );
 
   return (
     <Routes>
@@ -155,20 +194,31 @@ const AppRoutes = () => {
       <Route path="/subscription-done" element={<SubscriptionCallback />} />
       <Route path="/subscription-cancel" element={<Navigate to="/" replace />} />
 
+      {/* 5. SUBDOMAIN ROUTES (Prioritise si hostname est un sous-domaine) */}
+      {isSubdomain && (
+        <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+          {tenantRoutes}
+        </Route>
+      )}
+
       {/* ROOT REDIRECT */}
       <Route path="/" element={
         currentUser ? (
           currentUser.role === 'SUPER_ADMIN' ? (
             <Navigate to="/super-admin/overview" replace />
           ) : (
-            <Navigate to={`/${currentUser.tenant_slug || 'gombo'}`} replace />
+            isSubdomain ? (
+               <Navigate to="/dashboard" replace />
+            ) : (
+               <Navigate to={`/${currentUser.tenant_slug || 'gombo'}`} replace />
+            )
           )
         ) : (
           <LandingPage />
         )
       } />
 
-      {/* 5. SUPER ADMIN - Specialized Path */}
+      {/* 6. SUPER ADMIN - Specialized Path */}
       <Route path="/super-admin" element={
         <ProtectedRoute requiredPermission="SUPER_ADMIN">
           <Layout /> 
@@ -178,39 +228,12 @@ const AppRoutes = () => {
         <Route path="*" element={<SuperAdmin />} />
       </Route>
 
-      {/* 6. TENANT PAGES - Dynamic Slug Path */}
-      <Route path="/:tenantSlug" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-        <Route index element={<Dashboard />} />
-        <Route path="home" element={<Home />} />
-        <Route path="dashboard" element={<ProtectedRoute requiredPermission="DASHBOARD"><Dashboard /></ProtectedRoute>} />
-        <Route path="produits" element={<ProtectedRoute requiredPermission="PRODUITS"><Produits /></ProtectedRoute>} />
-        <Route path="commandes" element={<ProtectedRoute requiredPermission="COMMANDES"><Commandes /></ProtectedRoute>} />
-        <Route path="centre-appel" element={<ProtectedRoute requiredPermission="CENTRE_APPEL"><CentreAppel /></ProtectedRoute>} />
-        <Route path="logistique" element={<ProtectedRoute requiredPermission="LOGISTIQUE"><Logistique /></ProtectedRoute>} />
-        <Route path="livraison" element={<ProtectedRoute requiredPermission="LIVREUR"><Livraison /></ProtectedRoute>} />
-        <Route path="caisse" element={
-          <ProtectedRoute requiredPermission="CAISSE">
-            <SubscriptionGuard requiredModule="module_caisse" moduleNameFriendly="Caisse & Retours">
-              <Caisse />
-            </SubscriptionGuard>
-          </ProtectedRoute>
-        } />
-        <Route path="rapport-financier" element={<ProtectedRoute requiredPermission="FINANCE"><FinancialReport /></ProtectedRoute>} />
-        <Route path="historique" element={<ProtectedRoute requiredPermission="HISTORIQUE"><Historique /></ProtectedRoute>} />
-        <Route path="clients" element={<ProtectedRoute requiredPermission="CLIENTS"><Clients /></ProtectedRoute>} />
-        <Route path="performance-staff" element={<ProtectedRoute requiredPermission="GESTION_LIVREURS"><StaffPerformance /></ProtectedRoute>} />
-        <Route path="net-profit" element={<ProtectedRoute requiredPermission="ADMIN"><NetProfit /></ProtectedRoute>} />
-        <Route path="admin/tresorerie" element={<ProtectedRoute requiredPermission="TRESORERIE"><AdminTresorerie /></ProtectedRoute>} />
-        <Route path="audit-tresorerie" element={
-          <ProtectedRoute requiredPermission="ADMIN">
-            <SubscriptionGuard requiredModule="module_audit" moduleNameFriendly="Audit Expert">
-              <AuditTresorerie />
-            </SubscriptionGuard>
-          </ProtectedRoute>
-        } />
-        <Route path="profil" element={<ProtectedRoute requiredPermission="PROFIL"><Profil /></ProtectedRoute>} />
-        <Route path="admin" element={<ProtectedRoute requiredPermission="ADMIN"><Admin /></ProtectedRoute>} />
-      </Route>
+      {/* 7. TENANT PAGES - Dynamic Slug Path (Compatible Legacy) */}
+      {!isSubdomain && (
+        <Route path="/:tenantSlug" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+          {tenantRoutes}
+        </Route>
+      )}
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
