@@ -8,6 +8,7 @@ import {
   createCommune,
   updateCommune,
   deleteCommune,
+  deleteAdminUser,
   upsertAdminUserProfile,
   tryResolveUserIdByEmail,
   finalizeUserInviteViaRpc,
@@ -482,7 +483,28 @@ const UsersManager = ({ showToast, tenantId }: { showToast: any, tenantId: strin
                   </div>
                 </td>
                 <td style={{ textAlign: 'right', padding: '1.25rem 1.5rem' }}>
-                  <button className="btn btn-outline" style={{ height: '36px', minHeight: '36px', padding: '0 1rem', fontSize: '0.8rem', borderRadius: '10px' }} onClick={() => {setEditingId(u.id); setForm(u);}}>Configuration</button>
+                  <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'flex-end' }}>
+                     <button 
+                        className="btn btn-outline" 
+                        style={{ height: '36px', minHeight: '36px', padding: '0 0.8rem', fontSize: '0.8rem', borderRadius: '10px' }} 
+                        onClick={() => {setEditingId(u.id); setForm(u);}}
+                     >
+                        Modifier
+                     </button>
+                     <button 
+                        className="btn btn-outline" 
+                        style={{ height: '36px', minHeight: '36px', padding: '0 0.6rem', borderRadius: '10px', color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.1)' }} 
+                        onClick={async () => {
+                           if (confirm(`Souhaitez-vous vraiment désactiver ${u.nom_complet} ?`)) {
+                              await deleteAdminUser(tenantId, u.id);
+                              showToast('Utilisateur désactivé.');
+                              await loadUsers();
+                           }
+                        }}
+                     >
+                        <Trash2 size={16} />
+                     </button>
+                  </div>
                 </td>
               </tr>
             ))}

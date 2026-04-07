@@ -8,6 +8,7 @@ export const getAdminUsers = async (tenantId: string): Promise<User[]> => {
     .from('users')
     .select('*')
     .eq('tenant_id', tenantId)
+    .eq('actif', true)
     .order('nom_complet', { ascending: true });
   
   if (error) throw error;
