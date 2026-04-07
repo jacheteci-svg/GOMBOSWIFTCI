@@ -131,7 +131,13 @@ export const Login = () => {
               .single();
             
             if (tenant?.slug) {
-              window.location.href = `/${tenant.slug}`;
+              const hostname = window.location.hostname;
+              const isProd = hostname === 'gomboswiftci.app' || hostname === 'www.gomboswiftci.app';
+              if (isProd) {
+                window.location.href = `https://${tenant.slug}.gomboswiftci.app/dashboard`;
+              } else {
+                window.location.href = `/${tenant.slug}`;
+              }
             } else {
               window.location.href = '/';
             }

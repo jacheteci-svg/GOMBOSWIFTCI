@@ -14,6 +14,7 @@ interface SaasContextType {
   hasModule: (moduleName: keyof SaasPlanDb) => boolean;
   refreshSaasData: () => Promise<void>;
   isActive: boolean;
+  isSubdomain: boolean;
 }
 
 const SaasContext = createContext<SaasContextType>({
@@ -25,6 +26,7 @@ const SaasContext = createContext<SaasContextType>({
   hasModule: () => false,
   refreshSaasData: async () => {},
   isActive: true,
+  isSubdomain: false,
 });
 
 export const useSaas = () => useContext(SaasContext);
@@ -46,6 +48,7 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [planConfig, setPlanConfig] = useState<SaasPlanDb | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSubdomainState, setIsSubdomainState] = useState(false);
 
   const fetchSaasData = useCallback(async (opts?: { force?: boolean }) => {
     const force = opts?.force === true;
@@ -64,12 +67,21 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
 
-    // 2. Detection par URL Path (Pour compatibilite descendante)
-    if (!targetSlug && urlSlug && !['super-admin', 'platform', 'login', 'register', 'gombo', 'saas', 'demo', 'api', 'help'].includes(urlSlug)) {
+    // 2. Detection par URL Path (Rediriger vers sous-domaine en prod)
+    if (!targetSlug && urlSlug && !['super-admin', 'platform', 'login', 'register', 'gombo', 'saas', 'demo', 'api', 'help', 'status', 'privacy', 'terms', 'features', 'blog'].includes(urlSlug)) {
        targetSlug = urlSlug;
+       
+       const isProd = hostname === 'gomboswiftci.app' || hostname === 'www.gomboswiftci.app';
+       if (isProd && targetSlug) {
+         window.location.href = `https://${targetSlug}.gomboswiftci.app${location.pathname.replace(`/${targetSlug}`, '') || '/'}`;
+         return;
+       }
     }
 
     if (urlSlug === 'gombo') targetSlug = 'gombo';
+    
+    const isSub = !!targetSlug && (hostname.split('.').length >= 2 && !['www', 'gomboswiftci', 'localhost', 'vercel', 'app', 'next', 'vite', 'system'].includes(hostname.split('.')[0].toLowerCase()));
+    setIsSubdomainState(isSub);
 
     if (!currentUser && !targetSlug) {
       setTenant(null);
@@ -207,6 +219,7 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
         hasModule,
         refreshSaasData,
         isActive: tenant?.actif ?? true,
+        isSubdomain: isSubdomainState,
       }}
     >
       {children}

@@ -1,5 +1,6 @@
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useSaas } from '../../saas/SaasProvider';
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -15,35 +16,40 @@ interface BottomNavProps {
 
 export const BottomNav = ({ onMenuClick }: BottomNavProps) => {
   const { currentUser, hasPermission } = useAuth();
+  const { isSubdomain } = useSaas();
   const location = useLocation();
   const { tenantSlug } = useParams();
 
   const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN';
-
   const effectiveSlug = tenantSlug || currentUser?.tenant_slug || 'gombo';
+
+  const getPath = (path: string) => {
+    if (isSubdomain) return path;
+    return `/${effectiveSlug}${path}`;
+  };
 
   // Role-aware nav items — show only what matters most
   const getNavItems = () => {
     const base = [];
 
     if (hasPermission('DASHBOARD')) {
-      base.push({ path: `/${effectiveSlug}/dashboard`, label: 'Dashboard', icon: LayoutDashboard });
+      base.push({ path: getPath('/dashboard'), label: 'Dashboard', icon: LayoutDashboard });
     }
 
     if (hasPermission('COMMANDES') || hasPermission('CENTRE_APPEL')) {
-      base.push({ path: `/${effectiveSlug}/commandes`, label: 'Commandes', icon: ShoppingCart });
+      base.push({ path: getPath('/commandes'), label: 'Commandes', icon: ShoppingCart });
     }
 
     if (hasPermission('LOGISTIQUE')) {
-      base.push({ path: `/${effectiveSlug}/logistique`, label: 'Logistique', icon: Truck });
+      base.push({ path: getPath('/logistique'), label: 'Logistique', icon: Truck });
     } else if (hasPermission('LIVREUR')) {
-      base.push({ path: `/${effectiveSlug}/livraison`, label: 'Livraisons', icon: Truck });
+      base.push({ path: getPath('/livraison'), label: 'Livraisons', icon: Truck });
     } else if (hasPermission('PRODUITS')) {
-      base.push({ path: `/${effectiveSlug}/produits`, label: 'Produits', icon: Package });
+      base.push({ path: getPath('/produits'), label: 'Produits', icon: Package });
     }
 
     if (hasPermission('PROFIL') || isSuperAdmin) {
-      base.push({ path: isSuperAdmin ? '/super-admin/profile' : `/${effectiveSlug}/profil`, label: 'Profil', icon: UserCircle });
+      base.push({ path: isSuperAdmin ? '/super-admin/profile' : getPath('/profil'), label: 'Profil', icon: UserCircle });
     }
 
     if (isSuperAdmin) {

@@ -45,21 +45,27 @@ interface NavSection {
 
 export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
   const { currentUser, logout, hasPermission } = useAuth();
-  const { hasModule } = useSaas();
-  const { showToast } = useToast();
-  const location = useLocation();
   const { tenantSlug } = useParams();
+  const { isSubdomain, hasModule } = useSaas();
+  const { showToast } = useToast();
   const [expandedGroups, setExpandedGroups] = useState<string[]>(['Ventes & Opérations']);
+  const location = useLocation();
 
   const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN';
   const effectiveSlug = tenantSlug || currentUser?.tenant_slug || 'gombo';
+  
+  // Helper pour generer des URLs propres sur les sous-domaines
+  const getPath = (path: string) => {
+    if (isSubdomain) return path || '/';
+    return path ? `/${effectiveSlug}${path}` : `/${effectiveSlug}`;
+  };
 
   const tenantNavSections: NavSection[] = [
     {
       section: 'Principal',
       items: [
-        { path: `/${effectiveSlug}`, label: 'Tableau de Bord', icon: LayoutDashboard, permission: 'DASHBOARD' },
-        { path: `/${effectiveSlug}/home`, label: 'Menu de Navigation', icon: HomeIcon, permission: 'PROFIL' },
+        { path: getPath(''), label: 'Tableau de Bord', icon: LayoutDashboard, permission: 'DASHBOARD' },
+        { path: getPath('/home'), label: 'Menu de Navigation', icon: HomeIcon, permission: 'PROFIL' },
       ]
     },
     {
@@ -69,10 +75,10 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
           label: 'Gestion Commerciale',
           icon: ShoppingCart,
           children: [
-            { path: `/${effectiveSlug}/produits`, label: 'Produits & Stock', icon: Package, permission: 'PRODUITS' },
-            { path: `/${effectiveSlug}/commandes`, label: 'Commandes', icon: ShoppingCart, permission: 'COMMANDES' },
-            { path: `/${effectiveSlug}/centre-appel`, label: 'Centre d\'Appel', icon: Headset, permission: 'CENTRE_APPEL' },
-            { path: `/${effectiveSlug}/clients`, label: 'CRM & Clients', icon: Users, permission: 'CLIENTS', requiredModule: 'module_crm_clients' },
+            { path: getPath('/produits'), label: 'Produits & Stock', icon: Package, permission: 'PRODUITS' },
+            { path: getPath('/commandes'), label: 'Commandes', icon: ShoppingCart, permission: 'COMMANDES' },
+            { path: getPath('/centre-appel'), label: 'Centre d\'Appel', icon: Headset, permission: 'CENTRE_APPEL' },
+            { path: getPath('/clients'), label: 'CRM & Clients', icon: Users, permission: 'CLIENTS', requiredModule: 'module_crm_clients' },
           ]
         }
       ]
@@ -84,9 +90,9 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
           label: 'Suivi Terrain',
           icon: Truck,
           children: [
-            { path: `/${effectiveSlug}/logistique`, label: 'Logistique', icon: Truck, permission: 'LOGISTIQUE', requiredModule: 'module_logistique_pro' },
-            { path: `/${effectiveSlug}/performance-staff`, label: 'Performance Staff', icon: Activity, permission: 'GESTION_LIVREURS', requiredModule: 'module_staff_perf' },
-            { path: `/${effectiveSlug}/livraison`, label: 'Mes Livraisons', icon: UserIcon, permission: 'LIVREUR', requiredModule: 'module_livraisons_app' },
+            { path: getPath('/logistique'), label: 'Logistique', icon: Truck, permission: 'LOGISTIQUE', requiredModule: 'module_logistique_pro' },
+            { path: getPath('/performance-staff'), label: 'Performance Staff', icon: Activity, permission: 'GESTION_LIVREURS', requiredModule: 'module_staff_perf' },
+            { path: getPath('/livraison'), label: 'Mes Livraisons', icon: UserIcon, permission: 'LIVREUR', requiredModule: 'module_livraisons_app' },
           ]
         }
       ]
@@ -98,12 +104,12 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
           label: 'Trésorerie & Audit',
           icon: Wallet,
           children: [
-            { path: `/${effectiveSlug}/caisse`, label: 'Caisse / Retour', icon: Calculator, permission: 'CAISSE', requiredModule: 'module_caisse_retour_expert' },
-            { path: `/${effectiveSlug}/rapport-financier`, label: 'Rapport Journalier', icon: TrendingUp, permission: 'FINANCE', requiredModule: 'module_rapport_journalier' },
-            { path: `/${effectiveSlug}/net-profit`, label: 'Profit & Finances', icon: DollarSign, permission: 'ADMIN', requiredModule: 'module_profit_finances' },
-            { path: `/${effectiveSlug}/admin/tresorerie`, label: 'Trésorerie Admin', icon: Wallet, permission: 'TRESORERIE', requiredModule: 'module_tresorerie_admin' },
-            { path: `/${effectiveSlug}/audit-tresorerie`, label: 'Expertise Comptable', icon: ShieldCheck, permission: 'ADMIN', requiredModule: 'module_expertise_comptable' },
-            { path: `/${effectiveSlug}/admin?tab=abonnement`, label: 'Abonnement & Forfait', icon: Crown, permission: 'ADMIN' },
+            { path: getPath('/caisse'), label: 'Caisse / Retour', icon: Calculator, permission: 'CAISSE', requiredModule: 'module_caisse_retour_expert' },
+            { path: getPath('/rapport-financier'), label: 'Rapport Journalier', icon: TrendingUp, permission: 'FINANCE', requiredModule: 'module_rapport_journalier' },
+            { path: getPath('/net-profit'), label: 'Profit & Finances', icon: DollarSign, permission: 'ADMIN', requiredModule: 'module_profit_finances' },
+            { path: getPath('/admin/tresorerie'), label: 'Trésorerie Admin', icon: Wallet, permission: 'TRESORERIE', requiredModule: 'module_tresorerie_admin' },
+            { path: getPath('/audit-tresorerie'), label: 'Expertise Comptable', icon: ShieldCheck, permission: 'ADMIN', requiredModule: 'module_expertise_comptable' },
+            { path: getPath('/admin?tab=abonnement'), label: 'Abonnement & Forfait', icon: Crown, permission: 'ADMIN' },
           ]
         }
       ]
@@ -111,9 +117,9 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
     {
       section: 'Système',
       items: [
-        { path: `/${effectiveSlug}/historique`, icon: History, label: 'Historique d\'Activité', permission: 'HISTORIQUE' },
-        { path: `/${effectiveSlug}/admin`, icon: Settings, label: hasPermission('ADMIN') ? 'Administration' : 'Équipe & Zones', permission: 'COMMUNES' },
-        { path: `/${effectiveSlug}/profil`, icon: UserIcon, label: 'Mon Profil', permission: 'PROFIL' },
+        { path: getPath('/historique'), icon: History, label: 'Historique d\'Activité', permission: 'HISTORIQUE' },
+        { path: getPath('/admin'), icon: Settings, label: hasPermission('ADMIN') ? 'Administration' : 'Équipe & Zones', permission: 'COMMUNES' },
+        { path: getPath('/profil'), icon: UserIcon, label: 'Mon Profil', permission: 'PROFIL' },
       ]
     }
   ];

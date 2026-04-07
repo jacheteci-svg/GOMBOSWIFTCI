@@ -4,11 +4,13 @@ import { NotificationCenter } from './NotificationCenter';
 import { useAuth } from '../../contexts/AuthContext';
 import { insforge } from '../../lib/insforge';
 import { useState, useEffect } from 'react';
+import { useSaas } from '../../saas/SaasProvider';
 
 export const Header = ({ onMenuClick }: { onMenuClick: () => void }) => {
   const location = useLocation();
   const { currentUser } = useAuth();
   const { tenantSlug } = useParams();
+  const { isSubdomain } = useSaas();
   const [tenantName, setTenantName] = useState<string>('');
 
   useEffect(() => {
@@ -107,7 +109,7 @@ export const Header = ({ onMenuClick }: { onMenuClick: () => void }) => {
       
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexShrink: 0 }}>
         <Link 
-          to={tenantSlug ? `/${tenantSlug}` : "/"} 
+          to={isSubdomain ? "/" : (tenantSlug ? `/${tenantSlug}` : "/")} 
           style={{ 
             width: 36, height: 36,
             borderRadius: 10,
