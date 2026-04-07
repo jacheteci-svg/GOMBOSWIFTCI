@@ -247,10 +247,10 @@ export const Caisse = () => {
               <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem' }}>1</span>
               Sélection du Livreur
             </h3>
-            <select className="form-select" style={{ height: '52px', fontWeight: 700, fontSize: '1.05rem', background: 'rgba(0,0,0,0.2)', border: '2px solid rgba(255,255,255,0.1)', color: 'white' }} value={selectedLivreur} onChange={(e) => loadLivreur(e.target.value)}>
-              <option value="">Renseignez l'agent...</option>
+            <select className="form-select select-premium" style={{ height: '52px', fontWeight: 700, fontSize: '1.05rem', background: 'rgba(0,0,0,0.4)', border: '2px solid rgba(255,255,255,0.1)', color: 'white' }} value={selectedLivreur} onChange={(e) => loadLivreur(e.target.value)}>
+              <option value="" style={{ color: '#000' }}>Renseignez l'agent...</option>
               {livreurs.map(l => (
-                <option key={l.id} value={l.id}>{l.nom_complet}</option>
+                <option key={l.id} value={l.id} style={{ color: '#000' }}>{l.nom_complet}</option>
               ))}
             </select>
           </div>
@@ -278,7 +278,7 @@ export const Caisse = () => {
                          border: '1px solid #e2e8f0', 
                          borderRadius: '20px', 
                          cursor: 'pointer', 
-                         backgroundColor: 'white',
+                         backgroundColor: 'rgba(255,255,255,0.03)',
                          transition: 'all 0.2s ease',
                          boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
                        }} 
