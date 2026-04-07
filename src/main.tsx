@@ -4,10 +4,26 @@ import './index.css'
 import App from './App.tsx'
 
 // ============================================================
-// SECURITY & PERFORMANCE FORCE 🛡️⚡
+// GHOST SESSION KILLER 🧹👻
 // ============================================================
+// If we receive a 401 on refresh during startup, we're stuck in a "ghost session".
+// We need to clear only the relevant bits to allow a clean re-login.
+(function() {
+  const lastRefreshError = localStorage.getItem('insforge_auth_error_timestamp');
+  const now = Date.now();
+  
+  // If the last error was within 2 seconds of a page load, we might be in a loop
+  // This is a safety mechanism to prevent 401 refresh loops in production.
+  if (lastRefreshError && (now - parseInt(lastRefreshError) < 5000)) {
+     console.warn('Ghost session detected. Clearing auth storage for recovery.');
+     localStorage.removeItem('insforge.auth.token');
+     localStorage.removeItem('insforge.auth.refreshToken');
+     localStorage.removeItem('insforge_auth_error_timestamp');
+  }
+})();
 
-/* 1. PRO-ANTI COPIE (Désactive le clic droit et les raccourcis devtools sauf pour les admins)
+// 1. PRO-ANTI COPIE (Désactive le clic droit et les raccourcis devtools sauf pour les admins)
+/*
 if (import.meta.env.PROD) {
   const isSuperAdminPath = window.location.pathname.startsWith('/super-admin');
   const hasBypass = localStorage.getItem('gombo_debug_bypass') === 'true';
@@ -27,7 +43,8 @@ if (import.meta.env.PROD) {
       }
     });
   }
-} */
+} 
+*/
 
 // 2. FORCE CACHE CLEAN (Hashed assets handled by Vite)
 console.log("GomboSwiftCI Infrastructure Loaded. (Secure Layer Active)");
