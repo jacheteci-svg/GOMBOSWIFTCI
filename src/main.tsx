@@ -1,4 +1,4 @@
-import { StrictMode } from 'react' // Final deploy: 2026-04-07 19:42
+import { StrictMode } from 'react' // Final deploy: 2026-04-07 19:57:30 (DB Restored + Schema Fixed)
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
