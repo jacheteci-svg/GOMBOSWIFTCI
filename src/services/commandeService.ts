@@ -63,14 +63,20 @@ export const getCommandesByStatus = async (tenantId: string, statusList: string[
     .order('date_creation', { ascending: false });
 
   if (orderError) throw orderError;
+  if (!orders || orders.length === 0) return [];
 
+  const orderIds = orders.map(o => o.id);
+
+  // Fetch only lines for the retrieved orders and for this tenant
   const { data: lines, error: linesError } = await insforge.database
     .from('lignes_commandes')
-    .select('*');
+    .select('*')
+    .in('commande_id', orderIds)
+    .eq('tenant_id', tenantId);
 
   if (linesError) throw linesError;
   
-  return (orders || []).map((o: any) => ({
+  return orders.map((o: any) => ({
     ...o,
     nom_client: o.clients?.nom_complet ?? o.client_nom,
     telephone_client: o.clients?.telephone ?? o.client_telephone,
@@ -167,32 +173,36 @@ export const createCommandeBase = async (tenantId: string, commande: Omit<Comman
   const id = cmdData?.[0]?.id;
   if (!id) throw new Error("ID de commande non généré par la base de données.");
 
+  // Fetch all products involved once to get purchase prices
+  const productIds = Array.from(new Set(lignes.map(l => l.produit_id)));
+  const { data: productsData } = await insforge.database
+    .from('produits')
+    .select('id, prix_achat')
+    .in('id', productIds)
+    .eq('tenant_id', tenantId);
+
+  const priceMap = new Map((productsData || []).map(p => [p.id, p.prix_achat || 0]));
+
+  const lignePayloads = lignes.map(l => ({
+    commande_id: id,
+    produit_id: l.produit_id,
+    nom_produit: l.nom_produit ?? '',
+    quantite: Number(l.quantite) || 0,
+    prix_unitaire: Number(l.prix_unitaire) || 0,
+    montant_ligne: Number(l.montant_ligne) || 0,
+    prix_achat_unitaire: priceMap.get(l.produit_id) || 0,
+    tenant_id: tenantId,
+  }));
+
+  const { error: lineError } = await insforge.database.from('lignes_commandes').insert(lignePayloads);
+  
+  if (lineError) {
+    console.error("Erreur lignes commande:", lineError);
+    throw new Error(`Erreur insertion lignes: ${getErrorMessage(lineError)}`);
+  }
+
+  // Stock movements
   for (const l of lignes) {
-    // Fetch current purchase price to lock it in the line
-    const { data: prodData } = await insforge.database
-      .from('produits')
-      .select('prix_achat')
-      .eq('id', l.produit_id)
-      .single();
-
-    const lignePayload = {
-      commande_id: id,
-      produit_id: l.produit_id,
-      nom_produit: l.nom_produit ?? '',
-      quantite: Number(l.quantite) || 0,
-      prix_unitaire: Number(l.prix_unitaire) || 0,
-      montant_ligne: Number(l.montant_ligne) || 0,
-      prix_achat_unitaire: prodData?.prix_achat || 0,
-      tenant_id: tenantId,
-    };
-
-    const { error: lineError } = await insforge.database.from('lignes_commandes').insert([lignePayload]);
-    
-    if (lineError) {
-      console.error("Erreur ligne commande:", lineError);
-      throw new Error(`Erreur ligne commande (${l.nom_produit}): ${getErrorMessage(lineError)}`);
-    }
-
     try {
       await addMouvementStock(tenantId, {
         produit_id: l.produit_id,
@@ -290,29 +300,29 @@ export const replaceCommandeLignesCentreAppel = async (
 
   const subtotal = lignes.reduce((acc, l) => acc + Number(l.montant_ligne || 0), 0);
 
-  for (const l of lignes) {
-    const { data: prodData } = await insforge.database
-      .from('produits')
-      .select('prix_achat')
-      .eq('id', l.produit_id)
-      .eq('tenant_id', tenantId)
-      .single();
+  // Fetch all involved products once
+  const productIds = Array.from(new Set(lignes.map(l => l.produit_id)));
+  const { data: productsData } = await insforge.database
+    .from('produits')
+    .select('id, prix_achat')
+    .in('id', productIds)
+    .eq('tenant_id', tenantId);
 
-    const { error: insErr } = await insforge.database.from('lignes_commandes').insert([
-      {
-        commande_id: commandeId,
-        produit_id: l.produit_id,
-        nom_produit: l.nom_produit,
-        quantite: Number(l.quantite),
-        prix_unitaire: Number(l.prix_unitaire),
-        montant_ligne: Number(l.montant_ligne),
-        prix_achat_unitaire: prodData?.prix_achat || 0,
-        tenant_id: tenantId,
-      },
-    ]);
+  const priceMap = new Map((productsData || []).map(p => [p.id, p.prix_achat || 0]));
 
-    if (insErr) throw new Error(getErrorMessage(insErr));
-  }
+  const insPayloads = lignes.map(l => ({
+    commande_id: commandeId,
+    produit_id: l.produit_id,
+    nom_produit: l.nom_produit,
+    quantite: Number(l.quantite),
+    prix_unitaire: Number(l.prix_unitaire),
+    montant_ligne: Number(l.montant_ligne),
+    prix_achat_unitaire: priceMap.get(l.produit_id) || 0,
+    tenant_id: tenantId,
+  }));
+
+  const { error: insErr } = await insforge.database.from('lignes_commandes').insert(insPayloads);
+  if (insErr) throw new Error(getErrorMessage(insErr));
 
   return { subtotal };
 };
@@ -402,9 +412,10 @@ export const getTopSellingProducts = async (tenantId: string, limit = 10, days?:
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
     const iso = startDate.toISOString();
-    query = query.or(`commandes.date_livraison_effective.gte.${iso},and(commandes.date_livraison_effective.is.null,commandes.date_creation.gte.${iso})`);
+    // Simplified logic: filter only on creation date for now to eliminate parsing issues with joined table columns in or()
+    query = query.gte('commandes.date_creation', iso);
   } else if (start && end) {
-    query = query.or(`and(commandes.date_livraison_effective.gte.${start},commandes.date_livraison_effective.lte.${end}),and(commandes.date_livraison_effective.is.null,commandes.date_creation.gte.${start},commandes.date_creation.lte.${end})`);
+    query = query.gte('commandes.date_creation', start).lte('commandes.date_creation', end);
   }
 
   const { data: lines, error: linesError } = await query;

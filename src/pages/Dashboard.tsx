@@ -352,9 +352,9 @@ export const Dashboard = () => {
                 <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#06b6d4' }}><div style={{ width: 8, height: 8, borderRadius: '50%', background: '#06b6d4' }}></div> COMMANDES</span>
              </div>
           </div>
-          <div style={{ height: '350px' }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={historyData}>
+          <div style={{ height: '350px', width: '100%', minHeight: '350px' }}>
+            <ResponsiveContainer width="99%" height="100%">
+              <AreaChart data={historyData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <defs>
                    <linearGradient id="gomboRev" x1="0" y1="0" x2="0" y2="1">
                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
@@ -376,8 +376,8 @@ export const Dashboard = () => {
         <div className="gombo-card-elite" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
           <h4 style={{ margin: '0 0 2rem 0', fontWeight: 950, color: 'white', width: '100%', textAlign: 'center' }}>Répartition Logistique</h4>
           
-          <div style={{ position: 'relative', width: '220px', height: '220px' }}>
-            <ResponsiveContainer width="100%" height="100%">
+          <div style={{ position: 'relative', width: '100%', height: '260px', minHeight: '260px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <ResponsiveContainer width="99%" height="100%">
               <PieChart>
                 <Pie
                   data={statusData}
@@ -394,7 +394,7 @@ export const Dashboard = () => {
                 <Tooltip contentStyle={{ background: '#0f172a', border: 'none', borderRadius: '16px' }} />
               </PieChart>
             </ResponsiveContainer>
-            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
+            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', pointerEvents: 'none' }}>
                <div style={{ fontSize: '2.5rem', fontWeight: 950, color: 'white' }}>{stats.total}</div>
                <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 800, textTransform: 'uppercase' }}>FLUX TOTAL</div>
             </div>

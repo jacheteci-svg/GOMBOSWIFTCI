@@ -242,14 +242,22 @@ export async function fetchUserNameMap(
 
 async function fetchCommandesForPerformance(
   tenantId: string | null,
-  isSuperAdmin: boolean
+  isSuperAdmin: boolean,
+  range: { start: Date; end: Date }
 ): Promise<Commande[]> {
   let q = insforge.database
     .from('commandes')
     .select(
       'id, tenant_id, livreur_id, agent_appel_id, statut_commande, frais_livraison, date_creation, date_livraison_effective, date_validation_appel'
     );
-  if (!isSuperAdmin && tenantId) q = q.eq('tenant_id', tenantId);
+  
+  if (!isSuperAdmin && tenantId) {
+    q = q.eq('tenant_id', tenantId);
+  }
+
+  // Optimize: Filter by date in the query itself to avoid fetching thousands of old orders
+  q = q.or(`date_creation.gte.${range.start.toISOString()},date_livraison_effective.gte.${range.start.toISOString()}`);
+
   const { data, error } = await q;
   if (error) {
     console.error('fetchCommandesForPerformance', error);
@@ -535,7 +543,7 @@ export async function loadPerformanceDashboardData(
 }> {
   const range = getDateRangeForFilter(filter);
   const [commandes, names] = await Promise.all([
-    fetchCommandesForPerformance(tenantId || null, !!isSuperAdmin),
+    fetchCommandesForPerformance(tenantId || null, !!isSuperAdmin, range),
     fetchUserNameMap(tenantId || null, !!isSuperAdmin),
   ]);
 
@@ -566,7 +574,9 @@ export async function loadSuperAdminTenantPerformance(
         .from('commandes')
         .select(
           'tenant_id, statut_commande, montant_total, montant_encaisse, date_creation, date_livraison_effective'
-        ),
+        )
+        // Optimization: Filter by date at the query level for the platform as well
+        .or(`date_creation.gte.${range.start.toISOString()},date_livraison_effective.gte.${range.start.toISOString()}`),
     ]);
 
   if (te) console.error('tenants performance', te);
