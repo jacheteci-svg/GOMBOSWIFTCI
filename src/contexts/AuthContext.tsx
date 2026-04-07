@@ -117,6 +117,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         );
 
         if (authError || !data?.user) {
+          if ((authError as any)?.status === 401) {
+            localStorage.setItem('insforge_auth_error_timestamp', Date.now().toString());
+          }
           setCurrentUser(null);
           return;
         }
