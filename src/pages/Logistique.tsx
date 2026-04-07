@@ -9,7 +9,7 @@ import { generateDeliverySlipPDF } from '../services/pdfService';
 import { tenantToPdfBranding } from '../lib/tenantPdfBranding';
 import { format } from 'date-fns';
 import { CommandeDetails } from '../components/commandes/CommandeDetails';
-import { NexusModuleFrame } from '../components/layout/NexusModuleFrame';
+import { GomboModuleFrame } from '../components/layout/GomboModuleFrame';
 
 export const Logistique = () => {
   const { showToast } = useToast();
@@ -95,8 +95,8 @@ export const Logistique = () => {
   };
 
   return (
-    <NexusModuleFrame
-      badge="Supply Chain Nexus"
+    <GomboModuleFrame
+      badge="Supply Chain Gombo"
       title="Gestion Logistique"
       description="Coordination des tournées, affectation des livreurs et suivi terrain en temps réel."
     >
@@ -199,7 +199,7 @@ export const Logistique = () => {
                 <p style={{ color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Toutes les tournées sont closes.</p>
               </div>
             ) : activeFeuilles.map(f => (
-              <div key={f.id} className="nexus-card-lite hover-scale" style={{ padding: '2rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.03)' }}>
+              <div key={f.id} className="gombo-card-lite hover-scale" style={{ padding: '2rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.03)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
                   <div>
                     <div style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '0.4rem', letterSpacing: '0.1em' }}>Responsable Logistique</div>
@@ -246,7 +246,7 @@ export const Logistique = () => {
           onClose={() => setSelectedCommandeId(null)} 
         />
       )}
-    </NexusModuleFrame>
+    </GomboModuleFrame>
   );
 };
 
@@ -266,9 +266,9 @@ const FeuilleDetail = ({ feuille, onClose }: { feuille: FeuilleRoute, onClose: (
 
   return (
     <div className="modal-backdrop animate-fadeIn" onClick={onClose} style={{ backdropFilter: 'blur(12px)', background: 'rgba(0,0,0,0.85)' }}>
-      <div className="modal-content modal-nexus modal-nexus-wide card glass-effect animate-modalUp" style={{ maxWidth: '900px', width: '95%', padding: 0, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '32px', position: 'relative' }} onClick={e => e.stopPropagation()}>
+      <div className="modal-content modal-gombo modal-gombo-wide card glass-effect animate-modalUp" style={{ maxWidth: '900px', width: '95%', padding: 0, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '32px', position: 'relative' }} onClick={e => e.stopPropagation()}>
         <div className="modal-shell">
-        <div className="modal-nexus-accent" />
+        <div className="modal-gombo-accent" />
         <div style={{ padding: '1.5rem 1.5rem 1rem', flexShrink: 0 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
           <div>

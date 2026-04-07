@@ -5,7 +5,7 @@ import { CommandeDetails } from '../components/commandes/CommandeDetails';
 import { subscribeToCommandesByStatus } from '../services/commandeService';
 import { useSaas } from '../saas/SaasProvider';
 import type { Commande } from '../types';
-import { NexusModuleFrame } from '../components/layout/NexusModuleFrame';
+import { GomboModuleFrame } from '../components/layout/GomboModuleFrame';
 
 export const CentreAppel = () => {
   const { tenant } = useSaas();
@@ -26,8 +26,8 @@ export const CentreAppel = () => {
 
   return (
     <>
-      <NexusModuleFrame
-        badge="Nexus Voice"
+      <GomboModuleFrame
+        badge="Gombo Voice"
         title="Centre d'appel"
         description="Gestion des flux de validation client et relances téléphoniques."
         tight
@@ -61,7 +61,7 @@ export const CentreAppel = () => {
             />
           )}
         </div>
-      </NexusModuleFrame>
+      </GomboModuleFrame>
 
       {selectedCommande && (
         <AppelForm 

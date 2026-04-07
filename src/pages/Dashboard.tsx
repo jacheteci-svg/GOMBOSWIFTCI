@@ -219,14 +219,14 @@ export const Dashboard = () => {
   const { logStats, tauxSuccesLivraison } = stats;
 
   if (loading) return (
-    <div className="nexus-theme-dark" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
+    <div className="gombo-theme-dark" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
       <div className="spinner"></div>
     </div>
   );
 
   return (
     <div
-      className="nexus-theme-dark nexus-module-frame"
+      className="gombo-theme-dark gombo-module-frame"
       style={{ animation: 'fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1)' }}
     >
       
@@ -235,13 +235,13 @@ export const Dashboard = () => {
         <div>
            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.6rem' }}>
               <div style={{ background: 'rgba(6,182,212,0.15)', padding: '0.6rem', borderRadius: '12px', border: '1px solid rgba(6,182,212,0.3)' }}>
-                 <Activity size={24} className="nexus-neon-cyan" />
+                 <Activity size={24} className="gombo-neon-cyan" />
               </div>
               <span style={{ fontSize: '0.75rem', fontWeight: 900, color: '#06b6d4', textTransform: 'uppercase', letterSpacing: '0.15em' }}>
                  {tenant?.nom || 'Propriétaire'} • Live Dashboard
               </span>
            </div>
-           <h1 style={{ fontSize: 'clamp(2rem, 5vw, 2.8rem)', fontWeight: 950, letterSpacing: '-0.04em', margin: 0, color: 'white' }}>Nexus Command Center</h1>
+           <h1 style={{ fontSize: 'clamp(2rem, 5vw, 2.8rem)', fontWeight: 950, letterSpacing: '-0.04em', margin: 0, color: 'white' }}>Gombo Command Center</h1>
            <p style={{ color: '#94a3b8', fontSize: '1.1rem', fontWeight: 500, marginTop: '0.5rem' }}>Analyse de performance logistique & financière</p>
         </div>
         
@@ -288,9 +288,9 @@ export const Dashboard = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', marginBottom: '3rem' }}>
         
         {/* CA Net */}
-        <div className="nexus-card-elite" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <div className="gombo-card-elite" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-             <DollarSign size={24} className="nexus-neon-cyan" />
+             <DollarSign size={24} className="gombo-neon-cyan" />
              <div style={{ textAlign: 'right' }}>
                 <div style={{ fontSize: '0.75rem', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Revenu Net Produits</div>
                 <div style={{ fontSize: '2.4rem', fontWeight: 950, color: 'white' }}>{stats.caNetProduits.toLocaleString()}</div>
@@ -305,7 +305,7 @@ export const Dashboard = () => {
         </div>
 
         {/* Taux de Succès */}
-        <div className="nexus-card-elite" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <div className="gombo-card-elite" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f59e0b' }}>
                 <Percent size={24} />
@@ -324,7 +324,7 @@ export const Dashboard = () => {
         </div>
 
         {/* Flux de Sortie */}
-        <div className="nexus-card-elite" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <div className="gombo-card-elite" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
              <Activity size={24} style={{ color: '#8b5cf6' }} />
              <div style={{ textAlign: 'right' }}>
@@ -344,7 +344,7 @@ export const Dashboard = () => {
       <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '2.5rem', marginBottom: '3rem' }} className="mobile-stack">
         
         {/* Area Revenue Chart */}
-        <div className="nexus-card-elite" style={{ padding: '2.5rem' }}>
+        <div className="gombo-card-elite" style={{ padding: '2.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
              <h3 style={{ margin: 0, fontWeight: 950, fontSize: '1.4rem' }}>Optimisation de Flux</h3>
              <div style={{ display: 'flex', gap: '1rem', fontSize: '0.8rem', fontWeight: 800 }}>
@@ -356,7 +356,7 @@ export const Dashboard = () => {
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={historyData}>
                 <defs>
-                   <linearGradient id="nexusRev" x1="0" y1="0" x2="0" y2="1">
+                   <linearGradient id="gomboRev" x1="0" y1="0" x2="0" y2="1">
                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
                      <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
                    </linearGradient>
@@ -365,7 +365,7 @@ export const Dashboard = () => {
                 <XAxis dataKey="jour" axisLine={false} tickLine={false} tick={{fontSize: 11, fontWeight: 800, fill: '#64748b'}} dy={10} />
                 <YAxis hide />
                 <Tooltip contentStyle={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', fontWeight: 900 }} />
-                <Area type="monotone" dataKey="CA" stroke="#10b981" strokeWidth={4} fill="url(#nexusRev)" />
+                <Area type="monotone" dataKey="CA" stroke="#10b981" strokeWidth={4} fill="url(#gomboRev)" />
                 <Area type="monotone" dataKey="Commandes" stroke="#06b6d4" strokeWidth={2} strokeDasharray="5 5" fill="none" />
               </AreaChart>
             </ResponsiveContainer>
@@ -373,7 +373,7 @@ export const Dashboard = () => {
         </div>
 
         {/* Circular Distribution */}
-        <div className="nexus-card-elite" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="gombo-card-elite" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
           <h4 style={{ margin: '0 0 2rem 0', fontWeight: 950, color: 'white', width: '100%', textAlign: 'center' }}>Répartition Logistique</h4>
           
           <div style={{ position: 'relative', width: '220px', height: '220px' }}>
@@ -415,9 +415,9 @@ export const Dashboard = () => {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2.5rem' }}>
-         <div className="nexus-card-elite">
+         <div className="gombo-card-elite">
             <h3 style={{ marginBottom: '2rem', fontWeight: 950, display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-               <Truck size={22} className="nexus-neon-cyan" /> Livraison par Zone
+               <Truck size={22} className="gombo-neon-cyan" /> Livraison par Zone
             </h3>
             <div className="table-container" style={{ background: 'transparent', border: 'none' }}>
                <table style={{ borderSpacing: '0 0.8rem', borderCollapse: 'separate' }}>
@@ -434,7 +434,7 @@ export const Dashboard = () => {
             </div>
          </div>
 
-         <div className="nexus-card-elite">
+         <div className="gombo-card-elite">
             <h3 style={{ marginBottom: '2rem', fontWeight: 950, display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
                <ShoppingBag size={22} color="#ec4899" /> Performances Produits
             </h3>

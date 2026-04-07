@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap');
 
 :root {
-  /* Nexus Elite Dark Palette (HSL) */
+  /* Gombo Elite Dark Palette (HSL) */
   --p-h: 188; --p-s: 95%; --p-l: 43%; /* Neon Cyan */
   --primary: hsl(var(--p-h), var(--p-s), var(--p-l));
   --primary-glow: hsla(var(--p-h), var(--p-s), var(--p-l), 0.2);
@@ -62,7 +62,7 @@ h1, h2, h3, .brand {
   font-weight: 900;
 }
 
-/* --- NEXUS CARDS --- */
+/* --- GOMBO CARDS --- */
 .card {
   background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
   border-radius: var(--radius-xl);
@@ -303,14 +303,14 @@ h1, h2, h3, .brand {
   animation: pageEnter 0.35s ease;
 }
 
-/* Fond Nexus unifié (tous les modules tenant) */
-.nexus-page-bg {
+/* Fond Gombo unifié (tous les modules tenant) */
+.gombo-page-bg {
   background: linear-gradient(180deg, var(--bg-app) 0%, #0a0f1a 52%, var(--bg-app) 100%);
   position: relative;
 }
 
 /* Cadre largeur max alignée Performance / super-admin */
-.nexus-module-frame {
+.gombo-module-frame {
   max-width: 1400px;
   margin-left: auto;
   margin-right: auto;
@@ -334,15 +334,15 @@ h1, h2, h3, .brand {
 }
 
 /* Hero module — badge, titre dégradé, lead */
-.nexus-module-hero {
+.gombo-module-hero {
   margin-bottom: 2.5rem;
 }
 
-.nexus-module-hero--tight {
+.gombo-module-hero--tight {
   margin-bottom: 1.5rem;
 }
 
-.nexus-module-hero-row {
+.gombo-module-hero-row {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -350,19 +350,19 @@ h1, h2, h3, .brand {
   gap: 1.5rem 2rem;
 }
 
-.nexus-module-hero-text {
+.gombo-module-hero-text {
   min-width: 0;
   flex: 1;
 }
 
-.nexus-kicker-row {
+.gombo-kicker-row {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   margin-bottom: 0.5rem;
 }
 
-.nexus-kicker-dot {
+.gombo-kicker-dot {
   width: 12px;
   height: 12px;
   border-radius: 50%;
@@ -371,7 +371,7 @@ h1, h2, h3, .brand {
   flex-shrink: 0;
 }
 
-.nexus-kicker-label {
+.gombo-kicker-label {
   font-size: 0.75rem;
   font-weight: 800;
   color: var(--primary);
@@ -379,7 +379,7 @@ h1, h2, h3, .brand {
   letter-spacing: 0.18em;
 }
 
-.nexus-module-h1 {
+.gombo-module-h1 {
   font-family: 'Outfit', sans-serif;
   font-size: clamp(1.85rem, 4vw, 2.45rem);
   font-weight: 950;
@@ -392,7 +392,7 @@ h1, h2, h3, .brand {
   -webkit-text-fill-color: transparent;
 }
 
-.nexus-module-lead {
+.gombo-module-lead {
   color: var(--text-muted);
   font-size: 1.05rem;
   margin-top: 0.5rem;
@@ -401,7 +401,7 @@ h1, h2, h3, .brand {
   max-width: 48rem;
 }
 
-.nexus-module-actions {
+.gombo-module-actions {
   flex-shrink: 0;
   display: flex;
   align-items: flex-start;
@@ -413,7 +413,7 @@ h1, h2, h3, .brand {
 }
 
 /* Barre de titre app — légère teinte cyan */
-.header.nexus-header-bar {
+.header.gombo-header-bar {
   border-bottom: 1px solid rgba(6, 182, 212, 0.12);
   background: rgba(8, 11, 20, 0.88);
 }
@@ -901,18 +901,18 @@ tr:hover td {
 }
 
 /* ============================================ */
-/*           NEXUS COMMAND CENTER (SAAS)        */
+/*           GOMBO COMMAND CENTER (SAAS)        */
 /* ============================================ */
-.nexus-theme {
-  --nexus-bg: #020617;
-  --nexus-card: rgba(15, 23, 42, 0.88);
-  --nexus-border: rgba(99, 102, 241, 0.35);
-  --nexus-accent: #6366f1;
-  --nexus-glow: rgba(99, 102, 241, 0.4);
+.gombo-theme {
+  --gombo-bg: #020617;
+  --gombo-card: rgba(15, 23, 42, 0.88);
+  --gombo-border: rgba(99, 102, 241, 0.35);
+  --gombo-accent: #6366f1;
+  --gombo-glow: rgba(99, 102, 241, 0.4);
 }
 
-.nexus-container {
-  background: var(--nexus-bg);
+.gombo-container {
+  background: var(--gombo-bg);
   background-image: 
     radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.08) 0, transparent 50%),
     radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.05) 0, transparent 50%);
@@ -920,24 +920,24 @@ tr:hover td {
   min-height: 100vh;
 }
 
-.nexus-card {
-  background: var(--nexus-card);
+.gombo-card {
+  background: var(--gombo-card);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--nexus-border);
+  border: 1px solid var(--gombo-border);
   border-radius: 24px;
   padding: 1.5rem;
   box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
   transition: var(--transition-smooth);
 }
 
-.nexus-card:hover {
+.gombo-card:hover {
   border-color: rgba(99, 102, 241, 0.4);
   box-shadow: 0 15px 50px -10px rgba(99,102,241,0.15);
   transform: translateY(-2px);
 }
 
-.nexus-stat-card {
+.gombo-stat-card {
   position: relative;
   overflow: hidden;
   display: flex;
@@ -945,22 +945,22 @@ tr:hover td {
   padding: 1.75rem;
 }
 
-.nexus-stat-card::before {
+.gombo-stat-card::before {
   content: '';
   position: absolute;
   top: -20px; right: -20px;
   width: 100px; height: 100px;
-  background: var(--nexus-accent);
+  background: var(--gombo-accent);
   filter: blur(60px);
   opacity: 0.15;
 }
 
-.nexus-neon-text {
+.gombo-neon-text {
   color: white;
   text-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
 }
 
-.nexus-badge {
+.gombo-badge {
   padding: 0.4rem 1rem;
   border-radius: 30px;
   font-weight: 800;
@@ -973,65 +973,65 @@ tr:hover td {
   backdrop-filter: blur(4px);
 }
 
-.nexus-badge-active {
+.gombo-badge-active {
   background: rgba(16, 185, 129, 0.15);
   color: #10b981;
   border: 1px solid rgba(16, 185, 129, 0.35);
 }
 
-.nexus-badge-warning {
+.gombo-badge-warning {
   background: rgba(245, 158, 11, 0.15);
   color: #f59e0b;
   border: 1px solid rgba(245, 158, 11, 0.35);
 }
 
-.nexus-table {
+.gombo-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0 0.75rem;
 }
 
-.nexus-table tr {
+.gombo-table tr {
   transition: var(--transition-smooth);
 }
 
-.nexus-table td {
+.gombo-table td {
   padding: 1.25rem 1.5rem;
   background: rgba(255, 255, 255, 0.02);
   border-top: 1px solid rgba(255, 255, 255, 0.05);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.nexus-table td:first-child {
+.gombo-table td:first-child {
   border-left: 1px solid rgba(255, 255, 255, 0.05);
   border-top-left-radius: 16px;
   border-bottom-left-radius: 16px;
 }
 
-.nexus-table td:last-child {
+.gombo-table td:last-child {
   border-right: 1px solid rgba(255, 255, 255, 0.05);
   border-top-right-radius: 16px;
   border-bottom-right-radius: 16px;
 }
 
-.nexus-table tr:hover td {
+.gombo-table tr:hover td {
   background: rgba(255, 255, 255, 0.04);
   border-color: rgba(99, 102, 241, 0.3);
 }
 
 /* Scroll Engine Modern */
-.nexus-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
-.nexus-scroll::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.2); border-radius: 10px; }
-.nexus-scroll::-webkit-scrollbar-track { background: transparent; }
+.gombo-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+.gombo-scroll::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.2); border-radius: 10px; }
+.gombo-scroll::-webkit-scrollbar-track { background: transparent; }
 
-@keyframes nexusFloat {
+@keyframes gomboFloat {
   0% { transform: translateY(0px); }
   50% { transform: translateY(-8px); }
   100% { transform: translateY(0px); }
 }
 
-.nexus-floating {
-  animation: nexusFloat 5s ease-in-out infinite;
+.gombo-floating {
+  animation: gomboFloat 5s ease-in-out infinite;
 }
 
 /* Futuristic Login Additions */
@@ -1146,8 +1146,8 @@ tr:hover td {
   animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Variante Nexus : bordure accent, lisibilité, alignée sur --primary */
-.modal-content.modal-nexus {
+/* Variante Gombo : bordure accent, lisibilité, alignée sur --primary */
+.modal-content.modal-gombo {
   max-width: min(520px, 100vw - 2rem);
   padding: 0;
   overflow: hidden;
@@ -1155,14 +1155,14 @@ tr:hover td {
   box-shadow: var(--shadow-lg), 0 0 0 1px rgba(6, 182, 212, 0.1);
 }
 
-.modal-nexus-accent {
+.modal-gombo-accent {
   height: 4px;
   width: 100%;
   background: linear-gradient(90deg, hsl(var(--p-h), var(--p-s), var(--p-l)), #3b82f6);
   opacity: 0.95;
 }
 
-.modal-nexus-title {
+.modal-gombo-title {
   font-family: 'Outfit', sans-serif;
   font-size: 1.25rem;
   font-weight: 900;
@@ -1172,7 +1172,7 @@ tr:hover td {
   letter-spacing: -0.02em;
 }
 
-.modal-nexus-body {
+.modal-gombo-body {
   margin: 0.5rem 0 0;
   font-size: 0.95rem;
   color: var(--text-secondary);
@@ -1180,7 +1180,7 @@ tr:hover td {
   line-height: 1.5;
 }
 
-.modal-nexus-actions {
+.modal-gombo-actions {
   display: flex;
   gap: 0.75rem;
   justify-content: flex-end;
@@ -1190,33 +1190,33 @@ tr:hover td {
   border-top: 1px solid var(--glass-border);
 }
 
-.modal-nexus-btn {
+.modal-gombo-btn {
   min-height: 48px;
   padding: 0 1.25rem;
   border-radius: 14px;
   font-weight: 800;
 }
 
-.modal-nexus-btn-danger {
+.modal-gombo-btn-danger {
   background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
   color: #fff;
   border: none;
 }
 
-.modal-nexus-icon[data-variant="danger"] {
+.modal-gombo-icon[data-variant="danger"] {
   background: rgba(239, 68, 68, 0.1);
   color: #f87171;
   border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
-.modal-nexus-icon[data-variant="default"] {
+.modal-gombo-icon[data-variant="default"] {
   background: rgba(6, 182, 212, 0.1);
   color: var(--primary);
   border: 1px solid rgba(6, 182, 212, 0.2);
 }
 
 /* Panneaux larges (formulaires) : même traitement, padding interne */
-.modal-content.modal-nexus.modal-nexus-wide {
+.modal-content.modal-gombo.modal-gombo-wide {
   max-width: min(920px, 100vw - 1.5rem);
   padding: 0;
   border-radius: var(--radius-xl);
@@ -1241,12 +1241,12 @@ tr:hover td {
   overscroll-behavior: contain;
 }
 
-.modal-shell .modal-nexus-actions {
+.modal-shell .modal-gombo-actions {
   flex-shrink: 0;
 }
 
 /* Modal « Traitement d'appel » — pas de débordement horizontal, scroll confortable sur mobile */
-.modal-appel-form.modal-content.modal-nexus.modal-nexus-wide {
+.modal-appel-form.modal-content.modal-gombo.modal-gombo-wide {
   width: 100% !important;
   max-width: min(720px, calc(100vw - 1rem)) !important;
   min-width: 0;
@@ -1465,8 +1465,8 @@ tr:hover td {
   }
 
   .modal-content,
-  .modal-content.modal-nexus,
-  .modal-content.modal-nexus.modal-nexus-wide {
+  .modal-content.modal-gombo,
+  .modal-content.modal-gombo.modal-gombo-wide {
     width: 100% !important;
     max-width: 100% !important;
     border-radius: 22px 22px 0 0;
@@ -1478,7 +1478,7 @@ tr:hover td {
     max-height: min(96dvh, 100dvh) !important;
   }
 
-  .modal-content:not(.modal-nexus) {
+  .modal-content:not(.modal-gombo) {
     padding: 1.25rem;
     padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
     overflow-y: auto;
@@ -1580,21 +1580,21 @@ tr:hover td {
   box-shadow: var(--shadow-md);
 }
 /* ============================================ */
-/*           NEXUS ELITE DARK THEME             */
+/*           GOMBO ELITE DARK THEME             */
 /* ============================================ */
-.nexus-theme-dark {
-  --nexus-bg: #0b0f1a;
-  --nexus-card: #151b2d;
-  --nexus-border: rgba(255, 255, 255, 0.05);
-  --nexus-text: #f8fafc;
-  --nexus-muted: #94a3b8;
-  --nexus-accent: #3b82f6;
-  --nexus-cyan: #06b6d4;
-  --nexus-purple: #8b5cf6;
-  --nexus-orange: #f59e0b;
+.gombo-theme-dark {
+  --gombo-bg: #0b0f1a;
+  --gombo-card: #151b2d;
+  --gombo-border: rgba(255, 255, 255, 0.05);
+  --gombo-text: #f8fafc;
+  --gombo-muted: #94a3b8;
+  --gombo-accent: #3b82f6;
+  --gombo-cyan: #06b6d4;
+  --gombo-purple: #8b5cf6;
+  --gombo-orange: #f59e0b;
 }
 
-.nexus-card-elite {
+.gombo-card-elite {
   background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
   border-radius: 28px;
   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -1603,24 +1603,24 @@ tr:hover td {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.nexus-card-elite:hover {
+.gombo-card-elite:hover {
   transform: translateY(-4px);
   box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.7);
 }
 
-.nexus-neon-cyan {
+.gombo-neon-cyan {
   color: #06b6d4;
   filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.4));
 }
 
-.nexus-gradient-text-cyan {
+.gombo-gradient-text-cyan {
   background: linear-gradient(135deg, #06b6d4, #3b82f6);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.nexus-glow-button {
+.gombo-glow-button {
   background: linear-gradient(135deg, #06b6d4, #3b82f6);
   box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
   border: none;
@@ -1631,25 +1631,25 @@ tr:hover td {
   cursor: pointer;
 }
 
-.nexus-chart-dark .recharts-cartesian-grid-horizontal line,
-.nexus-chart-dark .recharts-cartesian-grid-vertical line {
+.gombo-chart-dark .recharts-cartesian-grid-horizontal line,
+.gombo-chart-dark .recharts-cartesian-grid-vertical line {
   stroke: rgba(255, 255, 255, 0.05);
 }
 
-.nexus-profile-circle {
+.gombo-profile-circle {
   border: 3px solid #06b6d4;
   box-shadow: 0 0 15px rgba(6, 182, 212, 0.3);
 }
 
-/* Animations Nexus */
-@keyframes nexusPulse {
+/* Animations Gombo */
+@keyframes gomboPulse {
   0% { transform: scale(1); opacity: 0.8; }
   50% { transform: scale(1.05); opacity: 1; }
   100% { transform: scale(1); opacity: 0.8; }
 }
 
-.nexus-pulse {
-  animation: nexusPulse 3s infinite ease-in-out;
+.gombo-pulse {
+  animation: gomboPulse 3s infinite ease-in-out;
 }
 
 /* Fix product row hover text issue */

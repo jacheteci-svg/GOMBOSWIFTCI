@@ -15,7 +15,7 @@ import {
   type InventoryStaffPerfRow,
   type PlatformTimelinePoint,
 } from '../../services/performanceService';
-import { NexusModuleFrame } from '../layout/NexusModuleFrame';
+import { GomboModuleFrame } from '../layout/GomboModuleFrame';
 import {
   BarChart,
   Bar,
@@ -85,7 +85,7 @@ const SUPER_ADMIN_SCOPE_DEFS: { id: SuperAdminScope; label: string; hint: string
 interface PerformanceDashboardProps {
   tenantId?: string;
   isSuperAdmin?: boolean;
-  /** Aligne la page sur Admin : NexusModuleFrame, onglets, cartes et tables */
+  /** Aligne la page sur Admin : GomboModuleFrame, onglets, cartes et tables */
   embeddedModuleChrome?: boolean;
 }
 
@@ -113,7 +113,7 @@ const C = {
 };
 
 /** Aligné sur Commandes.tsx : conteneur de pastilles */
-const NEXUS_TAB_BAR_WRAP: CSSProperties = {
+const GOMBO_TAB_BAR_WRAP: CSSProperties = {
   display: 'flex',
   gap: '0.5rem',
   padding: '0.4rem',
@@ -125,7 +125,7 @@ const NEXUS_TAB_BAR_WRAP: CSSProperties = {
   flexWrap: 'wrap',
 };
 
-function nexusPillButtonStyle(active: boolean, color: string): CSSProperties {
+function gomboPillButtonStyle(active: boolean, color: string): CSSProperties {
   return {
     padding: '0.8rem 1.5rem',
     borderRadius: '14px',
@@ -168,7 +168,7 @@ const BTN_OUTLINE_INLINE: CSSProperties = {
   gap: '0.6rem',
 };
 
-function NexusTableSkeleton({ rows = 5, cols = 3 }: { rows?: number; cols?: number }) {
+function GomboTableSkeleton({ rows = 5, cols = 3 }: { rows?: number; cols?: number }) {
   return (
     <div className="space-y-3 p-4 sm:p-5" aria-hidden>
       {Array.from({ length: rows }).map((_, i) => (
@@ -1769,7 +1769,7 @@ export const PerformanceDashboard = ({
 
   const subtitle = "Suivez l'efficacité opérationnelle de tous les départements.";
 
-  /** Vue Nexus — refonte UI : bento KPI, tableau dense, graphique GMV (couleurs natives) */
+  /** Vue Gombo — refonte UI : bento KPI, tableau dense, graphique GMV (couleurs natives) */
   const renderSuperAdminTenants = () => {
     const PIE_PX = 220;
     const LINE_PX = 280;
@@ -1952,7 +1952,7 @@ export const PerformanceDashboard = ({
             </div>
 
             <div className="perf-super-chart-pair mb-1">
-              <div className="perf-super-chart-box nexus-chart-dark">
+              <div className="perf-super-chart-box gombo-chart-dark">
                 <h4>Répartition boutiques</h4>
                 <div className="perf-super-chart-inner">
                   <ResponsiveContainer width="100%" height={PIE_PX}>
@@ -1989,7 +1989,7 @@ export const PerformanceDashboard = ({
                   </ResponsiveContainer>
                 </div>
               </div>
-              <div className="perf-super-chart-box nexus-chart-dark">
+              <div className="perf-super-chart-box gombo-chart-dark">
                 <h4>Concentration CA — top 3</h4>
                 <div className="perf-super-chart-inner">
                   <ResponsiveContainer width="100%" height={PIE_PX}>
@@ -2028,7 +2028,7 @@ export const PerformanceDashboard = ({
               </div>
             </div>
 
-            <div className="perf-super-line-box nexus-chart-dark">
+            <div className="perf-super-line-box gombo-chart-dark">
               <div className="mb-3 flex flex-wrap items-end justify-between gap-3 border-b border-white/[0.06] pb-3">
                 <div>
                   <p className="m-0 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">
@@ -2256,14 +2256,14 @@ export const PerformanceDashboard = ({
                     <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
                       Périmètre
                     </span>
-                    <div style={NEXUS_TAB_BAR_WRAP} role="group" aria-label="Périmètre boutique">
+                    <div style={GOMBO_TAB_BAR_WRAP} role="group" aria-label="Périmètre boutique">
                       {SUPER_ADMIN_SCOPE_DEFS.map((def) => (
                         <button
                           key={def.id}
                           type="button"
                           title={def.hint}
                           onClick={() => setSuperAdminScope(def.id)}
-                          style={nexusPillButtonStyle(superAdminScope === def.id, '#6366f1')}
+                          style={gomboPillButtonStyle(superAdminScope === def.id, '#6366f1')}
                         >
                           {def.label}
                         </button>
@@ -2276,7 +2276,7 @@ export const PerformanceDashboard = ({
                     </span>
                     <div
                       style={{
-                        ...NEXUS_TAB_BAR_WRAP,
+                        ...GOMBO_TAB_BAR_WRAP,
                         justifyContent: 'flex-end',
                         width: '100%',
                         maxWidth: '100%',
@@ -2289,7 +2289,7 @@ export const PerformanceDashboard = ({
                           key={def.id}
                           type="button"
                           onClick={() => setSuperAdminSort(def.id)}
-                          style={nexusPillButtonStyle(superAdminSort === def.id, def.color)}
+                          style={gomboPillButtonStyle(superAdminSort === def.id, def.color)}
                         >
                           {def.label}
                         </button>
@@ -2434,7 +2434,7 @@ export const PerformanceDashboard = ({
 
   if (moduleChrome) {
     return (
-      <NexusModuleFrame
+      <GomboModuleFrame
         badge="Performance Intelligence"
         title="Performance équipe"
         description={subtitle}
@@ -2543,13 +2543,13 @@ export const PerformanceDashboard = ({
                   >
                     Période
                   </span>
-                  <div style={NEXUS_TAB_BAR_WRAP} role="group" aria-label="Période">
+                  <div style={GOMBO_TAB_BAR_WRAP} role="group" aria-label="Période">
                     {periodFilterDefs.map((f) => (
                       <button
                         key={f.id}
                         type="button"
                         onClick={() => setFilter(f.id)}
-                        style={nexusPillButtonStyle(filter === f.id, f.color)}
+                        style={gomboPillButtonStyle(filter === f.id, f.color)}
                       >
                         {f.label}
                       </button>
@@ -2580,7 +2580,7 @@ export const PerformanceDashboard = ({
                   >
                     Pôle
                   </span>
-                  <div style={NEXUS_TAB_BAR_WRAP}>
+                  <div style={GOMBO_TAB_BAR_WRAP}>
                 {tabDefs.map((tab) => {
                   const active = activeTab === tab.id;
                   return (
@@ -2590,7 +2590,7 @@ export const PerformanceDashboard = ({
                           role="tab"
                           aria-selected={active}
                       onClick={() => setActiveTab(tab.id)}
-                          style={nexusPillButtonStyle(active, tab.color)}
+                          style={gomboPillButtonStyle(active, tab.color)}
                     >
                       {tab.label}
                     </button>
@@ -2692,7 +2692,7 @@ export const PerformanceDashboard = ({
                   <div className="h-8 w-8 animate-spin rounded-full border-2 border-cyan-500/25 border-t-cyan-400" />
                   <p className="m-0 text-sm font-medium text-slate-400">Chargement des indicateurs…</p>
                 </div>
-                <NexusTableSkeleton rows={6} cols={3} />
+                <GomboTableSkeleton rows={6} cols={3} />
               </div>
             ) : loadError ? null : (
               <div className="card glass-effect" style={{ padding: 0, border: '1px solid rgba(255,255,255,0.03)', borderRadius: '32px', overflow: 'hidden', background: 'transparent' }}>
@@ -2705,7 +2705,7 @@ export const PerformanceDashboard = ({
             )}
           </>
         )}
-      </NexusModuleFrame>
+      </GomboModuleFrame>
     );
   }
 
@@ -2720,8 +2720,8 @@ export const PerformanceDashboard = ({
       }}
     >
         <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 py-6 lg:py-8 pb-16">
-          <NexusModuleFrame
-            badge="Nexus Intelligence"
+          <GomboModuleFrame
+            badge="Gombo Intelligence"
             title="Performance des boutiques"
             description="Pilotage multi-boutiques : volume, CA (GMV) et indicateurs de livraison."
             actions={
@@ -2818,13 +2818,13 @@ export const PerformanceDashboard = ({
                   >
                     Période
                   </span>
-                  <div style={NEXUS_TAB_BAR_WRAP} role="group" aria-label="Période">
+                  <div style={GOMBO_TAB_BAR_WRAP} role="group" aria-label="Période">
                     {periodFilterDefs.map((f) => (
                       <button
                         key={f.id}
                         type="button"
                         onClick={() => setFilter(f.id)}
-                        style={nexusPillButtonStyle(filter === f.id, f.color)}
+                        style={gomboPillButtonStyle(filter === f.id, f.color)}
                       >
                         {f.label}
                       </button>
@@ -2871,7 +2871,7 @@ export const PerformanceDashboard = ({
                   <div className="h-8 w-8 animate-spin rounded-full border-2 border-cyan-500/25 border-t-cyan-400" />
                   <p className="m-0 text-sm font-medium text-slate-400">Chargement des indicateurs…</p>
             </div>
-                <NexusTableSkeleton rows={6} cols={4} />
+                <GomboTableSkeleton rows={6} cols={4} />
               </div>
             ) : loadError ? null : (
               <div
@@ -2889,7 +2889,7 @@ export const PerformanceDashboard = ({
                 </div>
               </div>
             )}
-          </NexusModuleFrame>
+          </GomboModuleFrame>
         </div>
       </div>
     );
@@ -2918,7 +2918,7 @@ export const PerformanceDashboard = ({
               <div className="max-w-2xl">
                 <span className="inline-flex items-center gap-2 rounded-full border border-cyan-500/25 bg-cyan-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-300/95">
                   <Activity size={12} className="text-cyan-400" strokeWidth={2.5} />
-                  Nexus · Hub équipe terrain
+                  Gombo · Hub équipe terrain
                 </span>
                 <h1
                   className="mt-4 text-3xl sm:text-4xl lg:text-[2.35rem] font-bold tracking-tight leading-[1.15]"

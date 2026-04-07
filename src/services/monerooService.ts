@@ -55,7 +55,7 @@ export const monerooService = {
             // 2. Call Moneroo API to get checkout URL
             const nameParts = (req.customer.name || '').trim().split(' ');
             const firstName = nameParts[0] || 'Client';
-            const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : 'Nexus';
+            const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : 'Gombo';
 
             const response = await fetch(`${MONEROO_API_BASE}/payments/initialize`, {
                 method: 'POST',

@@ -20,7 +20,7 @@ export const BottomNav = ({ onMenuClick }: BottomNavProps) => {
 
   const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN';
 
-  const effectiveSlug = tenantSlug || currentUser?.tenant_slug || 'nexus';
+  const effectiveSlug = tenantSlug || currentUser?.tenant_slug || 'gombo';
 
   // Role-aware nav items — show only what matters most
   const getNavItems = () => {
@@ -48,7 +48,7 @@ export const BottomNav = ({ onMenuClick }: BottomNavProps) => {
 
     if (isSuperAdmin) {
       return [
-        { path: '/super-admin/overview', label: 'Nexus', icon: LayoutDashboard },
+        { path: '/super-admin/overview', label: 'Gombo', icon: LayoutDashboard },
         { path: '/super-admin/tenants', label: 'Clients', icon: Package },
         { path: '/super-admin/blog', label: 'Blog', icon: Package }, // Use Package or FileText for blog
         { path: '/super-admin/billing', label: 'Finance', icon: ShoppingCart },

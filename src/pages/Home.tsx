@@ -17,7 +17,7 @@ import { Link, useParams } from 'react-router-dom';
 export const Home = () => {
   const { currentUser, hasPermission } = useAuth();
   const { tenantSlug } = useParams();
-  const effectiveSlug = tenantSlug || currentUser?.tenant_slug || 'nexus';
+  const effectiveSlug = tenantSlug || currentUser?.tenant_slug || 'gombo';
 
   const menuItems = [
     { path: `/${effectiveSlug}/produits`, label: 'Produits', desc: 'Gestion du stock et catalogue', icon: Package, permission: 'PRODUITS', color: '#6366f1' },
@@ -96,7 +96,7 @@ export const Home = () => {
 
       <div style={{ marginTop: '4rem', padding: '2rem', textAlign: 'center', background: 'rgba(255,255,255,0.02)', borderRadius: '24px', border: '1px solid var(--glass-border)' }}>
          <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '1rem', fontWeight: 700 }}>
-            Session sécurisée • Nexus Pulse Active • Rôle : <span style={{ color: '#06b6d4', fontWeight: 950, textTransform: 'uppercase' }}>{currentUser?.role}</span>
+            Session sécurisée • Gombo Pulse Active • Rôle : <span style={{ color: '#06b6d4', fontWeight: 950, textTransform: 'uppercase' }}>{currentUser?.role}</span>
          </p>
       </div>
     </div>

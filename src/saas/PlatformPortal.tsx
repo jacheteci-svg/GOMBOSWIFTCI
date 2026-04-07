@@ -84,7 +84,7 @@ export const PlatformPortal: React.FC<PlatformPortalProps> = ({ mode: propMode }
       const { error } = await insforge.auth.signInWithPassword({ email, password });
       if (error) throw error;
 
-      showToast('✅ Accès autorisé. Bienvenue au Nexus !', 'success');
+      showToast('✅ Accès autorisé. Bienvenue au Gombo !', 'success');
       /* Full page reload so AuthContext re-fetches fresh profile */
       setTimeout(() => {
         window.location.href = '/super-admin';
@@ -150,7 +150,7 @@ export const PlatformPortal: React.FC<PlatformPortalProps> = ({ mode: propMode }
             {mode === 'setup' ? <Cpu size={36} color="#818cf8" /> : <ShieldCheck size={36} color="#818cf8" />}
           </div>
           <h1 style={{ fontSize: '1.9rem', fontWeight: 950, letterSpacing: '-0.04em', margin: 0, textTransform: 'uppercase' }}>
-            {mode === 'setup' ? (step === 'verify' ? 'Vérification' : 'Platform Setup') : 'Nexus Portal'}
+            {mode === 'setup' ? (step === 'verify' ? 'Vérification' : 'Platform Setup') : 'Gombo Portal'}
           </h1>
           <p style={{ color: '#64748b', fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', marginTop: '0.4rem' }}>
             System Administration Center
@@ -172,7 +172,7 @@ export const PlatformPortal: React.FC<PlatformPortalProps> = ({ mode: propMode }
               </p>
               {/* Use anchor tag for reliable full-page navigation */}
               <a href="/platform/login" style={{ ...btnStyle, textDecoration: 'none', fontSize: '0.95rem' }}>
-                SE CONNECTER AU NEXUS <ArrowRight size={17} />
+                SE CONNECTER AU GOMBO <ArrowRight size={17} />
               </a>
             </div>
           )}
@@ -238,7 +238,7 @@ export const PlatformPortal: React.FC<PlatformPortalProps> = ({ mode: propMode }
                 </div>
               </div>
               <button type="submit" disabled={loading} style={btnStyle}>
-                {loading ? <Loader2 className="animate-spin" size={20} /> : <><ArrowRight size={18} /> INITIALISER LE NEXUS</>}
+                {loading ? <Loader2 className="animate-spin" size={20} /> : <><ArrowRight size={18} /> INITIALISER LE GOMBO</>}
               </button>
             </form>
           )}

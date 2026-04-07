@@ -143,11 +143,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             id: userId,
             email: email,
             nom_complet: email.split('@')[0],
-            role: (email.includes('admin') || email.includes('nexus')) ? 'SUPER_ADMIN' : 'ADMIN',
+            role: (email.includes('admin') || email.includes('gombo')) ? 'SUPER_ADMIN' : 'ADMIN',
             tenant_id: '', // Empty string instead of null to satisfy the User type
             tenant_slug: '',
-            tenant_name: 'Nexus Mode',
-            permissions: ROLE_PERMISSIONS[(email.includes('admin') || email.includes('nexus')) ? 'SUPER_ADMIN' : 'ADMIN']
+            tenant_name: 'Gombo Mode',
+            permissions: ROLE_PERMISSIONS[(email.includes('admin') || email.includes('gombo')) ? 'SUPER_ADMIN' : 'ADMIN']
           } as User);
         }
       } catch (e) {

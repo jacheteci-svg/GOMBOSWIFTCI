@@ -115,7 +115,7 @@ export const ProduitList = ({ produits, onEdit, onStock }: ProduitListProps) => 
                      height: '8px', 
                      borderRadius: '50%', 
                      background: produit.stock_actuel <= (produit.stock_minimum || 5) ? '#f43f5e' : '#10b981',
-                     animation: produit.stock_actuel <= (produit.stock_minimum || 5) ? 'nexusPulse 2s infinite' : 'none'
+                     animation: produit.stock_actuel <= (produit.stock_minimum || 5) ? 'gomboPulse 2s infinite' : 'none'
                    }}></div>
                    <span style={{ fontWeight: 950, fontSize: '0.85rem', color: produit.stock_actuel <= (produit.stock_minimum || 5) ? '#f43f5e' : '#10b981' }}>
                      {produit.stock_actuel} {produit.stock_actuel > 1 ? 'UNITÉS' : 'UNITÉ'}

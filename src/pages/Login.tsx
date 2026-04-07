@@ -202,7 +202,7 @@ export const Login = () => {
               letterSpacing: '0.3em',
               margin: 0,
               whiteSpace: 'nowrap'
-            }}>Nexus Logistics</p>
+            }}>Gombo Logistics</p>
             <div style={{ height: '1px', flex: 1, background: 'linear-gradient(90deg, rgba(255,255,255,0.2), transparent)' }}></div>
           </div>
         </div>

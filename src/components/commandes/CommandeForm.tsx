@@ -209,12 +209,12 @@ export const CommandeForm = ({ onClose, onSave }: { onClose: () => void, onSave:
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div
-        className="modal-content modal-nexus modal-nexus-wide card glass-effect"
+        className="modal-content modal-gombo modal-gombo-wide card glass-effect"
         style={{ maxWidth: '900px', padding: 0, overflow: 'hidden', borderRadius: '28px', position: 'relative' }}
         onClick={e => e.stopPropagation()}
       >
         <div className="modal-shell">
-        <div className="modal-nexus-accent" />
+        <div className="modal-gombo-accent" />
         <div className="modal-body-scroll" style={{ padding: '2.5rem 3rem 3rem' }}>
         <button 
           onClick={onClose} 

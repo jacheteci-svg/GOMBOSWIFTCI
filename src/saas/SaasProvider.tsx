@@ -56,7 +56,7 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let targetSlug: string | null = null;
     const isSpecialPath = ['super-admin', 'platform', 'login', 'register'].includes(urlSlug || '');
 
-    if (!isSpecialPath && urlSlug && urlSlug !== 'nexus') {
+    if (!isSpecialPath && urlSlug && urlSlug !== 'gombo') {
       targetSlug = urlSlug;
     } else {
       const parts = hostname.split('.');
@@ -69,7 +69,7 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
 
-    if (urlSlug === 'nexus') targetSlug = 'nexus';
+    if (urlSlug === 'gombo') targetSlug = 'gombo';
 
     if (!currentUser && !targetSlug) {
       setTenant(null);

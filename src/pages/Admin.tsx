@@ -24,7 +24,7 @@ import {
 } from '../lib/insforgeSession';
 import { useAuth } from '../contexts/AuthContext';
 import { useSaas } from '../saas/SaasProvider';
-import { NexusModuleFrame } from '../components/layout/NexusModuleFrame';
+import { GomboModuleFrame } from '../components/layout/GomboModuleFrame';
 import { TenantIdentityPanel } from '../components/admin/TenantIdentityPanel';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 
@@ -47,7 +47,7 @@ export const Admin = () => {
   );
 
   return (
-    <NexusModuleFrame
+    <GomboModuleFrame
       badge="Platform Control"
       title={hasPermission('ADMIN') ? 'Console Administration' : 'Gestion Équipe & Zones'}
       description={
@@ -128,11 +128,11 @@ export const Admin = () => {
         </button>
       </div>
 
-      <div className="nexus-main-area">
+      <div className="gombo-main-area">
         {!tenant ? (
           <div className="card glass-effect animate-pulse" style={{ padding: '5rem', textAlign: 'center', borderRadius: '40px' }}>
             <div className="spinner" style={{ margin: '0 auto 2rem', width: '50px', height: '50px', borderTopColor: 'var(--primary)' }}></div>
-            <p style={{ color: 'var(--text-main)', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Initialisation du Nexus...</p>
+            <p style={{ color: 'var(--text-main)', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Initialisation du Gombo...</p>
           </div>
         ) : (
           activeTab === 'utilisateurs' ? <UsersManager showToast={showToast} tenantId={tenant.id} /> : 
@@ -141,7 +141,7 @@ export const Admin = () => {
           <SubscriptionManager showToast={showToast} tenant={tenant} />
         )}
       </div>
-    </NexusModuleFrame>
+    </GomboModuleFrame>
   );
 };
 

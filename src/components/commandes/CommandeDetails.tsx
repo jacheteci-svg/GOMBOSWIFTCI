@@ -24,9 +24,9 @@ export const CommandeDetails = ({ commandeId, onClose }: CommandeDetailsProps) =
   if (loading) {
     return (
       <div className="modal-backdrop" onClick={onClose}>
-        <div className="modal-content modal-nexus card" style={{ maxWidth: '600px', textAlign: 'center', padding: 0, overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
+        <div className="modal-content modal-gombo card" style={{ maxWidth: '600px', textAlign: 'center', padding: 0, overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
           <div className="modal-shell">
-            <div className="modal-nexus-accent" />
+            <div className="modal-gombo-accent" />
             <div className="modal-body-scroll" style={{ padding: '2.5rem 2rem' }}>
               <div className="loading-spinner" style={{ margin: '0 auto 1.5rem' }}></div>
               <p style={{ fontWeight: 600 }}>Chargement des détails...</p>
@@ -43,9 +43,9 @@ export const CommandeDetails = ({ commandeId, onClose }: CommandeDetailsProps) =
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-content modal-nexus modal-nexus-wide card" style={{ maxWidth: '700px', padding: '0', overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
+      <div className="modal-content modal-gombo modal-gombo-wide card" style={{ maxWidth: '700px', padding: '0', overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
         <div className="modal-shell">
-          <div className="modal-nexus-accent" />
+          <div className="modal-gombo-accent" />
           {/* Header Section */}
           <div style={{ padding: '2rem', background: 'linear-gradient(135deg, rgba(6,182,212,0.15) 0%, #0f172a 100%)', color: 'white', position: 'relative', flexShrink: 0 }}>
             <button 

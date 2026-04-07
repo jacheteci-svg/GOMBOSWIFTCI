@@ -37,9 +37,9 @@ export const EmailLogsTab = () => {
           </div>
        </div>
 
-       <div className="nexus-card-elite" style={{ padding: 0, overflow: 'hidden' }}>
+       <div className="gombo-card-elite" style={{ padding: 0, overflow: 'hidden' }}>
           <div className="table-responsive-cards px-0">
-            <table className="nexus-table">
+            <table className="gombo-table">
                <thead>
                   <tr>
                     <th>DESTINATAIRE</th>
@@ -64,7 +64,7 @@ export const EmailLogsTab = () => {
                         </div>
                       </td>
                       <td data-label="ORG">
-                         <span style={{ color: '#cbd5e1', fontWeight: 800 }}>{log.tenants?.nom || 'NEXUS SYSTEM'}</span>
+                         <span style={{ color: '#cbd5e1', fontWeight: 800 }}>{log.tenants?.nom || 'GOMBO SYSTEM'}</span>
                       </td>
                       <td data-label="STATUT">
                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

@@ -9,7 +9,7 @@ import { tenantToPdfBranding } from '../lib/tenantPdfBranding';
 import type { Commande } from '../types';
 import { useToast } from '../contexts/ToastContext';
 import { useSaas } from '../saas/SaasProvider';
-import { NexusModuleFrame } from '../components/layout/NexusModuleFrame';
+import { GomboModuleFrame } from '../components/layout/GomboModuleFrame';
 
 export const Commandes = () => {
   const { tenant } = useSaas();
@@ -124,8 +124,8 @@ export const Commandes = () => {
 
   return (
     <>
-    <NexusModuleFrame
-      badge="Order Nexus Flow"
+    <GomboModuleFrame
+      badge="Order Gombo Flow"
       title="Gestion des Commandes"
       description="Pilotez le cycle de vie de vos ventes, de la saisie à la livraison finale."
       actions={
@@ -285,7 +285,7 @@ export const Commandes = () => {
             </div>
           )}
         </div>
-    </NexusModuleFrame>
+    </GomboModuleFrame>
 
       {isFormOpen && (
         <CommandeForm 

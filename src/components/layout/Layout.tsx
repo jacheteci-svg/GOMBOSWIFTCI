@@ -127,7 +127,7 @@ export const Layout = () => {
       <Sidebar isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
       <main className="main-content">
         <Header onMenuClick={() => setIsMobileMenuOpen(true)} />
-        <div className="page-content nexus-page-bg custom-scroll">
+        <div className="page-content gombo-page-bg custom-scroll">
           <Outlet />
         </div>
       </main>

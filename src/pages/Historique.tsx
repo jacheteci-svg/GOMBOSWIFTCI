@@ -194,9 +194,9 @@ const ReviewModal = ({ feuille, commandes, loading, onClose, onRefresh, showToas
         onCancel={() => setReopenConfirm(false)}
         onConfirm={executeReopen}
       />
-      <div className="modal-content modal-nexus modal-nexus-wide card glass-effect" onClick={e => e.stopPropagation()} style={{ maxWidth: '900px', padding: 0, overflow: 'hidden' }}>
+      <div className="modal-content modal-gombo modal-gombo-wide card glass-effect" onClick={e => e.stopPropagation()} style={{ maxWidth: '900px', padding: 0, overflow: 'hidden' }}>
         <div className="modal-shell">
-        <div className="modal-nexus-accent" />
+        <div className="modal-gombo-accent" />
         {/* Header Modal */}
         <div style={{ padding: '2rem', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'linear-gradient(180deg, rgba(6,182,212,0.08) 0%, rgba(15,23,42,0.4) 100%)', flexShrink: 0 }}>
           <div>

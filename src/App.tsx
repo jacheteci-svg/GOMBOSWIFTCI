@@ -161,7 +161,7 @@ const AppRoutes = () => {
           currentUser.role === 'SUPER_ADMIN' ? (
             <Navigate to="/super-admin/overview" replace />
           ) : (
-            <Navigate to={`/${currentUser.tenant_slug || 'nexus'}`} replace />
+            <Navigate to={`/${currentUser.tenant_slug || 'gombo'}`} replace />
           )
         ) : (
           <LandingPage />

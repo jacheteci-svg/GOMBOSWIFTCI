@@ -45,7 +45,7 @@ export const SuperAdmin: React.FC = () => {
       if (statsData) setPlatformStats(statsData);
     } catch (err: any) {
       console.error("SuperAdmin fetchData error:", err);
-      showToast(err.message || 'Échec de synchronisation Nexus', 'error');
+      showToast(err.message || 'Échec de synchronisation Gombo', 'error');
     } finally {
       setLoading(false);
     }
@@ -66,7 +66,7 @@ export const SuperAdmin: React.FC = () => {
   }
 
   return (
-    <div className="nexus-container" style={{ 
+    <div className="gombo-container" style={{ 
       animation: 'pageEnter 0.35s ease', 
       paddingBottom: activeTab === 'PERFORMANCE' ? '0' : '4rem',
       minHeight: '100%'
@@ -74,19 +74,19 @@ export const SuperAdmin: React.FC = () => {
       
       {activeTab !== 'PERFORMANCE' && (
       <>
-      {/* Header Nexus */}
+      {/* Header Gombo */}
       <div style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.5rem' }}>
             <div style={{ flexShrink: 0 }}>
-              <img src="/favicon.png" alt="Nexus Logo" style={{ width: 32, height: 32, borderRadius: 8, objectFit: 'cover' }} />
+              <img src="/favicon.png" alt="Gombo Logo" style={{ width: 32, height: 32, borderRadius: 8, objectFit: 'cover' }} />
             </div>
             <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>
-              Nexus Core v4.0.2
+              Gombo Core v4.0.2
             </span>
           </div>
-          <h1 className="nexus-neon-text" style={{ fontSize: '2.8rem', fontWeight: 900, letterSpacing: '-0.04em', margin: 0 }}>
-            Nexus Command Center
+          <h1 className="gombo-neon-text" style={{ fontSize: '2.8rem', fontWeight: 900, letterSpacing: '-0.04em', margin: 0 }}>
+            Gombo Command Center
           </h1>
           <p style={{ color: '#94a3b8', fontSize: '1rem', fontWeight: 500, marginTop: '0.5rem' }}>
             Pilotage global de l'infrastructure SaaS multi-tenant
@@ -97,21 +97,21 @@ export const SuperAdmin: React.FC = () => {
            <button 
              onClick={fetchData}
              disabled={loading}
-             className="nexus-card" 
+             className="gombo-card" 
              style={{ 
                padding: '0.8rem 1.5rem', 
                display: 'flex', 
                alignItems: 'center', 
                gap: '1rem',
                cursor: 'pointer',
-               border: '1px solid var(--nexus-border)',
+               border: '1px solid var(--gombo-border)',
                background: 'rgba(99, 102, 241, 0.1)',
                transition: 'all 0.3s'
              }}
            >
               <Activity size={18} color={loading ? "#94a3b8" : "#10b981"} className={loading ? "animate-spin" : ""} />
               <div>
-                <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Statut Nexus</div>
+                <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Statut Gombo</div>
                 <div style={{ fontSize: '0.9rem', fontWeight: 800, color: loading ? '#94a3b8' : '#10b981' }}>
                   {loading ? 'SYNCHRONISATION...' : 'SYSTÈME OPTIMAL'}
                 </div>
@@ -145,8 +145,8 @@ export const SuperAdmin: React.FC = () => {
 /*                                COMPONENTS                                  */
 /* -------------------------------------------------------------------------- */
 
-const NexusStatCard = ({ title, value, sub, icon, color, trend }: any) => (
-  <div className="nexus-card nexus-stat-card px-6 py-8">
+const GomboStatCard = ({ title, value, sub, icon, color, trend }: any) => (
+  <div className="gombo-card gombo-stat-card px-6 py-8">
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
       <div style={{ background: `${color}20`, padding: '0.6rem', borderRadius: '12px', border: `1px solid ${color}30`, color: color }}>
         {React.cloneElement(icon, { size: 20 })}
@@ -199,21 +199,21 @@ const OverviewTab = ({ stats, tenants }: { stats: any, tenants: Tenant[] }) => {
   };
 
   return (
-    <div className="nexus-theme-dark" style={{ animation: 'fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+    <div className="gombo-theme-dark" style={{ animation: 'fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1)' }}>
       {/* SECTION 1: WELCOME & PRIMARY FEED */}
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 1.5fr', gap: '2rem', marginBottom: '2.5rem' }} className="mobile-stack">
         {/* Profile Card */}
-        <div className="nexus-card-elite px-8 py-10" style={{ position: 'relative', overflow: 'hidden' }}>
+        <div className="gombo-card-elite px-8 py-10" style={{ position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: '-50px', right: '-50px', width: '150px', height: '150px', background: 'radial-gradient(circle, rgba(6,182,212,0.15) 0%, transparent 70%)', borderRadius: '50%' }}></div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <div style={{ position: 'relative' }}>
-                  <div className="nexus-profile-circle" style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem' }}>💎</div>
+                  <div className="gombo-profile-circle" style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.8rem' }}>💎</div>
                   <div style={{ position: 'absolute', bottom: '2px', right: '2px', width: '10px', height: '10px', background: '#10b981', borderRadius: '50%', border: '2px solid #1e293b' }}></div>
                 </div>
                 <div>
                   <h4 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 950 }}>Root Admin</h4>
-                  <span style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 800 }}>Nexus Core Active</span>
+                  <span style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 800 }}>Gombo Core Active</span>
                 </div>
              </div>
           </div>
@@ -234,7 +234,7 @@ const OverviewTab = ({ stats, tenants }: { stats: any, tenants: Tenant[] }) => {
         </div>
 
         {/* Growth Area Chart */}
-        <div className="nexus-card-elite">
+        <div className="gombo-card-elite">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <h4 style={{ margin: 0, fontWeight: 900, fontSize: '1.1rem' }}>Croissance Réseau (30 jours)</h4>
             <span style={{ fontSize: '0.8rem', color: '#06b6d4', fontWeight: 800, background: 'rgba(6,182,212,0.1)', padding: '4px 10px', borderRadius: '8px' }}>+ 5.27%</span>
@@ -243,7 +243,7 @@ const OverviewTab = ({ stats, tenants }: { stats: any, tenants: Tenant[] }) => {
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={stats.growth_chart || []}>
                 <defs>
-                  <linearGradient id="nexusGrowth" x1="0" y1="0" x2="0" y2="1">
+                  <linearGradient id="gomboGrowth" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3}/>
                     <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
                   </linearGradient>
@@ -252,7 +252,7 @@ const OverviewTab = ({ stats, tenants }: { stats: any, tenants: Tenant[] }) => {
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12, fontWeight: 800}} />
                 <YAxis hide />
                 <Tooltip contentStyle={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }} />
-                <Area type="monotone" dataKey="val" stroke="#06b6d4" strokeWidth={4} fill="url(#nexusGrowth)" />
+                <Area type="monotone" dataKey="val" stroke="#06b6d4" strokeWidth={4} fill="url(#gomboGrowth)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -262,7 +262,7 @@ const OverviewTab = ({ stats, tenants }: { stats: any, tenants: Tenant[] }) => {
       {/* SECTION 2: GRID OF METRICS */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
         {/* Activity Gauge */}
-        <div className="nexus-card-elite" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="gombo-card-elite" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
           <h4 style={{ margin: '0 0 2rem 0', fontWeight: 900, color: '#f8fafc', width: '100%' }}>Statut des Clients (Tenants)</h4>
           <div style={{ position: 'relative', width: '180px', height: '180px' }}>
              <svg width="180" height="180" viewBox="0 0 100 100">
@@ -292,9 +292,9 @@ const OverviewTab = ({ stats, tenants }: { stats: any, tenants: Tenant[] }) => {
 
         {/* User and Order Stats */}
         <div style={{ display: 'grid', gridTemplateRows: '1fr 1fr', gap: '1.5rem' }}>
-           <div className="nexus-card-elite" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+           <div className="gombo-card-elite" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
              <div>
-                <Users size={24} className="nexus-neon-cyan" style={{ marginBottom: '0.75rem' }} />
+                <Users size={24} className="gombo-neon-cyan" style={{ marginBottom: '0.75rem' }} />
                 <div style={{ fontSize: '1.8rem', fontWeight: 950 }}>{stats.total_users.toLocaleString()}</div>
                 <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 800 }}>UTILISATEURS RÉSEAU</div>
              </div>
@@ -304,7 +304,7 @@ const OverviewTab = ({ stats, tenants }: { stats: any, tenants: Tenant[] }) => {
                 </svg>
              </div>
            </div>
-           <div className="nexus-card-elite px-6 py-8" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+           <div className="gombo-card-elite px-6 py-8" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
              <div>
                 <Activity size={20} style={{ color: '#ec4899', marginBottom: '0.6rem' }} />
                 <div style={{ fontSize: '1.5rem', fontWeight: 950 }}>{stats.total_orders.toLocaleString()}</div>
@@ -319,7 +319,7 @@ const OverviewTab = ({ stats, tenants }: { stats: any, tenants: Tenant[] }) => {
         </div>
 
         {/* Global Distribution */}
-        <div className="nexus-card-elite" style={{ display: 'flex', flexDirection: 'column' }}>
+        <div className="gombo-card-elite" style={{ display: 'flex', flexDirection: 'column' }}>
            <h4 style={{ margin: '0 0 1.5rem 0', fontWeight: 900 }}>Répartition par Offre</h4>
            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
               {[
@@ -343,7 +343,7 @@ const OverviewTab = ({ stats, tenants }: { stats: any, tenants: Tenant[] }) => {
 
       {/* QUICK ACTIONS */}
       <div style={{ display: 'flex', gap: '1.5rem', marginTop: '2.5rem' }}>
-         <button onClick={handleAudit} className="nexus-glow-button" style={{ flex: 1, height: '65px', fontSize: '1.1rem', cursor: 'pointer' }}>
+         <button onClick={handleAudit} className="gombo-glow-button" style={{ flex: 1, height: '65px', fontSize: '1.1rem', cursor: 'pointer' }}>
             OPTIMISER L'INFRASTRUCTURE
          </button>
          <button onClick={() => navigate('/super-admin/support')} style={{ flex: 1, height: '65px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', borderRadius: '16px', fontWeight: 900, fontSize: '1.1rem', cursor: 'pointer', transition: 'all 0.3s' }}>
@@ -404,7 +404,7 @@ const TenantsTab = ({ tenants, fetchData, loading }: { tenants: Tenant[], fetchD
   };
 
   const handleImpersonate = (tenant: Tenant) => {
-    showToast(`Session sécurisée : Tunnel Nexus vers ${tenant.nom}...`, 'info');
+    showToast(`Session sécurisée : Tunnel Gombo vers ${tenant.nom}...`, 'info');
     setTimeout(() => {
        const origin = window.location.origin;
        // We use standard path-based routing to preserve session coookies / auth state
@@ -463,7 +463,7 @@ const TenantsTab = ({ tenants, fetchData, loading }: { tenants: Tenant[], fetchD
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 400px), 1fr))', gap: '1.5rem' }}>
           {filteredTenants.map(tenant => (
-            <div key={tenant.id} className="nexus-card-elite" style={{ borderLeft: `4px solid ${tenant.actif ? '#06b6d4' : '#f43f5e'}`, padding: '1.5rem' }}>
+            <div key={tenant.id} className="gombo-card-elite" style={{ borderLeft: `4px solid ${tenant.actif ? '#06b6d4' : '#f43f5e'}`, padding: '1.5rem' }}>
                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <div style={{ width: '50px', height: '50px', borderRadius: '14px', background: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 950, fontSize: '1.5rem' }}>
@@ -474,7 +474,7 @@ const TenantsTab = ({ tenants, fetchData, loading }: { tenants: Tenant[], fetchD
                        <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 800 }}>/{tenant.slug}</span>
                     </div>
                   </div>
-                  <div className={`nexus-badge ${tenant.actif ? 'nexus-badge-active' : 'nexus-badge-warning'}`}>
+                  <div className={`gombo-badge ${tenant.actif ? 'gombo-badge-active' : 'gombo-badge-warning'}`}>
                      {tenant.actif ? 'Actif' : 'Suspendu'}
                   </div>
                </div>
@@ -512,7 +512,7 @@ const TenantsTab = ({ tenants, fetchData, loading }: { tenants: Tenant[], fetchD
 
       {isModalOpen && (
         <div className="modal-backdrop" style={{ zIndex: 10000, background: 'rgba(2,6,23,0.85)', backdropFilter: 'blur(12px)' }} onClick={() => setIsModalOpen(false)}>
-          <div className="nexus-card-elite" style={{ width: '100%', maxWidth: '500px', padding: 0, overflow: 'hidden', animation: 'modalScale 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }} onClick={e => e.stopPropagation()}>
+          <div className="gombo-card-elite" style={{ width: '100%', maxWidth: '500px', padding: 0, overflow: 'hidden', animation: 'modalScale 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }} onClick={e => e.stopPropagation()}>
             <div className="modal-shell">
             <div className="modal-body-scroll" style={{ padding: '2rem 2rem 2.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', gap: '1rem' }}>
@@ -716,7 +716,7 @@ const PlansTab = () => {
   return (
     <div style={{ animation: 'fadeIn 0.3s ease' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <h3 className="nexus-neon-text" style={{ margin: 0, fontWeight: 950, fontSize: '1.8rem' }}>Catalogue des Offres SaaS</h3>
+        <h3 className="gombo-neon-text" style={{ margin: 0, fontWeight: 950, fontSize: '1.8rem' }}>Catalogue des Offres SaaS</h3>
       </div>
 
       {/* Sync Banner */}
@@ -731,7 +731,7 @@ const PlansTab = () => {
       {loading ? <div className="spinner" /> : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(420px, 1fr))', gap: '2rem' }}>
           {plans.map(plan => (
-            <div key={plan.id} className="nexus-card-elite" style={{
+            <div key={plan.id} className="gombo-card-elite" style={{
               border: plan.is_popular ? '1px solid rgba(99,102,241,0.5)' : '1px solid rgba(255,255,255,0.05)',
               position: 'relative'
             }}>
@@ -883,9 +883,9 @@ const BroadcastTab = ({ tenants }: { tenants: Tenant[] }) => {
         
         // 1. Send via Mailzeet
         if (dispatchType === 'EMAIL' || dispatchType === 'BOTH') {
-            const res = await emailService.sendEmail(tenant.email_contact, subject || "Nexus System Update", {
+            const res = await emailService.sendEmail(tenant.email_contact, subject || "Gombo System Update", {
               body: `<div style="font-family: sans-serif; padding: 20px;">
-                <h2 style="color: #6366f1;">Annonce Nexus Core</h2>
+                <h2 style="color: #6366f1;">Annonce Gombo Core</h2>
                 <p>${message.replace(/\n/g, '<br/>')}</p>
                 <hr/>
                 <small>Diffusé par : Root Admin GomboSwift</small>
@@ -936,9 +936,9 @@ const BroadcastTab = ({ tenants }: { tenants: Tenant[] }) => {
 
   return (
     <div style={{ animation: 'fadeIn 0.3s ease', maxWidth: '1000px', margin: '0 auto' }}>
-       <div className="nexus-card-elite" style={{ padding: '3rem' }}>
-          <h3 className="nexus-neon-text" style={{ margin: 0, fontWeight: 950, fontSize: '1.8rem', marginBottom: '2.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-             <Send size={28} color="var(--primary)" /> Nexus Mission Control
+       <div className="gombo-card-elite" style={{ padding: '3rem' }}>
+          <h3 className="gombo-neon-text" style={{ margin: 0, fontWeight: 950, fontSize: '1.8rem', marginBottom: '2.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+             <Send size={28} color="var(--primary)" /> Gombo Mission Control
           </h3>
 
           <div style={{ display: 'grid', gap: '1.5rem', marginBottom: '2.5rem' }}>
@@ -980,7 +980,7 @@ const BroadcastTab = ({ tenants }: { tenants: Tenant[] }) => {
              </div>
              <div>
                 <label style={{ fontSize: '0.7rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.75rem', display: 'block' }}>Objet de la Notification</label>
-                <input type="text" value={subject} onChange={e => setSubject(e.target.value)} placeholder="Nexus Update / Information Critique..." style={{ width: '100%', height: '56px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '0 1.5rem', color: 'white', fontWeight: 800 }} />
+                <input type="text" value={subject} onChange={e => setSubject(e.target.value)} placeholder="Gombo Update / Information Critique..." style={{ width: '100%', height: '56px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '0 1.5rem', color: 'white', fontWeight: 800 }} />
              </div>
              <div>
                 <label style={{ fontSize: '0.7rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.75rem', display: 'block' }}>Cœur du Message</label>
@@ -1021,14 +1021,14 @@ const BillingTab = ({ tenants }: { tenants: Tenant[] }) => {
   return (
     <div style={{ animation: 'fadeIn 0.3s ease' }}>
        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginBottom: '3rem' }}>
-          <NexusStatCard title="MRR ENCAISSÉ" value={`${mrr.toLocaleString()} F`} sub="Revenu confirmé (billing_status: paid)" icon={<CreditCard size={22} />} color="#10b981" trend="Actuel" />
-          <NexusStatCard title="MRR PRÉVISIONNEL" value={`${potentialMrr.toLocaleString()} F`} sub="Potentiel total des actifs" icon={<TrendingUp size={22} />} color="#8b5cf6" trend={mrr > 0 ? `+${Math.round(((potentialMrr - mrr) / mrr) * 100)}%` : potentialMrr > 0 ? '+100%' : '0%'} />
+          <GomboStatCard title="MRR ENCAISSÉ" value={`${mrr.toLocaleString()} F`} sub="Revenu confirmé (billing_status: paid)" icon={<CreditCard size={22} />} color="#10b981" trend="Actuel" />
+          <GomboStatCard title="MRR PRÉVISIONNEL" value={`${potentialMrr.toLocaleString()} F`} sub="Potentiel total des actifs" icon={<TrendingUp size={22} />} color="#8b5cf6" trend={mrr > 0 ? `+${Math.round(((potentialMrr - mrr) / mrr) * 100)}%` : potentialMrr > 0 ? '+100%' : '0%'} />
        </div>
 
-       <div className="nexus-card-elite" style={{ padding: '2.5rem' }}>
+       <div className="gombo-card-elite" style={{ padding: '2.5rem' }}>
           <h3 style={{ margin: 0, fontWeight: 950, fontSize: '1.4rem', marginBottom: '2rem' }}>Paiement & Facturation Tenants</h3>
           <div className="table-responsive-cards px-0">
-             <table className="nexus-table">
+             <table className="gombo-table">
                 <thead>
                    <tr>
                       <th>CLIENT</th>
@@ -1052,7 +1052,7 @@ const BillingTab = ({ tenants }: { tenants: Tenant[] }) => {
                                </div>
                             </div>
                          </td>
-                         <td data-label="PLAN"><span className="nexus-badge" style={{ background: 'rgba(255,255,255,0.05)', color: '#94a3b8' }}>{t.plan}</span></td>
+                         <td data-label="PLAN"><span className="gombo-badge" style={{ background: 'rgba(255,255,255,0.05)', color: '#94a3b8' }}>{t.plan}</span></td>
                          <td data-label="STATUS" style={{ color: t.billing_status === 'paid' ? '#10b981' : '#f59e0b', fontWeight: 900 }}>
                             {t.billing_status === 'paid' ? ' Encaissé' : ' En attente'}
                           </td>
@@ -1060,7 +1060,7 @@ const BillingTab = ({ tenants }: { tenants: Tenant[] }) => {
                             {t.plan === 'FREE' ? '0' : t.plan === 'BASIC' ? '15 000' : t.plan === 'PREMIUM' ? '30 000' : t.plan === 'ENTERPRISE' ? '75 000' : '0'} F
                          </td>
                          <td data-label="ACTIONS" style={{ textAlign: 'center' }}>
-                            <button className="nexus-card" style={{ padding: '0.4rem 0.8rem', fontSize: '0.7rem', background: 'rgba(99, 102, 241, 0.05)', border: '1px solid rgba(99, 102, 241, 0.2)', color: '#818cf8', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <button className="gombo-card" style={{ padding: '0.4rem 0.8rem', fontSize: '0.7rem', background: 'rgba(99, 102, 241, 0.05)', border: '1px solid rgba(99, 102, 241, 0.2)', color: '#818cf8', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                                <Eye size={12} /> Inspecter
                             </button>
                          </td>
@@ -1097,15 +1097,15 @@ const SupportTab = () => {
 
   return (
     <div style={{ animation: 'fadeIn 0.3s ease' }}>
-       <div className="nexus-card-elite" style={{ padding: '2.5rem' }}>
-          <h3 className="nexus-neon-text" style={{ margin: 0, fontWeight: 950, fontSize: '1.8rem', marginBottom: '2.5rem' }}>Nexus Help Desk</h3>
+       <div className="gombo-card-elite" style={{ padding: '2.5rem' }}>
+          <h3 className="gombo-neon-text" style={{ margin: 0, fontWeight: 950, fontSize: '1.8rem', marginBottom: '2.5rem' }}>Gombo Help Desk</h3>
           {loading ? <div className="spinner"></div> : (
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '1.5rem' }}>
                 {tickets.length === 0 ? <div style={{ color: '#64748b' }}>Aucune requête en attente.</div> : tickets.map(ticket => (
-                  <div key={ticket.id} className="nexus-card" style={{ borderLeft: `4px solid ${ticket.priority === 'HIGH' ? '#f43f5e' : 'var(--primary)'}` }}>
+                  <div key={ticket.id} className="gombo-card" style={{ borderLeft: `4px solid ${ticket.priority === 'HIGH' ? '#f43f5e' : 'var(--primary)'}` }}>
                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
                         <span style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b' }}>ID: {ticket.id.slice(0,8).toUpperCase()}</span>
-                        <div className="nexus-badge">{ticket.status}</div>
+                        <div className="gombo-badge">{ticket.status}</div>
                      </div>
                      <h4 style={{ margin: 0, fontWeight: 900, fontSize: '1.1rem', marginBottom: '0.75rem' }}>{ticket.subject}</h4>
                      <p style={{ margin: 0, fontSize: '0.85rem', color: '#94a3b8', lineHeight: 1.5, marginBottom: '1.5rem' }}>{ticket.message}</p>
@@ -1171,8 +1171,8 @@ const ProfileTab = () => {
 
   return (
     <div style={{ animation: 'fadeIn 0.3s ease', maxWidth: '800px' }}>
-      <div className="nexus-card-lite" style={{ padding: '2.5rem', marginBottom: '2rem' }}>
-        <h3 className="nexus-neon-text" style={{ margin: 0, fontWeight: 950, fontSize: '1.8rem', marginBottom: '2rem' }}>Mon Profil Nexus</h3>
+      <div className="gombo-card-lite" style={{ padding: '2.5rem', marginBottom: '2rem' }}>
+        <h3 className="gombo-neon-text" style={{ margin: 0, fontWeight: 950, fontSize: '1.8rem', marginBottom: '2rem' }}>Mon Profil Gombo</h3>
         
         <form onSubmit={handleUpdateName} style={{ display: 'grid', gap: '1.5rem' }}>
            <div>
@@ -1191,9 +1191,9 @@ const ProfileTab = () => {
         </form>
       </div>
 
-      <div className="nexus-card-lite" style={{ padding: '2.5rem' }}>
+      <div className="gombo-card-lite" style={{ padding: '2.5rem' }}>
         <h3 style={{ margin: 0, fontWeight: 950, fontSize: '1.8rem', marginBottom: '0.5rem', color: '#f43f5e' }}>Sécurité</h3>
-        <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '2rem' }}>Mettez à jour votre mot de passe pour sécuriser l'accès à Nexus Core.</p>
+        <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '2rem' }}>Mettez à jour votre mot de passe pour sécuriser l'accès à Gombo Core.</p>
         
         <form onSubmit={handleUpdatePassword} style={{ display: 'grid', gap: '1.5rem' }}>
            <div>
@@ -1244,13 +1244,13 @@ const SecurityLogsTab = () => {
 
   return (
     <div style={{ animation: 'fadeIn 0.3s ease' }}>
-       <div className="nexus-card-elite" style={{ padding: '2.5rem' }}>
-          <h3 className="nexus-neon-text" style={{ margin: 0, fontWeight: 950, fontSize: '1.8rem', marginBottom: '2.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-             <ShieldCheck size={28} color="var(--primary)" /> Sécurité & Audit Nexus
+       <div className="gombo-card-elite" style={{ padding: '2.5rem' }}>
+          <h3 className="gombo-neon-text" style={{ margin: 0, fontWeight: 950, fontSize: '1.8rem', marginBottom: '2.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+             <ShieldCheck size={28} color="var(--primary)" /> Sécurité & Audit Gombo
           </h3>
           {loading ? <div className="spinner"></div> : (
               <div className="table-container">
-                 <table className="nexus-table">
+                 <table className="gombo-table">
                     <thead>
                        <tr>
                           <th>ACTION SYSTÈME</th>

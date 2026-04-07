@@ -85,10 +85,10 @@ export const BlogTab = () => {
 
   if (isEditing) {
     return (
-      <div className="nexus-card-elite reveal" style={{ padding: '2.5rem' }}>
+      <div className="gombo-card-elite reveal" style={{ padding: '2.5rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem', flexWrap: 'wrap', gap: '1rem' }}>
           <h2 style={{ margin: 0, fontSize: '1.8rem', fontWeight: 900 }}>{currentPost?.id ? 'Modifier Article' : 'Nouvel Article'}</h2>
-          <button onClick={() => setIsEditing(false)} className="nexus-card" style={{ padding: '0.6rem 1.2rem', cursor: 'pointer' }}>Annuler</button>
+          <button onClick={() => setIsEditing(false)} className="gombo-card" style={{ padding: '0.6rem 1.2rem', cursor: 'pointer' }}>Annuler</button>
         </div>
 
         <form onSubmit={handleSave} style={{ display: 'grid', gap: '1.25rem' }}>
@@ -146,7 +146,7 @@ export const BlogTab = () => {
             <label htmlFor="published" style={{ fontWeight: 800, cursor: 'pointer' }}>Publier l'article</label>
           </div>
 
-          <button type="submit" disabled={loading} className="nexus-glow-button" style={{ height: '60px', marginTop: '1rem', fontSize: '1rem' }}>
+          <button type="submit" disabled={loading} className="gombo-glow-button" style={{ height: '60px', marginTop: '1rem', fontSize: '1rem' }}>
             {loading ? <Activity className="animate-spin" /> : <><Save size={20} /> ENREGISTRER L'ARTICLE</>}
           </button>
         </form>
@@ -163,16 +163,16 @@ export const BlogTab = () => {
         </div>
         <button 
           onClick={() => { setCurrentPost({}); setIsEditing(true); }}
-          className="nexus-glow-button" 
+          className="gombo-glow-button" 
           style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}
         >
           <PlusCircle size={20} /> NOUVEL ARTICLE
         </button>
       </div>
 
-      <div className="nexus-card-elite" style={{ padding: 0, overflow: 'hidden' }}>
+      <div className="gombo-card-elite" style={{ padding: 0, overflow: 'hidden' }}>
         <div className="table-responsive-cards px-0">
-          <table className="nexus-table">
+          <table className="gombo-table">
             <thead>
               <tr>
                 <th>ARTICLE</th>
@@ -201,15 +201,15 @@ export const BlogTab = () => {
                     </span>
                   </td>
                   <td data-label="STATUT">
-                    <div className={`nexus-badge ${post.published ? 'nexus-badge-active' : 'nexus-badge-warning'}`}>
+                    <div className={`gombo-badge ${post.published ? 'gombo-badge-active' : 'gombo-badge-warning'}`}>
                        {post.published ? 'Publié' : 'Brouillon'}
                     </div>
                   </td>
                   <td style={{ textAlign: 'right' }}>
                     <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-                      <button onClick={() => { setCurrentPost(post); setIsEditing(true); }} className="nexus-icon-btn"><Edit size={16} /></button>
-                      <button onClick={() => handleDelete(post.id)} className="nexus-icon-btn" style={{ color: '#f43f5e' }}><Trash2 size={16} /></button>
-                      <a href={`/blog/${post.slug}`} target="_blank" className="nexus-icon-btn"><Eye size={16} /></a>
+                      <button onClick={() => { setCurrentPost(post); setIsEditing(true); }} className="gombo-icon-btn"><Edit size={16} /></button>
+                      <button onClick={() => handleDelete(post.id)} className="gombo-icon-btn" style={{ color: '#f43f5e' }}><Trash2 size={16} /></button>
+                      <a href={`/blog/${post.slug}`} target="_blank" className="gombo-icon-btn"><Eye size={16} /></a>
                     </div>
                   </td>
                 </tr>

@@ -52,7 +52,7 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
   const [expandedGroups, setExpandedGroups] = useState<string[]>(['Ventes & Opérations']);
 
   const isSuperAdmin = currentUser?.role === 'SUPER_ADMIN';
-  const effectiveSlug = tenantSlug || currentUser?.tenant_slug || 'nexus';
+  const effectiveSlug = tenantSlug || currentUser?.tenant_slug || 'gombo';
 
   const tenantNavSections: NavSection[] = [
     {
@@ -120,7 +120,7 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
 
   const superAdminNavSections: NavSection[] = [
     {
-      section: 'Nexus Management',
+      section: 'Gombo Management',
       items: [
         { path: '/super-admin/overview', icon: TrendingUp, label: 'Tableau de bord Global', permission: 'SUPER_ADMIN' },
         { path: '/super-admin/tenants', icon: Building, label: 'Gestion des Clients', permission: 'SUPER_ADMIN' },
@@ -239,7 +239,7 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
               GomboSwift
             </span>
             <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#06b6d4', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-              Nexus Core
+              Gombo Core
             </span>
           </div>
           <button 
@@ -259,7 +259,7 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
               className="btn btn-primary" 
               style={{ width: '100%', borderRadius: '12px', fontSize: '0.85rem', fontWeight: 950, gap: '0.75rem', height: '50px', background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)', border: 'none', boxShadow: '0 8px 20px rgba(6, 182, 212, 0.3)' }}
             >
-              <ShieldCheck size={18} /> MISSION NEXUS
+              <ShieldCheck size={18} /> MISSION GOMBO
             </Link>
           </div>
         )}

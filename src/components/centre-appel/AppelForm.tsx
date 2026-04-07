@@ -264,7 +264,7 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div
-        className="modal-content modal-nexus modal-nexus-wide card glass-effect modal-appel-form"
+        className="modal-content modal-gombo modal-gombo-wide card glass-effect modal-appel-form"
         style={{
           maxWidth: 'min(720px, calc(100vw - 1rem))',
           width: '100%',
@@ -277,7 +277,7 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
         onClick={e => e.stopPropagation()}
       >
         <div className="modal-shell">
-        <div className="modal-nexus-accent" />
+        <div className="modal-gombo-accent" />
         <div
           className="modal-body-scroll modal-appel-form-body"
           style={{

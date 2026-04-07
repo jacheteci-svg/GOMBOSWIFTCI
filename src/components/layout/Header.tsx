@@ -62,7 +62,7 @@ export const Header = ({ onMenuClick }: { onMenuClick: () => void }) => {
     if (path.endsWith('/performance-staff')) return 'Performance';
     
     if (path.includes('/super-admin/performance')) return 'Performance boutiques';
-    if (path.startsWith('/super-admin')) return 'Nexus Portal';
+    if (path.startsWith('/super-admin')) return 'Gombo Portal';
     return 'GomboSwiftCI';
   };
 
@@ -71,7 +71,7 @@ export const Header = ({ onMenuClick }: { onMenuClick: () => void }) => {
     : '?';
 
   return (
-    <header className="header nexus-header-bar">
+    <header className="header gombo-header-bar">
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0 }}>
         <button className="mobile-menu-btn" onClick={onMenuClick} aria-label="Menu">
            <Menu size={20} />

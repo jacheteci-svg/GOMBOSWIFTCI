@@ -6,7 +6,7 @@ import { StockForm } from '../components/produits/StockForm';
 import { subscribeToProduits } from '../services/produitService';
 import { Produit } from '../types';
 import { useSaas } from '../saas/SaasProvider';
-import { NexusModuleFrame } from '../components/layout/NexusModuleFrame';
+import { GomboModuleFrame } from '../components/layout/GomboModuleFrame';
 
 export const Produits = () => {
   const { tenant, planConfig } = useSaas();
@@ -42,7 +42,7 @@ export const Produits = () => {
 
   return (
     <>
-    <NexusModuleFrame
+    <GomboModuleFrame
       badge="Inventory Intelligence"
       title="Catalogue Inventaire"
       description="Pilotez votre catalogue, vos marges et vos niveaux de stock stratégiques."
@@ -93,7 +93,7 @@ export const Produits = () => {
         {loading ? (
           <div style={{ textAlign: 'center', padding: '8rem 2rem' }}>
              <div className="spinner" style={{ margin: '0 auto 2rem', width: '50px', height: '50px', borderTopColor: 'var(--primary)' }}></div>
-             <p style={{ fontWeight: 800, fontSize: '1.2rem', color: 'var(--text-main)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Synchronisation du Nexus...</p>
+             <p style={{ fontWeight: 800, fontSize: '1.2rem', color: 'var(--text-main)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Synchronisation du Gombo...</p>
           </div>
         ) : (
           <ProduitList 
@@ -106,7 +106,7 @@ export const Produits = () => {
           />
         )}
       </div>
-    </NexusModuleFrame>
+    </GomboModuleFrame>
 
       {isProduitFormOpen && (
         <ProduitForm 
