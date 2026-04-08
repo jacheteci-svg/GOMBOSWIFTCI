@@ -134,7 +134,7 @@ export const Login = () => {
               const hostname = window.location.hostname;
               const isProd = hostname === 'gomboswiftci.app' || hostname === 'www.gomboswiftci.app';
               if (isProd) {
-                window.location.href = `https://${tenant.slug}.gomboswiftci.app/dashboard`;
+                window.location.href = `https://${tenant.slug}.gomboswiftci.app/`;
               } else {
                 window.location.href = `/${tenant.slug}`;
               }

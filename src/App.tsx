@@ -127,7 +127,7 @@ const AppRoutes = () => {
   // Define the core tenant routes as a reusable element to avoid duplication
   const tenantRoutes = (
     <>
-      <Route index element={<Dashboard />} />
+      <Route index element={<Home />} />
       <Route path="home" element={<Home />} />
       <Route path="dashboard" element={<ProtectedRoute requiredPermission="DASHBOARD"><Dashboard /></ProtectedRoute>} />
       <Route path="produits" element={<ProtectedRoute requiredPermission="PRODUITS"><Produits /></ProtectedRoute>} />
@@ -208,7 +208,7 @@ const AppRoutes = () => {
             <Navigate to="/super-admin/overview" replace />
           ) : (
             isSubdomain ? (
-               <Navigate to="/dashboard" replace />
+               <Navigate to="/" replace />
             ) : (
                <Navigate to={`/${currentUser.tenant_slug || 'gombo'}`} replace />
             )

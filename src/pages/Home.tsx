@@ -10,7 +10,8 @@ import {
   TrendingUp, 
   Settings,
   ChevronRight,
-  Zap
+  Zap,
+  LayoutDashboard
 } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 
@@ -20,6 +21,7 @@ export const Home = () => {
   const effectiveSlug = tenantSlug || currentUser?.tenant_slug || 'gombo';
 
   const menuItems = [
+    { path: `/${effectiveSlug}/dashboard`, label: 'Tableau de Bord', desc: 'Vue d\'ensemble et statistiques', icon: LayoutDashboard, permission: 'DASHBOARD', color: '#06b6d4' },
     { path: `/${effectiveSlug}/produits`, label: 'Produits', desc: 'Gestion du stock et catalogue', icon: Package, permission: 'PRODUITS', color: '#6366f1' },
     { path: `/${effectiveSlug}/commandes`, label: 'Commandes', desc: 'Suivi et flux des colis', icon: ShoppingCart, permission: 'COMMANDES', color: '#8b5cf6' },
     { path: `/${effectiveSlug}/centre-appel`, label: 'Centre d\'Appel', desc: 'Validation et suivi appels', icon: Headset, permission: 'CENTRE_APPEL', color: '#ec4899' },
