@@ -111,15 +111,18 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
         : Boolean(currentUser.tenant_id && tenant.id === currentUser.tenant_id));
 
     if (canReuseTenant && !force) {
+      console.log('[SaasProvider] Reusing valid tenant context:', tenant?.slug);
       return;
     }
 
     const shouldShowBlockingLoader = !canReuseTenant || force;
     if (shouldShowBlockingLoader) {
+      console.log('[SaasProvider] Starting loading state...');
       setLoading(true);
     }
 
     try {
+      console.log('[SaasProvider] Fetching data for:', { targetSlug, currentUserTenantId: currentUser?.tenant_id });
       let tenantData = null;
 
       if (currentUser?.role === 'SUPER_ADMIN' && targetSlug) {
@@ -138,50 +141,61 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
         tenantData = data;
       }
 
+      console.log('[SaasProvider] Tenant Data Result:', tenantData?.nom);
+
       if (tenantData) {
         setTenant(tenantData as Tenant);
 
-        if (tenantData.plan) {
+        if (tenantData.plan_id) {
+          console.log('[SaasProvider] Fetching plan:', tenantData.plan_id);
           const { data: planData } = await withTimeout(
-            insforge.database.from('saas_plans').select('*').eq('id', tenantData.plan).single(),
+            insforge.database.from('saas_plans').select('*').eq('id', tenantData.plan_id).single(),
             API_TIMEOUT_MS,
             'saas_plans'
           );
-          if (planData) setPlanConfig(planData as SaasPlanDb);
+          if (planData) {
+            console.log('[SaasProvider] Plan Loaded:', planData.nom);
+            setPlanConfig(planData as SaasPlanDb);
+          }
         } else {
           setPlanConfig(null);
         }
 
+        console.log('[SaasProvider] Fetching subscription for:', tenantData.id);
         const { data: subData } = await withTimeout(
           insforge.database
             .from('subscriptions')
             .select('*')
             .eq('tenant_id', tenantData.id)
             .eq('status', 'active')
-            .single(),
+            .maybeSingle(),
           API_TIMEOUT_MS,
           'subscriptions'
         );
 
         if (subData) {
+          console.log('[SaasProvider] Active Subscription Found');
           setSubscription(subData as Subscription);
         } else {
+          console.warn('[SaasProvider] No active subscription found');
           setSubscription(null);
         }
       } else {
+        console.warn('[SaasProvider] No tenant data found');
         setTenant(null);
         setSubscription(null);
         setPlanConfig(null);
       }
     } catch (error) {
-      console.error('Error fetching SaaS data:', error);
+      console.error('[SaasProvider] Error fetching SaaS data:', error);
       setTenant(null);
       setSubscription(null);
       setPlanConfig(null);
     } finally {
+      console.log('[SaasProvider] Finished loading state.');
       setLoading(false);
     }
-  }, [location.pathname, currentUser, tenant]);
+  }, [location.pathname, currentUser]);
 
   useEffect(() => {
     void fetchSaasData();
