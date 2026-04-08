@@ -68,7 +68,7 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     // 2. Detection par URL Path (Rediriger vers sous-domaine en prod)
-    if (!targetSlug && urlSlug && !['super-admin', 'platform', 'login', 'register', 'saas', 'demo', 'api', 'help', 'status', 'privacy', 'terms', 'features', 'blog'].includes(urlSlug)) {
+    if (!targetSlug && urlSlug && !['super-admin', 'platform', 'login', 'register', 'gombo', 'saas', 'demo', 'api', 'help', 'status', 'privacy', 'terms', 'features', 'blog'].includes(urlSlug)) {
        targetSlug = urlSlug;
        
        const isProd = hostname === 'gomboswiftci.app' || hostname === 'www.gomboswiftci.app';
