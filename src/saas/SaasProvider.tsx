@@ -68,17 +68,20 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     // 2. Detection par URL Path (Rediriger vers sous-domaine en prod)
-    if (!targetSlug && urlSlug && !['super-admin', 'platform', 'login', 'register', 'gombo', 'saas', 'demo', 'api', 'help', 'status', 'privacy', 'terms', 'features', 'blog'].includes(urlSlug)) {
+    if (!targetSlug && urlSlug && !['super-admin', 'platform', 'login', 'register', 'saas', 'demo', 'api', 'help', 'status', 'privacy', 'terms', 'features', 'blog'].includes(urlSlug)) {
        targetSlug = urlSlug;
        
        const isProd = hostname === 'gomboswiftci.app' || hostname === 'www.gomboswiftci.app';
        if (isProd && targetSlug) {
-         window.location.href = `https://${targetSlug}.gomboswiftci.app${location.pathname.replace(`/${targetSlug}`, '') || '/'}`;
+         // Logique de redirection vers sous-domaine (ex: gomboswiftci.app/gombo -> gombo.gomboswiftci.app/)
+         const cleanPath = location.pathname.startsWith(`/${targetSlug}`) 
+           ? location.pathname.substring(targetSlug.length + 1) 
+           : location.pathname;
+         
+         window.location.href = `https://${targetSlug}.gomboswiftci.app${cleanPath || '/'}`;
          return;
        }
     }
-
-    if (urlSlug === 'gombo') targetSlug = 'gombo';
     
     const isSub = !!targetSlug && (hostname.split('.').length >= 2 && !['www', 'gomboswiftci', 'localhost', 'vercel', 'app', 'next', 'vite', 'system'].includes(hostname.split('.')[0].toLowerCase()));
     setIsSubdomainState(isSub);
