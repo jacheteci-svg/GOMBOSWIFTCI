@@ -242,10 +242,10 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
               letterSpacing: '-0.03em',
               lineHeight: 1
             }}>
-              GomboSwift
+              {isPlatformView ? "Gombo Portal" : "GomboSwift"}
             </span>
             <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#06b6d4', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-              Gombo Core
+              {isPlatformView ? "Console de Contrôle" : "Gombo Core"}
             </span>
           </div>
           <button 

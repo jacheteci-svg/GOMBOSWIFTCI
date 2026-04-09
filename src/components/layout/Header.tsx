@@ -1,4 +1,4 @@
-import { Menu, Home, Building, User } from 'lucide-react';
+import { Menu, Home, Building, User, ShieldCheck } from 'lucide-react';
 import { useLocation, Link, useParams } from 'react-router-dom';
 import { NotificationCenter } from './NotificationCenter';
 import { useAuth } from '../../contexts/AuthContext';
@@ -92,10 +92,10 @@ export const Header = ({ onMenuClick }: { onMenuClick: () => void }) => {
           {location.pathname.startsWith('/super-admin') ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <div style={{ width: 24, height: 24, borderRadius: '6px', background: 'linear-gradient(135deg, #06b6d4, #3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 950, color: 'white' }}>
-                {currentUser?.nom_complet?.charAt(0).toUpperCase() || 'A'}
+                <ShieldCheck size={14} />
               </div>
               <span style={{ fontSize: '0.8rem', fontWeight: 900, color: 'white' }}>
-                {currentUser?.nom_complet || 'Administrateur'}
+                Administrateur Système
               </span>
             </div>
           ) : (
