@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { insforge } from '../lib/insforge';
 import { useToast } from '../contexts/ToastContext';
 import { 
-  FileText, Edit, Trash2, PlusCircle, Save, 
-  Sparkles, 
+  Edit, Trash2, 
+  Sparkles, Activity,
   ChevronLeft, User, RefreshCw,
   Search, Plus
 } from 'lucide-react';

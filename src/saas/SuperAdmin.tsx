@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, cloneElement } from 'react';
 import { insforge } from '../lib/insforge';
 import { Tenant } from '../types';
 import { useAuth } from '../contexts/AuthContext';
@@ -155,7 +155,7 @@ const GomboStatCard = ({ title, value, sub, icon, color, trend }: any) => (
   <div className="gombo-card gombo-stat-card px-6 py-8">
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
       <div style={{ background: `${color}20`, padding: '0.6rem', borderRadius: '12px', border: `1px solid ${color}30`, color: color }}>
-        {React.cloneElement(icon, { size: 20 })}
+        {cloneElement(icon, { size: 20 })}
       </div>
       {trend && (
         <div style={{ fontSize: '0.65rem', fontWeight: 900, color: trend.startsWith('+') ? '#10b981' : trend === 'Stable' ? '#94a3b8' : '#6366f1', background: 'rgba(255,255,255,0.05)', padding: '3px 7px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)' }}>
