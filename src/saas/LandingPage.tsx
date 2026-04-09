@@ -12,11 +12,11 @@ import {
   Layout
 } from 'lucide-react';
 import { Pricing } from './Pricing';
+import { LandingNavbar } from '../components/layout/LandingNavbar';
 
 export const LandingPage: React.FC = () => {
   console.log("LandingPage rendering on path:", window.location.pathname);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Scroll Reveal Logic
   React.useEffect(() => {
@@ -34,75 +34,14 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div style={{ background: '#020617', color: '#f8fafc', fontFamily: 'Inter, sans-serif' }}>
+      <LandingNavbar />
+      
       {/* Dynamic Background Noise/Glows */}
       <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, overflow: 'hidden', pointerEvents: 'none' }}>
         <div style={{ position: 'absolute', top: '-10%', left: '-10%', width: '40%', height: '40%', background: 'radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%)', filter: 'blur(50px)' }} />
         <div style={{ position: 'absolute', bottom: '10%', right: '-10%', width: '50%', height: '50%', background: 'radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%)', filter: 'blur(80px)' }} />
       </div>
 
-      <nav style={{ 
-        padding: '1.25rem 2rem', 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        position: 'sticky', 
-        top: 0, 
-        background: 'rgba(2, 6, 23, 0.85)', 
-        backdropFilter: 'blur(16px)',
-        zIndex: 1000,
-        borderBottom: '1px solid rgba(255,255,255,0.08)',
-        boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div style={{ padding: '0.2rem', flexShrink: 0 }}>
-            <img src="/favicon.png" alt="Logo" style={{ width: 44, height: 44, borderRadius: 12, objectFit: 'cover' }} />
-          </div>
-          <span style={{ fontSize: '1.6rem', fontWeight: 950, letterSpacing: '-0.04em', background: 'linear-gradient(to right, #fff, #94a3b8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>GomboSwiftCI</span>
-        </div>
-        <div style={{ display: 'flex', gap: '2.5rem', alignItems: 'center' }}>
-          <div style={{ display: 'flex', gap: '2rem', marginRight: '2rem' }} className="nav-links mobile-hide">
-            <a href="#features" className="premium-link">Produit</a>
-            <a href="#pricing" className="premium-link">Tarifs</a>
-            <Link to="/blog" className="premium-link" style={{ textDecoration: 'none', color: 'inherit' }}>Blog</Link>
-            <a href="#faq" className="premium-link">FAQ</a>
-          </div>
-          <Link to="/login" style={{ textDecoration: 'none', color: '#fff', fontWeight: 700, fontSize: '0.9rem' }} className="mobile-hide hover-glow">Connexion</Link>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <Link to="/register" className="btn-premium">Essai Gratuit</Link>
-            <button 
-              className="desktop-hide" 
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              style={{ background: 'transparent', border: 'none', color: 'white', cursor: 'pointer', padding: '0.5rem' }}
-            >
-              {isMenuOpen ? <ArrowRight style={{ transform: 'rotate(-90deg)' }} /> : <Layout size={28} />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Menu Overlay */}
-        {isMenuOpen && (
-          <div style={{ 
-            position: 'absolute', 
-            top: '100%', 
-            left: 0, 
-            right: 0, 
-            background: '#020617', 
-            borderBottom: '1px solid rgba(255,255,255,0.1)', 
-            padding: '2rem',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '1.5rem',
-            zIndex: 999,
-            animation: 'fadeIn 0.3s ease'
-          }}>
-            <a href="#features" onClick={() => setIsMenuOpen(false)} style={{ textDecoration: 'none', color: '#fff', fontSize: '1.2rem', fontWeight: 800 }}>Produit</a>
-            <a href="#pricing" onClick={() => setIsMenuOpen(false)} style={{ textDecoration: 'none', color: '#fff', fontSize: '1.2rem', fontWeight: 800 }}>Tarifs</a>
-            <Link to="/blog" onClick={() => setIsMenuOpen(false)} style={{ textDecoration: 'none', color: '#fff', fontSize: '1.2rem', fontWeight: 800 }}>Blog</Link>
-            <a href="#faq" onClick={() => setIsMenuOpen(false)} style={{ textDecoration: 'none', color: '#fff', fontSize: '1.2rem', fontWeight: 800 }}>FAQ</a>
-            <Link to="/login" onClick={() => setIsMenuOpen(false)} style={{ textDecoration: 'none', color: '#fff', fontSize: '1.2rem', fontWeight: 800 }}>Connexion</Link>
-          </div>
-        )}
-      </nav>
 
       {/* Immersive Hero Section */}
       <header style={{ 
@@ -384,147 +323,11 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer style={{ padding: '8rem 2rem 5rem', background: '#020617', borderTop: '1px solid rgba(255,255,255,0.03)' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '6rem' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
-              <div style={{ padding: '0.2rem', flexShrink: 0 }}>
-                <img src="/favicon.png" alt="Logo" style={{ width: 32, height: 32, borderRadius: 8, objectFit: 'cover' }} />
-              </div>
-              <span style={{ fontSize: '1.4rem', fontWeight: 950 }}>GomboSwiftCI</span>
-            </div>
-            <p style={{ color: '#64748b', fontSize: '1rem', lineHeight: 1.7, marginBottom: '2.5rem' }}>
-              L'infrastructure logistique SaaS de référence pour les entreprises en pleine expansion en Côte d'Ivoire.
-            </p>
-            <div style={{ color: '#94a3b8', fontSize: '0.9rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div>📍 Yopougon Toit Rouge, Non loin de la grande mosquée après le stade BAE</div>
-              <div>Tél: <a href="tel:2250757228731" style={{ color: '#fff', fontWeight: 800, textDecoration: 'none' }}>+225 07 57 22 87 31</a></div>
-              <div>WhatsApp: <a href="https://wa.me/2250100576526" style={{ color: '#25D366', fontWeight: 800, textDecoration: 'none' }}>+225 01 00 57 65 26</a></div>
-            </div>
-          </div>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4rem', gridColumn: 'span 2' }}>
-            {[
-              { t: 'Produit', l: [['Fonctionnalités', '/features'], ['Calculateur Coût', '/cost-calculator'], ['API Docs', '/api-docs'], ['Statut', '/status']] },
-              { t: 'Support', l: [['Help Center', '/help-center'], ['Sales', '/contact-sales'], ['Bugs', '/report-bug']] },
-              { t: 'Légal', l: [['Privacy', '/privacy'], ['Terms', '/terms'], ['GDPR', '/gdpr']] }
-            ].map((col, i) => (
-              <div key={i}>
-                <h4 style={{ fontWeight: 800, marginBottom: '2rem', color: '#fff' }}>{col.t}</h4>
-                <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                  {col.l.map((link, j) => (
-                    <li key={j}><Link to={link[1]} style={{ textDecoration: 'none', color: '#64748b', fontWeight: 500 }}>{link[0]}</Link></li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div style={{ marginTop: '8rem', textAlign: 'center', color: '#475569', fontSize: '0.9rem' }}>
-          &copy; {new Date().getFullYear()} GomboSwiftCI S.A.S. Tous droits réservés.
-        </div>
       </footer>
+    </div>
+  );
+};
 
-      <style>{`
-        .reveal {
-          opacity: 0;
-          transform: translateY(30px);
-          transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-          pointer-events: none;
-        }
-        .reveal.active {
-          opacity: 1;
-          transform: translateY(0);
-          pointer-events: auto;
-        }
-        .premium-card {
-          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .premium-card:hover {
-          transform: translateY(-12px);
-          border-color: rgba(99, 102, 241, 0.3) !important;
-          background: rgba(255,255,255,0.05) !important;
-          box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.5), 0 0 20px rgba(99, 102, 241, 0.1);
-        }
-        .card-shine {
-          position: absolute;
-          top: -100%;
-          left: -100%;
-          width: 300%;
-          height: 300%;
-          background: linear-gradient(135deg, transparent 45%, rgba(255,255,255,0.03) 50%, transparent 55%);
-          transition: all 0.6s;
-          pointer-events: none;
-        }
-        .premium-card:hover .card-shine {
-          top: 0;
-          left: 0;
-        }
-        .btn-premium {
-          padding: 0.75rem 1.8rem;
-          border-radius: 12px;
-          background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-          color: white;
-          text-decoration: none;
-          font-size: 0.9rem;
-          font-weight: 800;
-          box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);
-          transition: all 0.3s ease;
-          display: inline-block;
-        }
-        .btn-premium:hover {
-          transform: translateY(-2px) scale(1.05);
-          box-shadow: 0 15px 30px rgba(99, 102, 241, 0.4);
-        }
-        .premium-link {
-          text-decoration: none;
-          color: #94a3b8;
-          font-weight: 600;
-          font-size: 0.9rem;
-          transition: all 0.3s;
-          position: relative;
-        }
-        .premium-link:hover {
-          color: #fff;
-        }
-        .premium-link::after {
-          content: '';
-          position: absolute;
-          bottom: -4px;
-          left: 0;
-          width: 0;
-          height: 2px;
-          background: #6366f1;
-          transition: width 0.3s;
-        }
-        .premium-link:hover::after {
-          width: 100%;
-        }
-        .hover-glow:hover {
-          text-shadow: 0 0 10px rgba(255,255,255,0.5);
-          color: #fff !important;
-        }
-        @keyframes mockupIn {
-          from { opacity: 0; transform: perspective(1500px) rotateX(25deg) translateY(100px); }
-          to { opacity: 1; transform: perspective(1500px) rotateX(15deg) translateY(-50px); }
-        }
-        @keyframes float {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-20px); }
-        }
-        @media (max-width: 768px) {
-          .mobile-hide { display: none !important; }
-          .desktop-hide { display: block !important; }
-          h1 { font-size: 3rem !important; }
-          .hero-cta { padding: 1rem 1.5rem !important; font-size: 0.9rem !important; }
-          .reveal { opacity: 1 !important; transform: none !important; pointer-events: auto !important; }
-          .mobile-stack { grid-template-columns: 1fr !important; }
-        }
-        @media (min-width: 769px) {
-          .desktop-hide { display: none !important; }
-        }
-      `}</style>
     </div>
   );
 };

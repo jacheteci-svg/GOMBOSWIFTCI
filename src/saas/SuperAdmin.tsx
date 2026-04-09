@@ -360,27 +360,7 @@ const OverviewTab = ({ stats, tenants, currentUser }: { stats: any, tenants: Ten
 /* -------------------------------------------------------------------------- */
 const PerformanceHub = () => {
   return (
-    <div className="w-full max-w-full overflow-x-hidden" style={{ marginTop: '-1.5rem' }}>
-       {/* SaaS Admin Intelligence Overlay */}
-       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 px-4 mb-6">
-          {[
-            { label: 'Indice de Croissance', val: '84%', sub: 'Traction Hebdomadaire', icon: <Zap size={14} />, color: '#fbbf24' },
-            { label: 'Stabilité Réseau', val: '99.9%', sub: 'Uptime Cloud Node', icon: <Activity size={14} />, color: '#10b981' },
-            { label: 'Satisfaction Client', val: '4.8/5', sub: 'Calculé via IA', icon: <ShieldCheck size={14} />, color: '#06b6d4' },
-            { label: 'Trafic Data Log', val: '1.2M', sub: 'Événements 24h', icon: <TrendingUp size={14} />, color: '#ec4899' }
-          ].map((inf, i) => (
-            <div key={i} className="gombo-card-elite" style={{ padding: '1rem 1.5rem', background: 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-               <div style={{ padding: '0.5rem', borderRadius: '10px', background: `${inf.color}15`, color: inf.color }}>{inf.icon}</div>
-               <div>
-                  <div style={{ fontSize: '0.6rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase' }}>{inf.label}</div>
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
-                    <span style={{ fontSize: '1.1rem', fontWeight: 950 }}>{inf.val}</span>
-                    <span style={{ fontSize: '0.65rem', color: '#475569', fontWeight: 700 }}>{inf.sub}</span>
-                  </div>
-               </div>
-            </div>
-          ))}
-       </div>
+    <div className="w-full max-w-full overflow-x-hidden" style={{ marginTop: '-2.5rem' }}>
       <PerformanceDashboard isSuperAdmin={true} />
     </div>
   );

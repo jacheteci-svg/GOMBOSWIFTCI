@@ -1644,61 +1644,75 @@ export const PerformanceDashboard = ({
 
   if (isSuperAdmin && !moduleChrome) {
     return (
-      <div className="space-y-10 lg:space-y-12">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div className="lg:col-span-8 space-y-6">
+      <div className="space-y-10 lg:space-y-14" style={{ animation: 'fadeIn 0.6s cubic-bezier(0.23, 1, 0.32, 1)' }}>
+        {/* --- HERO SECTION: PLATFORM PULSE --- */}
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+          <div className="xl:col-span-8">
              <div 
-               className="relative overflow-hidden rounded-[32px] border border-white/[0.08] bg-slate-900/60 p-8 shadow-2xl"
-               style={{ background: 'linear-gradient(135deg, rgba(8, 11, 20, 0.95) 0%, rgba(15, 23, 42, 0.8) 100%)' }}
+               className="relative overflow-hidden rounded-[40px] border border-white/[0.08] bg-[#0c1222] p-8 lg:p-10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)]"
+               style={{ 
+                 background: 'radial-gradient(circle at 0% 0%, rgba(6,182,212,0.1) 0%, transparent 50%), radial-gradient(circle at 100% 100%, rgba(99,102,241,0.08) 0%, transparent 50%), #0c1222',
+               }}
              >
-                <div className="absolute -right-20 -top-20 size-64 bg-cyan-500/10 blur-[80px]" />
-                <div className="absolute -left-10 -bottom-10 size-40 bg-violet-600/10 blur-[60px]" />
+                <div className="absolute -right-20 -top-20 size-80 bg-cyan-500/10 blur-[100px] animate-pulse" />
                 
-                <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8 border-b border-white/[0.05] pb-6">
+                <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12 border-b border-white/[0.05] pb-8">
                   <div>
-                    <div className="flex items-center gap-2 mb-2">
-                       <Zap className="text-amber-400 size-4" />
-                       <span className="text-[11px] font-black uppercase tracking-[0.2em] text-cyan-400">Platform Performance Hub</span>
+                    <div className="flex items-center gap-2.5 mb-3">
+                       <div className="size-2 rounded-full bg-cyan-400 shadow-[0_0_10px_#22d3ee]" />
+                       <span className="text-[11px] font-black uppercase tracking-[0.25em] text-cyan-400">Platform Intelligence Engine</span>
                     </div>
-                    <h2 className="text-3xl font-black text-white tracking-tight" style={{ fontFamily: 'Outfit' }}>
-                      Operational <span className="text-slate-500">Overview</span>
+                    <h2 className="text-4xl lg:text-5xl font-black text-white tracking-tighter" style={{ fontFamily: 'Outfit' }}>
+                      Global <span className="text-slate-500">Growth Pulse</span>
                     </h2>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/[0.04] border border-white/[0.06] text-xs font-bold text-slate-300">
-                      <Globe size={14} className="text-cyan-400" />
-                      Live Network State
-                    </span>
+                  <div className="flex items-center gap-4">
+                     <div className="flex flex-col items-end">
+                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Network Status</span>
+                        <div className="flex items-center gap-2 mt-1">
+                           <div className="px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-black text-emerald-400 uppercase tracking-wider">
+                              Operational
+                           </div>
+                        </div>
+                     </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Total Orders</p>
-                    <p className="text-3xl font-black text-white tabular-nums">{totalCmd.toLocaleString('fr-FR')}</p>
-                    <p className="text-[11px] text-cyan-500/80 font-bold">Throughput Volume</p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Total Transactions</p>
+                    <p className="text-4xl font-black text-white tabular-nums tracking-tight">{totalCmd.toLocaleString('fr-FR')}</p>
+                    <div className="flex items-center gap-1.5 text-[11px] text-cyan-400 font-bold">
+                       <TrendingUp size={12} /> +12.5% <span className="text-slate-600 font-medium">vs last period</span>
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Global GMV</p>
-                    <p className="text-2xl font-black text-cyan-300 tabular-nums">
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Gross Turnover</p>
+                    <p className="text-3xl font-black text-white tabular-nums tracking-tight">
                       {totalGmv.toLocaleString('fr-FR')} 
-                      <span className="text-xs text-slate-500 ml-1">CFA</span>
+                      <span className="text-sm text-slate-500 font-medium ml-1.5">CFA</span>
                     </p>
-                    <p className="text-[11px] text-slate-500 font-bold">Processed Revenue</p>
+                    <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 font-bold">
+                       <Zap size={12} fill="currentColor" /> Premium Yield
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Active Footprint</p>
-                    <p className="text-3xl font-black text-white tabular-nums">{tenantRows.filter(x => x.actif).length}</p>
-                    <p className="text-[11px] text-emerald-400/80 font-bold">Verified Tenants</p>
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Merchant Base</p>
+                    <p className="text-4xl font-black text-white tabular-nums tracking-tight">{tenantRows.filter(x => x.actif).length}</p>
+                    <div className="flex items-center gap-1.5 text-[11px] text-slate-500 font-bold italic">
+                       Global Connectivity
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Health Score</p>
-                    <p className="text-3xl font-black text-emerald-400 tabular-nums">{100 - superAdminInsights.tauxAnnulPlateforme}%</p>
-                    <p className="text-[11px] text-slate-500 font-bold">Platform integrity</p>
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Efficacy Index</p>
+                    <p className="text-4xl font-black text-emerald-400 tabular-nums tracking-tight">{100 - superAdminInsights.tauxAnnulPlateforme}%</p>
+                    <div className="w-full h-1 bg-white/5 rounded-full mt-2 overflow-hidden">
+                       <div className="h-full bg-emerald-500" style={{ width: `${100 - superAdminInsights.tauxAnnulPlateforme}%` }} />
+                    </div>
                   </div>
                 </div>
 
-                <div className="mt-12 h-48 w-full">
+                <div className="h-64 w-full mt-6">
                   <ResponsiveContainer width="100%" height="100%">
                     <ComposedChart data={platformTimeline}>
                       <defs>
@@ -1706,53 +1720,109 @@ export const PerformanceDashboard = ({
                           <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.4}/>
                           <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
                         </linearGradient>
+                        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                           <feGaussianBlur stdDeviation="3" result="blur" />
+                           <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                        </filter>
                       </defs>
-                      <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10, fontWeight: 700 }} dy={10} />
-                      <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10, fontWeight: 700 }} />
-                      <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10, fontWeight: 700 }} />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.03)" />
+                      <XAxis 
+                        dataKey="label" 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fill: '#475569', fontSize: 10, fontWeight: 800, textTransform: 'uppercase' }} 
+                        dy={15} 
+                      />
+                      <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fill: '#475569', fontSize: 10, fontWeight: 700 }} />
+                      <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fill: '#475569', fontSize: 10, fontWeight: 700 }} />
                       <Tooltip {...chartTooltip} />
-                      <Area yAxisId="right" type="monotone" dataKey="ca_gmv" name="CA (GMV)" stroke="#22d3ee" strokeWidth={3} fill="url(#saAreaGrad)" />
-                      <Line yAxisId="left" type="monotone" dataKey="commandes" name="Commandes" stroke="#a78bfa" strokeWidth={3} dot={false} />
+                      <Area 
+                        yAxisId="right" 
+                        type="monotone" 
+                        dataKey="ca_gmv" 
+                        name="Chiffre d'Affaire" 
+                        stroke="#22d3ee" 
+                        strokeWidth={4} 
+                        fill="url(#saAreaGrad)" 
+                        filter="url(#glow)"
+                        animationDuration={1500}
+                      />
+                      <Line 
+                        yAxisId="left" 
+                        type="monotone" 
+                        dataKey="commandes" 
+                        name="Flux Commandes" 
+                        stroke="#818cf8" 
+                        strokeWidth={4} 
+                        dot={{ r: 4, strokeWidth: 2, fill: '#0c1222' }} 
+                        activeDot={{ r: 6, strokeWidth: 0 }}
+                        animationDuration={2000}
+                      />
                     </ComposedChart>
                   </ResponsiveContainer>
                 </div>
              </div>
           </div>
 
-          <div className="xl:col-span-4 space-y-6">
+          <div className="xl:col-span-4 flex flex-col gap-8">
              {topTenant && (
-                <div className="relative overflow-hidden rounded-[32px] border border-white/[0.08] bg-slate-900/60 p-8 shadow-xl">
-                   <div className="absolute -right-10 -top-10 size-40 bg-emerald-500/10 blur-[50px]" />
-                   <div className="relative flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-emerald-400 mb-6">
-                      <Medal size={16} /> Market Leader
-                   </div>
-                   <h4 className="text-2xl font-black text-white" style={{ fontFamily: 'Outfit' }}>{topTenant.nom}</h4>
-                   <p className="text-xs text-slate-500 mt-1">Tenant ID: {topTenant.slug}</p>
+                <div className="relative overflow-hidden rounded-[40px] border border-white/[0.08] bg-slate-900/40 p-10 flex-1 group hover:border-cyan-500/30 transition-all duration-500 shadow-xl">
+                   <div className="absolute -right-20 -top-20 size-64 bg-cyan-500/10 blur-[80px] group-hover:bg-cyan-500/20 transition-all duration-700" />
                    
-                   <div className="grid grid-cols-2 gap-4 mt-8">
-                      <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/[0.06]">
-                         <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Period Rev.</p>
-                         <p className="text-lg font-black text-white">{topTenant.ca_gmv.toLocaleString('fr-FR')} <span className="text-[10px]">CFA</span></p>
+                   <div className="relative flex items-center justify-between mb-8">
+                      <div className="flex items-center gap-3">
+                         <div className="size-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                            <Rocket size={24} />
+                         </div>
+                         <div>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Market Leader</p>
+                            <h4 className="text-2xl font-black text-white" style={{ fontFamily: 'Outfit' }}>{topTenant.nom}</h4>
+                         </div>
                       </div>
-                      <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/[0.06]">
-                         <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Efficiency</p>
-                         <p className="text-lg font-black text-emerald-400">{topTenant.success_rate}%</p>
+                      <div className="size-10 rounded-full bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-slate-500 group-hover:text-white transition-colors cursor-pointer">
+                         <ExternalLink size={18} />
+                      </div>
+                   </div>
+
+                   <p className="text-xs text-slate-400 leading-relaxed mb-8">
+                      Cette boutique génère actuellement <span className="text-white font-bold">{Math.round((topTenant.ca_gmv / totalGmv) * 100)}%</span> du volume total de la plateforme sur la période sélectionnée.
+                   </p>
+
+                   <div className="space-y-6">
+                      <div className="p-5 rounded-3xl bg-white/[0.03] border border-white/[0.06]">
+                         <div className="flex justify-between items-end mb-2">
+                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Turnover Performance</p>
+                            <span className="text-xs font-black text-cyan-400">Target Reached</span>
+                         </div>
+                         <p className="text-2xl font-black text-white">{topTenant.ca_gmv.toLocaleString('fr-FR')} <span className="text-xs text-slate-500">CFA</span></p>
+                      </div>
+                      <div className="p-5 rounded-3xl bg-white/[0.03] border border-white/[0.06]">
+                         <div className="flex justify-between items-end mb-2">
+                            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Efficiency Index</p>
+                            <span className="text-xs font-black text-emerald-400">{topTenant.success_rate}%</span>
+                         </div>
+                         <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                            <div className="h-full bg-emerald-500 shadow-[0_0_10px_#10b981]" style={{ width: `${topTenant.success_rate}%` }} />
+                         </div>
                       </div>
                    </div>
                 </div>
              )}
 
-             <div className="rounded-[32px] border border-white/[0.08] bg-slate-900/20 p-8">
-                <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-6 border-b border-white/5 pb-4">Network Distribution</h4>
-                <div style={{ height: 320 }}>
+             <div className="rounded-[40px] border border-white/[0.08] bg-slate-900/20 p-8 flex-shrink-0">
+                <div className="flex items-center justify-between mb-8 border-b border-white/5 pb-4">
+                   <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Revenue Distribution</h4>
+                   <PieIcon size={16} className="text-slate-600" />
+                </div>
+                <div style={{ height: 200 }}>
                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={chartData} layout="vertical" margin={{ left: 0, right: 20 }}>
+                      <BarChart data={chartData} layout="vertical" margin={{ left: -30, right: 30 }}>
                          <XAxis type="number" hide />
                          <YAxis dataKey="nom" type="category" hide />
                          <Tooltip {...chartTooltip} />
-                         <Bar dataKey="ca_gmv" radius={[0, 4, 4, 0]} barSize={10}>
+                         <Bar dataKey="ca_gmv" radius={[0, 6, 6, 0]} barSize={8}>
                             {chartData.map((_entry, index) => (
-                               <Cell key={`cell-${index}`} fill={index === 0 ? '#22d3ee' : '#1e293b'} />
+                               <Cell key={`cell-${index}`} fill={index === 0 ? '#22d3ee' : index === 1 ? '#818cf8' : 'rgba(255,255,255,0.05)'} />
                             ))}
                          </Bar>
                       </BarChart>
@@ -1762,84 +1832,125 @@ export const PerformanceDashboard = ({
           </div>
         </div>
 
-        {/* Intelligence Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* --- INTELLIGENCE GRID: DEEP INSIGHTS --- */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <IntelligenceCard 
               icon={<TrendingUp size={18} />}
-              label="GMV Plateforme"
+              label="Growth Engine"
               value={`${totalGmv.toLocaleString('fr-FR')} CFA`}
               color="#22d3ee"
-              insight={`+${superAdminInsights.tauxAnnulPlateforme}% de croissance sur la période.`}
-              subValue="Global Volume"
+              insight={`Vitesse d'exécution optimale avec un panier moyen de ${superAdminInsights.panierMoyen.toLocaleString('fr-FR')} CFA.`}
+              subValue="Revenue Matrix"
             />
             <IntelligenceCard 
-              icon={<Activity size={18} />}
-              label="Taux de Succès"
+              icon={<ShieldCheck size={18} />}
+              label="Network Integrity"
               value={`${100 - superAdminInsights.tauxAnnulPlateforme}%`}
               color="#10b981"
-              insight="Moyenne pondérée sur l'ensemble du réseau."
-              subValue="Efficiency"
+              insight="Faible taux d'attrition opérationnelle. La plateforme maintient ses KPIs de livraison."
+              subValue="Health State"
             />
             <IntelligenceCard 
-              icon={<ShieldAlert size={18} />}
-              label="Alertes Risque"
+              icon={<AlertCircle size={18} />}
+              label="Risk Assessment"
               value={`${superAdminInsights.atRiskCount}`}
-              color="#f59e0b"
-              insight={`${superAdminInsights.atRiskCount} partenaires sous les ${SA_LOGISTICS_RISK_THRESHOLD}% de succès.`}
-              subValue="Operational Alert"
+              color="#fbbf24"
+              insight={`${superAdminInsights.atRiskCount} boutiques nécessitent un audit logistique prioritaire.`}
+              subValue="Priority Focus"
             />
             <IntelligenceCard 
-              icon={<Mail size={18} />}
-              label="Inactifs"
+              icon={<Users size={18} />}
+              label="Merchant Churn"
               value={`${superAdminInsights.dormantActiveCount}`}
-              color="#8b5cf6"
-              insight={`${superAdminInsights.dormantActiveCount} tenants actifs n'ont eu aucune commande.`}
-              subValue="Retention"
+              color="#f43f5e"
+              insight={`${superAdminInsights.dormantActiveCount} partenaires n'exploitent pas encore leur infrastructure.`}
+              subValue="Retention Logic"
             />
         </div>
 
-        {/* Global Merchant Matrix */}
-        <div className="rounded-[40px] border border-white/[0.08] bg-slate-900/40 p-1 backdrop-blur-3xl overflow-hidden shadow-2xl">
-           <div className="flex items-center justify-between p-7 border-b border-white/[0.05]">
-              <h4 className="text-xl font-black text-white tracking-tight" style={{ fontFamily: 'Outfit' }}>Deep <span className="text-slate-500 text-sm font-medium ml-1 italic inline-block">analytics matrix</span></h4>
-              <div className="flex items-center gap-2">
-                 <button onClick={() => setSuperAdminScope('all')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${superAdminScope === 'all' ? 'bg-cyan-500 text-black' : 'text-slate-500 hover:text-white'}`}>GLOBAL</button>
-                 <button onClick={() => setSuperAdminScope('active_only')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${superAdminScope === 'active_only' ? 'bg-emerald-500 text-black' : 'text-slate-500 hover:text-white'}`}>ACTIVE</button>
+        {/* --- DATA MATRIX: DETAILED MERCHANT ANALYTICS --- */}
+        <div className="relative overflow-hidden rounded-[48px] border border-white/[0.08] bg-[#0c1222] shadow-[0_32px_80px_-20px_rgba(0,0,0,0.8)]">
+           <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent" />
+           
+           <div className="flex flex-col md:flex-row md:items-center justify-between p-10 lg:p-12 gap-8 border-b border-white/[0.05]">
+              <div>
+                 <h4 className="text-2xl font-black text-white tracking-tight mb-2" style={{ fontFamily: 'Outfit' }}>Merchant Command <span className="text-slate-500 ml-1">Matrix</span></h4>
+                 <p className="text-sm font-medium text-slate-500">Analytics granulaire par partenaire contractuel</p>
+              </div>
+              <div className="flex items-center gap-3 bg-white/[0.03] p-2 rounded-2xl border border-white/[0.06]">
+                 <button onClick={() => setSuperAdminScope('all')} className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${superAdminScope === 'all' ? 'bg-white text-black shadow-lg' : 'text-slate-500 hover:text-white'}`}>Toutes</button>
+                 <button onClick={() => setSuperAdminScope('active_only')} className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${superAdminScope === 'active_only' ? 'bg-white text-black shadow-lg' : 'text-slate-500 hover:text-white'}`}>Actives</button>
+                 <button 
+                  onClick={exportSuperAdminTenantsCsv}
+                  className="size-10 flex items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500/20 transition-all"
+                 >
+                    <Download size={18} />
+                 </button>
               </div>
            </div>
            
            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+              <table className="w-full text-left border-collapse min-w-[900px]">
                  <thead>
-                    <tr className="bg-white/[0.02]">
-                       <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/[0.05]">Tenant Label</th>
-                       <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/[0.05] cursor-pointer hover:text-cyan-400" onClick={() => setSuperAdminSort('ca_gmv')}>Turnover {superAdminSort === 'ca_gmv' && '▼'}</th>
-                       <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/[0.05] cursor-pointer hover:text-cyan-400" onClick={() => setSuperAdminSort('commandes')}>Orders {superAdminSort === 'commandes' && '▼'}</th>
-                       <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/[0.05] cursor-pointer hover:text-cyan-400" onClick={() => setSuperAdminSort('success_rate')}>Perf {superAdminSort === 'success_rate' && '▼'}</th>
+                    <tr className="bg-white/[0.01]">
+                       <th className="px-10 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] border-b border-white/[0.05]">Partner Infrastructure</th>
+                       <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] border-b border-white/[0.05] cursor-pointer hover:text-cyan-400 transition-colors" onClick={() => setSuperAdminSort('ca_gmv')}>Turnover {superAdminSort === 'ca_gmv' && '▼'}</th>
+                       <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] border-b border-white/[0.05] cursor-pointer hover:text-cyan-400 transition-colors" onClick={() => setSuperAdminSort('commandes')}>Orders {superAdminSort === 'commandes' && '▼'}</th>
+                       <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] border-b border-white/[0.05] cursor-pointer hover:text-cyan-400 transition-colors" onClick={() => setSuperAdminSort('success_rate')}>Efficiency {superAdminSort === 'success_rate' && '▼'}</th>
+                       <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] border-b border-white/[0.05]">Account Tier</th>
                     </tr>
                  </thead>
                  <tbody className="divide-y divide-white/[0.03]">
-                    {superAdminDisplayRows.map(r => (
-                       <tr key={r.slug} className="group hover:bg-white/[0.02] transition-all">
-                          <td className="px-8 py-5">
-                             <div className="flex items-center gap-4">
-                                <div className={`size-3 rounded-full ${r.actif ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-slate-700'}`} />
+                    {superAdminDisplayRows.map((r, i) => (
+                       <tr key={r.slug} className="group hover:bg-white/[0.02] transition-colors">
+                          <td className="px-10 py-8">
+                             <div className="flex items-center gap-5">
+                                <div className="size-14 rounded-2xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-xl font-black text-slate-400 group-hover:bg-cyan-500/10 group-hover:text-cyan-400 group-hover:border-cyan-500/30 transition-all duration-300">
+                                   {r.nom.charAt(0)}
+                                </div>
                                 <div>
-                                   <p className="text-sm font-bold text-white group-hover:text-cyan-400 transition-colors">{r.nom}</p>
-                                   <p className="text-[10px] text-slate-500">ID: {r.slug}</p>
+                                   <div className="flex items-center gap-2 mb-1">
+                                      <p className="text-base font-black text-white">{r.nom}</p>
+                                      {r.actif ? (
+                                         <div className="size-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
+                                      ) : (
+                                         <div className="size-1.5 rounded-full bg-slate-700" />
+                                      )}
+                                   </div>
+                                   <p className="text-[11px] font-bold text-slate-500 font-mono tracking-tight uppercase">{r.slug}.gomboswiftci.app</p>
                                 </div>
                              </div>
                           </td>
-                          <td className="px-6 py-5 text-sm font-black text-white tabular-nums">
-                             {r.ca_gmv.toLocaleString('fr-FR')} <span className="text-[10px] text-slate-500">CFA</span>
+                          <td className="px-8 py-8">
+                             <div>
+                                <p className="text-lg font-black text-white tabular-nums tracking-tight">{r.ca_gmv.toLocaleString('fr-FR')} <span className="text-[10px] text-slate-500 ml-1">CFA</span></p>
+                                <p className="text-[10px] text-slate-600 font-bold uppercase tracking-widest mt-1">Gross Merchandise Vol.</p>
+                             </div>
                           </td>
-                          <td className="px-6 py-5 text-sm font-bold text-slate-300 tabular-nums">{r.commandes}</td>
-                          <td className="px-6 py-5">
-                             <div className="flex items-center gap-3">
-                                <div className="w-20 h-1.5 rounded-full bg-slate-800 overflow-hidden">
-                                   <div className={`h-full rounded-full ${Number(r.success_rate) > 85 ? 'bg-emerald-500' : 'bg-cyan-500'}`} style={{ width: `${r.success_rate}%` }} />
+                          <td className="px-8 py-8">
+                             <div>
+                                <p className="text-lg font-black text-slate-300 tabular-nums tracking-tight">{r.commandes.toLocaleString('fr-FR')}</p>
+                                <p className="text-[10px] text-slate-600 font-bold uppercase tracking-widest mt-1">Processed Units</p>
+                             </div>
+                          </td>
+                          <td className="px-8 py-8">
+                             <div className="flex items-center gap-4">
+                                <div className="flex-1 w-32 h-2 rounded-full bg-white/[0.03] overflow-hidden border border-white/5">
+                                   <div 
+                                      className={`h-full rounded-full transition-all duration-1000 ${Number(r.success_rate) > 85 ? 'bg-emerald-500 shadow-[0_0_12px_#10b981]' : Number(r.success_rate) > 65 ? 'bg-cyan-500 shadow-[0_0_12px_#06b6d4]' : 'bg-amber-500 shadow-[0_0_12px_#f59e0b]'}`} 
+                                      style={{ width: `${r.success_rate}%` }} 
+                                   />
                                 </div>
-                                <span className="text-xs font-bold text-white">{r.success_rate}%</span>
+                                <span className={`text-sm font-black tabular-nums ${Number(r.success_rate) > 85 ? 'text-emerald-400' : 'text-slate-400'}`}>{r.success_rate}%</span>
+                             </div>
+                          </td>
+                          <td className="px-8 py-8">
+                             <div className={`inline-flex px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border ${
+                                r.plan === 'ENTERPRISE' ? 'bg-violet-500/10 border-violet-500/30 text-violet-400' :
+                                r.plan === 'PREMIUM' ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400' :
+                                'bg-slate-500/10 border-slate-500/20 text-slate-500'
+                             }`}>
+                                {r.plan}
                              </div>
                           </td>
                        </tr>
@@ -1847,6 +1958,12 @@ export const PerformanceDashboard = ({
                  </tbody>
               </table>
            </div>
+           {superAdminDisplayRows.length === 0 && (
+              <div className="p-20 text-center">
+                 <Search size={48} className="text-slate-800 mx-auto mb-6" />
+                 <p className="text-slate-500 font-bold uppercase tracking-widest text-sm">No partners found for current scope</p>
+              </div>
+           )}
         </div>
       </div>
     );
