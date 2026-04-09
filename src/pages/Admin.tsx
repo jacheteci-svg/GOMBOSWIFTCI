@@ -674,7 +674,7 @@ const SubscriptionManager = ({ showToast, tenant }: { showToast: any, tenant: an
       const [plansRes, contextRes, txRes] = await Promise.all([
         insforge.database.from('saas_plans').select('*').order('price_fcfa', { ascending: true }),
         insforge.database.rpc('get_tenant_billing_context', { t_id: tenant.id }),
-        insforge.database.from('moneroo_transactions').select('*').eq('tenant_id', tenant.id).order('created_at', { descending: true }).limit(5)
+        insforge.database.from('moneroo_transactions').select('*').eq('tenant_id', tenant.id).order('created_at', { ascending: false }).limit(5)
       ]);
 
       if (plansRes.error) throw plansRes.error;
@@ -919,8 +919,13 @@ const SubscriptionManager = ({ showToast, tenant }: { showToast: any, tenant: an
                     {isCurrent ? 'FORFAIT ACTUEL' : 'S\'ABONNER MAINTENANT'}
                   </button>
                 </div>
-      <div className="card" style={{ marginTop: '3rem', padding: '2rem', background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)', textAlign: 'center' }}>
-        <p style={{ fontWeight: 600, color: '#94a3b8', margin: 0 }}>Besoin d'un plan custom (Multi-entrepôts, White-label) ? 📧 Contactez support@gomboswiftci.com</p>
+              );
+           })}
+        </div>
+
+        <div className="card" style={{ marginTop: '3rem', padding: '2rem', background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)', textAlign: 'center', borderRadius: '24px' }}>
+          <p style={{ fontWeight: 600, color: '#94a3b8', margin: 0 }}>Besoin d'un plan custom (Multi-entrepôts, White-label) ? 📧 Contactez support@gomboswiftci.com</p>
+        </div>
       </div>
     </div>
   );
