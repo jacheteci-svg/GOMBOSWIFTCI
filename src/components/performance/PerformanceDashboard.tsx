@@ -59,6 +59,15 @@ import {
   Globe,
   PieChart as PieIcon,
   ShieldAlert,
+  ShieldCheck,
+  Eye,
+  Power,
+  X,
+  Search,
+  Send,
+  CreditCard,
+  Plus,
+  Rocket,
 } from 'lucide-react';
 
 type TabType = 'logistique' | 'call-center' | 'inventaire';
@@ -677,203 +686,6 @@ export const PerformanceDashboard = ({
     });
     downloadCsv(`performance-boutiques-${stamp}-${filter}.csv`, h, lines);
   }, [superAdminDisplayRows, filter]);
-
-  const staffKpiBundle = useMemo(() => {
-    if (isSuperAdmin) return null;
-    const log = logisticsSorted;
-    const cc = callCenterSorted;
-    const inv = inventorySorted;
-
-    const logSorties = log.reduce((a, s: any) => a + (Number(s.sorties) || 0), 0);
-    const logReuss = log.reduce((a, s: any) => a + (Number(s.reussies) || 0), 0);
-    const logAvg = logSorties > 0 ? Math.round((logReuss / logSorties) * 100) : 0;
-    const logCa = log.reduce((a, s: any) => a + (Number(s.ca_frais) || 0), 0);
-
-    const ccTh = cc.reduce((a, s: any) => a + (Number(s.total_handled) || 0), 0);
-    const ccTd = cc.reduce((a, s: any) => a + (Number(s.total_delivered) || 0), 0);
-    const ccVal = cc.reduce((a, s: any) => a + (Number(s.total_validations) || 0), 0);
-    const ccAvg = ccTh > 0 ? Math.round((ccTd / ccTh) * 100) : 0;
-
-    const invN = inv.length;
-    const invAlert = inv.filter((i: any) => i.stock_actuel <= (i.stock_minimum || 5)).length;
-    const invRotAvg =
-      invN > 0
-        ? Math.round(inv.reduce((a, i: any) => a + (Number(i.rotation_index) || 0), 0) / invN)
-        : 0;
-    const invCrit = inv.filter((i: any) => (Number(i.stock_actuel) || 0) <= 0).length;
-
-    const staffInv = inventoryStaffSorted;
-    const staffTotalP = staffInv.reduce((a, r) => a + r.produits_crees, 0);
-    const staffContributors = staffInv.filter((r) => r.produits_crees > 0).length;
-    const staffAvgPer = staffInv.length > 0 ? (staffTotalP / staffInv.length).toFixed(1) : '0';
-    const staffTop = staffInv[0];
-
-    const inventaireKpisEmbedded = [
-      {
-        key: 'tot',
-        label: 'Produits créés',
-        value: staffTotalP.toLocaleString('fr-FR'),
-        sub: 'Total sur la période',
-        accent: 'cyan' as const,
-        Icon: Package,
-      },
-      {
-        key: 'contrib',
-        label: 'Contributeurs',
-        value: String(staffContributors),
-        sub: 'Avec au moins une création',
-        accent: 'emerald' as const,
-        Icon: Users,
-      },
-      {
-        key: 'avg',
-        label: 'Moy. / collaborateur',
-        value: staffAvgPer,
-        sub: 'Moyenne arithmétique',
-        accent: 'violet' as const,
-        Icon: TrendingUp,
-      },
-      {
-        key: 'top',
-        label: 'Meilleur volume',
-        value: staffTop ? String(staffTop.produits_crees) : '—',
-        sub: staffTop
-          ? staffTop.staff_name.length > 28
-            ? `${staffTop.staff_name.slice(0, 28)}…`
-            : staffTop.staff_name
-          : '—',
-        accent: 'amber' as const,
-        Icon: Medal,
-      },
-    ];
-
-    const inventaireKpisFull = [
-      {
-        key: 'refs',
-        label: 'Références',
-        value: invN.toLocaleString('fr-FR'),
-        sub: 'Articles suivis',
-        accent: 'cyan' as const,
-        Icon: Package,
-      },
-      {
-        key: 'alert',
-        label: 'Alertes stock',
-        value: invAlert.toLocaleString('fr-FR'),
-        sub: 'Sous le seuil minimum',
-        accent: 'amber' as const,
-        Icon: Lightbulb,
-      },
-      {
-        key: 'rot',
-        label: 'Rotation moy.',
-        value: (
-          <span>
-            {invRotAvg}
-            <span className="text-cyan-400/90">%</span>
-          </span>
-        ),
-        sub: 'Indice moyen sur le catalogue',
-        accent: 'violet' as const,
-        Icon: TrendingUp,
-      },
-      {
-        key: 'rupt',
-        label: 'Ruptures',
-        value: invCrit.toLocaleString('fr-FR'),
-        sub: 'Stock à zéro',
-        accent: 'rose' as const,
-        Icon: Target,
-      },
-    ];
-
-    return {
-      logistique: [
-        {
-          key: 'sorties',
-          label: 'Sorties',
-          value: logSorties.toLocaleString('fr-FR'),
-          sub: 'Missions sur la période',
-          accent: 'cyan' as const,
-          Icon: Truck,
-        },
-        {
-          key: 'livrés',
-          label: 'Livrés',
-          value: logReuss.toLocaleString('fr-FR'),
-          sub: 'Colis délivrés avec succès',
-          accent: 'emerald' as const,
-          Icon: Target,
-        },
-        {
-          key: 'taux',
-          label: 'Taux succès',
-          value: (
-            <span>
-              {logAvg}
-              <span className="text-cyan-400/90">%</span>
-            </span>
-          ),
-          sub: 'Moyenne équipe (pondérée)',
-          accent: 'violet' as const,
-          Icon: TrendingUp,
-        },
-        {
-          key: 'ca',
-          label: 'Gains livreurs',
-          value: (
-            <span className="text-[1.15rem] sm:text-2xl">
-              {logCa.toLocaleString('fr-FR')}{' '}
-              <span className="text-xs font-semibold text-slate-400">CFA</span>
-            </span>
-          ),
-          sub: 'CA frais sur livraisons',
-          accent: 'amber' as const,
-          Icon: Banknote,
-        },
-      ],
-      'call-center': [
-        {
-          key: 'dossiers',
-          label: 'Dossiers',
-          value: ccTh.toLocaleString('fr-FR'),
-          sub: 'Traités par les agents',
-          accent: 'cyan' as const,
-          Icon: PhoneCall,
-        },
-        {
-          key: 'valid',
-          label: 'Validations',
-          value: ccVal.toLocaleString('fr-FR'),
-          sub: 'Validations enregistrées',
-          accent: 'violet' as const,
-          Icon: Activity,
-        },
-        {
-          key: 'livr',
-          label: 'Livrées',
-          value: ccTd.toLocaleString('fr-FR'),
-          sub: 'Commandes finalisées',
-          accent: 'emerald' as const,
-          Icon: Package,
-        },
-        {
-          key: 'conv',
-          label: 'Conversion',
-          value: (
-            <span>
-              {ccAvg}
-              <span className="text-cyan-400/90">%</span>
-            </span>
-          ),
-          sub: 'Moyenne centre d’appel',
-          accent: 'amber' as const,
-          Icon: TrendingUp,
-        },
-      ],
-      inventaire: moduleChrome ? inventaireKpisEmbedded : inventaireKpisFull,
-    };
-  }, [isSuperAdmin, moduleChrome, logisticsSorted, callCenterSorted, inventorySorted, inventoryStaffSorted]);
 
   const renderLogistics = () => {
     const data = logisticsSorted;
