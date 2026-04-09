@@ -238,61 +238,79 @@ const OverviewTab = ({ stats, tenants, currentUser }: { stats: any, tenants: Ten
         </div>
 
         {/* Growth Area Chart */}
-        <div className="gombo-card-elite">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <h4 style={{ margin: 0, fontWeight: 900, fontSize: '1.1rem' }}>Croissance Réseau (30 jours)</h4>
-            <span style={{ fontSize: '0.8rem', color: '#06b6d4', fontWeight: 800, background: 'rgba(6,182,212,0.1)', padding: '4px 10px', borderRadius: '8px' }}>+ 5.27%</span>
+      {/* SECTION 2: MERCHANT HEALTH MATRIX & GROWTH */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem', marginBottom: '2.5rem' }}>
+        {/* Activity Gauge */}
+        <div className="gombo-card-elite px-10 py-12 flex flex-col items-center justify-center">
+          <h4 style={{ margin: '0 0 2rem 0', fontWeight: 950, color: '#f8fafc', fontSize: '1.1rem', letterSpacing: '-0.02em', width: '100%', textAlign: 'left' }}>Platform Activity Flux</h4>
+          <div style={{ position: 'relative', width: '200px', height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+             <svg width="200" height="200" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="6" />
+                <circle cx="50" cy="50" r="45" fill="none" stroke="#06b6d4" strokeWidth="8" strokeDasharray={`${(activeTenants / Math.max(totalTenants, 1)) * 283}, 283`} strokeLinecap="round" style={{ transform: 'rotate(-90deg)', transformOrigin: '50% 50%', filter: 'drop-shadow(0 0 8px rgba(6,182,212,0.4))' }} />
+             </svg>
+             <div style={{ position: 'absolute', textAlign: 'center' }}>
+                <div style={{ fontSize: '2.8rem', fontWeight: 950, color: 'white' }}>{Math.round((activeTenants / Math.max(totalTenants, 1)) * 100)}%</div>
+                <div style={{ fontSize: '0.7rem', color: '#06b6d4', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.15em' }}>Health Index</div>
+             </div>
           </div>
-          <div style={{ height: '220px' }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={stats.growth_chart || []}>
-                <defs>
-                  <linearGradient id="gomboGrowth" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.03)" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12, fontWeight: 800}} />
-                <YAxis hide />
-                <Tooltip contentStyle={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }} />
-                <Area type="monotone" dataKey="val" stroke="#06b6d4" strokeWidth={4} fill="url(#gomboGrowth)" />
-              </AreaChart>
-            </ResponsiveContainer>
+          <div style={{ display: 'flex', gap: '1.5rem', marginTop: '2.5rem', width: '100%' }}>
+             <div style={{ flex: 1, textAlign: 'center', padding: '1rem', background: 'rgba(16,185,129,0.05)', borderRadius: '16px', border: '1px solid rgba(16,185,129,0.1)' }}>
+                <div style={{ fontSize: '1.4rem', fontWeight: 950, color: '#10b981' }}>{activeTenants}</div>
+                <div style={{ fontSize: '0.6rem', color: '#10b981', fontWeight: 900, textTransform: 'uppercase' }}>Active Units</div>
+             </div>
+             <div style={{ flex: 1, textAlign: 'center', padding: '1rem', background: 'rgba(239,68,68,0.05)', borderRadius: '16px', border: '1px solid rgba(239,68,68,0.1)' }}>
+                <div style={{ fontSize: '1.4rem', fontWeight: 950, color: '#ef4444' }}>{inactiveTenants}</div>
+                <div style={{ fontSize: '0.6rem', color: '#ef4444', fontWeight: 900, textTransform: 'uppercase' }}>Quarantine</div>
+             </div>
           </div>
+        </div>
+
+        {/* Merchant Success Matrix */}
+        <div className="gombo-card-elite px-10 py-12">
+          <div className="flex items-center justify-between mb-8">
+            <h4 style={{ margin: 0, fontWeight: 950, color: '#f8fafc', fontSize: '1.1rem', letterSpacing: '-0.02em' }}>Merchant Health Matrix</h4>
+            <div className="flex items-center gap-2">
+               <HeartPulse size={16} className="text-pink-500" />
+               <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">N-AI Pulse</span>
+            </div>
+          </div>
+          
+          <div className="space-y-6">
+             {[
+               { label: 'Growth Engines', count: tenants.filter(t => t.plan === 'PREMIUM' || t.plan === 'ELITE').length, color: '#6366f1', sub: 'High Volume Operations' },
+               { label: 'Healthy Baseline', count: tenants.filter(t => (t.plan === 'BASIC' || t.plan === 'FREE') && t.actif).length, color: '#10b981', sub: 'Stable Daily Transactions' },
+               { label: 'Critical / Churn Risk', count: inactiveTenants, color: '#f59e0b', sub: 'Low Engagement Signal' }
+             ].map((tier, i) => (
+                <div key={i} className="group cursor-pointer">
+                   <div className="flex items-end justify-between mb-3">
+                      <div>
+                         <div className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">{tier.label}</div>
+                         <div className="text-[10px] font-bold text-slate-500">{tier.sub}</div>
+                      </div>
+                      <div className="text-xl font-black text-white">{tier.count}</div>
+                   </div>
+                   <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full transition-all duration-1000" 
+                        style={{ 
+                          width: `${(tier.count / Math.max(totalTenants, 1)) * 100}%`,
+                          background: tier.color,
+                          boxShadow: `0 0 12px ${tier.color}40`
+                        }} 
+                      />
+                   </div>
+                </div>
+             ))}
+          </div>
+
+          <button 
+             onClick={() => navigate('/super-admin/tenants')}
+             className="w-full mt-10 py-4 rounded-xl border border-white/5 bg-white/[0.02] text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:bg-white/[0.05] hover:text-white transition-all"
+          >
+             View Segmentation Details
+          </button>
         </div>
       </div>
-
-      {/* SECTION 2: GRID OF METRICS */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
-        {/* Activity Gauge */}
-        <div className="gombo-card-elite" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          <h4 style={{ margin: '0 0 2rem 0', fontWeight: 900, color: '#f8fafc', width: '100%' }}>Statut des Clients (Tenants)</h4>
-          <div style={{ position: 'relative', width: '180px', height: '180px' }}>
-             <svg width="180" height="180" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="6" />
-                <circle cx="50" cy="50" r="45" fill="none" stroke="#10b981" strokeWidth="8" strokeDasharray={`${(activeTenants / Math.max(totalTenants, 1)) * 283}, 283`} strokeLinecap="round" style={{ transform: 'rotate(-90deg)', transformOrigin: '50% 50%' }} />
-             </svg>
-             <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
-                <div style={{ fontSize: '2.2rem', fontWeight: 950 }}>{Math.round((activeTenants / Math.max(totalTenants, 1)) * 100)}%</div>
-                <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 800 }}>TAUX D'ACTIVITÉ</div>
-             </div>
-          </div>
-          <div style={{ display: 'flex', gap: '1.5rem', marginTop: '2rem', width: '100%' }}>
-             <div style={{ flex: 1, textAlign: 'center' }}>
-                <div style={{ fontSize: '1.2rem', fontWeight: 950, color: '#10b981' }}>{activeTenants}</div>
-                <div style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 800 }}>ACTIFS</div>
-             </div>
-             <div style={{ flex: 1, textAlign: 'center' }}>
-                <div style={{ fontSize: '1.2rem', fontWeight: 950, color: '#ef4444' }}>{inactiveTenants}</div>
-                <div style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 800 }}>SUSPENDUS</div>
-             </div>
-             <div style={{ flex: 1, textAlign: 'center' }}>
-                <div style={{ fontSize: '1.2rem', fontWeight: 950 }}>{totalTenants}</div>
-                <div style={{ fontSize: '0.65rem', color: '#94a3b8', fontWeight: 800 }}>TOTAL</div>
-             </div>
-          </div>
-        </div>
 
         {/* User and Order Stats */}
         <div style={{ display: 'grid', gridTemplateRows: '1fr 1fr', gap: '1.5rem' }}>
@@ -1169,18 +1187,21 @@ const SupportTab = () => {
   const [loading, setLoading] = useState(true);
   const { showToast } = useToast();
 
+  const fetchTickets = async () => {
+    setLoading(true);
+    try {
+      const { data } = await insforge.database.from('support_tickets').select('*, tenants(nom)').order('created_at', { ascending: false });
+      setTickets(data || []);
+    } catch (e) {
+      showToast("Erreur lors du chargement des tickets.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchTickets = async () => {
-       const { data } = await insforge.database.from('support_tickets').select('*, tenants(nom)').order('created_at', { ascending: false });
-       setTickets(data || []);
-       setLoading(false);
-    };
     fetchTickets();
   }, []);
-
-  const handleApply = (id: string) => {
-     showToast(`Signalement ${id.slice(0,5)} en cours de traitement...`, 'info');
-  };
 
   return (
     <div style={{ animation: 'fadeIn 0.3s ease' }}>
@@ -1189,16 +1210,44 @@ const SupportTab = () => {
           {loading ? <div className="spinner"></div> : (
              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '1.5rem' }}>
                 {tickets.length === 0 ? <div style={{ color: '#64748b' }}>Aucune requête en attente.</div> : tickets.map(ticket => (
-                  <div key={ticket.id} className="gombo-card" style={{ borderLeft: `4px solid ${ticket.priority === 'HIGH' ? '#f43f5e' : 'var(--primary)'}` }}>
-                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                        <span style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b' }}>ID: {ticket.id.slice(0,8).toUpperCase()}</span>
-                        <div className="gombo-badge">{ticket.status}</div>
+                  <div key={ticket.id} className="gombo-card-elite p-8 border border-white/5 hover:border-white/10 transition-all">
+                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                        <div className="flex items-center gap-2">
+                           <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Ticket ID: {ticket.id.slice(0,8).toUpperCase()}</span>
+                        </div>
+                        <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${ticket.status === 'resolved' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}`}>
+                           {ticket.status}
+                        </div>
                      </div>
-                     <h4 style={{ margin: 0, fontWeight: 900, fontSize: '1.1rem', marginBottom: '0.75rem' }}>{ticket.subject}</h4>
-                     <p style={{ margin: 0, fontSize: '0.85rem', color: '#94a3b8', lineHeight: 1.5, marginBottom: '1.5rem' }}>{ticket.message}</p>
-                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)' }}>{ticket.tenants?.nom}</span>
-                        <button onClick={() => handleApply(ticket.id)} className="btn btn-primary btn-sm" style={{ padding: '0.5rem 1rem', borderRadius: '10px' }}>RÉPONDRE</button>
+                     <h4 style={{ margin: 0, fontWeight: 950, fontSize: '1.25rem', marginBottom: '1rem' }}>{ticket.subject}</h4>
+                     <p style={{ margin: 0, fontSize: '0.9rem', color: '#94a3b8', lineHeight: 1.6, marginBottom: '2rem' }}>{ticket.message}</p>
+                     
+                     <div className="pt-6 border-t border-white/5 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                           <div className="size-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 font-bold text-xs">
+                              {ticket.tenants?.nom?.charAt(0)}
+                           </div>
+                           <span style={{ fontSize: '0.85rem', fontWeight: 900, color: 'white' }}>{ticket.tenants?.nom}</span>
+                        </div>
+                        <div className="flex gap-3">
+                           <button 
+                             onClick={async () => {
+                               try {
+                                 await insforge.database.from('support_tickets').update({ status: 'resolved' }).eq('id', ticket.id);
+                                 showToast("Ticket marqué comme résolu.", "success");
+                                 fetchTickets();
+                               } catch (e) {
+                                 showToast("Erreur lors de la résolution.", "error");
+                               }
+                             }}
+                             className="px-4 py-2 border border-emerald-500/30 text-emerald-500 rounded-lg text-xs font-black uppercase tracking-widest hover:bg-emerald-500/10 transition-all"
+                           >
+                              RÉSOUDRE
+                           </button>
+                           <button onClick={() => showToast("Canal de communication direct en cours d'ouverture...", "info")} className="px-4 py-2 bg-indigo-500 text-white rounded-lg text-xs font-black uppercase tracking-widest hover:scale-105 transition-all">
+                              RÉPONDRE
+                           </button>
+                        </div>
                      </div>
                   </div>
                 ))}

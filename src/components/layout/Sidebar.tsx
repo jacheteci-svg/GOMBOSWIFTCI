@@ -26,7 +26,11 @@ import {
   Lock,
   ChevronRight,
   Building,
-  Mail
+  Mail,
+  Lighthouse,
+  Send,
+  BookOpen,
+  DollarSign
 } from 'lucide-react';
 
 interface NavItem {
@@ -128,19 +132,19 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
     {
       section: 'Gombo Management',
       items: [
-        { path: '/super-admin/overview', icon: TrendingUp, label: 'Tableau de bord Global', permission: 'SUPER_ADMIN' },
+        { path: '/super-admin/overview', icon: LayoutDashboard, label: 'Tableau de bord Global', permission: 'SUPER_ADMIN' },
         { path: '/super-admin/tenants', icon: Building, label: 'Gestion des Clients', permission: 'SUPER_ADMIN' },
-        { path: '/super-admin/performance', icon: Activity, label: 'Perf. boutiques', permission: 'SUPER_ADMIN' },
+        { path: '/super-admin/performance', icon: TrendingUp, label: 'Performance Hub', permission: 'SUPER_ADMIN' },
         { path: '/super-admin/plans', icon: Crown, label: 'Catalogue Offres', permission: 'SUPER_ADMIN' },
       ]
     },
     {
       section: 'Opérations SaaS',
       items: [
-        { path: '/super-admin/blog', icon: Package, label: 'Gestion du Blog', permission: 'SUPER_ADMIN' },
+        { path: '/super-admin/blog', icon: BookOpen, label: 'Blog Platform', permission: 'SUPER_ADMIN' },
         { path: '/super-admin/billing', icon: DollarSign, label: 'Finance & MRR', permission: 'SUPER_ADMIN' },
+        { path: '/super-admin/broadcast', icon: Send, label: 'Mission Control', permission: 'SUPER_ADMIN' },
         { path: '/super-admin/emails', icon: Mail, label: 'Journal des Emails', permission: 'SUPER_ADMIN' },
-        { path: '/super-admin/broadcast', icon: Activity, label: 'Mission Control', permission: 'SUPER_ADMIN' },
         { path: '/super-admin/support', icon: Headset, label: 'Centre de Support', permission: 'SUPER_ADMIN' },
       ]
     },

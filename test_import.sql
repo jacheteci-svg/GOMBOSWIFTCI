@@ -1,1 +1,0 @@
-INSERT INTO blog_posts (title, slug, excerpt, content, category, author, image, published) VALUES ('Test Import', 'test-import', 'Exc', '<h2>HTML Content</h2><p>Some text here.</p>', 'Cat', 'Me', '...', true);

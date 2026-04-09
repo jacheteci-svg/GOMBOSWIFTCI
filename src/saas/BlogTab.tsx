@@ -4,8 +4,9 @@ import { useToast } from '../contexts/ToastContext';
 import { 
   FileText, Edit, Trash2, PlusCircle, Save, 
   Activity, Eye, Sparkles, LayoutDashboard, 
-  Image as ImageIcon, Globe, Zap, ChevronLeft
+  Image as ImageIcon, Globe, Zap, ChevronLeft, User, RefreshCw
 } from 'lucide-react';
+import { BLOG_POSTS } from '../pages/blog/blogData';
 
 export const BlogTab = () => {
   const [posts, setPosts] = useState<any[]>([]);
@@ -34,6 +35,36 @@ export const BlogTab = () => {
   useEffect(() => {
     fetchPosts();
   }, []);
+
+  const handleDeepSync = async () => {
+    setLoading(true);
+    try {
+      showToast("Analyse de la bibliothèque SEO Gombo...", "info");
+      let added = 0;
+      for (const localPost of BLOG_POSTS) {
+        const exists = posts.some(p => p.slug === localPost.slug);
+        if (!exists) {
+          const { error } = await insforge.database.from('blog_posts').insert({
+            title: localPost.title,
+            slug: localPost.slug,
+             excerpt: localPost.excerpt,
+             content: localPost.content,
+             category: localPost.category,
+             author: localPost.author,
+             image: localPost.image,
+             published: true
+          });
+          if (!error) added++;
+        }
+      }
+      showToast(`${added} articles synchronisés avec succès.`, "success");
+      fetchPosts();
+    } catch (err: any) {
+      showToast(err.message, "error");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleRefresh = () => {
     fetchPosts();
@@ -253,6 +284,15 @@ export const BlogTab = () => {
         </div>
         
         <div className="flex items-center gap-4">
+          <button 
+            onClick={handleDeepSync}
+            className="flex items-center gap-2 px-6 py-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 font-black text-xs uppercase tracking-widest hover:bg-indigo-500/20 transition-all"
+            title="Sychroniser avec la bibliothèque SEO"
+          >
+            <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
+            Deep Sync
+          </button>
+
           <button 
             onClick={handleRefresh}
             className="p-4 rounded-2xl bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] transition-all text-slate-400 hover:text-white"
