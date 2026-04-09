@@ -4,7 +4,7 @@ import { Tenant } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { 
   Activity, ShieldCheck, Eye, Power, X, Search, Send, 
-  CreditCard, Zap, Users, Plus, TrendingUp, Rocket, Package, User, Building
+  CreditCard, Zap, Users, Plus, TrendingUp, Rocket, Package
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useToast } from '../contexts/ToastContext';
@@ -32,6 +32,7 @@ export const SuperAdmin: React.FC = () => {
   });
 
   const { showToast } = useToast();
+  const { currentUser } = useAuth();
 
   const fetchData = async () => {
     setLoading(true);
@@ -589,6 +590,11 @@ const PlansTab = () => {
   };
 
   useEffect(() => { fetchPlans(); }, []);
+
+  const handleRefresh = () => {
+    fetchPlans();
+    showToast('Recalcul des offres SaaS...', 'info');
+  };
 
   const handleChange = (id: string, field: string, value: any) => {
     setPlans(pList => pList.map(p => p.id === id ? { ...p, [field]: value } : p));
