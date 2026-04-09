@@ -678,161 +678,157 @@ const PlansTab = () => {
 
   const MODULE_CATEGORIES = [
     {
-      title: 'CRM & Clients',
+      title: 'Logistique & Opérations',
       modules: [
         { key: 'module_crm_clients', label: 'CRM & Clients', color: '#f59e0b', icon: '👥' },
-      ]
-    },
-    {
-      title: 'Logistique & Terrain',
-      modules: [
         { key: 'module_suivi_terrain', label: 'Suivi Terrain', color: '#10b981', icon: '📍' },
         { key: 'module_logistique_pro', label: 'Logistique Pro', color: '#06b6d4', icon: '🚚' },
-        { key: 'module_staff_perf', label: 'Performance Staff', color: '#8b5cf6', icon: '🏆' },
-        { key: 'module_livraisons_app', label: 'Mes Livraisons', color: '#ec4899', icon: '📱' },
+        { key: 'module_livraisons_app', label: 'App Livraisons', color: '#ec4899', icon: '📱' },
+        { key: 'module_livreurs', label: 'Gestion Livreurs', icon: '🛵', color: '#0616d4' },
       ]
     },
     {
-      title: 'Administration & Finance',
+      title: 'Finance & Performance',
       modules: [
         { key: 'module_tresorerie_audit', label: 'Trésorerie & Audit', color: '#6366f1', icon: '🛡️' },
         { key: 'module_caisse_retour_expert', label: 'Caisse / Retour', color: '#10b981', icon: '💸' },
         { key: 'module_rapport_journalier', label: 'Rapport Journalier', color: '#3b82f6', icon: '📊' },
         { key: 'module_profit_finances', label: 'Profit & Finances', color: '#10b981', icon: '📈' },
-        { key: 'module_tresorerie_admin', label: 'Trésorerie Admin', color: '#06b6d4', icon: '💼' },
-        { key: 'module_expertise_comptable', label: 'Expertise Comptable', color: '#a855f7', icon: '🕯️' },
+        { key: 'module_staff_perf', label: 'Performance Staff', color: '#8b5cf6', icon: '🏆' },
+        { key: 'module_expertise_comptable', label: 'Expertise Comptable', icon: '🏛️', color: '#64748b' }
       ]
     },
     {
-      title: 'Technique & White label',
+      title: 'Enterprise & Scaling',
       modules: [
-        { key: 'module_api', label: 'API & Intégrations', color: '#8b5cf6', icon: '🔌' },
-        { key: 'module_whatsapp', label: 'Notifications WhatsApp', color: '#25d366', icon: '💬' },
-        { key: 'module_white_label', label: 'Logiciel White Label', color: '#f8fafc', icon: '🎨' },
+        { key: 'module_api', label: 'API Access', color: '#8b5cf6', icon: '🔌' },
+        { key: 'module_whatsapp', label: 'WhatsApp Notif.', color: '#25d366', icon: '💬' },
+        { key: 'module_multi_depot', label: 'Multi-Dépôts', icon: '🏬', color: '#f59e0b' },
+        { key: 'module_rapport_avance', label: 'Rapports Avancés', icon: '🔬', color: '#a855f7' },
+        { key: 'module_white_label', label: 'Marque Blanche', color: '#f43f5e', icon: '🎨' },
       ]
     }
   ];
 
   return (
-    <div style={{ animation: 'fadeIn 0.3s ease' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <h3 className="gombo-neon-text" style={{ margin: 0, fontWeight: 950, fontSize: '1.8rem' }}>Catalogue des Offres SaaS</h3>
-      </div>
-
-      {/* Sync Banner */}
-      <div style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '14px', padding: '1rem 1.5rem', marginBottom: '2.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <span style={{ fontSize: '1.3rem' }}>🔄</span>
+    <div style={{ animation: 'fadeIn 0.4s ease' }} className="space-y-10">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <div style={{ fontWeight: 900, color: '#10b981', fontSize: '0.85rem' }}>SYNCHRONISATION AUTOMATIQUE AVEC LA LANDING PAGE</div>
-          <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.2rem' }}>Toute modification publiée ici est immédiatement visible sur la page de tarification publique.</div>
+           <div className="flex items-center gap-2 mb-2">
+             <Zap className="text-amber-400 size-4" />
+             <span className="text-[11px] font-black uppercase tracking-[0.2em] text-cyan-400">Offer Optimization Hub</span>
+           </div>
+           <h2 className="text-4xl font-black text-white tracking-tight" style={{ fontFamily: 'Outfit' }}>
+             Plans & <span className="text-slate-500">Tiering</span>
+           </h2>
+           <p className="text-sm font-medium text-slate-500 mt-2">Configurez les offres commerciales et les limitations techniques du réseau.</p>
+        </div>
+        
+        <div className="flex items-center gap-3 px-6 py-4 rounded-[24px] bg-emerald-500/10 border border-emerald-500/20">
+           <Globe size={18} className="text-emerald-400" />
+           <div>
+              <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest leading-none">Global Sync</p>
+              <p className="text-[10px] text-emerald-500/80 mt-1 font-bold">Synchronisation en direct avec la landing page</p>
+           </div>
         </div>
       </div>
 
-      {loading ? <div className="spinner" /> : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(420px, 1fr))', gap: '2rem' }}>
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+           {[1,2,3].map(i => <div key={i} className="h-[600px] rounded-[40px] bg-slate-900/40 border border-white/[0.05] animate-pulse" />)}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8">
           {plans.map(plan => (
-            <div key={plan.id} className="gombo-card-elite" style={{
-              border: plan.is_popular ? '1px solid rgba(99,102,241,0.5)' : '1px solid rgba(255,255,255,0.05)',
-              position: 'relative'
-            }}>
+            <div key={plan.id} 
+              className={`group flex flex-col rounded-[40px] border transition-all duration-500 p-8 hover:shadow-2xl hover:shadow-black/60 ${plan.is_popular ? 'border-indigo-500/40 bg-slate-900/60' : 'border-white/[0.06] bg-slate-900/30'}`}
+              style={{ position: 'relative' }}
+            >
               {plan.is_popular && (
-                <div style={{ position: 'absolute', top: '-1px', right: '1.5rem', background: 'linear-gradient(135deg, #6366f1, #a855f7)', color: 'white', padding: '0.3rem 1rem', borderRadius: '0 0 12px 12px', fontSize: '0.65rem', fontWeight: 900 }}>
-                  ⭐ POPULAIRE
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-6 py-1.5 rounded-full bg-indigo-600 text-white text-[10px] font-black uppercase tracking-[0.2em] shadow-lg">
+                  Most Popular
                 </div>
               )}
 
-              {/* Name + Popular toggle */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <div style={{ background: `${plan.color || '#6366f1'}20`, color: plan.color || '#6366f1', padding: '0.6rem', borderRadius: '12px', border: `1px solid ${plan.color || '#6366f1'}30` }}>
-                    <Zap size={22} />
+              <div className="flex items-start justify-between mb-8">
+                <div className="flex items-center gap-4">
+                  <div className="size-14 rounded-2xl flex items-center justify-center bg-white/[0.04] border border-white/[0.1] text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-all">
+                    <Zap size={24} />
                   </div>
-                  <input
-                    type="text"
-                    value={plan.name}
-                    onChange={e => handleChange(plan.id, 'name', e.target.value)}
-                    style={{ background: 'transparent', border: 'none', color: 'white', fontWeight: 950, fontSize: '1.3rem', outline: 'none', width: '170px' }}
-                  />
-                </div>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 900, color: plan.is_popular ? '#6366f1' : '#475569' }}>
-                  <input
-                    type="checkbox"
-                    checked={!!plan.is_popular}
-                    onChange={e => handleChange(plan.id, 'is_popular', e.target.checked)}
-                    style={{ accentColor: '#6366f1' }}
-                  />
-                  POPULAIRE
-                </label>
-              </div>
-
-              {/* Description */}
-              <div style={{ marginBottom: '1.5rem' }}>
-                <label style={{ fontSize: '0.65rem', fontWeight: 900, color: '#475569', textTransform: 'uppercase', display: 'block', marginBottom: '0.5rem' }}>Description (landing page)</label>
-                <input
-                  type="text"
-                  value={plan.description || ''}
-                  onChange={e => handleChange(plan.id, 'description', e.target.value)}
-                  placeholder="Description visible sur la page tarifaire..."
-                  style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.75rem 1rem', color: '#cbd5e1', fontWeight: 700, fontSize: '0.85rem', outline: 'none', boxSizing: 'border-box' }}
-                />
-              </div>
-
-              {/* Price */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem', padding: '1.25rem', background: 'rgba(255,255,255,0.03)', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <input
-                  type="number"
-                  value={plan.price_fcfa}
-                  onChange={e => handleChange(plan.id, 'price_fcfa', parseInt(e.target.value))}
-                  style={{ background: 'transparent', border: 'none', color: '#10b981', fontWeight: 950, fontSize: '2rem', width: '100%', outline: 'none' }}
-                />
-              </div>
-
-              {/* Limits Configuration */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-                <div className="form-group">
-                  <label className="form-label" style={{ fontSize: '0.65rem', fontWeight: 950, color: '#475569', textTransform: 'uppercase' }}>Utilisateurs Max</label>
-                  <input type="number" className="form-input" value={plan.max_users || ''} placeholder="Ex: 5 (-1=illimité)" onChange={e => handleChange(plan.id, 'max_users', Number(e.target.value))} style={{ height: '44px', borderRadius: '10px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'white', padding: '0 0.75rem', fontWeight: 700 }} />
-                </div>
-                <div className="form-group">
-                  <label className="form-label" style={{ fontSize: '0.65rem', fontWeight: 950, color: '#475569', textTransform: 'uppercase' }}>Commandes / Mois</label>
-                  <input type="number" className="form-input" value={plan.max_orders_month || ''} placeholder="Ex: 50 (-1=illimité)" onChange={e => handleChange(plan.id, 'max_orders_month', Number(e.target.value))} style={{ height: '44px', borderRadius: '10px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'white', padding: '0 0.75rem', fontWeight: 700 }} />
-                </div>
-                <div className="form-group">
-                  <label className="form-label" style={{ fontSize: '0.65rem', fontWeight: 950, color: '#475569', textTransform: 'uppercase' }}>Produits Max</label>
-                  <input type="number" className="form-input" value={plan.max_products || -1} placeholder="Ex: 10 (-1=illimité)" onChange={e => handleChange(plan.id, 'max_products', Number(e.target.value))} style={{ height: '44px', borderRadius: '10px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'white', padding: '0 0.75rem', fontWeight: 700 }} />
-                </div>
-              </div>
-
-              {/* 8 Modules Grid */}
-              <div style={{ marginBottom: '2rem' }}>
-                {MODULE_CATEGORIES.map(cat => (
-                  <div key={cat.title} style={{ marginBottom: '1.5rem' }}>
-                    <div style={{ fontSize: '0.65rem', fontWeight: 900, color: '#475569', textTransform: 'uppercase', marginBottom: '0.75rem', letterSpacing: '0.1em' }}>
-                      {cat.title}
+                  <div>
+                    <input
+                      type="text"
+                      value={plan.name}
+                      onChange={e => handleChange(plan.id, 'name', e.target.value)}
+                      className="bg-transparent border-none text-white font-black text-xl focus:outline-none w-full"
+                    />
+                    <div className="flex items-center gap-2 mt-1">
+                       <input
+                        type="checkbox"
+                        id={`pop-${plan.id}`}
+                        checked={!!plan.is_popular}
+                        onChange={e => handleChange(plan.id, 'is_popular', e.target.checked)}
+                        className="size-3 accent-indigo-500"
+                      />
+                      <label htmlFor={`pop-${plan.id}`} className="text-[9px] font-black text-slate-500 uppercase tracking-widest cursor-pointer hover:text-indigo-400">Marquer comme populaire</label>
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem' }}>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-6 mb-10">
+                <div className="space-y-2">
+                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Tarification Mensuelle</label>
+                   <div className="relative">
+                      <input
+                        type="number"
+                        value={plan.price_fcfa}
+                        onChange={e => handleChange(plan.id, 'price_fcfa', parseInt(e.target.value))}
+                        className="w-full bg-white/[0.03] border border-white/[0.06] rounded-2xl px-6 py-4 text-3xl font-black text-white tabular-nums focus:outline-none focus:border-cyan-500/30 transition-all"
+                      />
+                      <span className="absolute right-6 top-5 text-sm font-black text-slate-500">FCFA / MOIS</span>
+                   </div>
+                </div>
+
+                <div className="space-y-2">
+                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Description Marketing</label>
+                   <textarea
+                      value={plan.description || ''}
+                      onChange={e => handleChange(plan.id, 'description', e.target.value)}
+                      placeholder="Description attractive..."
+                      className="w-full bg-white/[0.03] border border-white/[0.06] rounded-2xl px-4 py-3 text-xs text-slate-400 font-medium focus:outline-none min-h-[80px] resize-none"
+                    />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
+                    <p className="text-[9px] font-black text-slate-600 uppercase mb-2">Users Limit</p>
+                    <input type="number" value={plan.max_users || -1} onChange={e => handleChange(plan.id, 'max_users', Number(e.target.value))} className="w-full bg-transparent border-none text-white font-black focus:outline-none tabular-nums" />
+                  </div>
+                  <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
+                    <p className="text-[9px] font-black text-slate-600 uppercase mb-2">Orders / Month</p>
+                    <input type="number" value={plan.max_orders_month || -1} onChange={e => handleChange(plan.id, 'max_orders_month', Number(e.target.value))} className="w-full bg-transparent border-none text-white font-black focus:outline-none tabular-nums" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex-1 space-y-8 overflow-y-auto max-h-[400px] pr-2 custom-scrollbar">
+                {MODULE_CATEGORIES.map(cat => (
+                  <div key={cat.title} className="space-y-3">
+                    <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest ml-1">{cat.title}</p>
+                    <div className="grid grid-cols-1 gap-2">
                       {cat.modules.map(mod => (
                         <label
                           key={mod.key}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            padding: '0.65rem 0.85rem',
-                            background: plan[mod.key] ? `${mod.color}12` : 'rgba(255,255,255,0.02)',
-                            border: plan[mod.key] ? `1px solid ${mod.color}35` : '1px solid rgba(255,255,255,0.04)',
-                            borderRadius: '10px',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s'
-                          }}
+                          className={`flex items-center gap-3 p-3 rounded-2xl border transition-all cursor-pointer ${plan[mod.key] ? 'bg-white/[0.05] border-white/10' : 'bg-transparent border-white/[0.03] opacity-40 hover:opacity-100'}`}
                         >
-                          <span style={{ fontSize: '0.9rem' }}>{mod.icon}</span>
-                          <span style={{ fontSize: '0.72rem', fontWeight: 800, color: plan[mod.key] ? mod.color : '#475569', flex: 1, lineHeight: 1.2 }}>{mod.label}</span>
+                          <span className="text-lg">{mod.icon}</span>
+                          <span className="text-[11px] font-bold text-white flex-1">{mod.label}</span>
                           <input
                             type="checkbox"
                             checked={!!plan[mod.key]}
                             onChange={e => handleChange(plan.id, mod.key, e.target.checked)}
-                            style={{ accentColor: mod.color, width: '14px', height: '14px', flexShrink: 0 }}
+                            className="size-4 accent-indigo-500"
                           />
                         </label>
                       ))}
@@ -841,15 +837,15 @@ const PlansTab = () => {
                 ))}
               </div>
 
-              {/* Save */}
-              <button
-                onClick={() => handleSave(plan)}
-                disabled={savingId === plan.id}
-                className="btn btn-primary"
-                style={{ width: '100%', height: '52px', borderRadius: '14px', fontWeight: 950, fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
-              >
-                {savingId === plan.id ? <div className="spinner" /> : <><Send size={16} /> PUBLIER SUR LA LANDING PAGE</>}
-              </button>
+              <div className="mt-8 pt-6 border-t border-white/[0.05]">
+                <button
+                  onClick={() => handleSave(plan)}
+                  disabled={savingId === plan.id}
+                  className="w-full h-16 rounded-[20px] bg-white text-slate-950 font-black text-sm flex items-center justify-center gap-3 hover:scale-[1.02] transition-all disabled:opacity-50"
+                >
+                  {savingId === plan.id ? <Activity size={20} className="animate-spin" /> : <><Send size={18} /> PUBLIER L&apos;OFFRE</>}
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -1000,6 +996,16 @@ const BroadcastTab = ({ tenants }: { tenants: Tenant[] }) => {
 /*                               BILLING TAB                                  */
 /* -------------------------------------------------------------------------- */
 const BillingTab = ({ tenants }: { tenants: Tenant[] }) => {
+  const { showToast } = useToast();
+
+  const handleImpersonate = (tenant: any) => {
+    showToast(`Session sécurisée : Tunnel Gombo vers ${tenant.nom}...`, 'info');
+    setTimeout(() => {
+       const origin = window.location.origin;
+       window.open(`${origin}/${tenant.slug}`, '_blank');
+    }, 1500);
+  };
+
   // Calcul du MRR réel basé sur les facturations confirmées ('paid')
   const mrr = tenants.reduce((total, t) => {
     if (!t.actif || t.billing_status !== 'paid') return total;
@@ -1060,7 +1066,11 @@ const BillingTab = ({ tenants }: { tenants: Tenant[] }) => {
                             {t.plan === 'FREE' ? '0' : t.plan === 'BASIC' ? '15 000' : t.plan === 'PREMIUM' ? '30 000' : t.plan === 'ENTERPRISE' ? '75 000' : '0'} F
                          </td>
                          <td data-label="ACTIONS" style={{ textAlign: 'center' }}>
-                            <button className="gombo-card" style={{ padding: '0.4rem 0.8rem', fontSize: '0.7rem', background: 'rgba(99, 102, 241, 0.05)', border: '1px solid rgba(99, 102, 241, 0.2)', color: '#818cf8', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <button 
+                              onClick={() => handleImpersonate(t)}
+                              className="gombo-card" 
+                              style={{ padding: '0.4rem 0.8rem', fontSize: '0.7rem', background: 'rgba(99, 102, 241, 0.05)', border: '1px solid rgba(99, 102, 241, 0.2)', color: '#818cf8', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                            >
                                <Eye size={12} /> Inspecter
                             </button>
                          </td>

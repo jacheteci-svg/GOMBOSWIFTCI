@@ -1,4 +1,4 @@
-import { Menu, Home, Building } from 'lucide-react';
+import { Menu, Home, Building, User } from 'lucide-react';
 import { useLocation, Link, useParams } from 'react-router-dom';
 import { NotificationCenter } from './NotificationCenter';
 import { useAuth } from '../../contexts/AuthContext';
@@ -89,20 +89,38 @@ export const Header = ({ onMenuClick }: { onMenuClick: () => void }) => {
           }} className="text-premium">
             {getPageTitle()}
           </h2>
-          {tenantName && (
-            <span style={{ 
-              fontSize: '0.68rem', 
-              color: 'var(--primary)', 
-              fontWeight: 700, 
-              textTransform: 'uppercase', 
-              letterSpacing: '0.04em', 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '0.3rem',
-              opacity: 0.8
-            }}>
-              <Building size={9} /> {tenantName}
-            </span>
+          {location.pathname.startsWith('/super-admin') ? (
+            currentUser?.nom_complet && (
+              <span style={{ 
+                fontSize: '0.68rem', 
+                color: 'var(--primary)', 
+                fontWeight: 700, 
+                textTransform: 'uppercase', 
+                letterSpacing: '0.04em', 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '0.3rem',
+                opacity: 0.8
+              }}>
+                <User size={9} /> {currentUser.nom_complet}
+              </span>
+            )
+          ) : (
+            tenantName && (
+              <span style={{ 
+                fontSize: '0.68rem', 
+                color: 'var(--primary)', 
+                fontWeight: 700, 
+                textTransform: 'uppercase', 
+                letterSpacing: '0.04em', 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '0.3rem',
+                opacity: 0.8
+              }}>
+                <Building size={9} /> {tenantName}
+              </span>
+            )
           )}
         </div>
       </div>

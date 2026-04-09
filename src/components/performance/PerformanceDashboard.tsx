@@ -54,6 +54,10 @@ import {
   ExternalLink,
   Store,
   Percent,
+  Mail,
+  Zap,
+  Globe,
+  PieChart as PieIcon,
 } from 'lucide-react';
 
 type TabType = 'logistique' | 'call-center' | 'inventaire';
@@ -136,11 +140,44 @@ function gomboPillButtonStyle(active: boolean, color: string): CSSProperties {
     whiteSpace: 'nowrap',
     cursor: 'pointer',
     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    border: 'none',
-    background: active ? color : 'transparent',
+    border: active ? 'none' : '1px solid rgba(255,255,255,0.05)',
+    background: active ? color : 'rgba(255,255,255,0.02)',
     color: active ? 'white' : 'var(--text-muted)',
-    boxShadow: active ? `0 10px 20px ${color}44` : 'none',
+    boxShadow: active ? `0 10px 25px ${color}33` : 'none',
   };
+}
+
+function IntelligenceCard({ icon, label, value, insight, color, subValue }: { 
+  icon: any, 
+  label: string, 
+  value: string | number, 
+  insight: string, 
+  color: string,
+  subValue?: string 
+}) {
+  return (
+    <div className="relative overflow-hidden rounded-[24px] border border-white/[0.06] bg-slate-900/40 p-5 transition-all duration-300 hover:border-white/[0.12] hover:bg-slate-900/60 group">
+      <div className="absolute -right-4 -top-4 size-24 rounded-full blur-[40px] opacity-20" style={{ backgroundColor: color }} />
+      <div className="relative flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <div className="flex size-10 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.06] text-white group-hover:scale-110 transition-transform duration-300">
+            {icon}
+          </div>
+          {subValue && (
+            <span className="text-[10px] font-black tracking-widest text-slate-500 uppercase">{subValue}</span>
+          )}
+        </div>
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-500 mb-1">{label}</p>
+          <p className="text-2xl font-black text-white tracking-tight">{value}</p>
+        </div>
+        <div className="flex items-start gap-2 rounded-xl bg-white/[0.03] p-3 border border-white/[0.03]">
+          <Sparkles size={14} className="mt-0.5 shrink-0" style={{ color }} />
+          <p className="text-[11px] leading-relaxed text-slate-400 font-medium">{insight}</p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 const BTN_PRIMARY_INLINE: CSSProperties = {
@@ -1770,643 +1807,315 @@ export const PerformanceDashboard = ({
   const subtitle = "Suivez l'efficacité opérationnelle de tous les départements.";
 
   /** Vue Gombo — refonte UI : bento KPI, tableau dense, graphique GMV (couleurs natives) */
-  const renderSuperAdminTenants = () => {
-    const PIE_PX = 220;
-    const LINE_PX = 280;
-    const rowsAll = tenantRows;
-    const rows = superAdminDisplayRows;
-    const ins = superAdminInsights;
-    const totalCmd = rowsAll.reduce((a, r) => a + r.commandes, 0);
-    const totalGmv = rowsAll.reduce((a, r) => a + r.ca_gmv, 0);
-    const withActivity = rowsAll.filter((r) => r.commandes > 0).length;
-    const inactiveTenants = rowsAll.filter((r) => !r.actif).length;
-    const totalSorties = rowsAll.reduce((a, r) => a + r.sorties_terrain, 0);
-    const avgSuccPlat =
-      totalSorties > 0
-        ? Math.round(
-            rowsAll.reduce((a, r) => a + r.success_rate * r.sorties_terrain, 0) / Math.max(1, totalSorties)
-          )
-        : 0;
-
-    const chartData = [...rowsAll]
-      .filter((r) => r.ca_gmv > 0 || r.commandes > 0)
-      .sort((a, b) => b.ca_gmv - a.ca_gmv)
-      .slice(0, 12)
-      .map((r) => ({
-        nom: r.nom.length > 18 ? `${r.nom.slice(0, 18)}…` : r.nom,
-        ca: r.ca_gmv,
-      }));
-
-    const topTenant = rowsAll[0];
-    const tl = platformTimeline;
-
-    const sansCmdBoutiques = Math.max(0, rowsAll.length - withActivity);
-    /** Évite un camembert vide (0+0) côté Recharts ; si aucune boutique en base, segment gris explicite */
-    const boutiquePieData =
-      rowsAll.length === 0
-        ? [{ name: 'Aucune boutique enregistrée', value: 1, color: '#334155' }]
-        : [
-            { name: 'Avec commandes', value: withActivity, color: '#22d3ee' },
-            { name: 'Sans commande', value: sansCmdBoutiques, color: '#475569' },
-          ];
-    const concTop3Clamped = Math.min(100, Math.max(0, ins.concentrationTop3));
-    const concPieData = [
-      { name: 'Top 3 CA', value: concTop3Clamped, color: '#06b6d4' },
-      { name: 'Autres boutiques', value: Math.max(0, 100 - concTop3Clamped), color: '#1e293b' },
-    ];
-
-      return (
-      <div className="space-y-8 lg:space-y-10">
-        <div
-          className="perf-super-synth-root relative overflow-hidden rounded-2xl border border-cyan-500/25 bg-gradient-to-br from-slate-900/70 via-slate-950/80 to-[#05080f] p-4 sm:p-6 shadow-[0_24px_70px_-20px_rgba(0,0,0,0.9),0_0_0_1px_rgba(6,182,212,0.18)] ring-1 ring-cyan-400/15"
-          role="region"
-          aria-label="Synthèse plateforme"
-        >
-          <div
-            className="pointer-events-none absolute -right-24 -top-24 h-56 w-56 rounded-full bg-cyan-500/10 blur-3xl"
-            aria-hidden
-          />
-          <div
-            className="pointer-events-none absolute -left-20 bottom-0 h-40 w-40 rounded-full bg-violet-600/10 blur-3xl"
-            aria-hidden
-          />
-          <div className="relative mb-4 flex flex-col gap-3 border-b border-white/[0.07] pb-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-            <div className="flex min-w-0 flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-cyan-500/25 bg-gradient-to-br from-cyan-500/15 to-slate-900/80 text-cyan-300 shadow-inner">
-                <Target size={20} strokeWidth={2} aria-hidden />
-            </div>
-            <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">Synthèse plateforme</p>
-                <p className="mt-0.5 text-xs text-slate-500">
-                  KPI, camemberts et courbe temporelle — toujours visibles pour la période choisie
-                </p>
-            </div>
-          </div>
-              <div className="perf-super-badge-row flex-shrink-0 sm:justify-end">
-                {ins.atRiskCount > 0 ? (
-                  <span
-                    className="inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-100"
-                    title={`≥${SA_MIN_SORTIES_FOR_RISK} missions terrain et succès <${SA_LOGISTICS_RISK_THRESHOLD}%`}
-                  >
-                    <AlertTriangle className="size-3.5 shrink-0" aria-hidden />
-                    Livraison · {ins.atRiskCount}
-                  </span>
-                ) : (
-                  <span className="inline-flex shrink-0 items-center rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-200/95">
-                    Livraison OK
-                  </span>
-                )}
-                {ins.dormantActiveCount > 0 ? (
-                  <span
-                    className="inline-flex shrink-0 items-center rounded-full border border-violet-500/25 bg-violet-500/10 px-2.5 py-1 text-[11px] font-semibold text-violet-200"
-                    title="Comptes actifs sans commande sur la période"
-                  >
-                    Relance · {ins.dormantActiveCount}
-                  </span>
-                ) : null}
-        </div>
-            </div>
-
-            <div className="relative z-10 space-y-5">
-            <div className="perf-super-kpi-grid">
-              <div className="perf-super-kpi-card">
-                <div className="perf-super-kpi-icon">
-                  <Package className="size-4 text-cyan-300" aria-hidden />
-                </div>
-                <p className="m-0 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Commandes</p>
-                <p className="mt-1 text-2xl font-bold tabular-nums leading-none text-white">{totalCmd}</p>
-              </div>
-              <div className="perf-super-kpi-card">
-                <div className="perf-super-kpi-icon">
-                  <Banknote className="size-4 text-cyan-300" aria-hidden />
-                </div>
-                <p className="m-0 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">GMV</p>
-                <p className="mt-1 text-lg font-bold tabular-nums leading-tight text-cyan-200/95 sm:text-xl">
-                  {totalGmv.toLocaleString('fr-FR')}
-                </p>
-                <p className="mt-0.5 text-[10px] text-slate-500">CFA</p>
-              </div>
-              <div className="perf-super-kpi-card">
-                <div className="perf-super-kpi-icon" style={{ background: 'rgba(16, 185, 129, 0.12)', borderColor: 'rgba(16, 185, 129, 0.25)' }}>
-                  <Store className="size-4 text-emerald-300" aria-hidden />
-                </div>
-                <p className="m-0 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Boutiques actives</p>
-                <p className="mt-1 text-2xl font-bold tabular-nums leading-none text-white">
-                  {withActivity}
-                  <span className="text-base font-semibold text-slate-500">/{rowsAll.length}</span>
-                </p>
-                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
-                  <div
-                    className="h-full rounded-full bg-emerald-500/80"
-                    style={{
-                      width: `${rowsAll.length ? Math.min(100, (withActivity / rowsAll.length) * 100) : 0}%`,
-                    }}
-                  />
-                </div>
-              </div>
-              <div className="perf-super-kpi-card">
-                <div className="perf-super-kpi-icon" style={{ background: 'rgba(139, 92, 246, 0.12)', borderColor: 'rgba(139, 92, 246, 0.25)' }}>
-                  <Truck className="size-4 text-violet-300" aria-hidden />
-                </div>
-                <p className="m-0 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Livraison</p>
-                <p className="mt-1 text-2xl font-bold tabular-nums leading-none text-white">{avgSuccPlat}%</p>
-                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
-                  <div
-                    className="h-full rounded-full bg-violet-500/75"
-                    style={{ width: `${Math.min(100, Math.max(0, avgSuccPlat))}%` }}
-                  />
-                </div>
-              </div>
-              <div className="perf-super-kpi-card">
-                <div className="perf-super-kpi-icon" style={{ background: 'rgba(251, 113, 133, 0.1)', borderColor: 'rgba(251, 113, 133, 0.22)' }}>
-                  <Percent className="size-4 text-rose-300" aria-hidden />
-                </div>
-                <p className="m-0 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Annulations</p>
-                <p className="mt-1 text-2xl font-bold tabular-nums leading-none text-rose-200/95">
-                  {ins.tauxAnnulPlateforme}%
-                </p>
-                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
-                  <div
-                    className="h-full rounded-full bg-rose-500/70"
-                    style={{ width: `${Math.min(100, Math.max(0, ins.tauxAnnulPlateforme))}%` }}
-                  />
-                </div>
-              </div>
-              <div className="perf-super-kpi-card">
-                <div className="perf-super-kpi-icon" style={{ background: 'rgba(148, 163, 184, 0.1)', borderColor: 'rgba(148, 163, 184, 0.2)' }}>
-                  <AlertCircle className="size-4 text-slate-300" aria-hidden />
-                </div>
-                <p className="m-0 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">Inactifs</p>
-                <p className="mt-1 text-2xl font-bold tabular-nums leading-none text-slate-100">{inactiveTenants}</p>
-                {ins.panierMoyen > 0 ? (
-                  <p className="mt-1 text-[10px] text-slate-500">
-                    Panier moy.{' '}
-                    <span className="font-semibold tabular-nums text-slate-400">
-                      {ins.panierMoyen.toLocaleString('fr-FR')} CFA
-              </span>
-                  </p>
-                ) : (
-                  <p className="mt-1 text-[10px] text-slate-600">—</p>
-                )}
-              </div>
-            </div>
-
-            <div className="perf-super-chart-pair mb-1">
-              <div className="perf-super-chart-box gombo-chart-dark">
-                <h4>Répartition boutiques</h4>
-                <div className="perf-super-chart-inner">
-                  <ResponsiveContainer width="100%" height={PIE_PX}>
-                    <PieChart>
-                      <Pie
-                        data={boutiquePieData}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={48}
-                        outerRadius={74}
-                        paddingAngle={2}
-                        stroke="rgba(255,255,255,0.08)"
-                        strokeWidth={1}
-                      >
-                        {boutiquePieData.map((entry) => (
-                          <Cell key={entry.name} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        {...chartTooltip}
-                        formatter={(value) => {
-                          const v = typeof value === 'number' ? value : Number(value ?? 0);
-                          return [Number.isFinite(v) ? v : 0, 'Boutiques'];
-                        }}
-                      />
-                      <Legend
-                        verticalAlign="bottom"
-                        height={32}
-                        wrapperStyle={{ fontSize: '11px', paddingTop: 6, color: '#94a3b8' }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-              <div className="perf-super-chart-box gombo-chart-dark">
-                <h4>Concentration CA — top 3</h4>
-                <div className="perf-super-chart-inner">
-                  <ResponsiveContainer width="100%" height={PIE_PX}>
-                    <PieChart>
-                      <Pie
-                        data={concPieData}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={48}
-                        outerRadius={74}
-                        paddingAngle={2}
-                        stroke="rgba(255,255,255,0.08)"
-                        strokeWidth={1}
-                      >
-                        {concPieData.map((entry) => (
-                          <Cell key={entry.name} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        {...chartTooltip}
-                        formatter={(value) => {
-                          const v = typeof value === 'number' ? value : Number(value ?? 0);
-                          return [`${Number.isFinite(v) ? v : 0} %`, 'Part'];
-                        }}
-                      />
-                      <Legend
-                        verticalAlign="bottom"
-                        height={32}
-                        wrapperStyle={{ fontSize: '11px', paddingTop: 6, color: '#94a3b8' }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            </div>
-
-            <div className="perf-super-line-box gombo-chart-dark">
-              <div className="mb-3 flex flex-wrap items-end justify-between gap-3 border-b border-white/[0.06] pb-3">
-                <div>
-                  <p className="m-0 text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">
-                    Suivi dans le temps
-                  </p>
-                  <p className="mt-1 max-w-2xl text-[10px] leading-relaxed text-slate-500">
-                    Agrégation par jour (≤ 90 j) ou par semaine · commandes créées dans la fenêtre · CA = montants
-                    livrées / terminées
-                  </p>
-                </div>
-              </div>
-              {tl.length > 0 ? (
-                <div className="perf-super-line-inner">
-                  <ResponsiveContainer width="100%" height={LINE_PX}>
-                    <ComposedChart data={tl} margin={{ top: 8, right: 14, left: 4, bottom: 4 }}>
-                      <defs>
-                        <linearGradient id={`saCaAreaGrad-${superAdminLineGradId}`} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#06b6d4" stopOpacity={0.45} />
-                          <stop offset="100%" stopColor="#06b6d4" stopOpacity={0.02} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
-                      <XAxis
-                        dataKey="label"
-                        tick={{ fill: C.textMuted, fontSize: 10 }}
-                        interval="preserveStartEnd"
-                        tickMargin={6}
-                        height={36}
-                      />
-                      <YAxis
-                        yAxisId="left"
-                        tick={{ fill: C.textMuted, fontSize: 10 }}
-                        width={36}
-                        allowDecimals={false}
-                      />
-                      <YAxis
-                        yAxisId="right"
-                        orientation="right"
-                        tick={{ fill: C.textMuted, fontSize: 10 }}
-                        width={44}
-                        tickFormatter={(v) => `${Number(v) >= 1000 ? `${Math.round(v / 1000)}k` : v}`}
-                      />
-                      <Tooltip
-                        {...chartTooltip}
-                        formatter={(value, name) => {
-                          const n = typeof value === 'number' ? value : Number(value);
-                          if (String(name) === 'CA (GMV)')
-                            return [`${Number.isFinite(n) ? n.toLocaleString('fr-FR') : '0'} CFA`, name];
-                          return [String(value ?? '0'), name];
-                        }}
-                      />
-                      <Legend wrapperStyle={{ fontSize: '11px', paddingTop: 8 }} />
-                      <Area
-                        yAxisId="right"
-                        type="monotone"
-                        dataKey="ca_gmv"
-                        name="CA (GMV)"
-                        stroke="#22d3ee"
-                        strokeWidth={2}
-                        fill={`url(#saCaAreaGrad-${superAdminLineGradId})`}
-                        fillOpacity={1}
-                      />
-                      <Line
-                        yAxisId="left"
-                        type="monotone"
-                        dataKey="commandes"
-                        name="Commandes"
-                        stroke="#a78bfa"
-                        strokeWidth={2}
-                        dot={false}
-                        activeDot={{ r: 4 }}
-                      />
-                      <Line
-                        yAxisId="left"
-                        type="monotone"
-                        dataKey="annules"
-                        name="Annulations"
-                        stroke="#fb7185"
-                        strokeWidth={1.5}
-                        dot={false}
-                      />
-                    </ComposedChart>
-                  </ResponsiveContainer>
-                </div>
-              ) : (
-                <div className="relative flex min-h-[280px] flex-col items-center justify-center rounded-xl border border-dashed border-cyan-500/15 bg-gradient-to-b from-slate-950/40 to-slate-900/20 py-10">
-                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-cyan-500/20 bg-cyan-500/10">
-                    <Activity className="size-7 text-cyan-400/80" aria-hidden />
-                  </div>
-                  <p className="max-w-sm px-4 text-center text-sm font-semibold text-slate-300">
-                    Aucune activité sur cette période
-                  </p>
-                  <p className="mt-2 max-w-md px-4 text-center text-xs leading-relaxed text-slate-500">
-                    Élargissez la période ou vérifiez les filtres (périmètre, dates).
-                  </p>
-                </div>
-              )}
-            </div>
-
-            </div>
-        </div>
-
-        {/* Carte "leader" + grille 2 colonnes */}
-        <div className="grid grid-cols-1 xl:grid-cols-5 gap-6 lg:gap-8">
-          <div className="xl:col-span-2 space-y-4">
-            {topTenant && (topTenant.ca_gmv > 0 || topTenant.commandes > 0) ? (
-              <div
-                className="relative overflow-hidden rounded-2xl border border-cyan-500/30 p-6 sm:p-7"
-                style={{
-                  background:
-                    'linear-gradient(135deg, rgba(6, 182, 212, 0.12) 0%, rgba(15, 23, 42, 0.98) 45%, #0f172a 100%)',
-                  boxShadow: '0 0 0 1px rgba(6, 182, 212, 0.12), 0 25px 50px -12px rgba(0,0,0,0.5)',
-                }}
-              >
-                <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-cyan-400/15 blur-3xl" aria-hidden />
-                <div className="relative flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-cyan-400/95">
-                  <Sparkles size={14} strokeWidth={2.5} />
-                  Leader période
-                </div>
-                <p className="relative mt-3 text-xl sm:text-2xl font-bold text-white tracking-tight">
-                  {topTenant.nom}
-                </p>
-                <p className="relative text-sm text-slate-400 mt-1">/{topTenant.slug || '—'}</p>
-                <div className="relative mt-6 grid grid-cols-2 gap-4">
-                  <div className="rounded-xl bg-black/20 border border-white/5 px-4 py-3">
-                    <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">CA (GMV)</p>
-                    <p className="text-lg font-bold text-white tabular-nums mt-1">
-                      {topTenant.ca_gmv.toLocaleString('fr-FR')}{' '}
-                      <span className="text-xs text-slate-500">CFA</span>
-                    </p>
-                  </div>
-                  <div className="rounded-xl bg-black/20 border border-white/5 px-4 py-3">
-                    <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Succès livr.</p>
-                    <p className="text-lg font-bold text-cyan-300 tabular-nums mt-1">{topTenant.success_rate}%</p>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="rounded-xl border border-dashed border-slate-600/40 px-4 py-3 text-center text-xs text-slate-500">
-                Aucune activité sur cette période — élargir la période ou vérifier les filtres.
-              </div>
-            )}
-
-            {chartData.length > 0 && (
-              <div
-                className="rounded-2xl border border-white/[0.08] p-5 sm:p-6 overflow-hidden"
-                style={{ background: 'linear-gradient(180deg, rgba(18, 24, 43, 0.95) 0%, #0b1120 100%)' }}
-              >
-                <div className="flex items-center justify-between gap-3 mb-5">
+    return (
+      <div className="space-y-10 lg:space-y-12">
+        {/* PLATFORM INTELLIGENCE / CORE KPIs */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-8 space-y-6">
+             <div 
+               className="relative overflow-hidden rounded-[32px] border border-white/[0.08] bg-slate-900/60 p-8 shadow-2xl"
+               style={{ background: 'linear-gradient(135deg, rgba(8, 11, 20, 0.95) 0%, rgba(15, 23, 42, 0.8) 100%)' }}
+             >
+                <div className="absolute -right-20 -top-20 size-64 bg-cyan-500/10 blur-[80px]" />
+                <div className="absolute -left-10 -bottom-10 size-40 bg-violet-600/10 blur-[60px]" />
+                
+                <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8 border-b border-white/[0.05] pb-6">
                   <div>
-                    <h3
-                      className="text-base font-bold text-white flex items-center gap-2"
-                      style={{ fontFamily: 'Outfit, sans-serif' }}
-                    >
-                      <LayoutDashboard size={18} className="text-cyan-400" strokeWidth={2} />
-                      Répartition CA (top 12)
-                    </h3>
-                    <p className="text-xs text-slate-500 mt-0.5">Barres horizontales · même échelle pour comparer</p>
+                    <div className="flex items-center gap-2 mb-2">
+                       <Zap className="text-amber-400 size-4" />
+                       <span className="text-[11px] font-black uppercase tracking-[0.2em] text-cyan-400">Platform Performance Hub</span>
+                    </div>
+                    <h2 className="text-3xl font-black text-white tracking-tight" style={{ fontFamily: 'Outfit' }}>
+                      Operational <span className="text-slate-500">Overview</span>
+                    </h2>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/[0.04] border border-white/[0.06] text-xs font-bold text-slate-300">
+                      <Globe size={14} className="text-cyan-400" />
+                      Live Network State
+                    </span>
                   </div>
                 </div>
-                <div style={{ height: Math.max(280, chartData.length * 36) }} className="min-h-[280px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={chartData} layout="vertical" margin={{ top: 4, right: 12, left: 4, bottom: 4 }}>
-                      <defs>
-                        <linearGradient id="gmvBarGradSuperAdmin" x1="0" y1="0" x2="1" y2="0">
-                          <stop offset="0%" stopColor="#06b6d4" />
-                          <stop offset="55%" stopColor="#22d3ee" />
-                          <stop offset="100%" stopColor="#3b82f6" />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(255,255,255,0.05)" />
-                      <XAxis
-                        type="number"
-                        tick={{ fill: C.textMuted, fontSize: 11 }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
-                      <YAxis
-                        type="category"
-                        dataKey="nom"
-                        width={118}
-                        tick={{ fill: '#cbd5e1', fontSize: 11 }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
-                      <Tooltip
-                        {...chartTooltip}
-                        formatter={(v) => [`${Number(v ?? 0).toLocaleString('fr-FR')} CFA`, 'CA livré']}
-                      />
-                      <Bar
-                        dataKey="ca"
-                        fill="url(#gmvBarGradSuperAdmin)"
-                        radius={[0, 8, 8, 0]}
-                        maxBarSize={32}
-                        animationDuration={600}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Total Orders</p>
+                    <p className="text-3xl font-black text-white tabular-nums">{totalCmd.toLocaleString('fr-FR')}</p>
+                    <p className="text-[11px] text-cyan-500/80 font-bold">Throughput Volume</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Global GMV</p>
+                    <p className="text-2xl font-black text-cyan-300 tabular-nums">
+                      {totalGmv.toLocaleString('fr-FR')} 
+                      <span className="text-xs text-slate-500 ml-1">CFA</span>
+                    </p>
+                    <p className="text-[11px] text-slate-500 font-bold">Processed Revenue</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Active Tenants</p>
+                    <p className="text-3xl font-black text-white tabular-nums">
+                      {withActivity}<span className="text-slate-600">/{rowsAll.length}</span>
+                    </p>
+                    <div className="h-1.5 w-16 bg-white/[0.05] rounded-full mt-2 overflow-hidden">
+                       <div className="h-full bg-emerald-500/60" style={{ width: `${(withActivity/Math.max(1, rowsAll.length))*100}%` }} />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Success Rate</p>
+                    <p className="text-3xl font-black text-violet-300 tabular-nums">{avgSuccPlat}%</p>
+                    <div className="h-1.5 w-16 bg-white/[0.05] rounded-full mt-2 overflow-hidden">
+                       <div className="h-full bg-violet-500/60" style={{ width: `${avgSuccPlat}%` }} />
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
+             </div>
+
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="rounded-[32px] border border-white/[0.08] bg-slate-900/40 p-6">
+                   <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2">
+                     <PieIcon size={14} className="text-violet-400" /> Subscription & Lifecycle
+                   </h4>
+                   <div style={{ height: 180 }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                         <PieChart>
+                            <Pie data={boutiquePieData} dataKey="value" cx="50%" cy="50%" innerRadius={45} outerRadius={65} paddingAngle={4}>
+                               {boutiquePieData.map((e, i) => <Cell key={i} fill={e.color} />)}
+                            </Pie>
+                            <Tooltip {...chartTooltip} />
+                         </PieChart>
+                      </ResponsiveContainer>
+                   </div>
+                </div>
+                <div className="rounded-[32px] border border-white/[0.08] bg-slate-900/40 p-6">
+                   <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2">
+                     <Target size={14} className="text-cyan-400" /> Distribution Top 3
+                   </h4>
+                   <div style={{ height: 180 }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                         <PieChart>
+                            <Pie data={concPieData} dataKey="value" cx="50%" cy="50%" innerRadius={45} outerRadius={65} paddingAngle={4}>
+                               {concPieData.map((e, i) => <Cell key={i} fill={e.color} />)}
+                            </Pie>
+                            <Tooltip {...chartTooltip} />
+                         </PieChart>
+                      </ResponsiveContainer>
+                   </div>
+                </div>
+             </div>
           </div>
 
-          <div className="xl:col-span-3">
-            <div
-              className="rounded-2xl border border-white/[0.08] overflow-hidden h-full flex flex-col min-h-[420px]"
-              style={{
-                background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(8, 11, 20, 0.99) 100%)',
-                boxShadow: 'var(--shadow-md)',
-              }}
-            >
-              <div className="flex flex-col gap-4 px-5 py-4 border-b border-white/[0.06] bg-gradient-to-r from-cyan-950/30 to-transparent">
-                <div>
-                  <h2 className="text-lg font-bold text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>
-                    Matrice <span style={{ color: C.primary }}>tenants</span>
-                  </h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    {rows.length} boutique{rows.length > 1 ? 's' : ''} affichée{rows.length > 1 ? 's' : ''} · ligne ambre
-                    = livraison à surveiller (≥{SA_MIN_SORTIES_FOR_RISK} missions, {'<'}
-                    {SA_LOGISTICS_RISK_THRESHOLD}% succès)
-                  </p>
-                </div>
-                <div className="flex flex-col gap-4 border-t border-white/[0.05] pt-4 md:flex-row md:items-end md:justify-between md:gap-6 md:pt-3">
-                  <div className="flex min-w-0 flex-1 flex-col gap-2 md:max-w-[min(100%,440px)]">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
-                      Périmètre
-                    </span>
-                    <div style={GOMBO_TAB_BAR_WRAP} role="group" aria-label="Périmètre boutique">
-                      {SUPER_ADMIN_SCOPE_DEFS.map((def) => (
-                        <button
-                          key={def.id}
-                          type="button"
-                          title={def.hint}
-                          onClick={() => setSuperAdminScope(def.id)}
-                          style={gomboPillButtonStyle(superAdminScope === def.id, '#6366f1')}
-                        >
-                          {def.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="flex min-w-0 flex-1 flex-col gap-2 md:max-w-[min(100%,580px)] md:items-end">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500 md:text-right">
-                      Tri du tableau
-                    </span>
-                    <div
-                      style={{
-                        ...GOMBO_TAB_BAR_WRAP,
-                        justifyContent: 'flex-end',
-                        width: '100%',
-                        maxWidth: '100%',
-                      }}
-                      role="group"
-                      aria-label="Colonne de tri"
-                    >
-                      {SUPER_ADMIN_SORT_DEFS.map((def) => (
-                        <button
-                          key={def.id}
-                          type="button"
-                          onClick={() => setSuperAdminSort(def.id)}
-                          style={gomboPillButtonStyle(superAdminSort === def.id, def.color)}
-                        >
-                          {def.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+          <div className="lg:col-span-4 space-y-6">
+            <div className="intelligence-deck flex flex-col h-full gap-5">
+              <div className="flex items-center gap-3">
+                  <div className="h-[2px] w-6 bg-cyan-500/50" />
+                  <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-cyan-400/90" style={{ fontFamily: 'Outfit' }}>
+                    Intelligence Pack
+                  </h3>
+                  <div className="h-[2px] flex-1 bg-gradient-to-r from-cyan-500/50 to-transparent" />
               </div>
-              <div className="overflow-x-auto flex-1">
-                <table className="w-full text-left text-[13px] min-w-[960px]">
-                  <thead>
-                    <tr className="text-[10px] uppercase tracking-[0.12em] text-slate-500 border-b border-white/[0.06] bg-black/20">
-                      <th className="pl-5 pr-2 py-3.5 font-bold w-10">#</th>
-                      <th className="px-2 py-3.5 font-bold">Boutique</th>
-                      <th className="px-2 py-3.5 font-bold">Plan</th>
-                      <th className="px-2 py-3.5 font-bold text-center">État</th>
-                      <th className="px-2 py-3.5 font-bold text-center">
-                        <Users className="inline size-3.5 opacity-50 mr-0.5" />
-                        Équipe
-                      </th>
-                      <th className="px-2 py-3.5 font-bold text-center">Cmd</th>
-                      <th className="px-2 py-3.5 font-bold text-center" style={{ color: C.livres }}>
-                        OK
-                      </th>
-                      <th className="px-2 py-3.5 font-bold text-center text-slate-400">Terrain</th>
-                      <th className="px-2 py-3.5 font-bold text-center">%</th>
-                      <th className="px-2 py-3.5 font-bold text-center" style={{ color: C.annules }}>
-                        Annul.
-                      </th>
-                      <th className="px-2 py-3.5 font-bold text-center text-slate-400">Ann. %</th>
-                      <th className="pl-2 pr-5 py-3.5 font-bold text-right">CA</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rows.map((r, idx) => {
-                      const annulPctLigne = r.commandes > 0 ? Math.round((r.annules / r.commandes) * 100) : 0;
-                      const atRisk = tenantLogisticsAtRisk(r);
-                      return (
-                      <tr
-                        key={r.tenant_id}
-                        className={[
-                          'border-b border-white/[0.04] transition-colors hover:bg-cyan-500/[0.04]',
-                          atRisk ? 'bg-amber-500/[0.06]' : '',
-                        ].join(' ')}
-                      >
-                        <td className="pl-5 pr-2 py-3.5 text-slate-600 font-mono text-xs tabular-nums">{idx + 1}</td>
-                        <td className="px-2 py-3.5">
-                          <div className="font-semibold text-slate-100">{r.nom}</div>
-                          <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                            <span className="text-[11px] text-cyan-500/75 font-medium">/{r.slug || '—'}</span>
-                            {r.slug ? (
-                              <Link
-                                to={`/${r.slug}`}
-                                className="inline-flex text-slate-500 hover:text-cyan-400 transition-colors"
-                                title="Ouvrir l'espace boutique"
-                                aria-label={`Ouvrir la boutique ${r.nom}`}
-                              >
-                                <ExternalLink size={13} strokeWidth={2} />
-                              </Link>
-                            ) : null}
-                            {atRisk ? (
-                              <span
-                                className="inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide bg-amber-500/20 text-amber-200 border border-amber-500/25"
-                                title="Charge terrain avec taux de succès sous le seuil"
-                              >
-                                <AlertTriangle className="size-3" aria-hidden />
-                                Liv.
-                              </span>
-                            ) : null}
-                          </div>
-                        </td>
-                        <td className="px-2 py-3.5">
-                          <span className="inline-flex rounded-lg bg-slate-800/80 px-2 py-0.5 text-xs font-medium text-slate-300 border border-white/5">
-                            {r.plan}
-                          </span>
-                        </td>
-                        <td className="px-2 py-3.5 text-center">
-                          <span
-                            className={`inline-flex items-center justify-center min-w-[3.25rem] rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
-                              r.actif ? 'bg-emerald-500/15 text-emerald-300' : 'bg-slate-700/60 text-slate-400'
-                            }`}
-                          >
-                            {r.actif ? 'On' : 'Off'}
-                          </span>
-                        </td>
-                        <td className="px-2 py-3.5 text-center tabular-nums text-slate-300">{r.users_count}</td>
-                        <td className="px-2 py-3.5 text-center tabular-nums text-slate-300">{r.commandes}</td>
-                        <td className="px-2 py-3.5 text-center font-semibold tabular-nums" style={{ color: C.livres }}>
-                          {r.livrees}
-                        </td>
-                        <td className="px-2 py-3.5 text-center tabular-nums text-slate-500">{r.sorties_terrain}</td>
-                        <td className="px-2 py-3.5 text-center">
-                          <span className="inline-flex min-w-[2.75rem] justify-center rounded-md bg-cyan-500/10 px-1.5 py-0.5 text-xs font-bold tabular-nums text-cyan-200 border border-cyan-500/20">
-                            {r.success_rate}%
-                          </span>
-                        </td>
-                        <td className="px-2 py-3.5 text-center tabular-nums" style={{ color: C.annules }}>
-                          {r.annules}
-                        </td>
-                        <td className="px-2 py-3.5 text-center tabular-nums text-slate-400 text-xs">
-                          {r.commandes > 0 ? `${annulPctLigne}%` : '—'}
-                        </td>
-                        <td className="pl-2 pr-5 py-3.5 text-right font-semibold tabular-nums text-white">
-                          {r.ca_gmv.toLocaleString('fr-FR')}{' '}
-                          <span className="text-slate-500 text-[11px] font-medium">CFA</span>
-                        </td>
-                      </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+              <IntelligenceCard 
+                icon={<TrendingUp size={18} />}
+                label="Concentration"
+                value={`${ins.concentrationTop3}%`}
+                color="#06b6d4"
+                insight={`Le Top 3 des boutiques génère ${ins.concentrationTop3}% du CA platforme.`}
+                subValue="Revenue Risk"
+              />
+              <IntelligenceCard 
+                icon={<Truck size={18} />}
+                label="Livrabilité"
+                value={`${ins.atRiskCount}`}
+                color="#f59e0b"
+                insight={`${ins.atRiskCount} partenaires sous les ${SA_LOGISTICS_RISK_THRESHOLD}% de succès.`}
+                subValue="Operational Alert"
+              />
+              <IntelligenceCard 
+                icon={<Mail size={18} />}
+                label="Inactifs"
+                value={`${ins.dormantActiveCount}`}
+                color="#8b5cf6"
+                insight={`${ins.dormantActiveCount} tenants actifs n'ont eu aucune commande.`}
+                subValue="Retention"
+              />
+              <div className="flex-1 flex flex-col justify-center items-center rounded-[32px] border border-dashed border-white/10 bg-white/[0.02] p-8 text-center group">
+                 <div className="size-16 rounded-3xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 mb-4 group-hover:scale-110 transition-transform">
+                    <Sparkles size={32} />
+                 </div>
+                 <p className="text-xs font-bold text-slate-400">Scan System Complete</p>
+                 <p className="text-[10px] text-slate-500 mt-1 max-w-[180px]">All signals are within operational parameters.</p>
               </div>
-              {rows.length === 0 && (
-                <p className="p-12 text-center text-slate-500 text-sm">Aucune boutique enregistrée.</p>
-              )}
             </div>
           </div>
+        </div>
+
+        {/* TIMELINE / GROWTH CHART */}
+        <div className="relative overflow-hidden rounded-[40px] border border-white/[0.08] bg-slate-900/20 p-8">
+           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+              <div>
+                 <h3 className="text-xl font-black text-white" style={{ fontFamily: 'Outfit' }}>Temporal <span className="text-slate-500">Analytics</span></h3>
+                 <p className="text-xs text-slate-500 mt-1">Suivi quotidien des flux et du volume d&apos;affaires sur l&apos;ensemble du réseau.</p>
+              </div>
+              <div className="flex items-center gap-6">
+                 <div className="flex items-center gap-2">
+                    <div className="size-2 rounded-full bg-cyan-400" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">GMV Growth</span>
+                 </div>
+                 <div className="flex items-center gap-2">
+                    <div className="size-2 rounded-full bg-violet-400" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Order Volume</span>
+                 </div>
+              </div>
+           </div>
+           
+           <div style={{ height: 320 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                 <ComposedChart data={tl} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="saAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#06b6d4" stopOpacity={0.4} />
+                        <stop offset="100%" stopColor="#06b6d4" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                    <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10, fontWeight: 700 }} dy={10} />
+                    <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10, fontWeight: 700 }} />
+                    <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10, fontWeight: 700 }} />
+                    <Tooltip {...chartTooltip} />
+                    <Area yAxisId="right" type="monotone" dataKey="ca_gmv" name="CA (GMV)" stroke="#22d3ee" strokeWidth={3} fill="url(#saAreaGrad)" />
+                    <Line yAxisId="left" type="monotone" dataKey="commandes" name="Commandes" stroke="#a78bfa" strokeWidth={3} dot={false} />
+                 </ComposedChart>
+              </ResponsiveContainer>
+           </div>
+        </div>
+
+        {/* TENANT MATRIX / RANKING */}
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+           <div className="xl:col-span-4 space-y-6">
+              {topTenant && (
+                 <div className="relative overflow-hidden rounded-[32px] border border-white/[0.08] bg-slate-900/60 p-8">
+                    <div className="absolute -right-10 -top-10 size-40 bg-emerald-500/10 blur-[50px]" />
+                    <div className="relative flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-emerald-400 mb-6">
+                       <Medal size={16} /> Market Leader
+                    </div>
+                    <h4 className="text-2xl font-black text-white" style={{ fontFamily: 'Outfit' }}>{topTenant.nom}</h4>
+                    <p className="text-xs text-slate-500 mt-1">Tenant ID: {topTenant.slug}</p>
+                    
+                    <div className="grid grid-cols-2 gap-4 mt-8">
+                       <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/[0.06]">
+                          <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Period Rev.</p>
+                          <p className="text-lg font-black text-white">{topTenant.ca_gmv.toLocaleString('fr-FR')} <span className="text-[10px]">CFA</span></p>
+                       </div>
+                       <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/[0.06]">
+                          <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Efficiency</p>
+                          <p className="text-lg font-black text-emerald-400">{topTenant.success_rate}%</p>
+                       </div>
+                    </div>
+                 </div>
+              )}
+
+              <div className="rounded-[32px] border border-white/[0.08] bg-slate-900/20 p-8">
+                 <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-6">Top 12 Distribution</h4>
+                 <div style={{ height: 380 }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                       <BarChart data={chartData} layout="vertical" margin={{ left: 0, right: 20 }}>
+                          <XAxis type="number" hide />
+                          <YAxis type="category" dataKey="nom" width={100} tick={{ fill: '#64748b', fontSize: 10, fontWeight: 700 }} axisLine={false} tickLine={false} />
+                          <Tooltip {...chartTooltip} />
+                          <Bar dataKey="ca" fill="#06b6d4" radius={[0, 10, 10, 0]} barSize={20} />
+                       </BarChart>
+                    </ResponsiveContainer>
+                 </div>
+              </div>
+           </div>
+
+           <div className="xl:col-span-8">
+              <div className="rounded-[32px] border border-white/[0.08] bg-slate-900/40 overflow-hidden">
+                 <div className="px-8 py-6 border-b border-white/[0.05] bg-white/[0.01] flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div>
+                       <h3 className="text-xl font-black text-white" style={{ fontFamily: 'Outfit' }}>Tenant <span className="text-slate-500">Matrix</span></h3>
+                       <p className="text-xs text-slate-500 mt-1">Drill-down into individual tenant performance metrics.</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                       <button onClick={exportSuperAdminTenantsCsv} className="btn-outline px-6 h-10 rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-2 border border-white/10 hover:bg-white/[0.05] transition-all">
+                          <Download size={14} /> Export Dataset
+                       </button>
+                    </div>
+                 </div>
+
+                 <div className="px-8 py-5 border-b border-white/[0.05] flex flex-wrap gap-6 items-center">
+                    <div className="flex items-center gap-3 p-1.5 rounded-2xl bg-black/20 border border-white/5">
+                       {SUPER_ADMIN_SCOPE_DEFS.map(def => (
+                          <button 
+                            key={def.id} 
+                            onClick={() => setSuperAdminScope(def.id)}
+                            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${superAdminScope === def.id ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+                          >
+                            {def.label}
+                          </button>
+                       ))}
+                    </div>
+                    <div className="flex-1" />
+                    <div className="flex items-center gap-3">
+                       {SUPER_ADMIN_SORT_DEFS.map(def => (
+                          <button 
+                            key={def.id} 
+                            onClick={() => setSuperAdminSort(def.id)}
+                            className={`size-8 rounded-xl flex items-center justify-center border transition-all ${superAdminSort === def.id ? 'border-cyan-500 bg-cyan-500/10 text-cyan-400' : 'border-white/5 text-slate-600'}`}
+                            title={def.label}
+                          >
+                             {def.id === 'ca_gmv' ? <Banknote size={16} /> : def.id === 'commandes' ? <Package size={16} /> : def.id === 'success_rate' ? <TrendingUp size={16} /> : <Truck size={16} />}
+                          </button>
+                       ))}
+                    </div>
+                 </div>
+
+                 <div className="overflow-x-auto">
+                    <table className="w-full">
+                       <thead>
+                          <tr className="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/[0.05]">
+                             <th className="px-8 py-5">Tenant</th>
+                             <th className="px-4 py-5 text-center">Plan</th>
+                             <th className="px-4 py-5 text-center">Orders</th>
+                             <th className="px-4 py-5 text-center">Succ.%</th>
+                             <th className="px-4 py-5 text-center">Annul.</th>
+                             <th className="pr-8 py-5 text-right">Revenue</th>
+                          </tr>
+                       </thead>
+                       <tbody className="divide-y divide-white/[0.03]">
+                          {rows.map((r, i) => (
+                             <tr key={r.tenant_id} className={`hover:bg-white/[0.02] transition-colors ${i < 3 ? 'bg-cyan-500/5' : ''}`}>
+                                <td className="px-8 py-5">
+                                   <div className="flex items-center gap-3">
+                                      {r.actif ? <div className="size-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" /> : <div className="size-2 rounded-full bg-slate-600" />}
+                                      <div>
+                                         <p className="font-black text-slate-100">{r.nom}</p>
+                                         <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">/{r.slug}</p>
+                                      </div>
+                                   </div>
+                                </td>
+                                <td className="px-4 py-5 text-center">
+                                   <span className="text-[10px] font-black uppercase px-2 py-1 rounded bg-slate-800 text-slate-400 border border-white/5">{r.plan}</span>
+                                </td>
+                                <td className="px-4 py-5 text-center font-black text-slate-300 tabular-nums">{r.commandes}</td>
+                                <td className="px-4 py-5 text-center">
+                                   <div className="flex flex-col items-center gap-1">
+                                      <span className={`text-xs font-black tabular-nums ${r.success_rate > 80 ? 'text-emerald-400' : r.success_rate > 60 ? 'text-amber-400' : 'text-rose-400'}`}>{r.success_rate}%</span>
+                                      <div className="h-0.5 w-10 bg-white/5 rounded-full overflow-hidden">
+                                         <div className="h-full bg-current opacity-60" style={{ width: `${r.success_rate}%` }} />
+                                      </div>
+                                   </div>
+                                </td>
+                                <td className="px-4 py-5 text-center font-black text-rose-500 tabular-nums">{r.annules}</td>
+                                <td className="pr-8 py-5 text-right font-black text-white tabular-nums">
+                                   {r.ca_gmv.toLocaleString('fr-FR')} <span className="text-[10px] text-slate-500">CFA</span>
+                                </td>
+                             </tr>
+                          ))}
+                       </tbody>
+                    </table>
+                 </div>
+              </div>
+           </div>
         </div>
       </div>
     );
