@@ -3,7 +3,6 @@ import {
   useEffect,
   useMemo,
   useCallback,
-  useId,
   type ReactNode,
   type CSSProperties,
 } from 'react';
@@ -27,9 +26,6 @@ import {
   ComposedChart,
   Area,
   Line,
-  Legend,
-  PieChart,
-  Pie,
   Cell,
 } from 'recharts';
 import {
@@ -37,37 +33,20 @@ import {
   PhoneCall,
   Package,
   TrendingUp,
-  Clock,
   Lightbulb,
   Users,
-  Banknote,
   Sparkles,
-  LayoutDashboard,
-  ArrowUpRight,
   Activity,
-  Target,
   Medal,
   RefreshCw,
   Download,
   AlertCircle,
-  AlertTriangle,
   ExternalLink,
-  Store,
-  Percent,
-  Mail,
   Zap,
-  Globe,
-  PieChart as PieIcon,
-  ShieldAlert,
-  ShieldCheck,
-  Eye,
-  Power,
-  X,
-  Search,
-  Send,
-  CreditCard,
-  Plus,
   Rocket,
+  PieChart as PieIcon,
+  ShieldCheck,
+  Search,
 } from 'lucide-react';
 
 type TabType = 'logistique' | 'call-center' | 'inventaire';
@@ -83,18 +62,7 @@ function tenantLogisticsAtRisk(r: TenantPerfRow): boolean {
   return r.sorties_terrain >= SA_MIN_SORTIES_FOR_RISK && r.success_rate < SA_LOGISTICS_RISK_THRESHOLD;
 }
 
-const SUPER_ADMIN_SORT_DEFS: { id: SuperAdminSortKey; label: string; color: string }[] = [
-  { id: 'ca_gmv', label: 'CA (GMV)', color: '#06b6d4' },
-  { id: 'commandes', label: 'Commandes', color: '#3b82f6' },
-  { id: 'success_rate', label: 'Taux succès', color: '#10b981' },
-  { id: 'sorties_terrain', label: 'Missions terrain', color: '#a78bfa' },
-];
 
-const SUPER_ADMIN_SCOPE_DEFS: { id: SuperAdminScope; label: string; hint: string }[] = [
-  { id: 'all', label: 'Toutes', hint: 'Catalogue complet' },
-  { id: 'active_only', label: 'Comptes actifs', hint: 'Abonnement / compte actif' },
-  { id: 'with_orders', label: 'Avec activité', hint: 'Au moins une commande sur la période' },
-];
 
 interface PerformanceDashboardProps {
   tenantId?: string;
@@ -126,36 +94,19 @@ const C = {
   textMuted: '#94a3b8',
 };
 
-/** Aligné sur Commandes.tsx : conteneur de pastilles */
-const GOMBO_TAB_BAR_WRAP: CSSProperties = {
+const BTN_PRIMARY_INLINE: CSSProperties = {
+  padding: '0 1.5rem',
+  borderRadius: '12px',
+  fontWeight: 800,
+  fontSize: '0.85rem',
+  background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
+  border: 'none',
+  color: 'white',
+  cursor: 'pointer',
   display: 'flex',
-  gap: '0.5rem',
-  padding: '0.4rem',
-  background: 'rgba(255,255,255,0.02)',
-  borderRadius: '18px',
-  border: '1px solid rgba(255,255,255,0.05)',
-  height: 'fit-content',
-  backdropFilter: 'blur(10px)',
-  flexWrap: 'wrap',
+  alignItems: 'center',
+  gap: '0.6rem',
 };
-
-function gomboPillButtonStyle(active: boolean, color: string): CSSProperties {
-  return {
-    padding: '0.8rem 1.5rem',
-    borderRadius: '14px',
-    fontSize: '0.85rem',
-    fontWeight: 800,
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em',
-    whiteSpace: 'nowrap',
-    cursor: 'pointer',
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    border: active ? 'none' : '1px solid rgba(255,255,255,0.05)',
-    background: active ? color : 'rgba(255,255,255,0.02)',
-    color: active ? 'white' : 'var(--text-muted)',
-    boxShadow: active ? `0 10px 25px ${color}33` : 'none',
-  };
-}
 
 function IntelligenceCard({ icon, label, value, insight, color, subValue }: { 
   icon: any, 
@@ -190,53 +141,6 @@ function IntelligenceCard({ icon, label, value, insight, color, subValue }: {
   );
 }
 
-const BTN_PRIMARY_INLINE: CSSProperties = {
-  height: '64px',
-  padding: '0 2.5rem',
-  borderRadius: '20px',
-  fontWeight: 950,
-  fontSize: '1.1rem',
-  boxShadow: '0 20px 40px -10px rgba(6, 182, 212, 0.4)',
-  background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
-  border: 'none',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '0.75rem',
-};
-
-const BTN_OUTLINE_INLINE: CSSProperties = {
-  height: '64px',
-  padding: '0 2rem',
-  borderRadius: '20px',
-  fontWeight: 800,
-  fontSize: '0.95rem',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '0.6rem',
-};
-
-function GomboTableSkeleton({ rows = 5, cols = 3 }: { rows?: number; cols?: number }) {
-  return (
-    <div className="space-y-3 p-4 sm:p-5" aria-hidden>
-      {Array.from({ length: rows }).map((_, i) => (
-        <div
-          key={i}
-          className="flex flex-wrap items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.03] p-3 animate-pulse"
-        >
-          <div className="h-10 w-10 shrink-0 rounded-full bg-white/[0.08]" />
-          <div className="min-w-0 flex-1 space-y-2">
-            <div className="h-3.5 w-32 rounded bg-white/[0.08] sm:w-48" />
-            <div className="h-3 w-24 rounded bg-white/[0.05]" />
-          </div>
-          {Array.from({ length: cols }).map((__, j) => (
-            <div key={j} className="h-8 w-12 rounded-lg bg-white/[0.08] sm:w-14" />
-          ))}
-        </div>
-      ))}
-    </div>
-  );
-}
-
 function escapeCsvCell(v: string) {
   if (/[",\n\r]/.test(v)) return `"${v.replace(/"/g, '""')}"`;
   return v;
@@ -264,79 +168,6 @@ function sortHint(tab: TabType): string {
     default:
       return '';
   }
-}
-
-function StaffKpiCard({
-  accent,
-  icon,
-  label,
-  value,
-  sub,
-  layout = 'card',
-}: {
-  accent: 'cyan' | 'emerald' | 'violet' | 'amber' | 'rose';
-  icon: ReactNode;
-  label: string;
-  value: ReactNode;
-  sub: string;
-  /** `strip` : ligne compacte (bandeau), idéal pour plusieurs blocs sur une rangée */
-  layout?: 'card' | 'strip';
-}) {
-  const ring =
-    accent === 'cyan'
-      ? 'from-cyan-500/25 to-transparent'
-      : accent === 'emerald'
-        ? 'from-emerald-500/20 to-transparent'
-        : accent === 'violet'
-          ? 'from-violet-500/20 to-transparent'
-          : accent === 'amber'
-            ? 'from-amber-500/20 to-transparent'
-            : 'from-rose-500/18 to-transparent';
-
-  if (layout === 'strip') {
-    return (
-      <div className="group relative min-h-0 overflow-hidden rounded-xl border border-white/10 bg-slate-950/50 p-3 shadow-[0_4px_24px_-12px_rgba(0,0,0,0.45)] transition-transform duration-200 hover:border-cyan-500/30 sm:p-3.5">
-        <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${ring} opacity-70`} aria-hidden />
-        <div className="relative flex min-w-0 flex-row items-center gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-slate-900/70 text-cyan-300 shadow-inner">
-            {icon}
-          </div>
-          <div className="min-w-0 flex-1 text-left">
-            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">{label}</p>
-            <p className="mt-0.5 text-lg font-bold leading-tight tracking-tight text-white tabular-nums sm:text-xl">
-              {value}
-            </p>
-            <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-slate-500">{sub}</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="group relative overflow-hidden rounded-2xl border border-white/[0.07] p-4 sm:p-5 transition-transform duration-300 hover:-translate-y-0.5 hover:border-cyan-500/25">
-      <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${ring} opacity-80`} aria-hidden />
-      <div className="relative flex h-full flex-col gap-3">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-slate-900/60 text-cyan-300 shadow-inner">
-            {icon}
-          </div>
-          <ArrowUpRight
-            size={16}
-            className="text-slate-600 opacity-0 transition-opacity group-hover:opacity-100"
-            strokeWidth={2}
-          />
-        </div>
-        <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">{label}</p>
-          <p className="mt-1.5 text-xl sm:text-2xl font-bold tracking-tight text-white tabular-nums leading-none">
-            {value}
-          </p>
-          <p className="mt-1.5 text-[11px] text-slate-500 leading-snug">{sub}</p>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 function PerfAdminTableCard({
@@ -417,8 +248,7 @@ export const PerformanceDashboard = ({
   const [activeTab, setActiveTab] = useState<TabType>('logistique');
   const [filter, setFilter] = useState<FilterType>('mois');
   const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const [dataUpdatedAt, setDataUpdatedAt] = useState<Date | null>(null);
+
   const [stats, setStats] = useState<any>({
     logistique: [],
     callCenter: [],
@@ -429,18 +259,14 @@ export const PerformanceDashboard = ({
   const [platformTimeline, setPlatformTimeline] = useState<PlatformTimelinePoint[]>([]);
   const [superAdminSort, setSuperAdminSort] = useState<SuperAdminSortKey>('ca_gmv');
   const [superAdminScope, setSuperAdminScope] = useState<SuperAdminScope>('all');
-  /** Id unique pour le dégradé du graphique temporel (évite collisions SVG) */
-  const superAdminLineGradId = useId().replace(/:/g, '');
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    setLoadError(null);
     try {
       if (isSuperAdmin) {
         const { rows, timeline } = await loadSuperAdminTenantPerformance(filter);
         setTenantRows(rows);
         setPlatformTimeline(timeline);
-        setDataUpdatedAt(new Date());
         return;
       }
       const effectiveTenantId = tenantId;
@@ -450,12 +276,8 @@ export const PerformanceDashboard = ({
       }
       const loaded = await loadPerformanceDashboardData(effectiveTenantId, false, filter);
       setStats(loaded);
-      setDataUpdatedAt(new Date());
     } catch (err) {
       console.error('Hub Performance Error:', err);
-      setLoadError(
-        err instanceof Error ? err.message : 'Impossible de charger les indicateurs. Réessayez dans un instant.'
-      );
     } finally {
       setLoading(false);
     }
@@ -464,50 +286,6 @@ export const PerformanceDashboard = ({
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
-  const renderFilterButtons = () => (
-    <div
-      role="group"
-      aria-label="Période"
-      className="inline-flex flex-wrap items-center gap-2 p-2 rounded-2xl border border-white/[0.1] shadow-inner"
-      style={{
-        background: 'linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.75) 100%)',
-      }}
-    >
-      {[
-        { id: 'mois' as const, label: 'Ce mois' },
-        { id: '7jours' as const, label: '7 jours' },
-        { id: 'aujourdhui' as const, label: "Aujourd'hui" },
-        { id: 'toujours' as const, label: 'Toujours' },
-      ].map((f) => {
-        const on = filter === f.id;
-        return (
-          <button
-            key={f.id}
-            type="button"
-            onClick={() => setFilter(f.id)}
-            className={[
-              'min-h-[40px] px-4 py-2 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200',
-              'focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0f1a]',
-              on
-                ? 'text-white shadow-md scale-[1.02]'
-                : 'text-slate-200 bg-slate-800/90 border border-slate-600/40 hover:bg-slate-700/95 hover:text-white hover:border-slate-500/50',
-            ].join(' ')}
-            style={
-              on
-                ? {
-                    background: 'linear-gradient(135deg, #0891b2 0%, #2563eb 100%)',
-                    boxShadow: '0 4px 18px rgba(6, 182, 212, 0.4)',
-                  }
-                : undefined
-            }
-          >
-            {f.label}
-          </button>
-        );
-      })}
-    </div>
-  );
 
   const panelClass =
     'rounded-2xl border border-white/[0.08] overflow-hidden bg-[var(--surface)] shadow-[var(--shadow-sm)]';
@@ -580,73 +358,6 @@ export const PerformanceDashboard = ({
   const totalCmd = useMemo(() => tenantRows.reduce((a, r) => a + r.commandes, 0), [tenantRows]);
   const topTenant = useMemo(() => [...tenantRows].sort((a, b) => b.ca_gmv - a.ca_gmv)[0], [tenantRows]);
   const chartData = useMemo(() => [...tenantRows].sort((a, b) => b.ca_gmv - a.ca_gmv).slice(0, 5), [tenantRows]);
-
-  const exportHubTableCsv = useCallback(() => {
-    const stamp = new Date().toISOString().slice(0, 10);
-    if (activeTab === 'logistique') {
-      const rows = logisticsSorted;
-      const h = [
-        'Livreur',
-        'Sorties',
-        'Livrés',
-        'Retours',
-        'Annulés',
-        'Reports',
-        'Réussite %',
-        'Gains CFA',
-      ];
-      const lines = rows.map((s: any) => [
-        String(s.nom ?? ''),
-        String(s.sorties ?? ''),
-        String(s.reussies ?? ''),
-        String(s.retours ?? ''),
-        String(s.annules ?? ''),
-        String(s.reportes ?? ''),
-        String(s.success_rate ?? ''),
-        String(s.ca_frais ?? ''),
-      ]);
-      downloadCsv(`performance-logistique-${stamp}.csv`, h, lines);
-      return;
-    }
-    if (activeTab === 'call-center') {
-      const rows = callCenterSorted;
-      const h = [
-        'Agent',
-        'Traitées',
-        'Validées',
-        'Livrées',
-        'Retours',
-        'Échecs',
-        'Reprog.',
-        'Annulées',
-        'Connex.',
-        'Conversion %',
-      ];
-      const lines = rows.map((a: any) => [
-        String(a.staff_name ?? ''),
-        String(a.total_handled ?? ''),
-        String(a.total_validations ?? ''),
-        String(a.total_delivered ?? ''),
-        String(a.retours ?? ''),
-        String(a.echouees ?? ''),
-        String(a.reprogrammes ?? ''),
-        String(a.annulees ?? ''),
-        String(a.connexions ?? ''),
-        String(a.success_rate ?? ''),
-      ]);
-      downloadCsv(`performance-centre-appel-${stamp}.csv`, h, lines);
-      return;
-    }
-    const rows = inventoryStaffSorted;
-    const h = ['Staff', 'Produits créés', 'Connexions', 'Fréquence hebdo'];
-    const lines = rows.map((r) => [
-      r.staff_name,
-      String(r.produits_crees),
-      String(r.connexions),
-      r.freq_hebdo_label,
-    ]);
-    downloadCsv(`performance-inventaire-staff-${stamp}.csv`, h, lines);
-  }, [activeTab, logisticsSorted, callCenterSorted, inventoryStaffSorted]);
 
   const exportSuperAdminTenantsCsv = useCallback(() => {
     const stamp = new Date().toISOString().slice(0, 10);
@@ -1730,7 +1441,7 @@ export const PerformanceDashboard = ({
                         dataKey="label" 
                         axisLine={false} 
                         tickLine={false} 
-                        tick={{ fill: '#475569', fontSize: 10, fontWeight: 800, textTransform: 'uppercase' }} 
+                        tick={{ fill: '#475569', fontSize: 10, fontWeight: 800 }} 
                         dy={15} 
                       />
                       <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fill: '#475569', fontSize: 10, fontWeight: 700 }} />
@@ -1901,7 +1612,7 @@ export const PerformanceDashboard = ({
                     </tr>
                  </thead>
                  <tbody className="divide-y divide-white/[0.03]">
-                    {superAdminDisplayRows.map((r, i) => (
+                    {superAdminDisplayRows.map((r) => (
                        <tr key={r.slug} className="group hover:bg-white/[0.02] transition-colors">
                           <td className="px-10 py-8">
                              <div className="flex items-center gap-5">

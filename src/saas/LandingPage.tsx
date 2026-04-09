@@ -323,11 +323,8 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      </footer>
     </div>
   );
 };
 
-    </div>
-  );
-};
+export default LandingPage;

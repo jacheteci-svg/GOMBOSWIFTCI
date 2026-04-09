@@ -259,3 +259,8 @@ export const deleteCommune = async (tenantId: string, id: string): Promise<void>
   
   if (error) throw error;
 };
+export const getBillingContext = async (tenantId: string): Promise<any> => {
+  const { data, error } = await insforge.database.rpc('get_tenant_billing_context', { t_id: tenantId });
+  if (error) throw error;
+  return data;
+};

@@ -646,7 +646,7 @@ const CommunesManager = ({ showToast, tenantId }: { showToast: any, tenantId: st
                   <span style={{ color: 'var(--text-muted)', fontSize: '0.7rem', fontWeight: 900, marginLeft: '0.5rem' }}>CFA</span>
                 </td>
                 <td style={{ textAlign: 'right', padding: '1.25rem 1.5rem' }}>
-                  <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+<div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
                     <button className="btn btn-outline" style={{ height: '36px', minHeight: '36px', padding: '0 1rem', fontSize: '0.8rem', borderRadius: '10px' }} onClick={() => {setEditingId(c.id); setForm(c);}}>Modifier</button>
                     <button className="btn btn-outline" style={{ height: '36px', minHeight: '36px', padding: '0 0.8rem', borderRadius: '10px', color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.1)' }} onClick={() => setDeleteId(c.id)}><Trash2 size={16} /></button>
                   </div>
@@ -663,26 +663,37 @@ const CommunesManager = ({ showToast, tenantId }: { showToast: any, tenantId: st
 // --- SUBSCRIPTION MANAGER COMPONENT ---
 const SubscriptionManager = ({ showToast, tenant }: { showToast: any, tenant: any }) => {
   const [plans, setPlans] = useState<any[]>([]);
+  const [billingContext, setBillingContext] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [transactions, setTransactions] = useState<any[]>([]);
   const { planConfig } = useSaas();
 
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [plansRes, contextRes, txRes] = await Promise.all([
+        insforge.database.from('saas_plans').select('*').order('price_fcfa', { ascending: true }),
+        insforge.database.rpc('get_tenant_billing_context', { t_id: tenant.id }),
+        insforge.database.from('moneroo_transactions').select('*').eq('tenant_id', tenant.id).order('created_at', { descending: true }).limit(5)
+      ]);
+
+      if (plansRes.error) throw plansRes.error;
+      if (contextRes.error) throw contextRes.error;
+
+      setPlans(plansRes.data || []);
+      setBillingContext(contextRes.data);
+      setTransactions(txRes.data || []);
+    } catch (e: any) {
+      console.error("Billing load error:", e);
+      showToast("Erreur lors du chargement des données billing.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchPlans = async () => {
-      try {
-        const { data, error } = await insforge.database
-          .from('saas_plans')
-          .select('*')
-          .order('price_fcfa', { ascending: true });
-        if (error) throw error;
-        setPlans(data || []);
-      } catch (e) {
-        showToast("Erreur plans.", "error");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchPlans();
-  }, []);
+    loadData();
+  }, [tenant.id]);
 
   const handleUpgrade = async (plan: any) => {
     if (plan.id === tenant.plan) {
@@ -696,7 +707,7 @@ const SubscriptionManager = ({ showToast, tenant }: { showToast: any, tenant: an
     }
 
     try {
-      showToast("Initialisation du paiement...", "info");
+      showToast("Initialisation du paiement sécurisé...", "info");
       const checkoutUrl = await monerooService.initializeSubscription({
         amount: plan.price_fcfa,
         currency: 'XOF',
@@ -704,7 +715,7 @@ const SubscriptionManager = ({ showToast, tenant }: { showToast: any, tenant: an
           name: tenant.nom,
           email: tenant.email_contact
         },
-        reference_id: plan.id, // Target Plan ID
+        reference_id: plan.id,
         type: 'SUBSCRIPTION',
         tenant_id: tenant.id
       });
@@ -717,110 +728,197 @@ const SubscriptionManager = ({ showToast, tenant }: { showToast: any, tenant: an
     }
   };
 
+  if (loading) return <div style={{ display: 'flex', justifyContent: 'center', padding: '5rem' }}><div className="spinner"></div></div>;
+
+  const usage = billingContext?.usage || { users_count: 0, products_count: 0, monthly_orders_count: 0 };
+  const currentPlan = plans.find(p => p.id === tenant.plan) || planConfig;
+
   return (
-    <div style={{ animation: 'fadeIn 0.4s' }}>
-      <div className="card glass-effect" style={{ padding: '2.5rem', marginBottom: '2.5rem', borderLeft: '5px solid var(--primary)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.5rem' }}>
-          <div>
-            <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Forfait Actuel</span>
-            <h2 style={{ fontSize: '2.2rem', fontWeight: 850, margin: '0.4rem 0' }}>{planConfig?.name || tenant.plan}</h2>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#10b981', fontWeight: 700 }}>
-              <CheckCircle size={18} /> Statut : ACTIF
+    <div style={{ animation: 'fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1)' }} className="space-y-12">
+      {/* SECTION 1: SUBSCRIPTION STATUS OVERVIEW */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 card glass-effect overflow-hidden" style={{ padding: 0, borderRadius: '40px', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <div style={{ padding: '3rem', background: 'linear-gradient(135deg, rgba(6,182,212,0.1), transparent)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2.5rem' }}>
+               <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                    <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 10px #10b981' }}></div>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 900, color: '#10b981', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Abonnement Actif</span>
+                  </div>
+                  <h2 style={{ fontSize: '3rem', fontWeight: 950, margin: 0, letterSpacing: '-0.04em' }}>{currentPlan?.name || tenant.plan}</h2>
+               </div>
+               <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '2.5rem', fontWeight: 950 }}>{currentPlan?.price_fcfa?.toLocaleString() || 0} <span style={{ fontSize: '1rem', color: '#64748b' }}>F/MOIS</span></div>
+                  <p style={{ margin: 0, color: '#94a3b8', fontWeight: 700, fontSize: '0.85rem' }}>Prochaine facture : {tenant.next_billing_at ? new Date(tenant.next_billing_at).toLocaleDateString() : 'Non définie'}</p>
+               </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+               <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <div style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', marginBottom: '1rem' }}>Utilisateurs</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '0.5rem' }}>
+                    <span style={{ fontSize: '1.5rem', fontWeight: 950 }}>{usage.users_count}</span>
+                    <span style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: 700 }}>/ {currentPlan?.max_users === -1 ? '∞' : currentPlan?.max_users}</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                    <div className="h-full bg-cyan-500" style={{ width: `${currentPlan?.max_users === -1 ? 10 : (usage.users_count / currentPlan?.max_users) * 100}%` }}></div>
+                  </div>
+               </div>
+
+               <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <div style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', marginBottom: '1rem' }}>Produits</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '0.5rem' }}>
+                    <span style={{ fontSize: '1.5rem', fontWeight: 950 }}>{usage.products_count}</span>
+                    <span style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: 700 }}>/ {currentPlan?.max_products === -1 ? '∞' : currentPlan?.max_products}</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                    <div className="h-full bg-indigo-500" style={{ width: `${currentPlan?.max_products === -1 ? 10 : (usage.products_count / currentPlan?.max_products) * 100}%` }}></div>
+                  </div>
+               </div>
+
+               <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <div style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', marginBottom: '1rem' }}>Commandes (Mois)</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '0.5rem' }}>
+                    <span style={{ fontSize: '1.5rem', fontWeight: 950 }}>{usage.monthly_orders_count}</span>
+                    <span style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: 700 }}>/ {currentPlan?.max_orders_month === -1 ? '∞' : currentPlan?.max_orders_month}</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                    <div className="h-full bg-rose-500" style={{ width: `${currentPlan?.max_orders_month === -1 ? 10 : (usage.monthly_orders_count / currentPlan?.max_orders_month) * 100}%` }}></div>
+                  </div>
+               </div>
             </div>
           </div>
-          <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1.25rem', borderRadius: '20px', textAlign: 'right', border: '1px solid rgba(255,255,255,0.06)' }}>
-            <p style={{ margin: 0, fontWeight: 700, color: 'var(--text-muted)' }}>Prochain renouvellement</p>
-            <p style={{ margin: 0, fontSize: '1.25rem', fontWeight: 850, color: 'var(--text-main)' }}>Dans 30 jours (Auto)</p>
-          </div>
+        </div>
+
+        <div className="card glass-effect flex flex-col justify-between" style={{ padding: '2.5rem', borderRadius: '40px', background: 'rgba(15, 23, 42, 0.4)' }}>
+           <div>
+              <h4 style={{ fontSize: '1.1rem', fontWeight: 950, marginBottom: '1.5rem' }}>Historique Facturation</h4>
+              <div className="space-y-4">
+                {transactions.length === 0 ? (
+                  <p style={{ color: '#64748b', fontSize: '0.8rem', fontStyle: 'italic' }}>Aucune transaction récente.</p>
+                ) : transactions.map(tx => (
+                  <div key={tx.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div>
+                      <div style={{ fontSize: '0.8rem', fontWeight: 800 }}>{new Date(tx.created_at).toLocaleDateString()}</div>
+                      <div style={{ fontSize: '0.7rem', color: tx.statut === 'success' ? '#10b981' : '#f59e0b', fontWeight: 800, textTransform: 'uppercase' }}>{tx.statut}</div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                       <div style={{ fontSize: '0.9rem', fontWeight: 950 }}>{tx.montant.toLocaleString()} F</div>
+                       <div style={{ fontSize: '0.6rem', color: '#64748b' }}>{tx.moneroo_id?.slice(0, 10)}...</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+           </div>
+           
+           <button 
+             onClick={() => showToast("Génération du relevé complet en cours...", "info")}
+             style={{ width: '100%', marginTop: '2rem', padding: '1rem', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.02)', color: 'white', fontSize: '0.75rem', fontWeight: 900, cursor: 'pointer' }}
+           >
+             TÉLÉCHARGER TOUT LE RELEVÉ
+           </button>
         </div>
       </div>
 
-      <h3 style={{ fontSize: '1.4rem', fontWeight: 850, marginBottom: '2rem' }}>Débloquez plus de puissance 🚀</h3>
-
-      {loading ? <div className="spinner" /> : (
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
-          gap: '2rem' 
-        }}>
-          {plans.filter(p => !p.id.includes('CUSTOM') && p.price_fcfa >= 0).map(plan => (
-            <div 
-                key={plan.id} 
-                className={`card ${plan.id === tenant.plan ? 'active-plan' : ''}`}
-                style={{ 
-                    padding: '2.5rem', 
-                    position: 'relative', 
-                    transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                    border: plan.id === tenant.plan ? '2px solid var(--primary)' : '1px solid rgba(255,255,255,0.06)',
-                    boxShadow: plan.is_popular ? '0 20px 40px rgba(99,102,241,0.1)' : 'none',
-                    display: 'flex',
-                    flexDirection: 'column'
-                }}
-            >
-              {plan.is_popular && (
-                <div style={{ position: 'absolute', top: '-15px', left: '50%', transform: 'translateX(-50%)', background: 'var(--primary)', color: 'white', padding: '0.4rem 1rem', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 800 }}>
-                   RECOMMANDÉ 
-                </div>
-              )}
-              
-              <div style={{ marginBottom: '1.5rem' }}>
-                <h4 style={{ fontSize: '1.4rem', fontWeight: 850, margin: 0 }}>{plan.name}</h4>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.5rem', fontWeight: 500, minHeight: '3em' }}>{plan.description}</p>
-              </div>
-
-              <div style={{ marginBottom: '2rem' }}>
-                <span style={{ fontSize: '2.2rem', fontWeight: 950, color: 'var(--text-main)' }}>{plan.price_fcfa.toLocaleString()}</span>
-                <span style={{ color: 'var(--text-muted)', fontWeight: 700 }}> F / mois</span>
-              </div>
-
-              <div style={{ flex: 1 }}>
-                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  {(() => {
-                    const MODULE_LABELS: Record<string, string> = {
-                      module_crm_clients: 'CRM & Clients',
-                      module_suivi_terrain: 'Suivi Terrain',
-                      module_logistique_pro: 'Logistique Pro',
-                      module_staff_perf: 'Performance Staff',
-                      module_livraisons_app: 'Mes Livraisons',
-                      module_tresorerie_audit: 'Trésorerie & Audit',
-                      module_caisse_retour_expert: 'Caisse / Retour',
-                      module_rapport_journalier: 'Rapport Journalier',
-                      module_profit_finances: 'Profit & Finances',
-                      module_tresorerie_admin: 'Trésorerie Admin',
-                      module_expertise_comptable: 'Expertise Comptable',
-                      module_api: 'API & Intégrations',
-                      module_whatsapp: 'Notifications WhatsApp',
-                      module_white_label: 'Logiciel White Label',
-                    };
-                    
-                    const activeFeatures = Object.entries(MODULE_LABELS)
-                      .filter(([key]) => plan[key] === true)
-                      .map(([, label]) => label);
-                      
-                    if (activeFeatures.length === 0) return <li style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Accès de base à la plateforme</li>;
-                    
-                    return activeFeatures.map((label, i) => (
-                      <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', fontSize: '0.95rem', fontWeight: 650, color: 'var(--text-main)' }}>
-                        <CheckCircle size={16} color="#10b981" strokeWidth={3} /> {label}
-                      </li>
-                    ));
-                  })()}
-                </ul>
-              </div>
-
-              <button 
-                onClick={() => handleUpgrade(plan)}
-                disabled={plan.id === tenant.plan}
-                className={plan.id === tenant.plan ? "btn btn-outline" : "btn btn-primary"}
-                style={{ width: '100%', marginTop: '2.5rem', height: '52px', borderRadius: '12px', fontWeight: 800 }}
-              >
-                {plan.id === tenant.plan ? 'Forfait Actuel' : 'Choisir ce forfait'}
-              </button>
-            </div>
-          ))}
+      {/* SECTION 2: PLANS COMPARISON */}
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '3rem' }}>
+          <div style={{ height: '1px', flex: 1, background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.1))' }}></div>
+          <h3 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 950, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#94a3b8' }}>Faites Décoller Votre Entreprise</h3>
+          <div style={{ height: '1px', flex: 1, background: 'linear-gradient(to left, transparent, rgba(255,255,255,0.1))' }}></div>
         </div>
-      )}
-      
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2.5rem' }}>
+           {plans.filter(p => !p.id.includes('CUSTOM') && p.price_fcfa >= 0).map(plan => {
+              const isCurrent = plan.id === tenant.plan;
+              const isPopular = plan.is_popular;
+
+              return (
+                <div 
+                  key={plan.id}
+                  className={`card transition-all duration-500 hover:scale-[1.02] ${isCurrent ? 'border-cyan-500/50' : 'border-white/5'}`}
+                  style={{ 
+                    padding: '3rem', 
+                    borderRadius: '40px', 
+                    background: isCurrent ? 'rgba(6, 182, 212, 0.03)' : 'rgba(15, 23, 42, 0.3)',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    minHeight: '600px'
+                  }}
+                >
+                  {isPopular && (
+                    <div style={{ position: 'absolute', top: '24px', right: '-35px', background: '#3b82f6', color: 'white', padding: '0.5rem 3rem', transform: 'rotate(45deg)', fontSize: '0.65rem', fontWeight: 950, letterSpacing: '0.1em' }}>
+                      POPULAIRE
+                    </div>
+                  )}
+
+                  <div style={{ marginBottom: '2.5rem' }}>
+                    <h4 style={{ fontSize: '1.75rem', fontWeight: 950, margin: 0, color: 'white' }}>{plan.name}</h4>
+                    <p style={{ fontSize: '0.9rem', color: '#94a3b8', margin: '0.75rem 0', lineHeight: 1.6, fontWeight: 500, minHeight: '4.8rem' }}>{plan.description}</p>
+                  </div>
+
+                  <div style={{ marginBottom: '3rem' }}>
+                    <span style={{ fontSize: '3rem', fontWeight: 950 }}>{plan.price_fcfa.toLocaleString()} <span style={{ fontSize: '1rem', color: '#64748b' }}>F/MOIS</span></span>
+                  </div>
+
+                  <div style={{ flex: 1 }} className="space-y-4">
+                     {plan.max_users !== 0 && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.9rem', fontWeight: 700 }}>
+                           <CheckCircle size={18} className="text-cyan-500" />
+                           <span>Jusqu'à {plan.max_users === -1 ? 'Utilisateurs illimités' : `${plan.max_users} Utilisateurs`}</span>
+                        </div>
+                     )}
+                     {Object.entries({
+                        module_crm_clients: 'CRM Clients & Relances',
+                        module_suivi_terrain: 'Suivi Terrain Temps Réel',
+                        module_logistique_pro: 'Outils Logistiques Pro',
+                        module_livraisons_app: 'Application Livreurs Dédiée',
+                        module_tresorerie_audit: 'Trésorerie & Audit Expert',
+                        module_whatsapp: 'Alertes Client WhatsApp',
+                        module_white_label: 'Solution Marque Blanche',
+                        module_api: 'API Développeur Ouverte'
+                     }).filter(([key]) => plan[key] === true).map(([key, label]) => (
+                        <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.9rem', fontWeight: 700, color: 'white' }}>
+                           <CheckCircle size={18} className="text-cyan-500" />
+                           <span>{label}</span>
+                        </div>
+                     ))}
+                     {/* Features non incluses */}
+                     {Object.entries({
+                        module_whatsapp: 'Alertes Client WhatsApp',
+                        module_white_label: 'Solution Marque Blanche',
+                        module_api: 'API Développeur Ouverte'
+                     }).filter(([key]) => plan[key] !== true).map(([key, label]) => (
+                        <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.9rem', fontWeight: 700, color: '#475569', opacity: 0.6 }}>
+                           <CheckCircle size={18} />
+                           <span style={{ textDecoration: 'line-through' }}>{label}</span>
+                        </div>
+                     ))}
+                  </div>
+
+                  <button 
+                    disabled={isCurrent}
+                    onClick={() => handleUpgrade(plan)}
+                    style={{ 
+                      width: '100%', 
+                      height: '65px', 
+                      borderRadius: '20px', 
+                      background: isCurrent ? 'rgba(255,255,255,0.05)' : isPopular ? 'linear-gradient(135deg, #3b82f6, #6366f1)' : 'white', 
+                      color: isCurrent ? '#64748b' : isPopular ? 'white' : 'black', 
+                      border: 'none', 
+                      fontWeight: 950, 
+                      fontSize: '0.9rem', 
+                      marginTop: '2.5rem',
+                      cursor: isCurrent ? 'default' : 'pointer',
+                      boxShadow: isPopular ? '0 10px 25px rgba(59, 130, 246, 0.4)' : 'none',
+                      transition: 'all 0.3s'
+                    }}
+                  >
+                    {isCurrent ? 'FORFAIT ACTUEL' : 'S\'ABONNER MAINTENANT'}
+                  </button>
+                </div>
       <div className="card" style={{ marginTop: '3rem', padding: '2rem', background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)', textAlign: 'center' }}>
         <p style={{ fontWeight: 600, color: '#94a3b8', margin: 0 }}>Besoin d'un plan custom (Multi-entrepôts, White-label) ? 📧 Contactez support@gomboswiftci.com</p>
       </div>

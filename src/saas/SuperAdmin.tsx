@@ -3,10 +3,10 @@ import { insforge } from '../lib/insforge';
 import { Tenant } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { 
-  Activity, ShieldCheck, Eye, Power, X, Search, Send, 
-  CreditCard, Zap, Users, Plus, TrendingUp, Rocket, Package,
-  AlertTriangle, CheckCircle, Info, Lock, EyeOff, Fingerprint, 
-  ShieldAlert, HeartPulse, Lighthouse, Download, ExternalLink, Globe, PieChart as PieIcon
+  Activity, ShieldCheck, Plus, TrendingUp,
+  AlertTriangle, CheckCircle, Info, Fingerprint, 
+  ShieldAlert, Globe, Users, Zap, Send, Rocket, CreditCard, Eye,
+  HeartPulse, Search, Power, X
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useToast } from '../contexts/ToastContext';
@@ -30,8 +30,12 @@ export const SuperAdmin: React.FC = () => {
     active_tenants: 0,
     total_users: 0,
     total_orders: 0,
-    total_revenue: 0
+    total_revenue: 0,
+    tenant_gmv: 0,
+    pending_revenue: 0,
+    growth_chart: []
   });
+  const [plans, setPlans] = useState<any[]>([]);
 
   const { showToast } = useToast();
   const { currentUser } = useAuth();
@@ -39,13 +43,15 @@ export const SuperAdmin: React.FC = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [{ data: tenantsData }, { data: statsData }] = await Promise.all([
+      const [{ data: tenantsData }, { data: statsData }, { data: plansData }] = await Promise.all([
         insforge.database.from('tenants').select('*').order('created_at', { ascending: false }),
-        insforge.database.rpc('get_platform_stats')
+        insforge.database.rpc('get_platform_stats'),
+        insforge.database.from('saas_plans').select('*').order('price_fcfa', { ascending: true })
       ]);
 
       if (tenantsData) setTenants(tenantsData);
       if (statsData) setPlatformStats(statsData);
+      if (plansData) setPlans(plansData);
     } catch (err: any) {
       console.error("SuperAdmin fetchData error:", err);
       showToast(err.message || 'Échec de synchronisation Gombo', 'error');
@@ -131,7 +137,7 @@ export const SuperAdmin: React.FC = () => {
         {activeTab === 'TENANTS' && <TenantsTab tenants={tenants} fetchData={fetchData} loading={loading} />}
         {activeTab === 'PERFORMANCE' && <PerformanceHub />}
         {activeTab === 'PLANS' && <PlansTab />}
-        {activeTab === 'BILLING' && <BillingTab tenants={tenants} fetchData={fetchData} />}
+        {activeTab === 'BILLING' && <BillingTab tenants={tenants} plans={plans} fetchData={fetchData} />}
         {activeTab === 'SUPPORT' && <SupportTab />}
         {activeTab === 'BROADCAST' && <BroadcastTab tenants={tenants} />}
         {activeTab === 'BLOG' && <BlogTab />}
@@ -187,13 +193,6 @@ const OverviewTab = ({ stats, tenants, currentUser }: { stats: any, tenants: Ten
   const activeTenants = tenants.filter(t => t.actif).length;
   const inactiveTenants = totalTenants - activeTenants;
 
-  const planStats = {
-    FREE: tenants.filter(t => t.plan === 'FREE').length,
-    BASIC: tenants.filter(t => t.plan === 'BASIC').length,
-    PREMIUM: tenants.filter(t => t.plan === 'PREMIUM').length,
-    ENTERPRISE: tenants.filter(t => t.plan === 'ENTERPRISE').length,
-    CUSTOM: tenants.filter(t => t.plan === 'CUSTOM').length
-  };
 
   const handleAudit = () => {
     showToast("Analyse de l'infrastructure en cours...", "info");
@@ -237,7 +236,32 @@ const OverviewTab = ({ stats, tenants, currentUser }: { stats: any, tenants: Ten
           </div>
         </div>
 
-        {/* Growth Area Chart */}
+        {/* Growth Area Chart (Restored) */}
+        <div className="gombo-card-elite">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h4 style={{ margin: 0, fontWeight: 950, fontSize: '1.1rem' }}>Data Flow <span className="text-slate-500">& Pulse</span></h4>
+            <span style={{ fontSize: '0.8rem', color: '#06b6d4', fontWeight: 800, background: 'rgba(6,182,212,0.1)', padding: '4px 10px', borderRadius: '8px' }}>+ 5.27% Vol.</span>
+          </div>
+          <div style={{ height: '220px' }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={stats.growth_chart || []}>
+                <defs>
+                  <linearGradient id="gomboGrowth" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.03)" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12, fontWeight: 800}} />
+                <YAxis hide />
+                <Tooltip contentStyle={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }} />
+                <Area type="monotone" dataKey="val" stroke="#06b6d4" strokeWidth={4} fill="url(#gomboGrowth)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
       {/* SECTION 2: MERCHANT HEALTH MATRIX & GROWTH */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem', marginBottom: '2.5rem' }}>
         {/* Activity Gauge */}
@@ -423,9 +447,13 @@ const TenantsTab = ({ tenants, fetchData, loading }: { tenants: Tenant[], fetchD
   const handleUpdatePlan = async (tenantId: string, newPlan: string) => {
     try {
       setActionLoading(true);
-      const { error } = await insforge.database.rpc('update_tenant_plan', { t_id: tenantId, new_plan: newPlan });
+      const { error } = await insforge.database.rpc('update_tenant_plan_manual', { 
+        p_tenant_id: tenantId, 
+        p_plan_id: newPlan,
+        p_status: 'paid' 
+      });
       if (error) throw error;
-      showToast('Plan Tier mis à jour avec succès', 'success');
+      showToast('Configuration SaaS forcée avec succès', 'success');
       fetchData();
     } catch (err: any) {
       showToast(err.message, 'error');
@@ -1043,7 +1071,7 @@ const BroadcastTab = ({ tenants }: { tenants: Tenant[] }) => {
 /* -------------------------------------------------------------------------- */
 /*                               BILLING TAB                                  */
 /* -------------------------------------------------------------------------- */
-const BillingTab = ({ tenants, fetchData }: { tenants: Tenant[], fetchData: () => void }) => {
+const BillingTab = ({ tenants, plans, fetchData }: { tenants: Tenant[], plans: any[], fetchData: () => void }) => {
   const { showToast } = useToast();
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
@@ -1055,17 +1083,17 @@ const BillingTab = ({ tenants, fetchData }: { tenants: Tenant[], fetchData: () =
     }, 1200);
   };
 
-  const handleToggleBilling = async (tenant: Tenant) => {
+  const handleOverrideBilling = async (tenant: Tenant, status: string) => {
     try {
       setActionLoading(tenant.id);
-      const newStatus = tenant.billing_status === 'paid' ? 'pending' : 'paid';
-      const { error } = await insforge.database
-        .from('tenants')
-        .update({ billing_status: newStatus })
-        .eq('id', tenant.id);
+      const { error } = await insforge.database.rpc('update_tenant_plan_manual', {
+        p_tenant_id: tenant.id,
+        p_plan_id: tenant.plan,
+        p_status: status
+      });
       
       if (error) throw error;
-      showToast(`${tenant.nom} : Statut de facturation mis à jour`, 'success');
+      showToast(`${tenant.nom} : Mise à jour manuelle effectuée`, 'success');
       fetchData();
     } catch (err: any) {
       showToast(err.message, 'error');
@@ -1077,19 +1105,17 @@ const BillingTab = ({ tenants, fetchData }: { tenants: Tenant[], fetchData: () =
   // Calcul du MRR réel basé sur les facturations confirmées ('paid')
   const mrr = tenants.reduce((total, t) => {
     if (!t.actif || t.billing_status !== 'paid') return total;
-    if (t.plan === 'BASIC') return total + 15000;
-    if (t.plan === 'PREMIUM') return total + 30000;
-    if (t.plan === 'ENTERPRISE') return total + 75000;
-    return total;
+    const plan = plans.find(p => p.id === t.plan);
+    const price = plan ? (plan.price_fcfa || 0) : 0;
+    return total + (price > 0 ? price : 0);
   }, 0);
 
   // Potentiel MRR (Total des actifs même si non payé ce mois)
   const potentialMrr = tenants.reduce((total, t) => {
     if (!t.actif) return total;
-    if (t.plan === 'BASIC') return total + 15000;
-    if (t.plan === 'PREMIUM') return total + 30000;
-    if (t.plan === 'ENTERPRISE') return total + 75000;
-    return total;
+    const plan = plans.find(p => p.id === t.plan);
+    const price = plan ? (plan.price_fcfa || 0) : 0;
+    return total + (price > 0 ? price : 0);
   }, 0);
 
   return (
@@ -1131,12 +1157,12 @@ const BillingTab = ({ tenants, fetchData }: { tenants: Tenant[], fetchData: () =
                             {t.billing_status === 'paid' ? ' Encaissé' : ' En attente'}
                           </td>
                          <td data-label="VALEUR" style={{ textAlign: 'right', fontWeight: 950 }}>
-                            {t.plan === 'FREE' ? '0' : t.plan === 'BASIC' ? '15 000' : t.plan === 'PREMIUM' ? '30 000' : t.plan === 'ENTERPRISE' ? '75 000' : '0'} F
+                            {plans.find(p => p.id === t.plan)?.price_fcfa?.toLocaleString() || 0} F
                          </td>
                          <td data-label="ACTIONS" style={{ textAlign: 'center' }}>
                              <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
                                 <button 
-                                  onClick={() => handleToggleBilling(t)}
+                                  onClick={() => handleOverrideBilling(t, t.billing_status === 'paid' ? 'pending' : 'paid')}
                                   disabled={actionLoading === t.id}
                                   className="gombo-card" 
                                   style={{ 
@@ -1156,7 +1182,7 @@ const BillingTab = ({ tenants, fetchData }: { tenants: Tenant[], fetchData: () =
                                    ) : (
                                       <>
                                         <CreditCard size={12} /> 
-                                        {t.billing_status === 'paid' ? 'Annuler encaissement' : 'Confirmer paiement'}
+                                        {t.billing_status === 'paid' ? 'Déclasser' : 'Forcer Activation'}
                                       </>
                                    )}
                                 </button>
@@ -1418,7 +1444,7 @@ const SecurityLogsTab = () => {
 /*                          SAFETY & SECURITY CENTER                          */
 /* -------------------------------------------------------------------------- */
 const SecurityCenterTab = () => {
-  const [activeScans, setActiveScans] = React.useState<any[]>([]);
+  const [activeScans, setActiveScans] = useState<any[]>([]);
   const { showToast } = useToast();
 
   const handleDeepScan = () => {
@@ -1489,7 +1515,26 @@ const SecurityCenterTab = () => {
                 </div>
              </div>
 
-             <div className="gombo-card-elite p-10">
+              {activeScans.length > 0 && (
+                <div className="gombo-card-elite p-10">
+                   <h4 className="text-[10px] font-black text-cyan-500 uppercase tracking-[0.2em] mb-8">Active Neural Scans</h4>
+                   <div className="space-y-8">
+                      {activeScans.map(scan => (
+                         <div key={scan.id} className="space-y-4">
+                            <div className="flex justify-between items-center text-xs font-black">
+                               <span className="text-white">{scan.title}</span>
+                               <span className="text-cyan-400">IN PROGRESS</span>
+                            </div>
+                            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                               <div className="h-full bg-cyan-500 animate-[loading_2s_infinite]" style={{ width: '60%' }} />
+                            </div>
+                         </div>
+                      ))}
+                   </div>
+                </div>
+              )}
+
+              <div className="gombo-card-elite p-10">
                 <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-8">Mission Critical Logs</h4>
                 <div className="space-y-4">
                    {[

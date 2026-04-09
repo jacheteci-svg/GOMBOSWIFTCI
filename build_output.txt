@@ -1,0 +1,42 @@
+
+> gomboswiftci@0.0.0 build
+> tsc -b && vite build
+
+src/components/layout/Header.tsx(1,22): error TS6133: 'Building' is declared but its value is never read.
+src/components/layout/Header.tsx(1,32): error TS6133: 'User' is declared but its value is never read.
+src/components/layout/Sidebar.tsx(19,3): error TS2300: Duplicate identifier 'DollarSign'.
+src/components/layout/Sidebar.tsx(30,3): error TS2305: Module '"lucide-react"' has no exported member 'Lighthouse'.
+src/components/layout/Sidebar.tsx(30,3): error TS6133: 'Lighthouse' is declared but its value is never read.
+src/components/layout/Sidebar.tsx(33,3): error TS2300: Duplicate identifier 'DollarSign'.
+src/components/performance/PerformanceDashboard.tsx(29,3): error TS6133: 'Legend' is declared but its value is never read.
+src/components/performance/PerformanceDashboard.tsx(30,3): error TS6133: 'PieChart' is declared but its value is never read.
+src/components/performance/PerformanceDashboard.tsx(31,3): error TS6133: 'Pie' is declared but its value is never read.
+src/components/performance/PerformanceDashboard.tsx(39,3): error TS6133: 'Clock' is declared but its value is never read.
+src/components/performance/PerformanceDashboard.tsx(42,3): error TS6133: 'Banknote' is declared but its value is never read.
+src/components/performance/PerformanceDashboard.tsx(44,3): error TS6133: 'LayoutDashboard' is declared but its value is never read.
+src/components/performance/PerformanceDashboard.tsx(47,3): error TS6133: 'Target' is declared but its value is never read.
+src/components/performance/PerformanceDashboard.tsx(58,3): error TS6133: 'Plus' is declared but its value is never read.
+src/components/performance/PerformanceDashboard.tsx(59,3): error TS6133: 'Send' is declared but its value is never read.
+src/components/performance/PerformanceDashboard.tsx(60,3): error TS6133: 'CreditCard' is declared but its value is never read.
+src/components/performance/PerformanceDashboard.tsx(61,3): error TS6133: 'Eye' is declared but its value is never read.
+src/components/performance/PerformanceDashboard.tsx(62,3): error TS6133: 'Power' is declared but its value is never read.
+src/components/performance/PerformanceDashboard.tsx(63,3): error TS6133: 'X' is declared but its value is never read.
+src/components/performance/PerformanceDashboard.tsx(112,7): error TS6133: 'GOMBO_TAB_BAR_WRAP' is declared but its value is never read.
+src/components/performance/PerformanceDashboard.tsx(124,10): error TS6133: 'gomboPillButtonStyle' is declared but its value is never read.
+src/components/performance/PerformanceDashboard.tsx(189,7): error TS6133: 'BTN_OUTLINE_INLINE' is declared but its value is never read.
+src/components/performance/PerformanceDashboard.tsx(200,10): error TS6133: 'GomboTableSkeleton' is declared but its value is never read.
+src/components/performance/PerformanceDashboard.tsx(251,10): error TS6133: 'StaffKpiCard' is declared but its value is never read.
+src/components/performance/PerformanceDashboard.tsx(402,10): error TS6133: 'loadError' is declared but its value is never read.
+src/components/performance/PerformanceDashboard.tsx(403,10): error TS6133: 'dataUpdatedAt' is declared but its value is never read.
+src/components/performance/PerformanceDashboard.tsx(415,9): error TS6133: 'superAdminLineGradId' is declared but its value is never read.
+src/components/performance/PerformanceDashboard.tsx(415,32): error TS2304: Cannot find name 'useId'.
+src/components/performance/PerformanceDashboard.tsx(450,9): error TS6133: 'renderFilterButtons' is declared but its value is never read.
+src/components/performance/PerformanceDashboard.tsx(566,9): error TS6133: 'exportHubTableCsv' is declared but its value is never read.
+src/components/performance/PerformanceDashboard.tsx(1886,52): error TS6133: 'i' is declared but its value is never read.
+src/pages/blog/Blog.tsx(65,17): error TS2304: Cannot find name 'Sparkles'.
+src/pages/blog/Blog.tsx(138,28): error TS2304: Cannot find name 'ArrowUpRight'.
+src/saas/SaasProvider.tsx(34,7): error TS2741: Property 'ELITE' is missing in type '{ FREE: number; BASIC: number; PREMIUM: number; ENTERPRISE: number; CUSTOM: number; }' but required in type 'Record<Plan, number>'.
+src/saas/SuperAdmin.tsx(6,26): error TS6133: 'EyeOff' is declared but its value is never read.
+src/saas/SuperAdmin.tsx(7,37): error TS6133: 'Lock' is declared but its value is never read.
+src/saas/SuperAdmin.tsx(9,33): error TS6133: 'Package' is declared but its value is never read.
+src/saas/SuperAdmin.tsx(9,42): error TS6133: 'Layout' is declared but its value is never read.

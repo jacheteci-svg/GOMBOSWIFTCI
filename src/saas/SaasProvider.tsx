@@ -35,8 +35,9 @@ const PLAN_HIERARCHY: Record<Plan, number> = {
   FREE: 0,
   BASIC: 1,
   PREMIUM: 2,
-  ENTERPRISE: 3,
-  CUSTOM: 4,
+  ELITE: 3,
+  ENTERPRISE: 4,
+  CUSTOM: 5,
 };
 
 const API_TIMEOUT_MS = 28000;

@@ -27,10 +27,8 @@ import {
   ChevronRight,
   Building,
   Mail,
-  Lighthouse,
   Send,
-  BookOpen,
-  DollarSign
+  BookOpen
 } from 'lucide-react';
 
 interface NavItem {

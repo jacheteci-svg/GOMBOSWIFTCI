@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { insforge } from '../../lib/insforge';
 import { LandingNavbar } from '../../components/layout/LandingNavbar';
 import { 
-  ArrowRight, Calendar, User, Search, 
-  Loader2, Sparkles, TrendingUp, BookOpen, 
-  ChevronRight, ArrowUpRight, Zap, Target
+  Calendar, User, Search, 
+  Loader2, ChevronRight, Zap, Target, Sparkles, ArrowUpRight
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 

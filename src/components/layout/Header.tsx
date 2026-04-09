@@ -1,4 +1,4 @@
-import { Menu, Home, Building, User, ShieldCheck } from 'lucide-react';
+import { Menu, Home, ShieldCheck } from 'lucide-react';
 import { useLocation, Link, useParams } from 'react-router-dom';
 import { NotificationCenter } from './NotificationCenter';
 import { useAuth } from '../../contexts/AuthContext';

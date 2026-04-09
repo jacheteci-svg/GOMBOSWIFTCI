@@ -17,7 +17,7 @@ export type Permission =
   | 'GESTION_LIVREURS'
   | 'TRESORERIE';
 
-export type Plan = 'FREE' | 'BASIC' | 'PREMIUM' | 'ENTERPRISE' | 'CUSTOM';
+export type Plan = 'FREE' | 'BASIC' | 'PREMIUM' | 'ELITE' | 'ENTERPRISE' | 'CUSTOM';
 
 export interface SaasPlanDb {
   id: string;

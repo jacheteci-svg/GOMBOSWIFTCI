@@ -1,0 +1,305 @@
+
+> gomboswiftci@0.0.0 build
+> tsc -b && vite build
+
+src/saas/LandingPage.tsx(326,9): error TS17002: Expected corresponding JSX closing tag for 'div'.
+src/saas/LandingPage.tsx(327,5): error TS1005: ')' expected.
+src/saas/LandingPage.tsx(328,3): error TS1109: Expression expected.
+src/saas/LandingPage.tsx(329,1): error TS1128: Declaration or statement expected.
+src/saas/LandingPage.tsx(331,5): error TS1128: Declaration or statement expected.
+src/saas/LandingPage.tsx(332,3): error TS1109: Expression expected.
+src/saas/LandingPage.tsx(333,1): error TS1128: Declaration or statement expected.
+src/saas/SuperAdmin.tsx(206,6): error TS17008: JSX element 'div' has no corresponding closing tag.
+src/saas/SuperAdmin.tsx(400,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(405,28): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(406,3): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(411,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(416,63): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(416,90): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(416,115): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(416,119): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(417,3): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(419,51): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(419,85): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(423,71): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(424,5): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(425,29): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(426,81): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(426,111): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(430,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(431,38): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(432,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(433,30): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(434,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(435,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(437,54): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(438,5): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(439,29): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(440,79): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(440,95): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(444,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(445,38): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(446,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(447,30): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(448,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(449,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(451,44): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(452,97): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(453,20): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(454,8): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(457,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(458,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(460,58): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(461,23): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(464,7): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(465,14): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(469,7): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(473,25): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(473,59): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(475,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(476,38): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(477,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(478,30): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(479,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(480,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(482,45): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(592,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(597,22): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(598,3): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(598,41): error TS1003: Identifier expected.
+src/saas/SuperAdmin.tsx(598,43): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(600,51): error TS1003: Identifier expected.
+src/saas/SuperAdmin.tsx(600,57): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(603,32): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(604,21): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(606,7): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(606,117): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(606,124): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(609,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(610,38): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(611,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(612,24): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(613,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(614,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(616,17): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(616,33): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(616,35): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(618,29): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(619,17): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(621,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(623,65): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(624,82): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(625,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(627,41): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(629,74): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(634,7): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(634,19): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(634,38): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(635,13): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(662,7): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(666,31): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(666,60): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(669,9): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(670,7): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(674,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(676,7): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(677,9): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(678,11): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(678,23): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(678,56): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(681,19): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(706,13): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(712,96): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(713,11): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(714,73): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(716,11): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(717,9): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(718,85): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(719,9): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(720,7): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(721,75): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(722,7): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(723,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(724,24): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(725,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(726,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(731,12): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(733,14): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(733,91): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(734,14): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(734,93): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(735,14): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(735,95): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(736,14): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(736,95): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(737,14): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(737,91): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(739,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(741,12): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(743,14): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(743,102): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(744,14): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(744,102): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(745,14): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(745,103): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(746,14): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(746,99): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(747,14): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(747,94): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(748,14): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(748,106): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(750,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(752,12): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(754,14): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(754,80): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(755,14): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(755,90): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(756,14): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(756,90): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(757,14): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(757,97): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(758,14): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(758,92): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(760,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(903,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(908,45): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(908,56): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(908,60): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(909,3): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(912,52): error TS1003: Identifier expected.
+src/saas/SuperAdmin.tsx(912,81): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(913,64): error TS1003: Identifier expected.
+src/saas/SuperAdmin.tsx(913,66): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(916,36): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(917,5): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(924,7): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(925,9): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(930,13): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(931,19): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(938,13): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(940,9): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(948,7): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(951,15): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(952,44): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(952,73): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(953,7): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(956,21): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(959,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(960,38): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(961,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(962,24): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(963,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(964,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(966,38): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(967,6): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(968,36): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(970,6): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(971,51): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(973,58): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(975,6): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(976,30): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(977,6): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(979,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1041,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1046,54): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(1046,81): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(1046,88): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1046,92): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(1047,3): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(1048,61): error TS1003: Identifier expected.
+src/saas/SuperAdmin.tsx(1048,67): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(1050,44): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(1051,80): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(1052,20): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(1053,8): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(1055,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1056,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1058,55): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(1059,5): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(1060,34): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(1064,33): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(1064,45): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1070,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1071,38): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(1072,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1073,29): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(1074,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1075,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1078,42): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(1079,5): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(1084,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1087,51): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(1088,5): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(1093,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1180,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1185,24): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(1186,3): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(1186,45): error TS1003: Identifier expected.
+src/saas/SuperAdmin.tsx(1186,47): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(1190,34): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(1191,21): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(1193,7): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(1193,129): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(1193,137): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1195,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1196,67): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(1197,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1198,24): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(1199,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1200,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1202,17): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(1203,19): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(1204,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1259,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1264,24): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(1265,3): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(1271,56): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(1272,23): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(1275,7): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(1277,30): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(1277,37): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1282,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1283,73): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(1284,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1285,24): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(1286,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1287,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1289,60): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(1290,23): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(1292,7): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(1293,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1296,7): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(1296,79): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(1296,93): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1301,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1302,73): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(1303,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1304,24): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(1305,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1306,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1363,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1368,29): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(1369,3): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(1369,39): error TS1003: Identifier expected.
+src/saas/SuperAdmin.tsx(1369,41): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(1372,17): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(1373,5): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(1373,33): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(1374,8): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(1374,117): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(1374,125): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1377,5): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1379,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1412,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1420,31): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(1421,3): error TS1109: Expression expected.
+src/saas/SuperAdmin.tsx(1421,59): error TS1003: Identifier expected.
+src/saas/SuperAdmin.tsx(1421,61): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(1424,30): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(1425,61): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(1426,26): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/saas/SuperAdmin.tsx(1426,42): error TS1005: '}' expected.
+src/saas/SuperAdmin.tsx(1426,106): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1427,3): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1565,1): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/saas/SuperAdmin.tsx(1566,1): error TS1005: '</' expected.
