@@ -4,13 +4,15 @@ import { useToast } from '../contexts/ToastContext';
 import { 
   FileText, Edit, Trash2, PlusCircle, Save, 
   Activity, Eye, Sparkles, LayoutDashboard, 
-  Image as ImageIcon, Globe, Zap, ChevronLeft, User, RefreshCw
+  Image as ImageIcon, Globe, Zap, ChevronLeft, User, RefreshCw,
+  Search, Plus
 } from 'lucide-react';
 import { BLOG_POSTS } from '../pages/blog/blogData';
 
 export const BlogTab = () => {
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [currentPost, setCurrentPost] = useState<any>(null);
   const { showToast } = useToast();
@@ -39,7 +41,7 @@ export const BlogTab = () => {
   const handleDeepSync = async () => {
     setLoading(true);
     try {
-      showToast("Analyse de la bibliothèque SEO Gombo...", "info");
+      showToast("Gombo AI : Synchronisation SEO...", "info");
       let added = 0;
       for (const localPost of BLOG_POSTS) {
         const exists = posts.some(p => p.slug === localPost.slug);
@@ -47,28 +49,23 @@ export const BlogTab = () => {
           const { error } = await insforge.database.from('blog_posts').insert({
             title: localPost.title,
             slug: localPost.slug,
-             excerpt: localPost.excerpt,
-             content: localPost.content,
-             category: localPost.category,
-             author: localPost.author,
-             image: localPost.image,
-             published: true
+            excerpt: localPost.excerpt,
+            content: localPost.content,
+            category: localPost.category,
+            author: localPost.author,
+            image: localPost.image,
+            published: true
           });
           if (!error) added++;
         }
       }
-      showToast(`${added} articles synchronisés avec succès.`, "success");
+      showToast(`${added} articles synchronisés`, "success");
       fetchPosts();
     } catch (err: any) {
       showToast(err.message, "error");
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleRefresh = () => {
-    fetchPosts();
-    showToast('Recherche de nouveaux articles...', 'info');
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -81,100 +78,94 @@ export const BlogTab = () => {
         excerpt: currentPost.excerpt,
         content: currentPost.content,
         category: currentPost.category || 'Logistique',
-        author: currentPost.author || 'GomboSwift Admin',
+        author: currentPost.author || 'Super Admin',
         image: currentPost.image,
         published: currentPost.published !== undefined ? currentPost.published : true
       };
 
       if (currentPost.id) {
-        const { error } = await insforge.database
-          .from('blog_posts')
-          .update(postData)
-          .eq('id', currentPost.id);
+        const { error } = await insforge.database.from('blog_posts').update(postData).eq('id', currentPost.id);
         if (error) throw error;
-        showToast('Article mis à jour avec succès', 'success');
+        showToast('Article mis à jour', 'success');
       } else {
-        const { error } = await insforge.database
-          .from('blog_posts')
-          .insert([postData]);
+        const { error } = await insforge.database.from('blog_posts').insert([postData]);
         if (error) throw error;
-        showToast('Nouvel article publié !', 'success');
+        showToast('Article publié !', 'success');
       }
-
       setIsEditing(false);
       setCurrentPost(null);
       fetchPosts();
     } catch (err: any) {
-      showToast(err.message || 'Erreur lors de la sauvegarde', 'error');
+      showToast(err.message, 'error');
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Supprimer définitivement cet article ? Cette action est irréversible.')) return;
+    if (!confirm('Voulez-vous supprimer cet article ?')) return;
     try {
       const { error } = await insforge.database.from('blog_posts').delete().eq('id', id);
       if (error) throw error;
-      showToast('Article supprimé du réseau', 'info');
+      showToast('Article supprimé', 'info');
       fetchPosts();
     } catch (err: any) {
       showToast(err.message, 'error');
     }
   };
 
+  const filteredPosts = posts.filter(p => 
+    p.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    p.category.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   if (isEditing) {
     return (
       <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between border-b border-white/5 pb-8">
+          <div className="flex items-center gap-6">
             <button 
               onClick={() => setIsEditing(false)}
-              className="group flex items-center justify-center size-12 rounded-2xl bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] transition-all"
+              className="group flex items-center justify-center size-14 rounded-2xl bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] transition-all"
             >
-              <ChevronLeft size={20} className="text-slate-400 group-hover:text-white" />
+              <ChevronLeft size={24} className="text-slate-400 group-hover:text-white" />
             </button>
             <div>
-              <h2 className="text-3xl font-black text-white tracking-tight" style={{ fontFamily: 'Outfit' }}>
-                {currentPost?.id ? 'Éditer' : 'Rédiger'} <span className="text-slate-500">l&apos;article</span>
+              <h2 className="text-4xl font-black text-white tracking-tight" style={{ fontFamily: 'Outfit' }}>
+                {currentPost?.id ? 'Editer' : 'Rédiger'} <span className="text-slate-500">l&apos;article</span>
               </h2>
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">
-                {currentPost?.id ? 'Modification de contenu existant' : 'Création d&apos;une nouvelle publication'}
-              </p>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-8 space-y-6">
-            <div className="rounded-[32px] border border-white/[0.08] bg-slate-900/40 p-8">
-              <form onSubmit={handleSave} className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Titre de l&apos;article</label>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          <div className="lg:col-span-8 space-y-8">
+            <div className="rounded-[40px] border border-white/[0.08] bg-slate-900/40 p-10">
+              <form onSubmit={handleSave} className="space-y-8">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Titre de l&apos;actualité</label>
                   <input 
                     type="text" 
-                    className="w-full bg-white/[0.03] border border-white/[0.06] rounded-2xl px-6 py-4 text-white font-bold placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/50 transition-all"
-                    placeholder="Ex: Optimiser vos livraisons avec GomboSwiftCI"
+                    className="w-full bg-white/[0.03] border border-white/[0.06] rounded-2xl px-8 py-5 text-xl text-white font-black focus:outline-none focus:border-cyan-500/50 transition-all"
                     value={currentPost?.title || ''} 
                     onChange={e => setCurrentPost({...currentPost, title: e.target.value})} 
                     required 
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Contenu (Format HTML)</label>
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Contenu Master (HTML)</label>
                   <textarea 
-                    className="w-full bg-white/[0.03] border border-white/[0.06] rounded-3xl px-6 py-4 text-slate-300 font-medium placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/50 transition-all min-h-[450px] font-mono text-sm leading-relaxed"
-                    placeholder="Écrivez votre article ici..."
+                    className="w-full bg-white/[0.03] border border-white/[0.06] rounded-3xl px-8 py-6 text-slate-300 font-medium focus:outline-none focus:border-cyan-500/50 transition-all min-h-[500px] font-mono text-sm"
                     value={currentPost?.content || ''} 
                     onChange={e => setCurrentPost({...currentPost, content: e.target.value})} 
                     required 
                   />
                 </div>
 
-                <div className="flex items-center justify-between pt-4">
-                   <div className="flex items-center gap-3">
-                      <div className={`size-3 rounded-full ${currentPost?.published !== false ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]' : 'bg-slate-600'}`} />
+                <div className="flex items-center justify-between border-t border-white/5 pt-8">
+                   <div className="flex items-center gap-4">
+                      <div className={`size-4 rounded-full ${currentPost?.published !== false ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'bg-slate-700'}`} />
                       <label className="flex items-center gap-3 cursor-pointer group">
                         <input 
                           type="checkbox" 
@@ -182,86 +173,47 @@ export const BlogTab = () => {
                           checked={currentPost?.published !== false} 
                           onChange={e => setCurrentPost({...currentPost, published: e.target.checked})} 
                         />
-                        <span className="text-sm font-black text-slate-300 group-hover:text-white transition-colors">Publier immédiatement</span>
+                        <span className="text-sm font-black text-slate-400 group-hover:text-white transition-colors">Diffuser sur le réseau</span>
                       </label>
                    </div>
                    <button 
                     type="submit" 
                     disabled={loading}
-                    className="flex items-center gap-3 px-10 py-4 rounded-2xl bg-cyan-600 hover:bg-cyan-500 text-white font-black shadow-lg shadow-cyan-900/20 transition-all disabled:opacity-50"
+                    className="px-12 py-5 rounded-2xl bg-white text-black font-black text-sm uppercase tracking-widest hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
                   >
-                    {loading ? <Activity size={20} className="animate-spin" /> : <><Save size={20} /> ENREGISTRER</>}
+                    {loading ? <Activity size={20} className="animate-spin" /> : 'SAUVEGARDER'}
                   </button>
                 </div>
               </form>
             </div>
           </div>
 
-          <div className="lg:col-span-4 space-y-6">
-            <div className="rounded-[32px] border border-white/[0.08] bg-slate-900/60 p-8 space-y-6">
-              <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
-                <Zap size={16} className="text-amber-400" /> Métadonnées & SEO
+          <div className="lg:col-span-4 space-y-8">
+            <div className="rounded-[40px] border border-white/[0.08] bg-slate-900/60 p-10 space-y-8">
+              <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] flex items-center gap-3">
+                <Sparkles size={18} className="text-cyan-400" /> SEO CONFIG
               </h3>
               
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Slug URL</label>
-                  <input 
-                    type="text" 
-                    className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl px-4 py-3 text-xs text-cyan-400 font-mono focus:outline-none"
-                    placeholder="mon-article-slug"
-                    value={currentPost?.slug || ''} 
-                    onChange={e => setCurrentPost({...currentPost, slug: e.target.value})}
-                  />
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Slug URL</label>
+                  <input type="text" className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl px-5 py-4 text-xs text-cyan-400 font-black" value={currentPost?.slug || ''} onChange={e => setCurrentPost({...currentPost, slug: e.target.value})} />
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Catégorie</label>
-                  <select 
-                    className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl px-4 py-3 text-xs text-white focus:outline-none"
-                    value={currentPost?.category || 'Logistique'} 
-                    onChange={e => setCurrentPost({...currentPost, category: e.target.value})}
-                  >
-                    <option value="Logistique">Logistique</option>
-                    <option value="E-commerce">E-commerce</option>
-                    <option value="Tutoriels">Tutoriels</option>
-                    <option value="Mises à jour">Mises à jour</option>
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Catégorie</label>
+                  <select className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl px-5 py-4 text-xs font-black text-white outline-none" value={currentPost?.category || 'Logistique'} onChange={e => setCurrentPost({...currentPost, category: e.target.value})}>
+                    <option value="Logistique">LOGISTIQUE</option>
+                    <option value="E-commerce">E-COMMERCE</option>
+                    <option value="Strategy">STRATÉGIE</option>
                   </select>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Image de couverture</label>
-                  <div className="relative group">
-                    <input 
-                      type="text" 
-                      className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl px-4 py-3 text-xs text-slate-400 focus:outline-none pr-10"
-                      placeholder="https://images.unsplash.com/..."
-                      value={currentPost?.image || ''} 
-                      onChange={e => setCurrentPost({...currentPost, image: e.target.value})}
-                    />
-                    <ImageIcon size={14} className="absolute right-3 top-3.5 text-slate-600" />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="flex items-center justify-between text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">
-                    <span>Extrait SEO</span>
-                    <span className={(currentPost?.excerpt?.length || 0) > 160 ? 'text-rose-500' : 'text-emerald-500'}>{currentPost?.excerpt?.length || 0}/160</span>
-                  </label>
-                  <textarea 
-                    className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl px-4 py-3 text-xs text-slate-300 focus:outline-none min-h-[100px] resize-none"
-                    placeholder="Brève description pour Google..."
-                    value={currentPost?.excerpt || ''} 
-                    onChange={e => setCurrentPost({...currentPost, excerpt: e.target.value})}
-                  />
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Image URL</label>
+                  <input type="text" className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl px-5 py-4 text-xs text-slate-400" value={currentPost?.image || ''} onChange={e => setCurrentPost({...currentPost, image: e.target.value})} />
                 </div>
               </div>
-            </div>
-
-            <div className="rounded-[32px] border border-dashed border-white/10 p-8 text-center bg-white/[0.02]">
-               <Globe size={32} className="mx-auto text-slate-700 mb-4" />
-               <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Aperçu Public</p>
-               <p className="text-[10px] text-slate-600 mt-2">L&apos;article sera visible à l&apos;adresse<br/>/blog/{currentPost?.slug || '...'}</p>
             </div>
           </div>
         </div>
@@ -271,132 +223,75 @@ export const BlogTab = () => {
 
   return (
     <div className="space-y-10 animate-in fade-in duration-700">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-white/[0.05] pb-10">
-        <div>
-           <div className="flex items-center gap-2 mb-2">
-             <Sparkles className="text-cyan-400 size-4" />
-             <span className="text-[11px] font-black uppercase tracking-[0.2em] text-cyan-400">Content Management System</span>
-           </div>
-           <h2 className="text-4xl font-black text-white tracking-tight" style={{ fontFamily: 'Outfit' }}>
-             Blog <span className="text-slate-500">Intelligence</span>
-           </h2>
-           <p className="text-sm font-medium text-slate-500 mt-2">Gerez le contenu marketing et le référencement naturel.</p>
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '3rem', flexWrap: 'wrap' }}>
+        <div style={{ flex: 1, position: 'relative', minWidth: '300px' }}>
+          <Search size={22} style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+          <input 
+            type="text" 
+            placeholder="Rechercher un article ou une catégorie..." 
+            className="form-input"
+            style={{ paddingLeft: '4rem', height: '64px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px', fontSize: '1rem', fontWeight: 600 }}
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+          />
         </div>
-        
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={handleDeepSync}
-            className="flex items-center gap-2 px-6 py-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 font-black text-xs uppercase tracking-widest hover:bg-indigo-500/20 transition-all"
-            title="Sychroniser avec la bibliothèque SEO"
-          >
-            <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
-            Deep Sync
+        <div className="flex gap-3">
+          <button onClick={handleDeepSync} className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/20 transition-all">
+             <RefreshCw size={24} className={loading ? 'animate-spin' : ''} />
           </button>
-
-          <button 
-            onClick={handleRefresh}
-            className="p-4 rounded-2xl bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] transition-all text-slate-400 hover:text-white"
-            title="Rafraîchir"
-          >
-            <Activity size={20} className={loading ? 'animate-spin' : ''} />
-          </button>
-          
-          <button 
-            onClick={() => { setCurrentPost({}); setIsEditing(true); }}
-            className="group relative flex items-center gap-3 px-8 py-4 rounded-2xl bg-white text-slate-950 font-black overflow-hidden hover:scale-105 transition-all active:scale-95"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-violet-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <PlusCircle size={20} className="relative group-hover:text-white" />
-            <span className="relative group-hover:text-white">NOUVEL ARTICLE</span>
+          <button onClick={() => { setCurrentPost({}); setIsEditing(true); }} className="btn btn-primary" style={{ height: '64px', padding: '0 2.5rem', borderRadius: '20px', fontWeight: 950, display: 'flex', gap: '0.8rem' }}>
+            <Plus size={24} /> NOUVEL ARTICLE
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {posts.map(post => (
-          <div 
-            key={post.id} 
-            className="group relative flex flex-col rounded-[32px] border border-white/[0.08] bg-slate-900/40 overflow-hidden hover:border-white/20 transition-all hover:shadow-2xl hover:shadow-black/50"
-          >
-            <div className="aspect-video w-full bg-slate-800 relative overflow-hidden">
-               {post.image ? (
-                 <img src={post.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={post.title} />
-               ) : (
-                 <div className="w-full h-full flex items-center justify-center text-slate-700">
-                   <FileText size={48} />
-                 </div>
-               )}
-               <div className="absolute top-4 left-4">
-                 <span className="px-3 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-[10px] font-black text-white uppercase tracking-widest">
-                   {post.category}
-                 </span>
-               </div>
-               {!post.published && (
-                 <div className="absolute top-4 right-4">
-                    <span className="px-3 py-1 rounded-full bg-amber-500/20 backdrop-blur-md border border-amber-500/30 text-[10px] font-black text-amber-400 uppercase tracking-widest">
-                       Brouillon
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+           {[1,2,3].map(i => <div key={i} className="h-[450px] rounded-[32px] bg-white/[0.02] border border-white/[0.05] animate-pulse" />)}
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 420px), 1fr))', gap: '2rem' }}>
+          {filteredPosts.map(post => (
+            <div 
+              key={post.id} 
+              className="gombo-card-elite group overflow-hidden flex flex-col"
+              style={{ borderLeft: `6px solid ${post.published ? '#06b6d4' : '#f43f5e'}`, padding: 0 }}
+            >
+              <div className="aspect-video w-full bg-slate-900 relative overflow-hidden">
+                 {post.image && <img src={post.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-60 group-hover:opacity-100" alt={post.title} />}
+                 <div className="absolute top-6 left-6">
+                    <span className="px-4 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-black text-white uppercase tracking-widest">
+                       {post.category}
                     </span>
                  </div>
-               )}
-            </div>
+              </div>
 
-            <div className="p-8 flex-1 flex flex-col">
-              <h3 className="text-xl font-black text-white leading-tight mb-4 group-hover:text-cyan-400 transition-colors">
-                {post.title}
-              </h3>
-              <p className="text-sm text-slate-500 font-medium line-clamp-3 mb-8">
-                {post.excerpt || 'Aucun extrait disponible pour cet article.'}
-              </p>
+              <div className="p-8 flex-1 flex flex-col">
+                <h3 className="text-2xl font-black text-white leading-tight mb-4" style={{ fontFamily: 'Outfit' }}>{post.title}</h3>
+                <p className="text-sm text-slate-500 font-medium line-clamp-3 mb-10">{post.excerpt}</p>
 
-              <div className="mt-auto flex items-center justify-between pt-6 border-t border-white/[0.05]">
-                 <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-2 text-slate-500">
-                       <User size={12} />
-                       <span className="text-[10px] font-black uppercase tracking-widest">{post.author?.split(' ')[0]}</span>
-                    </div>
-                 </div>
-                 <div className="flex items-center gap-2">
-                    <button 
-                      onClick={() => { setCurrentPost(post); setIsEditing(true); }}
-                      className="size-9 rounded-xl flex items-center justify-center bg-white/[0.04] text-slate-400 hover:bg-cyan-500 hover:text-white transition-all"
-                    >
-                      <Edit size={16} />
-                    </button>
-                    <button 
-                      onClick={() => handleDelete(post.id)}
-                      className="size-9 rounded-xl flex items-center justify-center bg-white/[0.04] text-slate-400 hover:bg-rose-500 hover:text-white transition-all"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                    <a 
-                      href={`/blog/${post.slug}`} 
-                      target="_blank" 
-                      className="size-9 rounded-xl flex items-center justify-center bg-white/[0.04] text-slate-400 hover:bg-violet-500 hover:text-white transition-all"
-                    >
-                      <Eye size={16} />
-                    </a>
-                 </div>
+                <div className="mt-auto flex items-center justify-between pt-8 border-t border-white/[0.05]">
+                   <div className="flex items-center gap-3">
+                      <div className="size-8 rounded-full bg-white/5 flex items-center justify-center text-slate-400">
+                         <User size={14} />
+                      </div>
+                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{post.author}</span>
+                   </div>
+                   <div className="flex gap-2">
+                      <button 
+                        onClick={() => { setCurrentPost(post); setIsEditing(true); }}
+                        className="size-11 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/[0.08] transition-all"
+                      >
+                        <Edit size={18} />
+                      </button>
+                      <button onClick={() => handleDelete(post.id)} className="size-11 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-rose-500/60 hover:text-rose-400 hover:bg-rose-500/10 transition-all">
+                        <Trash2 size={18} />
+                      </button>
+                   </div>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-
-        {posts.length === 0 && !loading && (
-          <div className="col-span-full py-20 text-center">
-             <div className="size-20 rounded-[32px] bg-slate-900 border border-white/[0.05] flex items-center justify-center mx-auto mb-6">
-                <LayoutDashboard size={32} className="text-slate-700" />
-             </div>
-             <h4 className="text-xl font-black text-white mb-2">Aucun article publié</h4>
-             <p className="text-slate-500 max-w-xs mx-auto text-sm font-medium">Commencez à rédiger du contenu pour dynamiser votre présence en ligne.</p>
-          </div>
-        )}
-      </div>
-
-      {loading && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-           {[1,2,3].map(i => (
-             <div key={i} className="h-[400px] rounded-[32px] bg-slate-900/40 border border-white/[0.05] animate-pulse" />
-           ))}
+          ))}
         </div>
       )}
     </div>

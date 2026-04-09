@@ -1355,75 +1355,82 @@ export const PerformanceDashboard = ({
 
   if (isSuperAdmin && !moduleChrome) {
     return (
-      <div className="space-y-10 lg:space-y-14" style={{ animation: 'fadeIn 0.6s cubic-bezier(0.23, 1, 0.32, 1)' }}>
+      <div className="space-y-12 animate-in fade-in duration-700">
+        {/* --- PERFORMANCE HEADER: HARMONIZED WITH TENANTS --- */}
+        <div style={{ display: 'flex', gap: '1rem', marginBottom: '3rem', flexWrap: 'wrap', alignItems: 'center' }}>
+           <div style={{ flex: 1 }}>
+              <div className="flex items-center gap-2.5 mb-2">
+                 <div className="size-2 rounded-full bg-cyan-400 shadow-[0_0_10px_#22d3ee]" />
+                 <span className="text-[11px] font-black uppercase tracking-[0.25em] text-cyan-400">Platform Intelligence Engine</span>
+              </div>
+              <h2 className="text-5xl font-black text-white tracking-tighter" style={{ fontFamily: 'Outfit' }}>
+                Global <span className="text-slate-500">Growth Pulse</span>
+              </h2>
+           </div>
+           <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-white/[0.03] border border-white/[0.08]">
+                {periodFilterDefs.map(f => (
+                  <button 
+                    key={f.id} 
+                    onClick={() => setFilter(f.id)}
+                    className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filter === f.id ? 'bg-white text-black shadow-lg shadow-white/10' : 'text-slate-500 hover:text-white'}`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+              <button onClick={() => fetchData()} className="size-14 flex items-center justify-center rounded-2xl bg-white/[0.04] border border-white/[0.08] text-cyan-400 hover:bg-white/[0.08] transition-all">
+                <RefreshCw size={24} className={loading ? 'animate-spin' : ''} />
+              </button>
+           </div>
+        </div>
+
         {/* --- HERO SECTION: PLATFORM PULSE --- */}
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
           <div className="xl:col-span-8">
              <div 
-               className="relative overflow-hidden rounded-[40px] border border-white/[0.08] bg-[#0c1222] p-8 lg:p-10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)]"
+               className="relative overflow-hidden rounded-[48px] border border-white/[0.08] bg-[#0c1222] p-10 lg:p-12 shadow-[0_32px_80px_-20px_rgba(0,0,0,0.8)]"
                style={{ 
                  background: 'radial-gradient(circle at 0% 0%, rgba(6,182,212,0.1) 0%, transparent 50%), radial-gradient(circle at 100% 100%, rgba(99,102,241,0.08) 0%, transparent 50%), #0c1222',
                }}
              >
                 <div className="absolute -right-20 -top-20 size-80 bg-cyan-500/10 blur-[100px] animate-pulse" />
                 
-                <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12 border-b border-white/[0.05] pb-8">
-                  <div>
-                    <div className="flex items-center gap-2.5 mb-3">
-                       <div className="size-2 rounded-full bg-cyan-400 shadow-[0_0_10px_#22d3ee]" />
-                       <span className="text-[11px] font-black uppercase tracking-[0.25em] text-cyan-400">Platform Intelligence Engine</span>
-                    </div>
-                    <h2 className="text-4xl lg:text-5xl font-black text-white tracking-tighter" style={{ fontFamily: 'Outfit' }}>
-                      Global <span className="text-slate-500">Growth Pulse</span>
-                    </h2>
-                  </div>
-                  <div className="flex items-center gap-4">
-                     <div className="flex flex-col items-end">
-                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Network Status</span>
-                        <div className="flex items-center gap-2 mt-1">
-                           <div className="px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-black text-emerald-400 uppercase tracking-wider">
-                              Operational
-                           </div>
-                        </div>
-                     </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-12">
-                  <div className="space-y-2">
-                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Total Transactions</p>
-                    <p className="text-4xl font-black text-white tabular-nums tracking-tight">{totalCmd.toLocaleString('fr-FR')}</p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-12 mb-12">
+                  <div className="space-y-3">
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.25em]">Total Transactions</p>
+                    <p className="text-5xl font-black text-white tabular-nums tracking-tight" style={{ fontFamily: 'Outfit' }}>{totalCmd.toLocaleString('fr-FR')}</p>
                     <div className="flex items-center gap-1.5 text-[11px] text-cyan-400 font-bold">
-                       <TrendingUp size={12} /> +12.5% <span className="text-slate-600 font-medium">vs last period</span>
+                       <TrendingUp size={14} /> +12.5% <span className="text-slate-600 font-medium">vs last period</span>
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Gross Turnover</p>
-                    <p className="text-3xl font-black text-white tabular-nums tracking-tight">
-                      {totalGmv.toLocaleString('fr-FR')} 
-                      <span className="text-sm text-slate-500 font-medium ml-1.5">CFA</span>
-                    </p>
+                  <div className="space-y-3">
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.25em]">Gross Turnover</p>
+                    <div className="flex items-baseline gap-2">
+                      <p className="text-4xl font-black text-white tabular-nums tracking-tight" style={{ fontFamily: 'Outfit' }}>{totalGmv.toLocaleString('fr-FR')}</p>
+                      <span className="text-xs text-slate-500 font-black uppercase">CFA</span>
+                    </div>
                     <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 font-bold">
-                       <Zap size={12} fill="currentColor" /> Premium Yield
+                       <Zap size={14} fill="currentColor" /> Premium Yield
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Merchant Base</p>
-                    <p className="text-4xl font-black text-white tabular-nums tracking-tight">{tenantRows.filter(x => x.actif).length}</p>
+                  <div className="space-y-3">
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.25em]">Merchant Base</p>
+                    <p className="text-5xl font-black text-white tabular-nums tracking-tight" style={{ fontFamily: 'Outfit' }}>{tenantRows.filter(x => x.actif).length}</p>
                     <div className="flex items-center gap-1.5 text-[11px] text-slate-500 font-bold italic">
                        Global Connectivity
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Efficacy Index</p>
-                    <p className="text-4xl font-black text-emerald-400 tabular-nums tracking-tight">{100 - superAdminInsights.tauxAnnulPlateforme}%</p>
-                    <div className="w-full h-1 bg-white/5 rounded-full mt-2 overflow-hidden">
-                       <div className="h-full bg-emerald-500" style={{ width: `${100 - superAdminInsights.tauxAnnulPlateforme}%` }} />
+                  <div className="space-y-3">
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.25em]">Efficacy Index</p>
+                    <p className="text-5xl font-black text-emerald-400 tabular-nums tracking-tight" style={{ fontFamily: 'Outfit' }}>{100 - superAdminInsights.tauxAnnulPlateforme}%</p>
+                    <div className="w-full h-1.5 bg-white/5 rounded-full mt-3 overflow-hidden">
+                       <div className="h-full bg-emerald-500 shadow-[0_0_10px_#10b981]" style={{ width: `${100 - superAdminInsights.tauxAnnulPlateforme}%` }} />
                     </div>
                   </div>
                 </div>
 
-                <div className="h-64 w-full mt-6">
+                <div className="h-72 w-full mt-12">
                   <ResponsiveContainer width="100%" height="100%">
                     <ComposedChart data={platformTimeline}>
                       <defs>
@@ -1431,10 +1438,6 @@ export const PerformanceDashboard = ({
                           <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.4}/>
                           <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
                         </linearGradient>
-                        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                           <feGaussianBlur stdDeviation="3" result="blur" />
-                           <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                        </filter>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.03)" />
                       <XAxis 
@@ -1455,7 +1458,6 @@ export const PerformanceDashboard = ({
                         stroke="#22d3ee" 
                         strokeWidth={4} 
                         fill="url(#saAreaGrad)" 
-                        filter="url(#glow)"
                         animationDuration={1500}
                       />
                       <Line 
@@ -1477,42 +1479,42 @@ export const PerformanceDashboard = ({
 
           <div className="xl:col-span-4 flex flex-col gap-8">
              {topTenant && (
-                <div className="relative overflow-hidden rounded-[40px] border border-white/[0.08] bg-slate-900/40 p-10 flex-1 group hover:border-cyan-500/30 transition-all duration-500 shadow-xl">
+                <div className="relative overflow-hidden rounded-[48px] border border-white/[0.08] bg-slate-900/40 p-10 flex-1 group hover:border-cyan-500/30 transition-all duration-500 shadow-2xl">
                    <div className="absolute -right-20 -top-20 size-64 bg-cyan-500/10 blur-[80px] group-hover:bg-cyan-500/20 transition-all duration-700" />
                    
                    <div className="relative flex items-center justify-between mb-8">
-                      <div className="flex items-center gap-3">
-                         <div className="size-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
-                            <Rocket size={24} />
+                      <div className="flex items-center gap-4">
+                         <div className="size-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                            <Rocket size={28} />
                          </div>
                          <div>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Market Leader</p>
-                            <h4 className="text-2xl font-black text-white" style={{ fontFamily: 'Outfit' }}>{topTenant.nom}</h4>
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Market Leader</p>
+                            <h4 className="text-3xl font-black text-white" style={{ fontFamily: 'Outfit' }}>{topTenant.nom}</h4>
                          </div>
                       </div>
-                      <div className="size-10 rounded-full bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-slate-500 group-hover:text-white transition-colors cursor-pointer">
-                         <ExternalLink size={18} />
+                      <div className="size-12 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-slate-500 group-hover:text-white transition-colors cursor-pointer">
+                         <ExternalLink size={20} />
                       </div>
                    </div>
 
-                   <p className="text-xs text-slate-400 leading-relaxed mb-8">
-                      Cette boutique génère actuellement <span className="text-white font-bold">{Math.round((topTenant.ca_gmv / totalGmv) * 100)}%</span> du volume total de la plateforme sur la période sélectionnée.
+                   <p className="text-sm text-slate-400 leading-relaxed mb-10 font-medium">
+                      Cette boutique génère actuellement <span className="text-white font-black">{Math.round((topTenant.ca_gmv / totalGmv) * 100)}%</span> du volume total de la plateforme sur la période sélectionnée.
                    </p>
 
                    <div className="space-y-6">
-                      <div className="p-5 rounded-3xl bg-white/[0.03] border border-white/[0.06]">
-                         <div className="flex justify-between items-end mb-2">
+                      <div className="p-6 rounded-[32px] bg-white/[0.03] border border-white/[0.06]">
+                         <div className="flex justify-between items-end mb-3">
                             <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Turnover Performance</p>
-                            <span className="text-xs font-black text-cyan-400">Target Reached</span>
+                            <span className="text-[10px] font-black text-cyan-400 uppercase tracking-widest">Target Reached</span>
                          </div>
-                         <p className="text-2xl font-black text-white">{topTenant.ca_gmv.toLocaleString('fr-FR')} <span className="text-xs text-slate-500">CFA</span></p>
+                         <p className="text-3xl font-black text-white" style={{ fontFamily: 'Outfit' }}>{topTenant.ca_gmv.toLocaleString('fr-FR')} <span className="text-xs text-slate-500 font-medium">CFA</span></p>
                       </div>
-                      <div className="p-5 rounded-3xl bg-white/[0.03] border border-white/[0.06]">
-                         <div className="flex justify-between items-end mb-2">
+                      <div className="p-6 rounded-[32px] bg-white/[0.03] border border-white/[0.06]">
+                         <div className="flex justify-between items-end mb-3">
                             <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Efficiency Index</p>
                             <span className="text-xs font-black text-emerald-400">{topTenant.success_rate}%</span>
                          </div>
-                         <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                         <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
                             <div className="h-full bg-emerald-500 shadow-[0_0_10px_#10b981]" style={{ width: `${topTenant.success_rate}%` }} />
                          </div>
                       </div>
@@ -1520,18 +1522,18 @@ export const PerformanceDashboard = ({
                 </div>
              )}
 
-             <div className="rounded-[40px] border border-white/[0.08] bg-slate-900/20 p-8 flex-shrink-0">
-                <div className="flex items-center justify-between mb-8 border-b border-white/5 pb-4">
-                   <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Revenue Distribution</h4>
-                   <PieIcon size={16} className="text-slate-600" />
+             <div className="rounded-[48px] border border-white/[0.08] bg-slate-900/20 p-10 flex-shrink-0">
+                <div className="flex items-center justify-between mb-8 border-b border-white/5 pb-6">
+                   <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.25em]">Revenue Distribution</h4>
+                   <PieIcon size={18} className="text-slate-600" />
                 </div>
-                <div style={{ height: 200 }}>
+                <div style={{ height: 220 }}>
                    <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={chartData} layout="vertical" margin={{ left: -30, right: 30 }}>
                          <XAxis type="number" hide />
                          <YAxis dataKey="nom" type="category" hide />
                          <Tooltip {...chartTooltip} />
-                         <Bar dataKey="ca_gmv" radius={[0, 6, 6, 0]} barSize={8}>
+                         <Bar dataKey="ca_gmv" radius={[0, 8, 8, 0]} barSize={10}>
                             {chartData.map((_entry, index) => (
                                <Cell key={`cell-${index}`} fill={index === 0 ? '#22d3ee' : index === 1 ? '#818cf8' : 'rgba(255,255,255,0.05)'} />
                             ))}
@@ -1546,7 +1548,7 @@ export const PerformanceDashboard = ({
         {/* --- INTELLIGENCE GRID: DEEP INSIGHTS --- */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <IntelligenceCard 
-              icon={<TrendingUp size={18} />}
+              icon={<TrendingUp size={20} />}
               label="Growth Engine"
               value={`${totalGmv.toLocaleString('fr-FR')} CFA`}
               color="#22d3ee"
@@ -1554,7 +1556,7 @@ export const PerformanceDashboard = ({
               subValue="Revenue Matrix"
             />
             <IntelligenceCard 
-              icon={<ShieldCheck size={18} />}
+              icon={<ShieldCheck size={20} />}
               label="Network Integrity"
               value={`${100 - superAdminInsights.tauxAnnulPlateforme}%`}
               color="#10b981"
@@ -1562,7 +1564,7 @@ export const PerformanceDashboard = ({
               subValue="Health State"
             />
             <IntelligenceCard 
-              icon={<AlertCircle size={18} />}
+              icon={<AlertCircle size={20} />}
               label="Risk Assessment"
               value={`${superAdminInsights.atRiskCount}`}
               color="#fbbf24"
@@ -1570,7 +1572,7 @@ export const PerformanceDashboard = ({
               subValue="Priority Focus"
             />
             <IntelligenceCard 
-              icon={<Users size={18} />}
+              icon={<Users size={20} />}
               label="Merchant Churn"
               value={`${superAdminInsights.dormantActiveCount}`}
               color="#f43f5e"
@@ -1585,17 +1587,17 @@ export const PerformanceDashboard = ({
            
            <div className="flex flex-col md:flex-row md:items-center justify-between p-10 lg:p-12 gap-8 border-b border-white/[0.05]">
               <div>
-                 <h4 className="text-2xl font-black text-white tracking-tight mb-2" style={{ fontFamily: 'Outfit' }}>Merchant Command <span className="text-slate-500 ml-1">Matrix</span></h4>
+                 <h4 className="text-3xl font-black text-white tracking-tight mb-2" style={{ fontFamily: 'Outfit' }}>Merchant Command <span className="text-slate-500 ml-1">Matrix</span></h4>
                  <p className="text-sm font-medium text-slate-500">Analytics granulaire par partenaire contractuel</p>
               </div>
-              <div className="flex items-center gap-3 bg-white/[0.03] p-2 rounded-2xl border border-white/[0.06]">
-                 <button onClick={() => setSuperAdminScope('all')} className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${superAdminScope === 'all' ? 'bg-white text-black shadow-lg' : 'text-slate-500 hover:text-white'}`}>Toutes</button>
-                 <button onClick={() => setSuperAdminScope('active_only')} className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${superAdminScope === 'active_only' ? 'bg-white text-black shadow-lg' : 'text-slate-500 hover:text-white'}`}>Actives</button>
+              <div className="flex items-center gap-4 bg-white/[0.03] p-2.5 rounded-[24px] border border-white/[0.06]">
+                 <button onClick={() => setSuperAdminScope('all')} className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${superAdminScope === 'all' ? 'bg-white text-black shadow-lg shadow-white/10' : 'text-slate-500 hover:text-white'}`}>Toutes</button>
+                 <button onClick={() => setSuperAdminScope('active_only')} className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${superAdminScope === 'active_only' ? 'bg-white text-black shadow-lg shadow-white/10' : 'text-slate-500 hover:text-white'}`}>Actives</button>
                  <button 
                   onClick={exportSuperAdminTenantsCsv}
-                  className="size-10 flex items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500/20 transition-all"
+                  className="size-12 flex items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500/20 transition-all"
                  >
-                    <Download size={18} />
+                    <Download size={22} />
                  </button>
               </div>
            </div>
@@ -1604,49 +1606,49 @@ export const PerformanceDashboard = ({
               <table className="w-full text-left border-collapse min-w-[900px]">
                  <thead>
                     <tr className="bg-white/[0.01]">
-                       <th className="px-10 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] border-b border-white/[0.05]">Partner Infrastructure</th>
-                       <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] border-b border-white/[0.05] cursor-pointer hover:text-cyan-400 transition-colors" onClick={() => setSuperAdminSort('ca_gmv')}>Turnover {superAdminSort === 'ca_gmv' && '▼'}</th>
-                       <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] border-b border-white/[0.05] cursor-pointer hover:text-cyan-400 transition-colors" onClick={() => setSuperAdminSort('commandes')}>Orders {superAdminSort === 'commandes' && '▼'}</th>
-                       <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] border-b border-white/[0.05] cursor-pointer hover:text-cyan-400 transition-colors" onClick={() => setSuperAdminSort('success_rate')}>Efficiency {superAdminSort === 'success_rate' && '▼'}</th>
-                       <th className="px-8 py-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] border-b border-white/[0.05]">Account Tier</th>
+                       <th className="px-12 py-8 text-[10px] font-black text-slate-500 uppercase tracking-[0.25em] border-b border-white/[0.05]">Partner Infrastructure</th>
+                       <th className="px-8 py-8 text-[10px] font-black text-slate-500 uppercase tracking-[0.25em] border-b border-white/[0.05] cursor-pointer hover:text-cyan-400 transition-colors" onClick={() => setSuperAdminSort('ca_gmv')}>Turnover {superAdminSort === 'ca_gmv' && '▼'}</th>
+                       <th className="px-8 py-8 text-[10px] font-black text-slate-500 uppercase tracking-[0.25em] border-b border-white/[0.05] cursor-pointer hover:text-cyan-400 transition-colors" onClick={() => setSuperAdminSort('commandes')}>Orders {superAdminSort === 'commandes' && '▼'}</th>
+                       <th className="px-8 py-8 text-[10px] font-black text-slate-500 uppercase tracking-[0.25em] border-b border-white/[0.05] cursor-pointer hover:text-cyan-400 transition-colors" onClick={() => setSuperAdminSort('success_rate')}>Efficiency {superAdminSort === 'success_rate' && '▼'}</th>
+                       <th className="px-10 py-8 text-[10px] font-black text-slate-500 uppercase tracking-[0.25em] border-b border-white/[0.05]">Account Tier</th>
                     </tr>
                  </thead>
                  <tbody className="divide-y divide-white/[0.03]">
                     {superAdminDisplayRows.map((r) => (
                        <tr key={r.slug} className="group hover:bg-white/[0.02] transition-colors">
-                          <td className="px-10 py-8">
-                             <div className="flex items-center gap-5">
-                                <div className="size-14 rounded-2xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-xl font-black text-slate-400 group-hover:bg-cyan-500/10 group-hover:text-cyan-400 group-hover:border-cyan-500/30 transition-all duration-300">
+                          <td className="px-12 py-10">
+                             <div className="flex items-center gap-6">
+                                <div className="size-16 rounded-2xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-2xl font-black text-slate-400 group-hover:bg-cyan-500/10 group-hover:text-cyan-400 group-hover:border-cyan-500/30 transition-all duration-300">
                                    {r.nom.charAt(0)}
                                 </div>
                                 <div>
-                                   <div className="flex items-center gap-2 mb-1">
-                                      <p className="text-base font-black text-white">{r.nom}</p>
+                                   <div className="flex items-center gap-2.5 mb-1.5">
+                                      <p className="text-lg font-black text-white" style={{ fontFamily: 'Outfit' }}>{r.nom}</p>
                                       {r.actif ? (
-                                         <div className="size-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
+                                         <div className="size-2 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]" />
                                       ) : (
-                                         <div className="size-1.5 rounded-full bg-slate-700" />
+                                         <div className="size-2 rounded-full bg-slate-700" />
                                       )}
                                    </div>
                                    <p className="text-[11px] font-bold text-slate-500 font-mono tracking-tight uppercase">{r.slug}.gomboswiftci.app</p>
                                 </div>
                              </div>
                           </td>
-                          <td className="px-8 py-8">
+                          <td className="px-8 py-10">
                              <div>
-                                <p className="text-lg font-black text-white tabular-nums tracking-tight">{r.ca_gmv.toLocaleString('fr-FR')} <span className="text-[10px] text-slate-500 ml-1">CFA</span></p>
-                                <p className="text-[10px] text-slate-600 font-bold uppercase tracking-widest mt-1">Gross Merchandise Vol.</p>
+                                <p className="text-xl font-black text-white tabular-nums tracking-tight" style={{ fontFamily: 'Outfit' }}>{r.ca_gmv.toLocaleString('fr-FR')} <span className="text-[10px] text-slate-500 ml-1 font-medium">CFA</span></p>
+                                <p className="text-[10px] text-slate-600 font-bold uppercase tracking-widest mt-1.5">Gross Merchandise Vol.</p>
                              </div>
                           </td>
-                          <td className="px-8 py-8">
+                          <td className="px-8 py-10">
                              <div>
-                                <p className="text-lg font-black text-slate-300 tabular-nums tracking-tight">{r.commandes.toLocaleString('fr-FR')}</p>
-                                <p className="text-[10px] text-slate-600 font-bold uppercase tracking-widest mt-1">Processed Units</p>
+                                <p className="text-xl font-black text-slate-300 tabular-nums tracking-tight" style={{ fontFamily: 'Outfit' }}>{r.commandes.toLocaleString('fr-FR')}</p>
+                                <p className="text-[10px] text-slate-600 font-bold uppercase tracking-widest mt-1.5">Processed Units</p>
                              </div>
                           </td>
-                          <td className="px-8 py-8">
-                             <div className="flex items-center gap-4">
-                                <div className="flex-1 w-32 h-2 rounded-full bg-white/[0.03] overflow-hidden border border-white/5">
+                          <td className="px-8 py-10">
+                             <div className="flex items-center gap-5">
+                                <div className="flex-1 w-40 h-2 rounded-full bg-white/[0.03] overflow-hidden border border-white/5">
                                    <div 
                                       className={`h-full rounded-full transition-all duration-1000 ${Number(r.success_rate) > 85 ? 'bg-emerald-500 shadow-[0_0_12px_#10b981]' : Number(r.success_rate) > 65 ? 'bg-cyan-500 shadow-[0_0_12px_#06b6d4]' : 'bg-amber-500 shadow-[0_0_12px_#f59e0b]'}`} 
                                       style={{ width: `${r.success_rate}%` }} 
@@ -1655,8 +1657,8 @@ export const PerformanceDashboard = ({
                                 <span className={`text-sm font-black tabular-nums ${Number(r.success_rate) > 85 ? 'text-emerald-400' : 'text-slate-400'}`}>{r.success_rate}%</span>
                              </div>
                           </td>
-                          <td className="px-8 py-8">
-                             <div className={`inline-flex px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest border ${
+                          <td className="px-10 py-10">
+                             <div className={`inline-flex px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border ${
                                 r.plan === 'ENTERPRISE' ? 'bg-violet-500/10 border-violet-500/30 text-violet-400' :
                                 r.plan === 'PREMIUM' ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400' :
                                 'bg-slate-500/10 border-slate-500/20 text-slate-500'
@@ -1670,9 +1672,9 @@ export const PerformanceDashboard = ({
               </table>
            </div>
            {superAdminDisplayRows.length === 0 && (
-              <div className="p-20 text-center">
-                 <Search size={48} className="text-slate-800 mx-auto mb-6" />
-                 <p className="text-slate-500 font-bold uppercase tracking-widest text-sm">No partners found for current scope</p>
+              <div className="p-24 text-center">
+                 <Search size={64} className="text-slate-800 mx-auto mb-8" />
+                 <p className="text-slate-500 font-black uppercase tracking-[0.3em] text-sm">No partners found for current scope</p>
               </div>
            )}
         </div>

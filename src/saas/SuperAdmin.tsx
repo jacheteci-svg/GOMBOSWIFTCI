@@ -4,8 +4,8 @@ import { Tenant } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { 
   Activity, ShieldCheck, Plus, TrendingUp,
-  AlertTriangle, CheckCircle, Info, Fingerprint, 
-  ShieldAlert, Globe, Users, Zap, Send, Rocket, CreditCard, Eye,
+  AlertTriangle, CheckCircle, XCircle, Info, Fingerprint, 
+  ShieldAlert, Globe, Users, Send, Rocket, CreditCard, Eye,
   HeartPulse, Search, Power, X
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -81,8 +81,6 @@ export const SuperAdmin: React.FC = () => {
       minHeight: '100%'
     }}>
       
-      {activeTab !== 'PERFORMANCE' && (
-      <>
       {/* Header Gombo */}
       <div style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
@@ -128,8 +126,6 @@ export const SuperAdmin: React.FC = () => {
            </button>
         </div>
       </div>
-      </>
-      )}
 
       {/* TABS CONTENT */}
       <div style={{ marginTop: activeTab === 'PERFORMANCE' ? 0 : '1rem', animation: 'fadeIn 0.5s ease' }}>
@@ -428,7 +424,7 @@ const OverviewTab = ({ stats, tenants, currentUser }: { stats: any, tenants: Ten
 /* -------------------------------------------------------------------------- */
 const PerformanceHub = () => {
   return (
-    <div className="w-full max-w-full overflow-x-hidden" style={{ marginTop: '-2.5rem' }}>
+    <div className="w-full max-w-full overflow-x-hidden" style={{ marginTop: '0' }}>
       <PerformanceDashboard isSuperAdmin={true} />
     </div>
   );
@@ -625,6 +621,7 @@ const TenantsTab = ({ tenants, fetchData, loading }: { tenants: Tenant[], fetchD
 const PlansTab = () => {
   const [plans, setPlans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
   const [savingId, setSavingId] = useState<string | null>(null);
   const { showToast } = useToast();
 
@@ -645,7 +642,7 @@ const PlansTab = () => {
 
   const handleRefresh = () => {
     fetchPlans();
-    showToast('Recalcul des offres SaaS...', 'info');
+    showToast('Infrastructure SaaS synchronisée', 'info');
   };
 
   const handleChange = (id: string, field: string, value: any) => {
@@ -653,13 +650,9 @@ const PlansTab = () => {
   };
 
   const handleSave = async (plan: any) => {
-    // 1. Instantly update local state (optimistic update)
-    setPlans(pList => pList.map(p => p.id === plan.id ? { ...plan } : p));
-    
     setSavingId(plan.id);
     try {
-      // Use RPC with SECURITY DEFINER to bypass RLS silent failures
-      const { data: rpcResult, error } = await insforge.database.rpc('update_saas_plan', {
+      const { error } = await insforge.database.rpc('update_saas_plan', {
         p_id: plan.id,
         p_name: plan.name,
         p_price_fcfa: plan.price_fcfa,
@@ -673,7 +666,6 @@ const PlansTab = () => {
         p_module_livreurs: !!plan.module_livreurs,
         p_module_rapport_avance: !!plan.module_rapport_avance,
         p_module_white_label: !!plan.module_white_label,
-        // NEW GRANULAR
         p_module_crm_clients: !!plan.module_crm_clients,
         p_module_suivi_terrain: !!plan.module_suivi_terrain,
         p_module_logistique_pro: !!plan.module_logistique_pro,
@@ -685,245 +677,199 @@ const PlansTab = () => {
         p_module_profit_finances: !!plan.module_profit_finances,
         p_module_tresorerie_admin: !!plan.module_tresorerie_admin,
         p_module_expertise_comptable: !!plan.module_expertise_comptable,
-        // NEW LIMITS
         p_max_products: plan.max_products === undefined ? -1 : Number(plan.max_products),
+        p_max_users: plan.max_users === undefined ? -1 : Number(plan.max_users),
+        p_max_orders_month: plan.max_orders_month === undefined ? -1 : Number(plan.max_orders_month)
       });
 
       if (error) throw error;
-
-      // RPC returns { success: true/false, error?: string }
-      const result = rpcResult as any;
-      if (result && result.success === false) {
-        throw new Error(result.error || 'Échec de la mise à jour en base de données');
-      }
-
-      showToast(`✅ Offre "${plan.name}" publiée sur la landing page !`, 'success');
-      await fetchPlans(); // Ensure fresh data from DB
+      showToast(`Plan "${plan.name}" mis à jour `, 'success');
+      await fetchPlans();
     } catch (err: any) {
-      // Fallback: try direct update if RPC doesn't exist yet
-      if (err?.message?.includes('Could not find') || err?.code === 'PGRST202') {
-        try {
-          const { data: updateData, error: updateError } = await (insforge.database
-            .from('saas_plans') as any)
-            .update({
-              name: plan.name,
-              price_fcfa: plan.price_fcfa,
-              description: plan.description,
-              is_popular: plan.is_popular,
-              module_caisse: plan.module_caisse,
-              module_audit: plan.module_audit,
-              module_api: plan.module_api,
-              module_whatsapp: plan.module_whatsapp,
-              module_multi_depot: plan.module_multi_depot,
-              module_livreurs: plan.module_livreurs,
-              module_rapport_avance: plan.module_rapport_avance,
-              module_white_label: plan.module_white_label,
-              // NEW GRANULAR
-              module_crm_clients: !!plan.module_crm_clients,
-              module_suivi_terrain: !!plan.module_suivi_terrain,
-              module_logistique_pro: !!plan.module_logistique_pro,
-              module_staff_perf: !!plan.module_staff_perf,
-              module_livraisons_app: !!plan.module_livraisons_app,
-              module_tresorerie_audit: !!plan.module_tresorerie_audit,
-              module_caisse_retour_expert: !!plan.module_caisse_retour_expert,
-              module_rapport_journalier: !!plan.module_rapport_journalier,
-              module_profit_finances: !!plan.module_profit_finances,
-              module_tresorerie_admin: !!plan.module_tresorerie_admin,
-              module_expertise_comptable: !!plan.module_expertise_comptable,
-              max_products: plan.max_products === undefined ? -1 : Number(plan.max_products),
-            })
-            .eq('id', plan.id)
-            .select();
-
-          if (updateError) throw updateError;
-          if (!updateData || updateData.length === 0) {
-            showToast(`⚠️ Mise à jour bloquée par RLS. Exécutez fix_plans_update.sql`, 'error');
-          } else {
-            showToast(`✅ Offre "${plan.name}" mise à jour !`, 'success');
-            fetchPlans();
-          }
-        } catch (fallbackErr: any) {
-          showToast(fallbackErr.message || 'Erreur lors de la mise à jour', 'error');
-        }
-      } else {
-        showToast(err.message || 'Erreur lors de la mise à jour', 'error');
-      }
+      showToast(err.message || 'Erreur lors de la mise à jour', 'error');
     } finally {
       setSavingId(null);
     }
   };
 
+  const filteredPlans = plans.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   const MODULE_CATEGORIES = [
     {
-      title: 'Logistique & Opérations',
+      title: 'Opérations',
       modules: [
-        { key: 'module_crm_clients', label: 'CRM & Clients', color: '#f59e0b', icon: '👥' },
-        { key: 'module_suivi_terrain', label: 'Suivi Terrain', color: '#10b981', icon: '📍' },
-        { key: 'module_logistique_pro', label: 'Logistique Pro', color: '#06b6d4', icon: '🚚' },
-        { key: 'module_livraisons_app', label: 'App Livraisons', color: '#ec4899', icon: '📱' },
-        { key: 'module_livreurs', label: 'Gestion Livreurs', icon: '🛵', color: '#0616d4' },
+        { key: 'module_crm_clients', label: 'CRM Clients', icon: <Users size={14} /> },
+        { key: 'module_suivi_terrain', label: 'Suivi Terrain', icon: <Globe size={14} /> },
+        { key: 'module_logistique_pro', label: 'Logist. Pro', icon: <Rocket size={14} /> },
+        { key: 'module_livraisons_app', label: 'App Livr.', icon: <Activity size={14} /> },
       ]
     },
     {
-      title: 'Finance & Performance',
+      title: 'Finance',
       modules: [
-        { key: 'module_tresorerie_audit', label: 'Trésorerie & Audit', color: '#6366f1', icon: '🛡️' },
-        { key: 'module_caisse_retour_expert', label: 'Caisse / Retour', color: '#10b981', icon: '💸' },
-        { key: 'module_rapport_journalier', label: 'Rapport Journalier', color: '#3b82f6', icon: '📊' },
-        { key: 'module_profit_finances', label: 'Profit & Finances', color: '#10b981', icon: '📈' },
-        { key: 'module_staff_perf', label: 'Performance Staff', color: '#8b5cf6', icon: '🏆' },
-        { key: 'module_expertise_comptable', label: 'Expertise Comptable', icon: '🏛️', color: '#64748b' }
+        { key: 'module_tresorerie_audit', label: 'Audit Tréso.', icon: <ShieldCheck size={14} /> },
+        { key: 'module_caisse_retour_expert', label: 'Caisse Expert', icon: <CreditCard size={14} /> },
+        { key: 'module_staff_perf', label: 'Staff Perf.', icon: <TrendingUp size={14} /> },
+        { key: 'module_expertise_comptable', label: 'Comptabilité', icon: <ShieldCheck size={14} /> }
       ]
     },
     {
-      title: 'Enterprise & Scaling',
+      title: 'Enterprise',
       modules: [
-        { key: 'module_api', label: 'API Access', color: '#8b5cf6', icon: '🔌' },
-        { key: 'module_whatsapp', label: 'WhatsApp Notif.', color: '#25d366', icon: '💬' },
-        { key: 'module_multi_depot', label: 'Multi-Dépôts', icon: '🏬', color: '#f59e0b' },
-        { key: 'module_rapport_avance', label: 'Rapports Avancés', icon: '🔬', color: '#a855f7' },
-        { key: 'module_white_label', label: 'Marque Blanche', color: '#f43f5e', icon: '🎨' },
+        { key: 'module_api', label: 'API Access', icon: <Activity size={14} /> },
+        { key: 'module_whatsapp', label: 'WhatsApp', icon: <Send size={14} /> },
+        { key: 'module_multi_depot', label: 'Multi-Dépôts', icon: <Globe size={14} /> },
+        { key: 'module_white_label', label: 'White Label', icon: <ShieldCheck size={14} /> },
       ]
     }
   ];
 
+  const getPlanTheme = (index: number) => {
+    const themes = [
+      { color: '#06b6d4', grad: 'linear-gradient(135deg, #0891b2, #06b6d4)', glow: 'rgba(6,182,212,0.3)' },
+      { color: '#6366f1', grad: 'linear-gradient(135deg, #4f46e5, #6366f1)', glow: 'rgba(99,102,241,0.3)' },
+      { color: '#a855f7', grad: 'linear-gradient(135deg, #9333ea, #a855f7)', glow: 'rgba(168,85,247,0.3)' }
+    ];
+    return themes[index % themes.length];
+  };
+
   return (
-    <div style={{ animation: 'fadeIn 0.4s ease' }} className="space-y-10">
-      <div className="flex items-center justify-between mb-10 pb-6 border-b border-white/[0.05]">
-        <div>
-           <div className="flex items-center gap-2 mb-2">
-             <Rocket className="text-indigo-400 size-4" />
-             <span className="text-[11px] font-black uppercase tracking-[0.2em] text-indigo-400">Offer Architecture</span>
-           </div>
-           <h2 className="text-4xl font-black text-white tracking-tight" style={{ fontFamily: 'Outfit' }}>
-             SaaS <span className="text-slate-500">Configurator</span>
-           </h2>
+    <div style={{ animation: 'fadeIn 0.5s ease' }} className="space-y-12">
+      {/* IDENTICAL BAR TO TENANTS TAB */}
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '3rem', flexWrap: 'wrap' }}>
+        <div style={{ flex: 1, position: 'relative', minWidth: '300px' }}>
+          <Search size={22} style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+          <input 
+            type="text" 
+            placeholder="Rechercher une offre commerciale..." 
+            className="form-input"
+            style={{ paddingLeft: '4rem', height: '64px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px', fontSize: '1rem', fontWeight: 600 }}
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+          />
         </div>
-        
         <button 
           onClick={handleRefresh}
-          className="p-4 rounded-2xl bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] transition-all text-slate-400 hover:text-white"
+          className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.08] hover:bg-white/[0.08] transition-all text-slate-400"
+          style={{ height: '64px', width: '64px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
-          <Activity size={20} className={loading ? 'animate-spin' : ''} />
+          <Activity size={24} className={loading ? 'animate-spin' : ''} />
         </button>
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-           {[1,2,3].map(i => <div key={i} className="h-[600px] rounded-[40px] bg-slate-900/40 border border-white/[0.05] animate-pulse" />)}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+           {[1,2,3].map(i => <div key={i} className="h-[700px] rounded-[32px] bg-white/[0.02] border border-white/[0.05] animate-pulse" />)}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8">
-          {plans.map(plan => (
-            <div key={plan.id} 
-              className={`group flex flex-col rounded-[40px] border transition-all duration-500 p-8 hover:shadow-2xl hover:shadow-black/60 ${plan.is_popular ? 'border-indigo-500/40 bg-slate-900/60' : 'border-white/[0.06] bg-slate-900/30'}`}
-              style={{ position: 'relative' }}
-            >
-              {plan.is_popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-6 py-1.5 rounded-full bg-indigo-600 text-white text-[10px] font-black uppercase tracking-[0.2em] shadow-lg">
-                  Most Popular
-                </div>
-              )}
-
-              <div className="flex items-start justify-between mb-8">
-                <div className="flex items-center gap-4">
-                  <div className="size-14 rounded-2xl flex items-center justify-center bg-white/[0.04] border border-white/[0.1] text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-all">
-                    <Zap size={24} />
-                  </div>
-                  <div>
-                    <input
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+          {filteredPlans.map((plan, idx) => {
+            const theme = getPlanTheme(idx);
+            return (
+              <div key={plan.id} 
+                className="relative flex flex-col rounded-[40px] overflow-hidden transition-all duration-500 hover:-translate-y-2 group"
+                style={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 32px 64px -16px rgba(0,0,0,0.5)' }}
+              >
+                {/* HEADER (SLANTED & RIBBON) */}
+                <div style={{ position: 'relative', height: '180px', background: theme.grad, padding: '2rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                   {/* Triangle fold effect */}
+                   <div style={{ position: 'absolute', bottom: '-20px', left: '0', borderTop: `20px solid transparent`, borderRight: `20px solid black`, opacity: 0.3 }} />
+                   
+                   <input
                       type="text"
                       value={plan.name}
                       onChange={e => handleChange(plan.id, 'name', e.target.value)}
-                      className="bg-transparent border-none text-white font-black text-xl focus:outline-none w-full"
+                      className="bg-transparent border-none text-white font-black text-3xl text-center focus:outline-none w-full drop-shadow-lg"
                     />
-                    <div className="flex items-center gap-2 mt-1">
-                       <input
-                        type="checkbox"
-                        id={`pop-${plan.id}`}
-                        checked={!!plan.is_popular}
-                        onChange={e => handleChange(plan.id, 'is_popular', e.target.checked)}
-                        className="size-3 accent-indigo-500"
-                      />
-                      <label htmlFor={`pop-${plan.id}`} className="text-[9px] font-black text-slate-500 uppercase tracking-widest cursor-pointer hover:text-indigo-400">Marquer comme populaire</label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-6 mb-10">
-                <div className="space-y-2">
-                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Tarification Mensuelle</label>
-                   <div className="relative">
+                    
+                    <div className="mt-2 flex items-baseline gap-1">
+                      <span className="text-white/60 font-black text-sm">$</span>
                       <input
                         type="number"
                         value={plan.price_fcfa}
                         onChange={e => handleChange(plan.id, 'price_fcfa', parseInt(e.target.value))}
-                        className="w-full bg-white/[0.03] border border-white/[0.06] rounded-2xl px-6 py-4 text-3xl font-black text-white tabular-nums focus:outline-none focus:border-cyan-500/30 transition-all"
+                        className="bg-transparent border-none text-white font-black text-5xl text-center focus:outline-none w-28 tabular-nums drop-shadow-xl"
                       />
-                      <span className="absolute right-6 top-5 text-sm font-black text-slate-500">FCFA / MOIS</span>
+                      <span className="text-white/60 font-black text-xs">.00</span>
+                    </div>
+
+                    {/* ANGLED BOTTOM EDGE */}
+                    <div style={{ 
+                      position: 'absolute', bottom: '-40px', left: 0, right: 0, height: '80px', 
+                      background: theme.grad, 
+                      clipPath: 'polygon(0 0, 100% 0, 100% 20%, 0 100%)', 
+                      zIndex: 1
+                    }} />
+                </div>
+
+                {/* CONTENT SECTION */}
+                <div className="flex-1 flex flex-col px-8 pb-32 pt-16">
+                  {/* QUOTAS */}
+                  <div className="grid grid-cols-3 gap-3 mb-10">
+                     {[
+                       { k: 'max_users', label: 'Users' }, { k: 'max_products', label: 'Items' }, { k: 'max_orders_month', label: 'Sales' }
+                     ].map(q => (
+                       <div key={q.k} className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.05] flex flex-col items-center">
+                          <input 
+                            type="number" value={plan[q.k]} 
+                            onChange={e => handleChange(plan.id, q.k, Number(e.target.value))}
+                            className="bg-transparent border-none text-white font-black text-center text-sm w-full focus:outline-none" 
+                          />
+                          <span className="text-[10px] font-black uppercase text-slate-500 mt-1 tracking-widest">{q.label}</span>
+                       </div>
+                     ))}
+                  </div>
+
+                  {/* MODULES LIST */}
+                  <div className="space-y-8">
+                    {MODULE_CATEGORIES.map(cat => (
+                      <div key={cat.title}>
+                        <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.25em] mb-4 px-2 flex items-center gap-3">
+                           {cat.title} <div className="h-[1px] flex-1 bg-white/[0.03]"></div>
+                        </p>
+                        <div className="space-y-2">
+                          {cat.modules.map(mod => (
+                            <div 
+                              key={mod.key}
+                              onClick={() => handleChange(plan.id, mod.key, !plan[mod.key])}
+                              className={`flex items-center gap-4 p-3.5 rounded-2xl transition-all cursor-pointer ${plan[mod.key] ? 'bg-white/[0.04] text-white border border-white/[0.05]' : 'opacity-20 hover:opacity-100 hover:bg-white/[0.02] text-slate-500 border border-transparent'}`}
+                            >
+                               <div className={`p-2 rounded-xl ${plan[mod.key] ? 'bg-white/10' : ''}`}>
+                                  {plan[mod.key] ? <CheckCircle size={14} color={theme.color} /> : <XCircle size={14} />}
+                               </div>
+                               <span className="text-xs font-black uppercase tracking-widest">{mod.label}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* FOOTER AREA */}
+                <div className="absolute bottom-0 left-0 right-0 p-10 pt-20" style={{ background: 'linear-gradient(to top, #0f172a 60%, transparent)' }}>
+                   <button
+                    onClick={() => handleSave(plan)}
+                    disabled={savingId === plan.id}
+                    className="relative z-10 w-full h-16 rounded-2xl text-white font-black text-sm uppercase tracking-[0.2em] transition-all hover:scale-[1.03] active:scale-[0.97] disabled:opacity-50 flex items-center justify-center gap-3 shadow-2xl"
+                    style={{ background: theme.grad, boxShadow: `0 16px 40px ${theme.glow}` }}
+                   >
+                     {savingId === plan.id ? <Activity size={24} className="animate-spin" /> : 'DEPLOIEMENT PLAN'}
+                   </button>
+                   
+                   <div className="mt-5 flex items-center justify-center gap-2">
+                      <input 
+                        type="checkbox" checked={!!plan.is_popular} 
+                        onChange={e => handleChange(plan.id, 'is_popular', e.target.checked)} 
+                        className="accent-white size-3"
+                        id={`pop-p-${plan.id}`}
+                      />
+                      <label htmlFor={`pop-p-${plan.id}`} className="text-[9px] font-black text-slate-500 uppercase tracking-widest cursor-pointer">Recommander sur le portail</label>
                    </div>
                 </div>
-
-                <div className="space-y-2">
-                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Description Marketing</label>
-                   <textarea
-                      value={plan.description || ''}
-                      onChange={e => handleChange(plan.id, 'description', e.target.value)}
-                      placeholder="Description attractive..."
-                      className="w-full bg-white/[0.03] border border-white/[0.06] rounded-2xl px-4 py-3 text-xs text-slate-400 font-medium focus:outline-none min-h-[80px] resize-none"
-                    />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
-                    <p className="text-[9px] font-black text-slate-600 uppercase mb-2">Users Limit</p>
-                    <input type="number" value={plan.max_users || -1} onChange={e => handleChange(plan.id, 'max_users', Number(e.target.value))} className="w-full bg-transparent border-none text-white font-black focus:outline-none tabular-nums" />
-                  </div>
-                  <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
-                    <p className="text-[9px] font-black text-slate-600 uppercase mb-2">Orders / Month</p>
-                    <input type="number" value={plan.max_orders_month || -1} onChange={e => handleChange(plan.id, 'max_orders_month', Number(e.target.value))} className="w-full bg-transparent border-none text-white font-black focus:outline-none tabular-nums" />
-                  </div>
-                </div>
               </div>
-
-              <div className="flex-1 space-y-8 overflow-y-auto max-h-[400px] pr-2 custom-scrollbar">
-                {MODULE_CATEGORIES.map(cat => (
-                  <div key={cat.title} className="space-y-3">
-                    <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest ml-1">{cat.title}</p>
-                    <div className="grid grid-cols-1 gap-2">
-                      {cat.modules.map(mod => (
-                        <label
-                          key={mod.key}
-                          className={`flex items-center gap-3 p-3 rounded-2xl border transition-all cursor-pointer ${plan[mod.key] ? 'bg-white/[0.05] border-white/10' : 'bg-transparent border-white/[0.03] opacity-40 hover:opacity-100'}`}
-                        >
-                          <span className="text-lg">{mod.icon}</span>
-                          <span className="text-[11px] font-bold text-white flex-1">{mod.label}</span>
-                          <input
-                            type="checkbox"
-                            checked={!!plan[mod.key]}
-                            onChange={e => handleChange(plan.id, mod.key, e.target.checked)}
-                            className="size-4 accent-indigo-500"
-                          />
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-8 pt-6 border-t border-white/[0.05]">
-                <button
-                  onClick={() => handleSave(plan)}
-                  disabled={savingId === plan.id}
-                  className="w-full h-16 rounded-[20px] bg-white text-slate-950 font-black text-sm flex items-center justify-center gap-3 hover:scale-[1.02] transition-all disabled:opacity-50"
-                >
-                  {savingId === plan.id ? <Activity size={20} className="animate-spin" /> : <><Send size={18} /> PUBLIER L&apos;OFFRE</>}
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
