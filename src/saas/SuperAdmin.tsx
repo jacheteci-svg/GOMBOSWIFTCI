@@ -129,7 +129,7 @@ export const SuperAdmin: React.FC = () => {
         {activeTab === 'TENANTS' && <TenantsTab tenants={tenants} fetchData={fetchData} loading={loading} />}
         {activeTab === 'PERFORMANCE' && <PerformanceHub />}
         {activeTab === 'PLANS' && <PlansTab />}
-        {activeTab === 'BILLING' && <BillingTab tenants={tenants} />}
+        {activeTab === 'BILLING' && <BillingTab tenants={tenants} fetchData={fetchData} />}
         {activeTab === 'SUPPORT' && <SupportTab />}
         {activeTab === 'BROADCAST' && <BroadcastTab tenants={tenants} />}
         {activeTab === 'BLOG' && <BlogTab />}
@@ -1019,15 +1019,35 @@ const BroadcastTab = ({ tenants }: { tenants: Tenant[] }) => {
 /* -------------------------------------------------------------------------- */
 /*                               BILLING TAB                                  */
 /* -------------------------------------------------------------------------- */
-const BillingTab = ({ tenants }: { tenants: Tenant[] }) => {
+const BillingTab = ({ tenants, fetchData }: { tenants: Tenant[], fetchData: () => void }) => {
   const { showToast } = useToast();
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const handleImpersonate = (tenant: any) => {
     showToast(`Session sécurisée : Tunnel Gombo vers ${tenant.nom}...`, 'info');
     setTimeout(() => {
        const origin = window.location.origin;
-       window.open(`${origin}/${tenant.slug}`, '_blank');
-    }, 1500);
+       window.open(`${origin}/${tenant.slug}/dashboard`, '_blank');
+    }, 1200);
+  };
+
+  const handleToggleBilling = async (tenant: Tenant) => {
+    try {
+      setActionLoading(tenant.id);
+      const newStatus = tenant.billing_status === 'paid' ? 'pending' : 'paid';
+      const { error } = await insforge.database
+        .from('tenants')
+        .update({ billing_status: newStatus })
+        .eq('id', tenant.id);
+      
+      if (error) throw error;
+      showToast(`${tenant.nom} : Statut de facturation mis à jour`, 'success');
+      fetchData();
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   // Calcul du MRR réel basé sur les facturations confirmées ('paid')
@@ -1090,14 +1110,41 @@ const BillingTab = ({ tenants }: { tenants: Tenant[] }) => {
                             {t.plan === 'FREE' ? '0' : t.plan === 'BASIC' ? '15 000' : t.plan === 'PREMIUM' ? '30 000' : t.plan === 'ENTERPRISE' ? '75 000' : '0'} F
                          </td>
                          <td data-label="ACTIONS" style={{ textAlign: 'center' }}>
-                            <button 
-                              onClick={() => handleImpersonate(t)}
-                              className="gombo-card" 
-                              style={{ padding: '0.4rem 0.8rem', fontSize: '0.7rem', background: 'rgba(99, 102, 241, 0.05)', border: '1px solid rgba(99, 102, 241, 0.2)', color: '#818cf8', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-                            >
-                               <Eye size={12} /> Inspecter
-                            </button>
-                         </td>
+                             <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                                <button 
+                                  onClick={() => handleToggleBilling(t)}
+                                  disabled={actionLoading === t.id}
+                                  className="gombo-card" 
+                                  style={{ 
+                                    padding: '0.4rem 0.8rem', 
+                                    fontSize: '0.7rem', 
+                                    background: t.billing_status === 'paid' ? 'rgba(245, 158, 11, 0.05)' : 'rgba(16, 185, 129, 0.05)', 
+                                    border: `1px solid ${t.billing_status === 'paid' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(16, 185, 129, 0.2)'}`, 
+                                    color: t.billing_status === 'paid' ? '#f59e0b' : '#10b981', 
+                                    cursor: 'pointer', 
+                                    display: 'inline-flex', 
+                                    alignItems: 'center', 
+                                    gap: '4px' 
+                                  }}
+                                >
+                                   {actionLoading === t.id ? (
+                                      <Activity size={12} className="animate-spin" />
+                                   ) : (
+                                      <>
+                                        <CreditCard size={12} /> 
+                                        {t.billing_status === 'paid' ? 'Annuler encaissement' : 'Confirmer paiement'}
+                                      </>
+                                   )}
+                                </button>
+                                <button 
+                                  onClick={() => handleImpersonate(t)}
+                                  className="gombo-card" 
+                                  style={{ padding: '0.4rem 0.8rem', fontSize: '0.7rem', background: 'rgba(99, 102, 241, 0.05)', border: '1px solid rgba(99, 102, 241, 0.2)', color: '#818cf8', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                                >
+                                   <Eye size={12} /> Inspecter
+                                </button>
+                             </div>
+                          </td>
                       </tr>
                    ))}
                 </tbody>
