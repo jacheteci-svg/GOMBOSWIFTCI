@@ -1,11 +1,20 @@
 -- Gombo Core v4.1 - Billing & Infrastructure Stabilization
 -- This script ensures all action buttons in SuperAdmin (Billing & Plans) work correctly.
 
--- 1. Ensure columns exist in tenants
+-- 1. Cleanup old overloaded functions
+DO $$ 
+DECLARE r record; 
+BEGIN 
+  FOR r IN (SELECT oid FROM pg_proc WHERE proname = 'update_saas_plan') LOOP 
+    EXECUTE 'DROP FUNCTION ' || r.oid::regprocedure; 
+  END LOOP; 
+END $$;
+
+-- 2. Ensure columns exist in tenants
 ALTER TABLE tenants ADD COLUMN IF NOT EXISTS billing_status TEXT DEFAULT 'pending';
 ALTER TABLE tenants ADD COLUMN IF NOT EXISTS trial_ends_at TIMESTAMPTZ;
 
--- 2. Ensure columns exist in saas_plans (Granular modules)
+-- 3. Ensure columns exist in saas_plans (Granular modules)
 ALTER TABLE saas_plans 
   ADD COLUMN IF NOT EXISTS module_crm_clients BOOLEAN DEFAULT FALSE,
   ADD COLUMN IF NOT EXISTS module_suivi_terrain BOOLEAN DEFAULT FALSE,
@@ -20,7 +29,7 @@ ALTER TABLE saas_plans
   ADD COLUMN IF NOT EXISTS module_expertise_comptable BOOLEAN DEFAULT FALSE,
   ADD COLUMN IF NOT EXISTS max_products INTEGER DEFAULT -1;
 
--- 3. Universal SuperAdmin RLS Bypass (to allow direct updates)
+-- 4. Universal SuperAdmin RLS Bypass
 DO $$
 DECLARE
   t text;
@@ -35,7 +44,7 @@ BEGIN
   END LOOP;
 END $$;
 
--- 4. Re-create update_saas_plan with ALL granular modules to match Frontend
+-- 5. Create update_saas_plan with ALL granular modules
 CREATE OR REPLACE FUNCTION update_saas_plan(
   p_id TEXT,
   p_name TEXT,
@@ -50,7 +59,6 @@ CREATE OR REPLACE FUNCTION update_saas_plan(
   p_module_livreurs BOOLEAN DEFAULT FALSE,
   p_module_rapport_avance BOOLEAN DEFAULT FALSE,
   p_module_white_label BOOLEAN DEFAULT FALSE,
-  -- Granular modules added to match SuperAdmin.tsx
   p_module_crm_clients BOOLEAN DEFAULT FALSE,
   p_module_suivi_terrain BOOLEAN DEFAULT FALSE,
   p_module_logistique_pro BOOLEAN DEFAULT FALSE,
@@ -109,4 +117,4 @@ BEGIN
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION update_saas_plan TO authenticated;
+GRANT EXECUTE ON FUNCTION update_saas_plan(TEXT, TEXT, BIGINT, TEXT, BOOLEAN, BOOLEAN, BOOLEAN, BOOLEAN, BOOLEAN, BOOLEAN, BOOLEAN, BOOLEAN, BOOLEAN, BOOLEAN, BOOLEAN, BOOLEAN, BOOLEAN, BOOLEAN, BOOLEAN, BOOLEAN, BOOLEAN, BOOLEAN, BOOLEAN, BOOLEAN, INTEGER) TO authenticated;
