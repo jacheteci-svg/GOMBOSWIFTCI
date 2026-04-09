@@ -58,6 +58,7 @@ import {
   Zap,
   Globe,
   PieChart as PieIcon,
+  ShieldAlert,
 } from 'lucide-react';
 
 type TabType = 'logistique' | 'call-center' | 'inventaire';
@@ -565,6 +566,11 @@ export const PerformanceDashboard = ({
       atRiskTenants,
     };
   }, [isSuperAdmin, tenantRows]);
+
+  const totalGmv = useMemo(() => tenantRows.reduce((a, r) => a + r.ca_gmv, 0), [tenantRows]);
+  const totalCmd = useMemo(() => tenantRows.reduce((a, r) => a + r.commandes, 0), [tenantRows]);
+  const topTenant = useMemo(() => [...tenantRows].sort((a, b) => b.ca_gmv - a.ca_gmv)[0], [tenantRows]);
+  const chartData = useMemo(() => [...tenantRows].sort((a, b) => b.ca_gmv - a.ca_gmv).slice(0, 5), [tenantRows]);
 
   const exportHubTableCsv = useCallback(() => {
     const stamp = new Date().toISOString().slice(0, 10);
@@ -1804,12 +1810,29 @@ export const PerformanceDashboard = ({
     );
   };
 
+  const tabDefs: {
+    id: TabType;
+    label: string;
+    sub: string;
+    icon: typeof Truck;
+    color: string;
+  }[] = [
+    { id: 'logistique', label: 'Logistique', sub: 'Livraisons & retours', icon: Truck, color: '#06b6d4' },
+    { id: 'call-center', label: "Centre d'appel", sub: 'Validations & relances', icon: PhoneCall, color: '#8b5cf6' },
+    { id: 'inventaire', label: 'Inventaire', sub: 'Création de produits', icon: Package, color: '#10b981' },
+  ];
+  const periodFilterDefs: { id: FilterType; label: string; color: string }[] = [
+    { id: 'mois', label: 'Ce mois', color: '#06b6d4' },
+    { id: '7jours', label: '7 jours', color: '#0891b2' },
+    { id: 'aujourdhui', label: "Aujourd'hui", color: '#3b82f6' },
+    { id: 'toujours', label: 'Toujours', color: '#6366f1' },
+  ];
+
   const subtitle = "Suivez l'efficacité opérationnelle de tous les départements.";
 
-  /** Vue Gombo — refonte UI : bento KPI, tableau dense, graphique GMV (couleurs natives) */
+  if (isSuperAdmin && !moduleChrome) {
     return (
       <div className="space-y-10 lg:space-y-12">
-        {/* PLATFORM INTELLIGENCE / CORE KPIs */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-8 space-y-6">
              <div 
@@ -1852,294 +1875,170 @@ export const PerformanceDashboard = ({
                     <p className="text-[11px] text-slate-500 font-bold">Processed Revenue</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Active Tenants</p>
-                    <p className="text-3xl font-black text-white tabular-nums">
-                      {withActivity}<span className="text-slate-600">/{rowsAll.length}</span>
-                    </p>
-                    <div className="h-1.5 w-16 bg-white/[0.05] rounded-full mt-2 overflow-hidden">
-                       <div className="h-full bg-emerald-500/60" style={{ width: `${(withActivity/Math.max(1, rowsAll.length))*100}%` }} />
-                    </div>
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Active Footprint</p>
+                    <p className="text-3xl font-black text-white tabular-nums">{tenantRows.filter(x => x.actif).length}</p>
+                    <p className="text-[11px] text-emerald-400/80 font-bold">Verified Tenants</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Success Rate</p>
-                    <p className="text-3xl font-black text-violet-300 tabular-nums">{avgSuccPlat}%</p>
-                    <div className="h-1.5 w-16 bg-white/[0.05] rounded-full mt-2 overflow-hidden">
-                       <div className="h-full bg-violet-500/60" style={{ width: `${avgSuccPlat}%` }} />
-                    </div>
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Health Score</p>
+                    <p className="text-3xl font-black text-emerald-400 tabular-nums">{100 - superAdminInsights.tauxAnnulPlateforme}%</p>
+                    <p className="text-[11px] text-slate-500 font-bold">Platform integrity</p>
                   </div>
                 </div>
-             </div>
 
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="rounded-[32px] border border-white/[0.08] bg-slate-900/40 p-6">
-                   <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2">
-                     <PieIcon size={14} className="text-violet-400" /> Subscription & Lifecycle
-                   </h4>
-                   <div style={{ height: 180 }}>
-                      <ResponsiveContainer width="100%" height="100%">
-                         <PieChart>
-                            <Pie data={boutiquePieData} dataKey="value" cx="50%" cy="50%" innerRadius={45} outerRadius={65} paddingAngle={4}>
-                               {boutiquePieData.map((e, i) => <Cell key={i} fill={e.color} />)}
-                            </Pie>
-                            <Tooltip {...chartTooltip} />
-                         </PieChart>
-                      </ResponsiveContainer>
-                   </div>
-                </div>
-                <div className="rounded-[32px] border border-white/[0.08] bg-slate-900/40 p-6">
-                   <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2">
-                     <Target size={14} className="text-cyan-400" /> Distribution Top 3
-                   </h4>
-                   <div style={{ height: 180 }}>
-                      <ResponsiveContainer width="100%" height="100%">
-                         <PieChart>
-                            <Pie data={concPieData} dataKey="value" cx="50%" cy="50%" innerRadius={45} outerRadius={65} paddingAngle={4}>
-                               {concPieData.map((e, i) => <Cell key={i} fill={e.color} />)}
-                            </Pie>
-                            <Tooltip {...chartTooltip} />
-                         </PieChart>
-                      </ResponsiveContainer>
-                   </div>
+                <div className="mt-12 h-48 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ComposedChart data={platformTimeline}>
+                      <defs>
+                        <linearGradient id="saAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.4}/>
+                          <stop offset="95%" stopColor="#06b6d4" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10, fontWeight: 700 }} dy={10} />
+                      <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10, fontWeight: 700 }} />
+                      <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10, fontWeight: 700 }} />
+                      <Tooltip {...chartTooltip} />
+                      <Area yAxisId="right" type="monotone" dataKey="ca_gmv" name="CA (GMV)" stroke="#22d3ee" strokeWidth={3} fill="url(#saAreaGrad)" />
+                      <Line yAxisId="left" type="monotone" dataKey="commandes" name="Commandes" stroke="#a78bfa" strokeWidth={3} dot={false} />
+                    </ComposedChart>
+                  </ResponsiveContainer>
                 </div>
              </div>
           </div>
 
-          <div className="lg:col-span-4 space-y-6">
-            <div className="intelligence-deck flex flex-col h-full gap-5">
-              <div className="flex items-center gap-3">
-                  <div className="h-[2px] w-6 bg-cyan-500/50" />
-                  <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-cyan-400/90" style={{ fontFamily: 'Outfit' }}>
-                    Intelligence Pack
-                  </h3>
-                  <div className="h-[2px] flex-1 bg-gradient-to-r from-cyan-500/50 to-transparent" />
-              </div>
-              <IntelligenceCard 
-                icon={<TrendingUp size={18} />}
-                label="Concentration"
-                value={`${ins.concentrationTop3}%`}
-                color="#06b6d4"
-                insight={`Le Top 3 des boutiques génère ${ins.concentrationTop3}% du CA platforme.`}
-                subValue="Revenue Risk"
-              />
-              <IntelligenceCard 
-                icon={<Truck size={18} />}
-                label="Livrabilité"
-                value={`${ins.atRiskCount}`}
-                color="#f59e0b"
-                insight={`${ins.atRiskCount} partenaires sous les ${SA_LOGISTICS_RISK_THRESHOLD}% de succès.`}
-                subValue="Operational Alert"
-              />
-              <IntelligenceCard 
-                icon={<Mail size={18} />}
-                label="Inactifs"
-                value={`${ins.dormantActiveCount}`}
-                color="#8b5cf6"
-                insight={`${ins.dormantActiveCount} tenants actifs n'ont eu aucune commande.`}
-                subValue="Retention"
-              />
-              <div className="flex-1 flex flex-col justify-center items-center rounded-[32px] border border-dashed border-white/10 bg-white/[0.02] p-8 text-center group">
-                 <div className="size-16 rounded-3xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 mb-4 group-hover:scale-110 transition-transform">
-                    <Sparkles size={32} />
-                 </div>
-                 <p className="text-xs font-bold text-slate-400">Scan System Complete</p>
-                 <p className="text-[10px] text-slate-500 mt-1 max-w-[180px]">All signals are within operational parameters.</p>
-              </div>
-            </div>
+          <div className="xl:col-span-4 space-y-6">
+             {topTenant && (
+                <div className="relative overflow-hidden rounded-[32px] border border-white/[0.08] bg-slate-900/60 p-8 shadow-xl">
+                   <div className="absolute -right-10 -top-10 size-40 bg-emerald-500/10 blur-[50px]" />
+                   <div className="relative flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-emerald-400 mb-6">
+                      <Medal size={16} /> Market Leader
+                   </div>
+                   <h4 className="text-2xl font-black text-white" style={{ fontFamily: 'Outfit' }}>{topTenant.nom}</h4>
+                   <p className="text-xs text-slate-500 mt-1">Tenant ID: {topTenant.slug}</p>
+                   
+                   <div className="grid grid-cols-2 gap-4 mt-8">
+                      <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/[0.06]">
+                         <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Period Rev.</p>
+                         <p className="text-lg font-black text-white">{topTenant.ca_gmv.toLocaleString('fr-FR')} <span className="text-[10px]">CFA</span></p>
+                      </div>
+                      <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/[0.06]">
+                         <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Efficiency</p>
+                         <p className="text-lg font-black text-emerald-400">{topTenant.success_rate}%</p>
+                      </div>
+                   </div>
+                </div>
+             )}
+
+             <div className="rounded-[32px] border border-white/[0.08] bg-slate-900/20 p-8">
+                <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-6 border-b border-white/5 pb-4">Network Distribution</h4>
+                <div style={{ height: 320 }}>
+                   <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={chartData} layout="vertical" margin={{ left: 0, right: 20 }}>
+                         <XAxis type="number" hide />
+                         <YAxis dataKey="nom" type="category" hide />
+                         <Tooltip {...chartTooltip} />
+                         <Bar dataKey="ca_gmv" radius={[0, 4, 4, 0]} barSize={10}>
+                            {chartData.map((_entry, index) => (
+                               <Cell key={`cell-${index}`} fill={index === 0 ? '#22d3ee' : '#1e293b'} />
+                            ))}
+                         </Bar>
+                      </BarChart>
+                   </ResponsiveContainer>
+                </div>
+             </div>
           </div>
         </div>
 
-        {/* TIMELINE / GROWTH CHART */}
-        <div className="relative overflow-hidden rounded-[40px] border border-white/[0.08] bg-slate-900/20 p-8">
-           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
-              <div>
-                 <h3 className="text-xl font-black text-white" style={{ fontFamily: 'Outfit' }}>Temporal <span className="text-slate-500">Analytics</span></h3>
-                 <p className="text-xs text-slate-500 mt-1">Suivi quotidien des flux et du volume d&apos;affaires sur l&apos;ensemble du réseau.</p>
-              </div>
-              <div className="flex items-center gap-6">
-                 <div className="flex items-center gap-2">
-                    <div className="size-2 rounded-full bg-cyan-400" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">GMV Growth</span>
-                 </div>
-                 <div className="flex items-center gap-2">
-                    <div className="size-2 rounded-full bg-violet-400" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Order Volume</span>
-                 </div>
+        {/* Intelligence Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <IntelligenceCard 
+              icon={<TrendingUp size={18} />}
+              label="GMV Plateforme"
+              value={`${totalGmv.toLocaleString('fr-FR')} CFA`}
+              color="#22d3ee"
+              insight={`+${superAdminInsights.tauxAnnulPlateforme}% de croissance sur la période.`}
+              subValue="Global Volume"
+            />
+            <IntelligenceCard 
+              icon={<Activity size={18} />}
+              label="Taux de Succès"
+              value={`${100 - superAdminInsights.tauxAnnulPlateforme}%`}
+              color="#10b981"
+              insight="Moyenne pondérée sur l'ensemble du réseau."
+              subValue="Efficiency"
+            />
+            <IntelligenceCard 
+              icon={<ShieldAlert size={18} />}
+              label="Alertes Risque"
+              value={`${superAdminInsights.atRiskCount}`}
+              color="#f59e0b"
+              insight={`${superAdminInsights.atRiskCount} partenaires sous les ${SA_LOGISTICS_RISK_THRESHOLD}% de succès.`}
+              subValue="Operational Alert"
+            />
+            <IntelligenceCard 
+              icon={<Mail size={18} />}
+              label="Inactifs"
+              value={`${superAdminInsights.dormantActiveCount}`}
+              color="#8b5cf6"
+              insight={`${superAdminInsights.dormantActiveCount} tenants actifs n'ont eu aucune commande.`}
+              subValue="Retention"
+            />
+        </div>
+
+        {/* Global Merchant Matrix */}
+        <div className="rounded-[40px] border border-white/[0.08] bg-slate-900/40 p-1 backdrop-blur-3xl overflow-hidden shadow-2xl">
+           <div className="flex items-center justify-between p-7 border-b border-white/[0.05]">
+              <h4 className="text-xl font-black text-white tracking-tight" style={{ fontFamily: 'Outfit' }}>Deep <span className="text-slate-500 text-sm font-medium ml-1 italic inline-block">analytics matrix</span></h4>
+              <div className="flex items-center gap-2">
+                 <button onClick={() => setSuperAdminScope('all')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${superAdminScope === 'all' ? 'bg-cyan-500 text-black' : 'text-slate-500 hover:text-white'}`}>GLOBAL</button>
+                 <button onClick={() => setSuperAdminScope('active_only')} className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${superAdminScope === 'active_only' ? 'bg-emerald-500 text-black' : 'text-slate-500 hover:text-white'}`}>ACTIVE</button>
               </div>
            </div>
            
-           <div style={{ height: 320 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                 <ComposedChart data={tl} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="saAreaGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#06b6d4" stopOpacity={0.4} />
-                        <stop offset="100%" stopColor="#06b6d4" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                    <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10, fontWeight: 700 }} dy={10} />
-                    <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10, fontWeight: 700 }} />
-                    <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10, fontWeight: 700 }} />
-                    <Tooltip {...chartTooltip} />
-                    <Area yAxisId="right" type="monotone" dataKey="ca_gmv" name="CA (GMV)" stroke="#22d3ee" strokeWidth={3} fill="url(#saAreaGrad)" />
-                    <Line yAxisId="left" type="monotone" dataKey="commandes" name="Commandes" stroke="#a78bfa" strokeWidth={3} dot={false} />
-                 </ComposedChart>
-              </ResponsiveContainer>
-           </div>
-        </div>
-
-        {/* TENANT MATRIX / RANKING */}
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
-           <div className="xl:col-span-4 space-y-6">
-              {topTenant && (
-                 <div className="relative overflow-hidden rounded-[32px] border border-white/[0.08] bg-slate-900/60 p-8">
-                    <div className="absolute -right-10 -top-10 size-40 bg-emerald-500/10 blur-[50px]" />
-                    <div className="relative flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-emerald-400 mb-6">
-                       <Medal size={16} /> Market Leader
-                    </div>
-                    <h4 className="text-2xl font-black text-white" style={{ fontFamily: 'Outfit' }}>{topTenant.nom}</h4>
-                    <p className="text-xs text-slate-500 mt-1">Tenant ID: {topTenant.slug}</p>
-                    
-                    <div className="grid grid-cols-2 gap-4 mt-8">
-                       <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/[0.06]">
-                          <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Period Rev.</p>
-                          <p className="text-lg font-black text-white">{topTenant.ca_gmv.toLocaleString('fr-FR')} <span className="text-[10px]">CFA</span></p>
-                       </div>
-                       <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/[0.06]">
-                          <p className="text-[10px] font-black text-slate-500 uppercase mb-1">Efficiency</p>
-                          <p className="text-lg font-black text-emerald-400">{topTenant.success_rate}%</p>
-                       </div>
-                    </div>
-                 </div>
-              )}
-
-              <div className="rounded-[32px] border border-white/[0.08] bg-slate-900/20 p-8">
-                 <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-6">Top 12 Distribution</h4>
-                 <div style={{ height: 380 }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                       <BarChart data={chartData} layout="vertical" margin={{ left: 0, right: 20 }}>
-                          <XAxis type="number" hide />
-                          <YAxis type="category" dataKey="nom" width={100} tick={{ fill: '#64748b', fontSize: 10, fontWeight: 700 }} axisLine={false} tickLine={false} />
-                          <Tooltip {...chartTooltip} />
-                          <Bar dataKey="ca" fill="#06b6d4" radius={[0, 10, 10, 0]} barSize={20} />
-                       </BarChart>
-                    </ResponsiveContainer>
-                 </div>
-              </div>
-           </div>
-
-           <div className="xl:col-span-8">
-              <div className="rounded-[32px] border border-white/[0.08] bg-slate-900/40 overflow-hidden">
-                 <div className="px-8 py-6 border-b border-white/[0.05] bg-white/[0.01] flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div>
-                       <h3 className="text-xl font-black text-white" style={{ fontFamily: 'Outfit' }}>Tenant <span className="text-slate-500">Matrix</span></h3>
-                       <p className="text-xs text-slate-500 mt-1">Drill-down into individual tenant performance metrics.</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                       <button onClick={exportSuperAdminTenantsCsv} className="btn-outline px-6 h-10 rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-2 border border-white/10 hover:bg-white/[0.05] transition-all">
-                          <Download size={14} /> Export Dataset
-                       </button>
-                    </div>
-                 </div>
-
-                 <div className="px-8 py-5 border-b border-white/[0.05] flex flex-wrap gap-6 items-center">
-                    <div className="flex items-center gap-3 p-1.5 rounded-2xl bg-black/20 border border-white/5">
-                       {SUPER_ADMIN_SCOPE_DEFS.map(def => (
-                          <button 
-                            key={def.id} 
-                            onClick={() => setSuperAdminScope(def.id)}
-                            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${superAdminScope === def.id ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
-                          >
-                            {def.label}
-                          </button>
-                       ))}
-                    </div>
-                    <div className="flex-1" />
-                    <div className="flex items-center gap-3">
-                       {SUPER_ADMIN_SORT_DEFS.map(def => (
-                          <button 
-                            key={def.id} 
-                            onClick={() => setSuperAdminSort(def.id)}
-                            className={`size-8 rounded-xl flex items-center justify-center border transition-all ${superAdminSort === def.id ? 'border-cyan-500 bg-cyan-500/10 text-cyan-400' : 'border-white/5 text-slate-600'}`}
-                            title={def.label}
-                          >
-                             {def.id === 'ca_gmv' ? <Banknote size={16} /> : def.id === 'commandes' ? <Package size={16} /> : def.id === 'success_rate' ? <TrendingUp size={16} /> : <Truck size={16} />}
-                          </button>
-                       ))}
-                    </div>
-                 </div>
-
-                 <div className="overflow-x-auto">
-                    <table className="w-full">
-                       <thead>
-                          <tr className="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/[0.05]">
-                             <th className="px-8 py-5">Tenant</th>
-                             <th className="px-4 py-5 text-center">Plan</th>
-                             <th className="px-4 py-5 text-center">Orders</th>
-                             <th className="px-4 py-5 text-center">Succ.%</th>
-                             <th className="px-4 py-5 text-center">Annul.</th>
-                             <th className="pr-8 py-5 text-right">Revenue</th>
-                          </tr>
-                       </thead>
-                       <tbody className="divide-y divide-white/[0.03]">
-                          {rows.map((r, i) => (
-                             <tr key={r.tenant_id} className={`hover:bg-white/[0.02] transition-colors ${i < 3 ? 'bg-cyan-500/5' : ''}`}>
-                                <td className="px-8 py-5">
-                                   <div className="flex items-center gap-3">
-                                      {r.actif ? <div className="size-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" /> : <div className="size-2 rounded-full bg-slate-600" />}
-                                      <div>
-                                         <p className="font-black text-slate-100">{r.nom}</p>
-                                         <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">/{r.slug}</p>
-                                      </div>
-                                   </div>
-                                </td>
-                                <td className="px-4 py-5 text-center">
-                                   <span className="text-[10px] font-black uppercase px-2 py-1 rounded bg-slate-800 text-slate-400 border border-white/5">{r.plan}</span>
-                                </td>
-                                <td className="px-4 py-5 text-center font-black text-slate-300 tabular-nums">{r.commandes}</td>
-                                <td className="px-4 py-5 text-center">
-                                   <div className="flex flex-col items-center gap-1">
-                                      <span className={`text-xs font-black tabular-nums ${r.success_rate > 80 ? 'text-emerald-400' : r.success_rate > 60 ? 'text-amber-400' : 'text-rose-400'}`}>{r.success_rate}%</span>
-                                      <div className="h-0.5 w-10 bg-white/5 rounded-full overflow-hidden">
-                                         <div className="h-full bg-current opacity-60" style={{ width: `${r.success_rate}%` }} />
-                                      </div>
-                                   </div>
-                                </td>
-                                <td className="px-4 py-5 text-center font-black text-rose-500 tabular-nums">{r.annules}</td>
-                                <td className="pr-8 py-5 text-right font-black text-white tabular-nums">
-                                   {r.ca_gmv.toLocaleString('fr-FR')} <span className="text-[10px] text-slate-500">CFA</span>
-                                </td>
-                             </tr>
-                          ))}
-                       </tbody>
-                    </table>
-                 </div>
-              </div>
+           <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                 <thead>
+                    <tr className="bg-white/[0.02]">
+                       <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/[0.05]">Tenant Label</th>
+                       <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/[0.05] cursor-pointer hover:text-cyan-400" onClick={() => setSuperAdminSort('ca_gmv')}>Turnover {superAdminSort === 'ca_gmv' && '▼'}</th>
+                       <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/[0.05] cursor-pointer hover:text-cyan-400" onClick={() => setSuperAdminSort('commandes')}>Orders {superAdminSort === 'commandes' && '▼'}</th>
+                       <th className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/[0.05] cursor-pointer hover:text-cyan-400" onClick={() => setSuperAdminSort('success_rate')}>Perf {superAdminSort === 'success_rate' && '▼'}</th>
+                    </tr>
+                 </thead>
+                 <tbody className="divide-y divide-white/[0.03]">
+                    {superAdminDisplayRows.map(r => (
+                       <tr key={r.slug} className="group hover:bg-white/[0.02] transition-all">
+                          <td className="px-8 py-5">
+                             <div className="flex items-center gap-4">
+                                <div className={`size-3 rounded-full ${r.actif ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-slate-700'}`} />
+                                <div>
+                                   <p className="text-sm font-bold text-white group-hover:text-cyan-400 transition-colors">{r.nom}</p>
+                                   <p className="text-[10px] text-slate-500">ID: {r.slug}</p>
+                                </div>
+                             </div>
+                          </td>
+                          <td className="px-6 py-5 text-sm font-black text-white tabular-nums">
+                             {r.ca_gmv.toLocaleString('fr-FR')} <span className="text-[10px] text-slate-500">CFA</span>
+                          </td>
+                          <td className="px-6 py-5 text-sm font-bold text-slate-300 tabular-nums">{r.commandes}</td>
+                          <td className="px-6 py-5">
+                             <div className="flex items-center gap-3">
+                                <div className="w-20 h-1.5 rounded-full bg-slate-800 overflow-hidden">
+                                   <div className={`h-full rounded-full ${Number(r.success_rate) > 85 ? 'bg-emerald-500' : 'bg-cyan-500'}`} style={{ width: `${r.success_rate}%` }} />
+                                </div>
+                                <span className="text-xs font-bold text-white">{r.success_rate}%</span>
+                             </div>
+                          </td>
+                       </tr>
+                    ))}
+                 </tbody>
+              </table>
            </div>
         </div>
       </div>
     );
-  };
-
-  const tabDefs: {
-    id: TabType;
-    label: string;
-    sub: string;
-    icon: typeof Truck;
-    /** Couleur pastille active (alignement Commandes) */
-    color: string;
-  }[] = [
-    { id: 'logistique', label: 'Logistique', sub: 'Livraisons & retours', icon: Truck, color: '#06b6d4' },
-    { id: 'call-center', label: "Centre d'appel", sub: 'Validations & relances', icon: PhoneCall, color: '#8b5cf6' },
-    { id: 'inventaire', label: 'Inventaire', sub: 'Création de produits', icon: Package, color: '#10b981' },
-  ];
-
-  const periodFilterDefs: { id: FilterType; label: string; color: string }[] = [
-    { id: 'mois', label: 'Ce mois', color: '#06b6d4' },
-    { id: '7jours', label: '7 jours', color: '#0891b2' },
-    { id: 'aujourdhui', label: "Aujourd'hui", color: '#3b82f6' },
-    { id: 'toujours', label: 'Toujours', color: '#6366f1' },
-  ];
+  }
 
   if (moduleChrome) {
     return (
@@ -2148,277 +2047,56 @@ export const PerformanceDashboard = ({
         title="Performance équipe"
         description={subtitle}
         actions={
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              flexWrap: 'wrap',
-              justifyContent: 'flex-end',
-            }}
-          >
-            <button
+          <div className="flex items-center gap-3">
+            <button 
               type="button"
-              className="btn btn-primary"
-              onClick={() => fetchData()}
-              disabled={loading}
-              aria-label="Actualiser les données"
-              style={{
-                ...BTN_PRIMARY_INLINE,
-                opacity: loading ? 0.75 : 1,
-              }}
+              onClick={() => fetchData()} 
+              disabled={loading} 
+              className="btn btn-primary flex items-center gap-2"
+              style={{ ...BTN_PRIMARY_INLINE, height: '42px' }}
             >
-              <RefreshCw size={22} strokeWidth={2.5} className={loading ? 'animate-spin' : ''} aria-hidden />
-              Actualiser
-            </button>
-            <button
-              type="button"
-              className="btn btn-outline"
-              onClick={exportHubTableCsv}
-              disabled={loading || !!loadError}
-              aria-label="Exporter le tableau visible en CSV"
-              style={BTN_OUTLINE_INLINE}
-            >
-              <Download size={20} strokeWidth={2.2} aria-hidden />
-              Export CSV
+               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+               <span>Actualiser</span>
             </button>
           </div>
         }
       >
-        {loadError ? (
-          <div
-            className="mb-8 flex flex-col gap-3 rounded-2xl border border-red-500/35 bg-red-950/35 p-4 text-red-100 shadow-[0_0_0_1px_rgba(248,113,113,0.12)] backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between"
-            role="alert"
-            aria-live="polite"
-          >
-            <div className="flex items-start gap-3">
-              <AlertCircle className="mt-0.5 shrink-0 text-red-400" size={20} aria-hidden />
-              <div>
-                <p className="m-0 font-semibold text-red-100">Chargement impossible</p>
-                <p className="mt-1 mb-0 text-sm text-red-200/85">{loadError}</p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => fetchData()}
-              className="btn btn-primary shrink-0"
-              style={{ ...BTN_PRIMARY_INLINE, height: '52px', fontSize: '0.95rem', padding: '0 1.75rem' }}
-            >
-              Réessayer
-            </button>
-          </div>
-        ) : null}
-
-        {!tenantId ? (
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-white/[0.08] bg-[var(--surface)] py-16">
-            <div className="h-10 w-10 animate-spin rounded-full border-2 border-cyan-500/30 border-t-cyan-400" />
-            <p className="mt-4 text-sm font-medium text-slate-400">Initialisation du module…</p>
-          </div>
-        ) : (
-          <>
-            {/* Période (gauche) + Pôle (droite) sur une même ligne — responsive */}
-            <nav
-              style={{ marginBottom: '2rem' }}
-              aria-label="Filtres période et département"
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '1rem 1.5rem',
-                }}
-          >
-            <div
-              style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem',
-                    flexWrap: 'wrap',
-                    flex: '1 1 auto',
-                    minWidth: 'min(100%, 260px)',
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: '0.75rem',
-                fontWeight: 800,
-                      color: 'var(--text-muted)',
-                textTransform: 'uppercase',
-                      letterSpacing: '0.15em',
-                      flexShrink: 0,
-                    }}
-                  >
-                    Période
-                  </span>
-                  <div style={GOMBO_TAB_BAR_WRAP} role="group" aria-label="Période">
-                    {periodFilterDefs.map((f) => (
+        <div className="py-2">
+           {loading ? (
+             <div className="flex flex-col items-center justify-center py-20 rounded-2xl border border-white/[0.05] bg-slate-900/20">
+               <div className="w-10 h-10 border-2 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin" />
+               <p className="mt-4 text-xs font-medium text-slate-500">Mise à jour...</p>
+             </div>
+           ) : (
+             <div style={{ animation: 'fadeIn 0.35s ease' }}>
+                <nav className="mb-6 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none border-b border-white/[0.05]">
+                  {tabDefs.map((tab) => {
+                    const active = activeTab === tab.id;
+                    const Icon = tab.icon;
+                    return (
                       <button
-                        key={f.id}
-                        type="button"
-                        onClick={() => setFilter(f.id)}
-                        style={gomboPillButtonStyle(filter === f.id, f.color)}
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`inline-flex items-center gap-2 px-6 py-3 rounded-t-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
+                          active ? 'bg-white/[0.05] text-cyan-400 border-b-2 border-cyan-400' : 'text-slate-500 hover:text-slate-300'
+                        }`}
                       >
-                        {f.label}
+                        <Icon size={14} />
+                        {tab.label}
                       </button>
-                    ))}
-          </div>
-                </div>
-
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                    gap: '1rem',
-                    flexWrap: 'wrap',
-                    flex: '1 1 auto',
-                    minWidth: 'min(100%, 260px)',
-                    justifyContent: 'flex-end',
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: '0.75rem',
-                      fontWeight: 800,
-                      color: 'var(--text-muted)',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.15em',
-                      flexShrink: 0,
-                    }}
-                  >
-                    Pôle
-                  </span>
-                  <div style={GOMBO_TAB_BAR_WRAP}>
-                {tabDefs.map((tab) => {
-                  const active = activeTab === tab.id;
-                  return (
-                    <button
-                      key={tab.id}
-                      type="button"
-                          role="tab"
-                          aria-selected={active}
-                      onClick={() => setActiveTab(tab.id)}
-                          style={gomboPillButtonStyle(active, tab.color)}
-                    >
-                      {tab.label}
-                    </button>
-                  );
-                })}
-              </div>
-                </div>
-              </div>
-
-              <div
-                style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '0.75rem',
-                  marginTop: '0.85rem',
-                }}
-              >
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: '0.85rem',
-                    color: 'var(--text-muted)',
-                    maxWidth: '42rem',
-                  }}
-                >
-                  {tabDefs.find((t) => t.id === activeTab)?.sub} — sélectionnez un pôle pour afficher les indicateurs
-                  détaillés.
-                </p>
-                {dataUpdatedAt && !loadError ? (
-                  <span
-                    style={{
-                      fontSize: '0.8rem',
-                      fontWeight: 600,
-                      color: 'var(--text-muted)',
-                      flexShrink: 0,
-                    }}
-                  >
-                    Mis à jour :{' '}
-                    {dataUpdatedAt.toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}
-                  </span>
-                ) : null}
-            </div>
-            </nav>
-
-            {staffKpiBundle && !loading && !loadError ? (
-              <div
-                className="card glass-effect"
-                style={{
-                  marginBottom: '3.5rem',
-                  padding: '1.5rem',
-                  border: '1px solid rgba(255,255,255,0.03)',
-                  borderRadius: '28px',
-                  background: 'rgba(255,255,255,0.01)',
-                }}
-              >
-                <p
-                  style={{
-                    margin: '0 0 1rem 0',
-                    fontSize: '0.7rem',
-                    fontWeight: 800,
-                    letterSpacing: '0.14em',
-                    textTransform: 'uppercase',
-                    color: 'var(--text-muted)',
-                  }}
-                >
-                  Synthèse indicateurs
-                </p>
-                <div className="perf-embedded-kpi-grid w-full">
-                {staffKpiBundle[activeTab].map((k) => {
-                  const IconComp = k.Icon;
-                  return (
-                    <StaffKpiCard
-                      key={k.key}
-                        layout="strip"
-                      accent={k.accent}
-                      icon={<IconComp size={20} strokeWidth={2} />}
-                      label={k.label}
-                      value={k.value}
-                      sub={k.sub}
-                    />
-                  );
-                })}
-              </div>
-              </div>
-            ) : null}
-
-              {loading ? (
-                <div
-                className="card glass-effect overflow-hidden"
-                    style={{
-                  border: '1px solid rgba(255,255,255,0.03)',
-                  borderRadius: '32px',
-                  background: 'transparent',
-                }}
-              >
-                <div className="flex items-center gap-3 border-b border-white/[0.06] px-5 py-4">
-                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-cyan-500/25 border-t-cyan-400" />
-                  <p className="m-0 text-sm font-medium text-slate-400">Chargement des indicateurs…</p>
-                </div>
-                <GomboTableSkeleton rows={6} cols={3} />
-              </div>
-            ) : loadError ? null : (
-              <div className="card glass-effect" style={{ padding: 0, border: '1px solid rgba(255,255,255,0.03)', borderRadius: '32px', overflow: 'hidden', background: 'transparent' }}>
-                <div style={{ animation: 'fadeIn 0.35s ease' }}>
-                  {activeTab === 'logistique' && renderLogistics()}
-                  {activeTab === 'call-center' && renderCallCenter()}
-                  {activeTab === 'inventaire' && renderInventory()}
-                </div>
-            </div>
-            )}
-          </>
-        )}
+                    );
+                  })}
+                </nav>
+                {activeTab === 'logistique' && renderLogistics()}
+                {activeTab === 'call-center' && renderCallCenter()}
+                {activeTab === 'inventaire' && renderInventory()}
+             </div>
+           )}
+        </div>
       </GomboModuleFrame>
     );
   }
 
-  if (isSuperAdmin) {
   return (
     <div
       className="min-h-full w-full font-sans overflow-x-hidden selection:bg-cyan-500/20"
@@ -2429,319 +2107,97 @@ export const PerformanceDashboard = ({
       }}
     >
         <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 py-6 lg:py-8 pb-16">
-          <GomboModuleFrame
-            badge="Gombo Intelligence"
-            title="Performance des boutiques"
-            description="Pilotage multi-boutiques : volume, CA (GMV) et indicateurs de livraison."
-            actions={
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.75rem',
-                  flexWrap: 'wrap',
-                  justifyContent: 'flex-end',
-                }}
-              >
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={() => fetchData()}
-                  disabled={loading}
-                  aria-label="Actualiser les données"
-                  style={{
-                    ...BTN_PRIMARY_INLINE,
-                    opacity: loading ? 0.75 : 1,
-                  }}
-                >
-                  <RefreshCw size={22} strokeWidth={2.5} className={loading ? 'animate-spin' : ''} aria-hidden />
-                  Actualiser
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-outline"
-                  onClick={exportSuperAdminTenantsCsv}
-                  disabled={loading || !!loadError || superAdminDisplayRows.length === 0}
-                  aria-label="Exporter la matrice affichée en CSV"
-                  style={BTN_OUTLINE_INLINE}
-                >
-                  <Download size={20} strokeWidth={2.2} aria-hidden />
-                  Export CSV
-                </button>
-              </div>
-            }
-          >
-            {loadError ? (
-              <div
-                className="mb-8 flex flex-col gap-3 rounded-2xl border border-red-500/35 bg-red-950/35 p-4 text-red-100 shadow-[0_0_0_1px_rgba(248,113,113,0.12)] backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between"
-                role="alert"
-                aria-live="polite"
-              >
-                <div className="flex items-start gap-3">
-                  <AlertCircle className="mt-0.5 shrink-0 text-red-400" size={20} aria-hidden />
-                  <div>
-                    <p className="m-0 font-semibold text-red-100">Chargement impossible</p>
-                    <p className="mt-1 mb-0 text-sm text-red-200/85">{loadError}</p>
+          <header className="relative mb-10 lg:mb-12 overflow-hidden rounded-[32px] border border-cyan-500/20 bg-gradient-to-br from-[#0c1222] via-[#0a0f1a] to-[#060911] px-8 py-10 shadow-2xl">
+            <div className="absolute -right-20 -top-20 h-64 w-64 bg-cyan-500/10 blur-[100px]" aria-hidden />
+            <div className="absolute -left-10 -bottom-10 h-40 w-40 bg-violet-600/10 blur-[80px]" aria-hidden />
+
+            <div className="relative flex flex-col items-start gap-8 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex items-start gap-6">
+                <div className="relative shrink-0 flex items-center justify-center h-16 w-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 shadow-xl">
+                   <Activity size={32} className="text-white" strokeWidth={2.2} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-cyan-500/15 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-cyan-400 border border-cyan-500/20">
+                      <Zap size={12} strokeWidth={2.5} />
+                      Performance Intelligence
+                    </span>
                   </div>
+                  <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-white mb-1" style={{ fontFamily: 'Outfit' }}>
+                    Gombo · <span className="text-slate-500 text-2xl lg:text-3xl">Hub équipe terrain</span>
+                  </h1>
+                  <p className="max-w-xl text-sm font-medium text-slate-400">
+                    {subtitle}
+                  </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => fetchData()}
-                  className="btn btn-primary shrink-0"
-                  style={{ ...BTN_PRIMARY_INLINE, height: '52px', fontSize: '0.95rem', padding: '0 1.75rem' }}
-                >
-                  Réessayer
+              </div>
+
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex items-center gap-2 p-1 rounded-2xl bg-black/40 border border-white/5 shadow-inner">
+                  {periodFilterDefs.map(f => (
+                    <button 
+                      key={f.id} 
+                      onClick={() => setFilter(f.id)}
+                      className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${filter === f.id ? 'bg-white text-black' : 'text-slate-500 hover:text-white'}`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+                <button onClick={() => fetchData()} className="size-12 flex items-center justify-center rounded-2xl bg-white/[0.04] border border-white/[0.08] text-cyan-400 hover:bg-white/[0.08] transition-all">
+                  <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
                 </button>
-              </div>
-            ) : null}
-
-            <nav style={{ marginBottom: '2rem' }} aria-label="Période">
-              <div
-                style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  gap: '1rem 1.5rem',
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem',
-                    flexWrap: 'wrap',
-                    flex: '1 1 auto',
-                    minWidth: 'min(100%, 260px)',
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: '0.75rem',
-                      fontWeight: 800,
-                      color: 'var(--text-muted)',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.15em',
-                      flexShrink: 0,
-                    }}
-                  >
-                    Période
-                  </span>
-                  <div style={GOMBO_TAB_BAR_WRAP} role="group" aria-label="Période">
-                    {periodFilterDefs.map((f) => (
-                      <button
-                        key={f.id}
-                        type="button"
-                        onClick={() => setFilter(f.id)}
-                        style={gomboPillButtonStyle(filter === f.id, f.color)}
-                      >
-                        {f.label}
-                      </button>
-                    ))}
-              </div>
-                </div>
-                {dataUpdatedAt && !loadError ? (
-                <div
-                    className="flex items-center gap-2 text-xs sm:text-sm text-slate-300 px-3 py-2 rounded-xl border border-white/10"
-                  style={{ background: 'rgba(8, 11, 20, 0.75)', backdropFilter: 'blur(12px)' }}
-                >
-                    <Clock size={16} className="shrink-0 text-cyan-400/90" strokeWidth={2} aria-hidden />
-                    <span className="font-semibold tabular-nums">
-                      Données :{' '}
-                      {dataUpdatedAt.toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}
-                  </span>
-                </div>
-                ) : null}
-              </div>
-              <p
-                style={{
-                  margin: '0.85rem 0 0 0',
-                  fontSize: '0.8rem',
-                  color: 'var(--text-muted)',
-                  maxWidth: '48rem',
-                  lineHeight: 1.45,
-                }}
-              >
-                La synthèse plateforme utilise toujours toutes les boutiques ; le périmètre et le tri agissent uniquement
-                sur le tableau.
-              </p>
-            </nav>
-
-            {loading ? (
-              <div
-                className="card glass-effect overflow-hidden"
-                style={{
-                  border: '1px solid rgba(255,255,255,0.03)',
-                  borderRadius: '32px',
-                  background: 'transparent',
-                }}
-              >
-                <div className="flex items-center gap-3 border-b border-white/[0.06] px-5 py-4">
-                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-cyan-500/25 border-t-cyan-400" />
-                  <p className="m-0 text-sm font-medium text-slate-400">Chargement des indicateurs…</p>
-            </div>
-                <GomboTableSkeleton rows={6} cols={4} />
-              </div>
-            ) : loadError ? null : (
-              <div
-                className="card glass-effect"
-                style={{
-                  padding: 0,
-                  border: '1px solid rgba(255,255,255,0.06)',
-                  borderRadius: '32px',
-                  overflow: 'visible',
-                  background: 'transparent',
-                }}
-              >
-                <div style={{ animation: 'fadeIn 0.35s ease', padding: '0.5rem 0.25rem 1rem' }}>
-                  {renderSuperAdminTenants()}
-                </div>
-              </div>
-            )}
-          </GomboModuleFrame>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className="min-h-full w-full font-sans overflow-x-hidden selection:bg-cyan-500/20"
-      style={{
-        background: 'linear-gradient(180deg, var(--bg-app) 0%, #0a0f1a 50%, var(--bg-app) 100%)',
-        color: 'var(--text-main)',
-        colorScheme: 'dark',
-      }}
-    >
-      <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 py-8 lg:py-10 pb-16">
-          <header className="relative mb-10 lg:mb-12 overflow-hidden rounded-3xl border border-cyan-500/20 bg-gradient-to-br from-[#0c1222] via-[#0a0f1a] to-[#060911] px-6 py-8 sm:px-10 sm:py-10 shadow-[0_0_0_1px_rgba(6,182,212,0.08),0_40px_80px_-20px_rgba(0,0,0,0.65)]">
-            <div
-              className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-cyan-500/15 blur-[100px]"
-              aria-hidden
-            />
-            <div
-              className="pointer-events-none absolute -left-16 bottom-0 h-48 w-48 rounded-full bg-violet-600/10 blur-[80px]"
-              aria-hidden
-            />
-            <div className="relative flex flex-col xl:flex-row xl:items-end xl:justify-between gap-8">
-              <div className="max-w-2xl">
-                <span className="inline-flex items-center gap-2 rounded-full border border-cyan-500/25 bg-cyan-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-300/95">
-                  <Activity size={12} className="text-cyan-400" strokeWidth={2.5} />
-                  Gombo · Hub équipe terrain
-                </span>
-                <h1
-                  className="mt-4 text-3xl sm:text-4xl lg:text-[2.35rem] font-bold tracking-tight leading-[1.15]"
-                  style={{ fontFamily: 'Outfit, sans-serif' }}
-                >
-                  <span
-                    style={{
-                      background: 'linear-gradient(135deg, #e0f2fe 0%, #22d3ee 35%, #a78bfa 70%, #818cf8 100%)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      backgroundClip: 'text',
-                    }}
-                  >
-                    Performance équipe
-                  </span>
-                </h1>
-                <p className="mt-3 text-sm sm:text-base text-slate-400 leading-relaxed max-w-xl">
-                  {subtitle}
-                </p>
-              </div>
-              <div className="flex flex-col sm:flex-row xl:flex-col xl:items-end gap-4 shrink-0">
-                {renderFilterButtons()}
-                <div
-                  className="flex items-center gap-2.5 text-xs sm:text-sm text-slate-200 px-4 py-3 rounded-2xl border border-white/10"
-                  style={{ background: 'rgba(8, 11, 20, 0.75)', backdropFilter: 'blur(12px)' }}
-                >
-                  <Clock size={17} className="shrink-0 text-cyan-400" strokeWidth={2} aria-hidden />
-                  <span className="font-medium tabular-nums">
-                    {new Date().toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' })}
-                  </span>
-                </div>
               </div>
             </div>
           </header>
 
-          <>
-            <nav
-              className="mb-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between"
-              aria-label="Départements"
-            >
-              <div className="inline-flex flex-wrap gap-2 p-1.5 rounded-2xl border border-white/10 bg-slate-950/60 backdrop-blur-md shadow-inner">
-                {tabDefs.map((tab) => {
-                  const active = activeTab === tab.id;
-                  const Icon = tab.icon;
-                  return (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      onClick={() => setActiveTab(tab.id)}
-                      className={[
-                        'inline-flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all duration-200',
-                        'focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/50',
-                        active
-                          ? 'text-white shadow-md'
-                          : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]',
-                      ].join(' ')}
-                      style={
-                        active
-                          ? {
-                              background: 'linear-gradient(135deg, #0891b2 0%, #2563eb 100%)',
-                              boxShadow: '0 4px 18px rgba(6, 182, 212, 0.35)',
-                            }
-                          : undefined
-                      }
-                    >
-                      <Icon size={18} strokeWidth={2} className="shrink-0 opacity-90" />
-                      <span>{tab.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-              <p className="text-xs text-slate-500 max-w-md sm:text-right">
-                {tabDefs.find((t) => t.id === activeTab)?.sub} — sélectionnez un pôle pour afficher les indicateurs
-                détaillés.
-              </p>
-            </nav>
-
-            {staffKpiBundle && !loading && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-5 mb-10">
-                {staffKpiBundle[activeTab].map((k) => {
-                  const IconComp = k.Icon;
-                  return (
-                    <StaffKpiCard
-                      key={k.key}
-                      accent={k.accent}
-                      icon={<IconComp size={20} strokeWidth={2} />}
-                      label={k.label}
-                      value={k.value}
-                      sub={k.sub}
-                    />
-                  );
-                })}
-              </div>
-            )}
-          </>
-
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 sm:py-28 rounded-2xl border border-white/[0.08] bg-gradient-to-b from-slate-900/40 to-transparent">
-            <div className="relative">
-              <div className="w-12 h-12 border-2 border-cyan-500/25 border-t-cyan-400 rounded-full animate-spin" />
-              <div className="absolute inset-0 rounded-full bg-cyan-500/10 blur-xl animate-pulse" aria-hidden />
+          <nav className="mb-10 lg:mb-14 overflow-hidden rounded-[32px] border border-white/[0.08] bg-slate-900/40 p-1.5 backdrop-blur-xl">
+            <div className="flex flex-wrap items-center gap-1">
+              {tabDefs.map((tab) => {
+                const active = activeTab === tab.id;
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`group relative flex flex-1 items-center justify-center gap-4 px-6 py-4 rounded-[24px] transition-all duration-300 ${
+                      active 
+                        ? 'bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-[0_10px_30px_rgba(6,182,212,0.25)]' 
+                        : 'text-slate-500 hover:bg-white/[0.04] hover:text-slate-300'
+                    }`}
+                  >
+                    <div className={`p-2.5 rounded-xl transition-all ${active ? 'bg-white/20' : 'bg-slate-800/50 group-hover:bg-slate-800'}`}>
+                      <Icon size={20} strokeWidth={active ? 2.5 : 2} />
+                    </div>
+                    <div className="text-left hidden sm:block">
+                      <p className={`text-xs font-black uppercase tracking-widest ${active ? 'text-white' : 'text-slate-400'}`}>{tab.label}</p>
+                      <p className={`text-[10px] font-medium leading-none mt-1 ${active ? 'text-white/70' : 'text-slate-600'}`}>{tab.sub}</p>
+                    </div>
+                    {active && <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-8 h-1 bg-white rounded-full" />}
+                  </button>
+                );
+              })}
             </div>
-            <p className="mt-6 text-sm font-medium text-slate-400">Chargement des indicateurs…</p>
-          </div>
-        ) : (
-          <div style={{ animation: 'fadeIn 0.35s ease' }}>
-              <>
+          </nav>
+
+          <>
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-20 sm:py-28 rounded-2xl border border-white/[0.08] bg-gradient-to-b from-slate-900/40 to-transparent">
+                <div className="relative">
+                  <div className="w-12 h-12 border-2 border-cyan-500/25 border-t-cyan-400 rounded-full animate-spin" />
+                  <div className="absolute inset-0 rounded-full bg-cyan-500/10 blur-xl animate-pulse" aria-hidden />
+                </div>
+                <p className="mt-6 text-sm font-medium text-slate-400">Chargement des indicateurs…</p>
+              </div>
+            ) : (
+              <div style={{ animation: 'fadeIn 0.35s ease' }}>
                 {activeTab === 'logistique' && renderLogistics()}
                 {activeTab === 'call-center' && renderCallCenter()}
                 {activeTab === 'inventaire' && renderInventory()}
-              </>
-          </div>
-        )}
-      </div>
+              </div>
+            )}
+          </>
+        </div>
     </div>
   );
 };

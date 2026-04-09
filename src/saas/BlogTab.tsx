@@ -36,6 +36,11 @@ export const BlogTab = () => {
     fetchPosts();
   }, []);
 
+  const handleRefresh = () => {
+    fetchPosts();
+    showToast('Recherche de nouveaux articles...', 'info');
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -245,17 +250,27 @@ export const BlogTab = () => {
            <h2 className="text-4xl font-black text-white tracking-tight" style={{ fontFamily: 'Outfit' }}>
              Blog <span className="text-slate-500">Intelligence</span>
            </h2>
-           <p className="text-sm font-medium text-slate-500 mt-2">Gérez le contenu marketing et le référencement naturel de la plateforme.</p>
+           <p className="text-sm font-medium text-slate-500 mt-2">Gerez le contenu marketing et le référencement naturel.</p>
         </div>
         
-        <button 
-          onClick={() => { setCurrentPost({}); setIsEditing(true); }}
-          className="group relative flex items-center gap-3 px-8 py-4 rounded-2xl bg-white text-slate-950 font-black overflow-hidden hover:scale-105 transition-all active:scale-95"
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-violet-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-          <PlusCircle size={20} className="relative group-hover:text-white" />
-          <span className="relative group-hover:text-white">NOUVEL ARTICLE</span>
-        </button>
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={handleRefresh}
+            className="p-4 rounded-2xl bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] transition-all text-slate-400 hover:text-white"
+            title="Rafraîchir"
+          >
+            <Activity size={20} className={loading ? 'animate-spin' : ''} />
+          </button>
+          
+          <button 
+            onClick={() => { setCurrentPost({}); setIsEditing(true); }}
+            className="group relative flex items-center gap-3 px-8 py-4 rounded-2xl bg-white text-slate-950 font-black overflow-hidden hover:scale-105 transition-all active:scale-95"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-violet-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <PlusCircle size={20} className="relative group-hover:text-white" />
+            <span className="relative group-hover:text-white">NOUVEL ARTICLE</span>
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

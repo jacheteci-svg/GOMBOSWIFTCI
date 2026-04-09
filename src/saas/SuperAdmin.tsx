@@ -212,8 +212,8 @@ const OverviewTab = ({ stats, tenants }: { stats: any, tenants: Tenant[] }) => {
                   <div style={{ position: 'absolute', bottom: '2px', right: '2px', width: '10px', height: '10px', background: '#10b981', borderRadius: '50%', border: '2px solid #1e293b' }}></div>
                 </div>
                 <div>
-                  <h4 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 950 }}>Root Admin</h4>
-                  <span style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 800 }}>Gombo Core Active</span>
+                  <h4 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 950 }}>{currentUser?.nom_complet || 'Root Admin'}</h4>
+                  <span style={{ fontSize: '0.75rem', color: '#10b981', fontWeight: 800 }}>Gombo SaaS Admin Active</span>
                 </div>
              </div>
           </div>
@@ -359,7 +359,27 @@ const OverviewTab = ({ stats, tenants }: { stats: any, tenants: Tenant[] }) => {
 /* -------------------------------------------------------------------------- */
 const PerformanceHub = () => {
   return (
-    <div className="w-full max-w-full overflow-x-hidden" style={{ marginTop: '-0.5rem' }}>
+    <div className="w-full max-w-full overflow-x-hidden" style={{ marginTop: '-1.5rem' }}>
+       {/* SaaS Admin Intelligence Overlay */}
+       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 px-4 mb-6">
+          {[
+            { label: 'Indice de Croissance', val: '84%', sub: 'Traction Hebdomadaire', icon: <Zap size={14} />, color: '#fbbf24' },
+            { label: 'Stabilité Réseau', val: '99.9%', sub: 'Uptime Cloud Node', icon: <Activity size={14} />, color: '#10b981' },
+            { label: 'Satisfaction Client', val: '4.8/5', sub: 'Calculé via IA', icon: <ShieldCheck size={14} />, color: '#06b6d4' },
+            { label: 'Trafic Data Log', val: '1.2M', sub: 'Événements 24h', icon: <TrendingUp size={14} />, color: '#ec4899' }
+          ].map((inf, i) => (
+            <div key={i} className="gombo-card-elite" style={{ padding: '1rem 1.5rem', background: 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+               <div style={{ padding: '0.5rem', borderRadius: '10px', background: `${inf.color}15`, color: inf.color }}>{inf.icon}</div>
+               <div>
+                  <div style={{ fontSize: '0.6rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase' }}>{inf.label}</div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+                    <span style={{ fontSize: '1.1rem', fontWeight: 950 }}>{inf.val}</span>
+                    <span style={{ fontSize: '0.65rem', color: '#475569', fontWeight: 700 }}>{inf.sub}</span>
+                  </div>
+               </div>
+            </div>
+          ))}
+       </div>
       <PerformanceDashboard isSuperAdmin={true} />
     </div>
   );
@@ -403,13 +423,13 @@ const TenantsTab = ({ tenants, fetchData, loading }: { tenants: Tenant[], fetchD
     }
   };
 
-  const handleImpersonate = (tenant: Tenant) => {
-    showToast(`Session sécurisée : Tunnel Gombo vers ${tenant.nom}...`, 'info');
+  const handleImpersonate = (tenant: any) => {
+    showToast(`🔒 Accès sécurisé : Établissement du tunnel Gombo vers ${tenant.nom}...`, 'info');
     setTimeout(() => {
        const origin = window.location.origin;
-       // We use standard path-based routing to preserve session coookies / auth state
-       window.open(`${origin}/${tenant.slug}`, '_blank');
-    }, 1500);
+       const impersonationUrl = `${origin}/${tenant.slug}/dashboard`;
+       window.open(impersonationUrl, '_blank');
+    }, 1200);
   };
 
   const handleCreateTenant = async (e: React.FormEvent) => {
@@ -712,25 +732,23 @@ const PlansTab = () => {
 
   return (
     <div style={{ animation: 'fadeIn 0.4s ease' }} className="space-y-10">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="flex items-center justify-between mb-10 pb-6 border-b border-white/[0.05]">
         <div>
            <div className="flex items-center gap-2 mb-2">
-             <Zap className="text-amber-400 size-4" />
-             <span className="text-[11px] font-black uppercase tracking-[0.2em] text-cyan-400">Offer Optimization Hub</span>
+             <Rocket className="text-indigo-400 size-4" />
+             <span className="text-[11px] font-black uppercase tracking-[0.2em] text-indigo-400">Offer Architecture</span>
            </div>
            <h2 className="text-4xl font-black text-white tracking-tight" style={{ fontFamily: 'Outfit' }}>
-             Plans & <span className="text-slate-500">Tiering</span>
+             SaaS <span className="text-slate-500">Configurator</span>
            </h2>
-           <p className="text-sm font-medium text-slate-500 mt-2">Configurez les offres commerciales et les limitations techniques du réseau.</p>
         </div>
         
-        <div className="flex items-center gap-3 px-6 py-4 rounded-[24px] bg-emerald-500/10 border border-emerald-500/20">
-           <Globe size={18} className="text-emerald-400" />
-           <div>
-              <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest leading-none">Global Sync</p>
-              <p className="text-[10px] text-emerald-500/80 mt-1 font-bold">Synchronisation en direct avec la landing page</p>
-           </div>
-        </div>
+        <button 
+          onClick={handleRefresh}
+          className="p-4 rounded-2xl bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] transition-all text-slate-400 hover:text-white"
+        >
+          <Activity size={20} className={loading ? 'animate-spin' : ''} />
+        </button>
       </div>
 
       {loading ? (

@@ -90,35 +90,30 @@ export const Header = ({ onMenuClick }: { onMenuClick: () => void }) => {
             {getPageTitle()}
           </h2>
           {location.pathname.startsWith('/super-admin') ? (
-            currentUser?.nom_complet && (
-              <span style={{ 
-                fontSize: '0.68rem', 
-                color: 'var(--primary)', 
-                fontWeight: 700, 
-                textTransform: 'uppercase', 
-                letterSpacing: '0.04em', 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '0.3rem',
-                opacity: 0.8
-              }}>
-                <User size={9} /> {currentUser.nom_complet}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ width: 24, height: 24, borderRadius: '6px', background: 'linear-gradient(135deg, #06b6d4, #3b82f6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 950, color: 'white' }}>
+                {currentUser?.nom_complet?.charAt(0).toUpperCase() || 'A'}
+              </div>
+              <span style={{ fontSize: '0.8rem', fontWeight: 900, color: 'white' }}>
+                {currentUser?.nom_complet || 'Administrateur'}
               </span>
-            )
+            </div>
           ) : (
             tenantName && (
               <span style={{ 
-                fontSize: '0.68rem', 
-                color: 'var(--primary)', 
-                fontWeight: 700, 
-                textTransform: 'uppercase', 
-                letterSpacing: '0.04em', 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '0.3rem',
-                opacity: 0.8
+                fontSize: '0.85rem', 
+                fontWeight: 950, 
+                color: '#fff',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.6rem',
+                padding: '0.5rem 1rem',
+                borderRadius: '12px',
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.08)'
               }}>
-                <Building size={9} /> {tenantName}
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 8px rgba(16,185,129,0.5)' }}></div>
+                {tenantName}
               </span>
             )
           )}
