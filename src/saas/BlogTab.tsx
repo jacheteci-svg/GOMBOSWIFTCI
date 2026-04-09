@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { insforge } from '../lib/insforge';
 import { useToast } from '../contexts/ToastContext';
-import { 
   FileText, Edit, Trash2, PlusCircle, Save, 
-  Activity, Eye, Sparkles, LayoutDashboard, 
-  Image as ImageIcon, Globe, Zap, ChevronLeft, User, RefreshCw,
+  Sparkles, 
+  ChevronLeft, User, RefreshCw,
   Search, Plus
 } from 'lucide-react';
 import { BLOG_POSTS } from '../pages/blog/blogData';

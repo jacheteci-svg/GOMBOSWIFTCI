@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { insforge } from '../lib/insforge';
 import { Tenant } from '../types';
 import { useAuth } from '../contexts/AuthContext';
