@@ -4,7 +4,7 @@ import { Tenant } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { 
   Activity, ShieldCheck, Eye, Power, X, Search, Send, 
-  CreditCard, Zap, Users, Plus, TrendingUp
+  CreditCard, Zap, Users, Plus, TrendingUp, Rocket, Package, User, Building
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useToast } from '../contexts/ToastContext';
@@ -124,7 +124,7 @@ export const SuperAdmin: React.FC = () => {
 
       {/* TABS CONTENT */}
       <div style={{ marginTop: activeTab === 'PERFORMANCE' ? 0 : '1rem', animation: 'fadeIn 0.5s ease' }}>
-        {activeTab === 'OVERVIEW' && <OverviewTab stats={platformStats} tenants={tenants} />}
+        {activeTab === 'OVERVIEW' && <OverviewTab stats={platformStats} tenants={tenants} currentUser={currentUser} />}
         {activeTab === 'TENANTS' && <TenantsTab tenants={tenants} fetchData={fetchData} loading={loading} />}
         {activeTab === 'PERFORMANCE' && <PerformanceHub />}
         {activeTab === 'PLANS' && <PlansTab />}
@@ -174,7 +174,7 @@ const GomboStatCard = ({ title, value, sub, icon, color, trend }: any) => (
 /* -------------------------------------------------------------------------- */
 /*                                OVERVIEW TAB                                */
 /* -------------------------------------------------------------------------- */
-const OverviewTab = ({ stats, tenants }: { stats: any, tenants: Tenant[] }) => {
+const OverviewTab = ({ stats, tenants, currentUser }: { stats: any, tenants: Tenant[], currentUser: any }) => {
   const { showToast } = useToast();
   const navigate = useNavigate();
 

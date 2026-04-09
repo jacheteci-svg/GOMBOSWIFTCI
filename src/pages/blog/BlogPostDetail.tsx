@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { insforge } from '../../lib/insforge';
 import { LandingNavbar } from '../../components/layout/LandingNavbar';
-import { ArrowLeft, Clock, Share2, Facebook, Twitter, Linkedin, Loader2, ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowLeft, Clock, Share2, Facebook, Twitter, Linkedin, Loader2, ArrowRight, Sparkles, User } from 'lucide-react';
 
 export const BlogPostDetail: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();

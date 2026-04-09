@@ -4,8 +4,7 @@ import { useToast } from '../contexts/ToastContext';
 import { 
   FileText, Edit, Trash2, PlusCircle, Save, 
   Activity, Eye, Sparkles, LayoutDashboard, 
-  Image as ImageIcon, Calendar, User, Tag, 
-  ChevronLeft, Send, Globe, Zap
+  Image as ImageIcon, Globe, Zap, ChevronLeft
 } from 'lucide-react';
 
 export const BlogTab = () => {
