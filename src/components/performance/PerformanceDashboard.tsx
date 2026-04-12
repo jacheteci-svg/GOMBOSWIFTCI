@@ -1318,184 +1318,114 @@ export const PerformanceDashboard = ({
 
   if (isSuperAdmin && !moduleChrome) {
     return (
-      <div className="space-y-6 animate-in fade-in duration-1000 bg-[#070b14] min-h-screen p-6" style={{ fontFamily: 'Outfit, sans-serif' }}>
-        
+      <div 
+        style={{ 
+          padding: '1.5rem', 
+          backgroundColor: '#070b14', 
+          minHeight: '100vh', 
+          fontFamily: "'Outfit', sans-serif",
+          color: 'white',
+          animation: 'pageEnter 0.6s ease'
+        }}
+      >
         {/* --- PLECTO STYLE HEADER --- */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2">
-           <div>
-              <div className="flex items-center gap-2 mb-1">
-                 <div className="size-2 rounded-full bg-cyan-500 shadow-[0_0_10px_#06b6d4]" />
-                 <h2 className="text-2xl font-black text-white tracking-tight uppercase">Gombo Control Center</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
+           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
+                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--primary)', boxShadow: '0 0 10px var(--primary)' }} />
+                    <h2 style={{ fontSize: '1.5rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '-0.02em', margin: 0 }}>Gombo Control Center</h2>
+                 </div>
+                 <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em' }}>
+                    Operational Intelligence & Market Growth · v4.0.3
+                 </p>
               </div>
-              <p className="text-xs text-slate-500 font-bold tracking-widest uppercase opacity-50">Operational Intelligence & Market Growth · v4.0.3</p>
-           </div>
-           <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1 p-1 bg-white/[0.03] border border-white/[0.06] rounded-xl backdrop-blur-xl">
-                 {periodFilterDefs.map(f => (
-                   <button 
-                     key={f.id} 
-                     onClick={() => setFilter(f.id)}
-                     className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filter === f.id ? 'bg-cyan-500 text-white shadow-lg' : 'text-slate-500 hover:text-white'}`}
-                   >
-                     {f.label}
-                   </button>
-                 ))}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                 <div style={{ display: 'flex', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '0.25rem' }}>
+                    {periodFilterDefs.map(f => (
+                      <button 
+                        key={f.id} 
+                        onClick={() => setFilter(f.id)}
+                        style={{ 
+                          padding: '0.5rem 1rem', 
+                          borderRadius: '8px', 
+                          fontSize: '0.65rem', 
+                          fontWeight: 900, 
+                          textTransform: 'uppercase', 
+                          letterSpacing: '0.1em',
+                          border: 'none',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          backgroundColor: filter === f.id ? 'var(--primary)' : 'transparent',
+                          color: filter === f.id ? 'white' : 'rgba(255,255,255,0.4)',
+                          boxShadow: filter === f.id ? '0 4px 12px rgba(6, 182, 212, 0.3)' : 'none'
+                        }}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                 </div>
+                 <button 
+                   onClick={() => fetchData()} 
+                   style={{ 
+                     width: '38px', height: '38px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)', backgroundColor: 'rgba(255,255,255,0.03)',
+                     color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s'
+                   }}
+                 >
+                   <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+                 </button>
               </div>
-              <button 
-                onClick={() => fetchData()} 
-                className="group size-10 flex items-center justify-center rounded-xl bg-white/[0.03] border border-white/[0.06] text-cyan-400 hover:bg-cyan-500 hover:text-white transition-all"
-              >
-                <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
-              </button>
            </div>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '1.5rem' }}>
            
-           {/* --- TOP SELLERS PODIUM (TOP 3) --- */}
-           <div className="xl:col-span-6">
-              <div className="bg-[#101624] rounded-[24px] p-8 h-full flex flex-col justify-between border border-white/[0.02] shadow-2xl">
-                 <div className="flex justify-between items-start mb-10">
+           {/* --- TOP PERFORMERS LEADERBOARD (TABLE as requested) --- */}
+           <div style={{ gridColumn: 'span 7' }}>
+              <div className="card" style={{ padding: '2rem', height: '100%', background: '#0e1422', borderRadius: '24px' }}>
+                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                     <div>
-                       <h3 className="text-xl font-black text-white">Top Performers</h3>
-                       <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Current Scope</p>
+                       <h3 style={{ fontSize: '1.1rem', margin: 0, fontWeight: 900 }}>Top Performers</h3>
+                       <p style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', fontWeight: 800, margin: '0.25rem 0 0' }}>Leaderboard matrix</p>
                     </div>
-                    <div className="text-right">
-                       <p className="text-2xl font-black text-white">{(totalGmv/1000).toFixed(2)}K</p>
-                       <p className="text-[10px] text-slate-500 font-bold uppercase">Total Turnover CFA</p>
+                    <div style={{ textAlign: 'right' }}>
+                       <p style={{ fontSize: '1.5rem', fontWeight: 900, margin: 0 }}>{(totalGmv/1000).toFixed(2)}K</p>
+                       <p style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', fontWeight: 800, margin: 0 }}>Total Volume CFA</p>
                     </div>
                  </div>
 
-                 <div className="flex justify-around items-end gap-4 pb-4">
-                    {chartData.slice(0, 3).map((r, i) => {
-                       const colors = i === 0 ? 'border-amber-400' : i === 1 ? 'border-slate-300' : 'border-orange-400';
-                       const badge = i === 0 ? 'bg-amber-400' : i === 1 ? 'bg-slate-300' : 'bg-orange-400';
-                       return (
-                          <div key={r.slug} className="flex flex-col items-center group cursor-pointer">
-                             <div className={`relative mb-6`}>
-                                <div className={`size-24 md:size-32 rounded-full border-4 ${colors} p-1 bg-slate-800 flex items-center justify-center text-4xl font-black text-white overflow-hidden shadow-2xl group-hover:scale-105 transition-transform`}>
-                                   {r.nom.charAt(0)}
-                                </div>
-                                <div className={`absolute -bottom-2 left-1/2 -translate-x-1/2 size-8 rounded-full ${badge} text-black font-black flex items-center justify-center border-4 border-[#101624] text-xs shadow-lg`}>
-                                   {i + 1}
-                                </div>
-                             </div>
-                             <p className="text-sm font-black text-white mb-1 group-hover:text-cyan-400 transition-colors uppercase tracking-tight">{r.nom}</p>
-                             <p className="text-2xl font-black text-white tabular-nums tracking-tighter">
-                                ${(r.ca_gmv/1000).toFixed(2)}K
-                             </p>
-                          </div>
-                       );
-                    })}
-                 </div>
-              </div>
-           </div>
-
-           {/* --- SALES BY PARTNER (BAR CHART) --- */}
-           <div className="xl:col-span-6">
-              <div className="bg-[#101624] rounded-[24px] p-8 h-full border border-white/[0.02] shadow-2xl flex flex-col">
-                 <div className="mb-8">
-                    <h3 className="text-xl font-black text-white">Volume by Partner</h3>
-                    <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Gross Merchandise Volume Breakdown</p>
-                 </div>
-                 <div className="flex-1 min-h-[250px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                       <BarChart data={chartData} margin={{ top: 20, right: 0, left: -20, bottom: 20 }}>
-                          <XAxis 
-                            dataKey="nom" 
-                            axisLine={false} 
-                            tickLine={false} 
-                            tick={{ fill: '#475569', fontSize: 10, fontWeight: 800 }} 
-                            interval={0}
-                          />
-                          <YAxis hide />
-                          <Tooltip {...chartTooltip} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
-                          <Bar dataKey="ca_gmv" radius={[12, 12, 12, 12]} barSize={28}>
-                             {chartData.map((_, index) => (
-                                <Cell key={`cell-${index}`} fill={index === 0 ? '#06b6d4' : '#1e293b'} />
-                             ))}
-                          </Bar>
-                       </BarChart>
-                    </ResponsiveContainer>
-                 </div>
-              </div>
-           </div>
-
-           {/* --- PARTNER TABLE / MATRIX --- */}
-           <div className="xl:col-span-7">
-              <div className="bg-[#101624] rounded-[24px] border border-white/[0.02] shadow-2xl overflow-hidden h-full">
-                 <div className="p-8 border-b border-white/[0.05] flex justify-between items-center bg-[#141c2d]">
-                    <div>
-                       <h3 className="text-lg font-black text-white uppercase tracking-tight">Active Infrastructure</h3>
-                       <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Real-time status matrix</p>
-                    </div>
-                    <div className="flex gap-2">
-                       <button onClick={() => setSuperAdminScope('all')} className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${superAdminScope === 'all' ? 'bg-cyan-500 text-white shadow-lg' : 'text-slate-500 hover:text-white'}`}>All</button>
-                       <button onClick={() => setSuperAdminScope('active_only')} className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${superAdminScope === 'active_only' ? 'bg-cyan-500 text-white shadow-lg' : 'text-slate-500 hover:text-white'}`}>Active</button>
-                       <button 
-                        onClick={exportSuperAdminTenantsCsv}
-                        className="size-8 flex items-center justify-center rounded-lg bg-white/[0.03] border border-white/[0.06] text-slate-500 hover:text-cyan-400 transition-all"
-                        title="Export CSV"
-                       >
-                          <Download size={14} />
-                       </button>
-                    </div>
-                 </div>
-                 <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse min-w-[700px]">
+                 <div className="table-container" style={{ background: 'transparent', border: 'none' }}>
+                    <table style={{ borderCollapse: 'collapse', width: '100%' }}>
                        <thead>
-                          <tr className="bg-white/[0.02]">
-                             <th className="px-8 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/[0.03]">Partner</th>
-                             <th className="px-4 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/[0.03]">Status</th>
-                             <th 
-                              className="px-4 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/[0.03] cursor-pointer hover:text-cyan-400 transition-colors"
-                              onClick={() => setSuperAdminSort('success_rate')}
-                             >
-                                <div className="flex items-center gap-2">
-                                   Efficacy
-                                   <ShieldCheck size={12} className={superAdminSort === 'success_rate' ? 'text-cyan-400' : 'opacity-20'} />
-                                </div>
-                             </th>
-                             <th 
-                               className="px-6 py-5 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/[0.03] cursor-pointer hover:text-cyan-400 transition-colors"
-                               onClick={() => setSuperAdminSort('ca_gmv')}
-                             >
-                                <div className="flex items-center gap-2">
-                                   Volume
-                                   <BarChartIcon size={12} className={superAdminSort === 'ca_gmv' ? 'text-cyan-400' : 'opacity-20'} />
-                                </div>
-                             </th>
+                          <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                             <th style={{ padding: '0.75rem 0', color: 'rgba(255,255,255,0.4)', fontSize: '0.6rem' }}>Rank</th>
+                             <th style={{ padding: '0.75rem 0', color: 'rgba(255,255,255,0.4)', fontSize: '0.6rem' }}>Merchant</th>
+                             <th style={{ padding: '0.75rem 0', color: 'rgba(255,255,255,0.4)', fontSize: '0.6rem', textAlign: 'center' }}>Cmds</th>
+                             <th style={{ padding: '0.75rem 0', color: 'rgba(255,255,255,0.4)', fontSize: '0.6rem', textAlign: 'right' }}>Gross Turnover</th>
                           </tr>
                        </thead>
-                       <tbody className="divide-y divide-white/[0.03]">
-                          {superAdminDisplayRows.slice(0, 6).map((r) => (
-                             <tr key={r.slug} className="hover:bg-white/[0.02] transition-colors group">
-                                <td className="px-8 py-4">
-                                   <div className="flex items-center gap-4">
-                                      <div className="size-10 rounded-full bg-slate-800 flex items-center justify-center font-black text-white group-hover:bg-cyan-500 transition-colors">
+                       <tbody>
+                          {chartData.map((r, i) => (
+                             <tr key={r.slug} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                                <td style={{ padding: '1rem 0', fontSize: '0.85rem' }}>
+                                   <div style={{ width: '24px', height: '24px', borderRadius: '6px', backgroundColor: i===0 ? 'rgba(251, 191, 36, 0.1)' : 'rgba(255,255,255,0.03)', color: i===0? '#fbbf24' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 900 }}>
+                                      {i + 1}
+                                   </div>
+                                </td>
+                                <td style={{ padding: '1rem 0' }}>
+                                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                      <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 900, color: 'var(--primary)' }}>
                                          {r.nom.charAt(0)}
                                       </div>
                                       <div>
-                                         <p className="text-sm font-black text-white truncate max-w-[150px] uppercase tracking-tighter">{r.nom}</p>
-                                         <p className="text-[10px] text-slate-500 font-bold tracking-widest">{r.slug}.gomboswiftci.app</p>
+                                         <p style={{ margin: 0, fontWeight: 800, fontSize: '0.85rem' }}>{r.nom}</p>
+                                         <p style={{ margin: 0, fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)' }}>{r.slug}</p>
                                       </div>
                                    </div>
                                 </td>
-                                <td className="px-4 py-4">
-                                   <div className={`inline-flex px-3 py-1 rounded-md text-[9px] font-black uppercase tracking-widest ${r.actif ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
-                                      {r.actif ? 'Available' : 'Unavailable'}
-                                   </div>
-                                </td>
-                                <td className="px-4 py-4">
-                                   <div className="flex items-center gap-3">
-                                      <div className="flex-1 w-20 h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                                         <div className={`h-full rounded-full ${Number(r.success_rate) > 80 ? 'bg-emerald-400' : Number(r.success_rate) > 60 ? 'bg-cyan-400' : 'bg-rose-500'}`} style={{ width: `${r.success_rate}%` }} />
-                                      </div>
-                                      <span className="text-[10px] font-black text-white/80">{r.success_rate}%</span>
-                                   </div>
-                                </td>
-                                <td className="px-6 py-4">
-                                   <p className="text-[11px] font-black text-white tabular-nums">{r.ca_gmv.toLocaleString('fr-FR')} <span className="opacity-30">CFA</span></p>
+                                <td style={{ padding: '1rem 0', textAlign: 'center', fontSize: '0.85rem', fontWeight: 800 }}>{r.commandes}</td>
+                                <td style={{ padding: '1rem 0', textAlign: 'right' }}>
+                                   <p style={{ margin:0, fontWeight: 950, color: 'var(--primary)', fontSize: '0.9rem' }}>{r.ca_gmv.toLocaleString()} <span style={{ fontSize: '0.6rem', opacity: 0.3 }}>CFA</span></p>
                                 </td>
                              </tr>
                           ))}
@@ -1505,102 +1435,149 @@ export const PerformanceDashboard = ({
               </div>
            </div>
 
-           {/* --- CIRCULAR GAUGE: EFFICIENCY --- */}
-           <div className="xl:col-span-5 grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-[#101624] rounded-[24px] p-8 border border-white/[0.02] shadow-2xl flex flex-col items-center justify-between">
-                 <div className="w-full mb-4">
-                    <h3 className="text-lg font-black text-white uppercase tracking-tight text-center">Platform Health</h3>
-                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest text-center">Global Efficiency Index</p>
+           {/* --- VOLUME BY PARTNER (BAR CHART) --- */}
+           <div style={{ gridColumn: 'span 5' }}>
+              <div className="card" style={{ padding: '2rem', height: '100%', background: '#0e1422', borderRadius: '24px', display: 'flex', flexDirection: 'column' }}>
+                 <div style={{ marginBottom: '1.5rem' }}>
+                    <h3 style={{ fontSize: '1.1rem', margin: 0, fontWeight: 900 }}>Volume Breakdown</h3>
+                    <p style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', fontWeight: 800, margin: '0.25rem 0 0' }}>GMV vs Active Resources</p>
                  </div>
-                 
-                 <div className="relative size-48 flex items-center justify-center">
+                 <div style={{ flex: 1, minHeight: '200px' }}>
+                    <ResponsiveContainer width="100%" height="100%">
+                       <BarChart data={chartData} margin={{ top: 10, right: 0, left: -25, bottom: 0 }}>
+                          <XAxis 
+                            dataKey="nom" 
+                            axisLine={false} 
+                            tickLine={false} 
+                            tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 9, fontWeight: 800 }} 
+                            interval={0}
+                          />
+                          <YAxis hide />
+                          <Tooltip {...chartTooltip} cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
+                          <Bar dataKey="ca_gmv" radius={[6, 6, 6, 6]} barSize={20}>
+                             {chartData.map((_, index) => (
+                                <Cell key={`cell-${index}`} fill={index === 0 ? 'var(--primary)' : 'rgba(255,255,255,0.1)'} />
+                             ))}
+                          </Bar>
+                       </BarChart>
+                    </ResponsiveContainer>
+                 </div>
+              </div>
+           </div>
+
+           {/* --- PARTNER TABLE / MATRIX --- */}
+           <div style={{ gridColumn: 'span 8' }}>
+              <div className="card" style={{ padding: 0, background: '#0e1422', borderRadius: '24px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.04)' }}>
+                 <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)' }}>
+                    <div>
+                       <h3 style={{ fontSize: '1rem', margin: 0, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Infrastructure Matrix</h3>
+                       <p style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', fontWeight: 800 }}>Global tenant status</p>
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                       <button onClick={() => setSuperAdminScope('all')} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', fontSize: '0.6rem', fontWeight: 900, border: 'none', cursor: 'pointer', backgroundColor: superAdminScope === 'all' ? 'var(--primary)' : 'rgba(255,255,255,0.03)', color: superAdminScope === 'all' ? 'white' : 'rgba(255,255,255,0.4)' }}>All</button>
+                       <button onClick={() => setSuperAdminScope('active_only')} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', fontSize: '0.6rem', fontWeight: 900, border: 'none', cursor: 'pointer', backgroundColor: superAdminScope === 'active_only' ? 'var(--primary)' : 'rgba(255,255,255,0.03)', color: superAdminScope === 'active_only' ? 'white' : 'rgba(255,255,255,0.4)' }}>Active</button>
+                    </div>
+                 </div>
+                 <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                       <thead>
+                          <tr style={{ backgroundColor: 'rgba(255,255,255,0.01)' }}>
+                             <th style={{ padding: '1.25rem 2rem', textAlign: 'left', color: 'rgba(255,255,255,0.4)', fontSize: '0.65rem' }}>Partner</th>
+                             <th style={{ padding: '1.25rem 1rem', textAlign: 'left', color: 'rgba(255,255,255,0.4)', fontSize: '0.65rem' }}>Status</th>
+                             <th style={{ padding: '1.25rem 1rem', textAlign: 'left', color: 'rgba(255,255,255,0.4)', fontSize: '0.65rem' }}>Efficacy</th>
+                             <th style={{ padding: '1.25rem 2rem', textAlign: 'right', color: 'rgba(255,255,255,0.4)', fontSize: '0.65rem' }}>Volume</th>
+                          </tr>
+                       </thead>
+                       <tbody style={{ borderTop: '1px solid rgba(255,255,255,0.03)' }}>
+                          {superAdminDisplayRows.slice(0, 8).map((r) => (
+                             <tr key={r.slug} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                                <td style={{ padding: '1rem 2rem' }}>
+                                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                      <div style={{ width: '28px', height: '28px', borderRadius: '6px', backgroundColor: '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, color: 'white', fontSize: '0.75rem' }}>{r.nom.charAt(0)}</div>
+                                      <div>
+                                         <p style={{ margin: 0, fontWeight: 800, fontSize: '0.8rem' }}>{r.nom}</p>
+                                         <p style={{ margin: 0, fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)' }}>{r.slug}</p>
+                                      </div>
+                                   </div>
+                                </td>
+                                <td style={{ padding: '1rem 1rem' }}>
+                                   <div style={{ display: 'inline-flex', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.55rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em', backgroundColor: r.actif ? 'rgba(16, 185, 129, 0.1)' : 'rgba(244, 63, 94, 0.1)', color: r.actif ? '#10b981' : '#f43f5e' }}>
+                                      {r.actif ? 'ONLINE' : 'OFFLINE'}
+                                   </div>
+                                </td>
+                                <td style={{ padding: '1rem 1rem' }}>
+                                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                      <div style={{ width: '60px', height: '4px', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '2px', overflow: 'hidden' }}>
+                                         <div style={{ height: '100%', backgroundColor: Number(r.success_rate) > 80 ? '#10b981' : Number(r.success_rate) > 60 ? 'var(--primary)' : '#f43f5e', width: `${r.success_rate}%` }} />
+                                      </div>
+                                      <span style={{ fontSize: '0.7rem', fontWeight: 800 }}>{r.success_rate}%</span>
+                                   </div>
+                                </td>
+                                <td style={{ padding: '1rem 2rem', textAlign: 'right', fontWeight: 900, fontSize: '0.85rem' }}>{r.ca_gmv.toLocaleString()} <span style={{ opacity: 0.3, fontSize: '0.6rem' }}>CFA</span></td>
+                             </tr>
+                          ))}
+                       </tbody>
+                    </table>
+                 </div>
+              </div>
+           </div>
+
+           {/* --- CIRCULAR GAUGE & GROWTH --- */}
+           <div style={{ gridColumn: 'span 4', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div className="card" style={{ padding: '2rem', background: '#0e1422', borderRadius: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                 <div style={{ width: '100%', textAlign: 'center', marginBottom: '1rem' }}>
+                    <h3 style={{ fontSize: '1rem', margin: 0, fontWeight: 900, textTransform: 'uppercase' }}>Efficiency Index</h3>
+                    <p style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', fontWeight: 800 }}>Global Marketplace</p>
+                 </div>
+                 <div style={{ position: 'relative', width: '160px', height: '160px' }}>
                     <ResponsiveContainer width="100%" height="100%">
                        <PieChart>
                           <Pie
-                             data={[
-                                { name: 'Success', value: (100 - superAdminInsights.tauxAnnulPlateforme) },
-                                { name: 'Empty', value: superAdminInsights.tauxAnnulPlateforme }
-                             ]}
-                             cx="50%"
-                             cy="50%"
-                             innerRadius={65}
-                             outerRadius={85}
-                             startAngle={225}
-                             endAngle={-45}
-                             dataKey="value"
-                             stroke="none"
-                             cornerRadius={10}
+                             data={[{ name: 'Success', value: (100 - superAdminInsights.tauxAnnulPlateforme) }, { name: 'Void', value: superAdminInsights.tauxAnnulPlateforme }]}
+                             cx="50%" cy="50%" innerRadius={50} outerRadius={65} startAngle={225} endAngle={-45} dataKey="value" stroke="none" cornerRadius={6}
                           >
-                             <Cell fill="#06b6d4" />
-                             <Cell fill="rgba(255,255,255,0.05)" />
+                             <Cell fill="var(--primary)" />
+                             <Cell fill="rgba(255,255,255,0.04)" />
                           </Pie>
                        </PieChart>
                     </ResponsiveContainer>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                       <p className="text-5xl font-black text-white">{100 - superAdminInsights.tauxAnnulPlateforme}</p>
-                       <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest opacity-50">% EFFICIENCY</p>
+                    <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
+                       <p style={{ fontSize: '1.75rem', fontWeight: 900, margin: 0 }}>{100 - superAdminInsights.tauxAnnulPlateforme}%</p>
+                       <p style={{ fontSize: '0.5rem', fontWeight: 800, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase' }}>Optimum</p>
                     </div>
-                 </div>
-                 
-                 <div className="w-full flex justify-between mt-4 pt-4 border-t border-white/5 opacity-50">
-                    <p className="text-[10px] font-black text-slate-500 uppercase">Target: 85%</p>
-                    <p className="text-[10px] font-black text-cyan-400 uppercase">Active</p>
                  </div>
               </div>
 
-              {/* --- GROWTH CURVE --- */}
-              <div className="bg-[#101624] rounded-[24px] p-8 border border-white/[0.02] shadow-2xl flex flex-col justify-between">
-                 <div>
-                    <h3 className="text-lg font-black text-white uppercase tracking-tight text-center">Growth Velocity</h3>
-                    <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest text-center">Turnover Evolution</p>
+              <div className="card" style={{ padding: '1.5rem 2rem', background: '#0e1422', borderRadius: '24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                 <div style={{ marginBottom: '1rem' }}>
+                    <h3 style={{ fontSize: '1rem', margin: 0, fontWeight: 900, textTransform: 'uppercase' }}>Growth Trend</h3>
+                    <p style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', fontWeight: 800 }}>Real-time traction</p>
                  </div>
-                 <div className="flex-1 min-h-[140px] mt-4">
+                 <div style={{ flex: 1, minHeight: '100px' }}>
                     <ResponsiveContainer width="100%" height="100%">
                        <AreaChart data={platformTimeline}>
                           <defs>
-                             <linearGradient id="growthGrad" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stopColor="#06b6d4" stopOpacity={0.3} />
-                                <stop offset="100%" stopColor="#06b6d4" stopOpacity={0} />
+                             <linearGradient id="growthGradV2" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.2} />
+                                <stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
                              </linearGradient>
                           </defs>
-                          <Tooltip {...chartTooltip} />
-                          <Area 
-                             type="monotone" 
-                             dataKey="ca_gmv" 
-                             stroke="#06b6d4" 
-                             strokeWidth={3} 
-                             fill="url(#growthGrad)" 
-                             animationDuration={1500} 
-                          />
+                          <Area type="monotone" dataKey="ca_gmv" stroke="var(--primary)" strokeWidth={2} fill="url(#growthGradV2)" animationDuration={1000} />
                        </AreaChart>
                     </ResponsiveContainer>
                  </div>
-                 <div className="flex justify-between items-center mt-4">
-                    <div className="text-left">
-                       <p className="text-xl font-black text-white">{(totalCmd > 0 ? (totalGmv / totalCmd).toFixed(0) : 0)}</p>
-                       <p className="text-[8px] text-slate-500 font-bold uppercase tracking-widest">Avg Transaction</p>
+                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+                    <div>
+                       <p style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', fontWeight: 800, margin: 0 }}>Average</p>
+                       <p style={{ fontSize: '1rem', fontWeight: 900, margin: 0 }}>{(totalCmd > 0 ? (totalGmv / totalCmd).toFixed(0) : 0)} <span style={{ fontSize: '0.6rem', opacity: 0.3 }}>F</span></p>
                     </div>
-                    {topTenant && (
-                       <div className="text-right hidden sm:block">
-                          <p className="text-[8px] text-slate-600 font-bold uppercase mb-0.5">Top Merchant</p>
-                          <p className="text-[10px] font-black text-cyan-400 uppercase tracking-tighter">{topTenant.nom}</p>
-                       </div>
-                    )}
-                    <div className="size-10 rounded-full bg-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.4)] flex items-center justify-center text-white">
-                       <Zap size={20} />
+                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 15px rgba(6,182,212,0.3)' }}>
+                       <Zap size={16} />
                     </div>
                  </div>
               </div>
            </div>
         </div>
-
-        {/* --- PARTNER SEARCH FOOTER (EMPTY STATE) --- */}
-        {superAdminDisplayRows.length === 0 && (
-           <div className="p-24 text-center rounded-[32px] bg-white/[0.01] border border-dashed border-white/[0.05]">
-              <Search size={64} className="text-slate-800 mx-auto mb-6" />
-              <p className="text-slate-500 font-black uppercase tracking-[0.4em] text-sm">No synchronized infrastructure found</p>
-           </div>
-        )}
       </div>
     );
   }
