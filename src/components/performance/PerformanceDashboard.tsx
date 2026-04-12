@@ -46,7 +46,7 @@ import {
   ExternalLink,
   Zap,
   Rocket,
-  PieChart as PieIcon,
+  BarChart as BarChartIcon,
   ShieldCheck,
   Search,
 } from 'lucide-react';
@@ -241,12 +241,12 @@ function PerfAdminTableCard({
 export const PerformanceDashboard = ({
   tenantId,
   isSuperAdmin,
-  embeddedModuleChrome,
+  embeddedModuleChrome: _embeddedModuleChrome,
 }: PerformanceDashboardProps) => {
   const { tenantSlug } = useParams<{ tenantSlug: string }>();
   const tenantBase = tenantSlug ? `/${tenantSlug}` : '';
 
-  const moduleChrome = Boolean(embeddedModuleChrome && !isSuperAdmin);
+  const moduleChrome = Boolean(_embeddedModuleChrome && !isSuperAdmin);
   const [activeTab, setActiveTab] = useState<TabType>('logistique');
   const [filter, setFilter] = useState<FilterType>('mois');
   const [loading, setLoading] = useState(true);
@@ -1535,7 +1535,7 @@ export const PerformanceDashboard = ({
                             dataKey="ca_gmv"
                             stroke="none"
                          >
-                            {chartData.map((entry, index) => (
+                            {chartData.map((_, index) => (
                                <Cell key={`cell-${index}`} fill={index === 0 ? '#06b6d4' : index === 1 ? '#4f46e5' : index === 2 ? '#a855f7' : index === 3 ? '#ec4899' : '#1e293b'} />
                             ))}
                          </Pie>
@@ -1557,6 +1557,42 @@ export const PerformanceDashboard = ({
                 </div>
              </div>
           </div>
+        </div>
+
+        {/* --- INTELLIGENCE GRID: DEEP INSIGHTS --- */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <IntelligenceCard 
+              icon={<TrendingUp size={20} />}
+              label="Growth Engine"
+              value={`${totalGmv.toLocaleString('fr-FR')} CFA`}
+              color="#22d3ee"
+              insight={`Vitesse d'exécution optimale avec un panier moyen de ${superAdminInsights.panierMoyen.toLocaleString('fr-FR')} CFA.`}
+              subValue="Revenue Matrix"
+            />
+            <IntelligenceCard 
+              icon={<ShieldCheck size={20} />}
+              label="Network Integrity"
+              value={`${100 - superAdminInsights.tauxAnnulPlateforme}%`}
+              color="#10b981"
+              insight="Faible taux d'attrition opérationnelle. La plateforme maintient ses KPIs de livraison."
+              subValue="Health State"
+            />
+            <IntelligenceCard 
+              icon={<AlertCircle size={20} />}
+              label="Risk Assessment"
+              value={`${superAdminInsights.atRiskCount}`}
+              color="#fbbf24"
+              insight={`${superAdminInsights.atRiskCount} boutiques nécessitent un audit logistique prioritaire.`}
+              subValue="Priority Focus"
+            />
+            <IntelligenceCard 
+              icon={<Users size={20} />}
+              label="Merchant Churn"
+              value={`${superAdminInsights.dormantActiveCount}`}
+              color="#f43f5e"
+              insight={`${superAdminInsights.dormantActiveCount} partenaires n'exploitent pas encore leur infrastructure.`}
+              subValue="Retention Logic"
+            />
         </div>
 
         {/* --- SECTION 3: TRANSACTIONAL VOLUME & HIGHLIGHTS --- */}
@@ -1654,7 +1690,7 @@ export const PerformanceDashboard = ({
                        <th className="px-6 py-6 text-[10px] font-black text-slate-500 uppercase tracking-widest cursor-pointer group" onClick={() => setSuperAdminSort('commandes')}>
                          <div className="flex items-center gap-2">
                             Vol. Orders
-                            <BarChart size={12} className={`group-hover:text-cyan-400 ${superAdminSort === 'commandes' ? 'text-cyan-400' : ''}`} />
+                            <BarChartIcon size={12} className={`group-hover:text-cyan-400 ${superAdminSort === 'commandes' ? 'text-cyan-400' : ''}`} />
                          </div>
                        </th>
                        <th className="px-6 py-6 text-[10px] font-black text-slate-500 uppercase tracking-widest cursor-pointer group" onClick={() => setSuperAdminSort('success_rate')}>
@@ -1711,6 +1747,14 @@ export const PerformanceDashboard = ({
                  </tbody>
               </table>
            </div>
+           {superAdminDisplayRows.length === 0 && (
+              <div className="p-24 text-center">
+                 <div className="size-16 rounded-full bg-white/[0.02] border border-white/[0.05] flex items-center justify-center mx-auto mb-6">
+                    <Search size={32} className="text-slate-800" />
+                 </div>
+                 <p className="text-slate-500 font-black uppercase tracking-[0.3em] text-sm">No partners found for current scope</p>
+              </div>
+           )}
         </div>
       </div>
     );
