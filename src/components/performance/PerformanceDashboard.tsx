@@ -40,9 +40,6 @@ import {
   RefreshCw,
   Download,
   Zap,
-  BarChart as BarChartIcon,
-  ShieldCheck,
-  Search,
 } from 'lucide-react';
 
 type TabType = 'logistique' | 'call-center' | 'inventaire';
@@ -220,7 +217,7 @@ export const PerformanceDashboard = ({
   });
   const [tenantRows, setTenantRows] = useState<TenantPerfRow[]>([]);
   const [platformTimeline, setPlatformTimeline] = useState<PlatformTimelinePoint[]>([]);
-  const [superAdminSort, setSuperAdminSort] = useState<SuperAdminSortKey>('ca_gmv');
+  const [superAdminSort] = useState<SuperAdminSortKey>('ca_gmv');
   const [superAdminScope, setSuperAdminScope] = useState<SuperAdminScope>('all');
 
   const fetchData = useCallback(async () => {
@@ -1473,9 +1470,18 @@ export const PerformanceDashboard = ({
                        <h3 style={{ fontSize: '1rem', margin: 0, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Infrastructure Matrix</h3>
                        <p style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', fontWeight: 800 }}>Global tenant status</p>
                     </div>
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                       <button onClick={() => setSuperAdminScope('all')} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', fontSize: '0.6rem', fontWeight: 900, border: 'none', cursor: 'pointer', backgroundColor: superAdminScope === 'all' ? 'var(--primary)' : 'rgba(255,255,255,0.03)', color: superAdminScope === 'all' ? 'white' : 'rgba(255,255,255,0.4)' }}>All</button>
-                       <button onClick={() => setSuperAdminScope('active_only')} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', fontSize: '0.6rem', fontWeight: 900, border: 'none', cursor: 'pointer', backgroundColor: superAdminScope === 'active_only' ? 'var(--primary)' : 'rgba(255,255,255,0.03)', color: superAdminScope === 'active_only' ? 'white' : 'rgba(255,255,255,0.4)' }}>Active</button>
+                    <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
+                       <div style={{ display: 'flex', gap: '0.3rem' }}>
+                          <button onClick={() => setSuperAdminScope('all')} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', fontSize: '0.6rem', fontWeight: 900, border: 'none', cursor: 'pointer', backgroundColor: superAdminScope === 'all' ? 'var(--primary)' : 'rgba(255,255,255,0.03)', color: superAdminScope === 'all' ? 'white' : 'rgba(255,255,255,0.4)' }}>All</button>
+                          <button onClick={() => setSuperAdminScope('active_only')} style={{ padding: '0.4rem 0.8rem', borderRadius: '6px', fontSize: '0.6rem', fontWeight: 900, border: 'none', cursor: 'pointer', backgroundColor: superAdminScope === 'active_only' ? 'var(--primary)' : 'rgba(255,255,255,0.03)', color: superAdminScope === 'active_only' ? 'white' : 'rgba(255,255,255,0.4)' }}>Active</button>
+                       </div>
+                       <button 
+                         onClick={exportSuperAdminTenantsCsv}
+                         style={{ width: '30px', height: '30px', borderRadius: '6px', backgroundColor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                         title="Export CSV"
+                       >
+                          <Download size={14} />
+                       </button>
                     </div>
                  </div>
                  <div style={{ overflowX: 'auto' }}>
@@ -1571,9 +1577,12 @@ export const PerformanceDashboard = ({
                        <p style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', fontWeight: 800, margin: 0 }}>Average</p>
                        <p style={{ fontSize: '1rem', fontWeight: 900, margin: 0 }}>{(totalCmd > 0 ? (totalGmv / totalCmd).toFixed(0) : 0)} <span style={{ fontSize: '0.6rem', opacity: 0.3 }}>F</span></p>
                     </div>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: 'var(--primary)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 15px rgba(6,182,212,0.3)' }}>
-                       <Zap size={16} />
-                    </div>
+                    {topTenant && (
+                       <div style={{ textAlign: 'right', display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', gap: '0.2rem' }}>
+                          <p style={{ margin: 0, fontSize: '0.55rem', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', width: '100%' }}>Top Merchant</p>
+                          <p style={{ margin: 0, fontSize: '0.7rem', fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase' }}>{topTenant.nom}</p>
+                       </div>
+                    )}
                  </div>
               </div>
            </div>
