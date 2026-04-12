@@ -1327,7 +1327,7 @@ export const PerformanceDashboard = ({
                  <div className="size-2 rounded-full bg-cyan-500 shadow-[0_0_10px_#06b6d4]" />
                  <h2 className="text-2xl font-black text-white tracking-tight uppercase">Gombo Control Center</h2>
               </div>
-              <p className="text-xs text-slate-500 font-bold tracking-widest uppercase opacity-50">Operational Intelligence & Market Growth</p>
+              <p className="text-xs text-slate-500 font-bold tracking-widest uppercase opacity-50">Operational Intelligence & Market Growth · v4.0.3</p>
            </div>
            <div className="flex items-center gap-3">
               <div className="flex items-center gap-1 p-1 bg-white/[0.03] border border-white/[0.06] rounded-xl backdrop-blur-xl">

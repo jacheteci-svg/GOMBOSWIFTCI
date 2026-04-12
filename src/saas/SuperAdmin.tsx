@@ -82,50 +82,52 @@ export const SuperAdmin: React.FC = () => {
     }}>
       
       {/* Header Gombo */}
-      <div style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.5rem' }}>
-            <div style={{ flexShrink: 0 }}>
-              <img src="/favicon.png" alt="Gombo Logo" style={{ width: 32, height: 32, borderRadius: 8, objectFit: 'cover' }} />
-            </div>
-            <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>
-              Gombo Core v4.0.2
-            </span>
-          </div>
-          <h1 className="gombo-neon-text" style={{ fontSize: '2.8rem', fontWeight: 900, letterSpacing: '-0.04em', margin: 0 }}>
-            Gombo Command Center
-          </h1>
-          <p style={{ color: '#94a3b8', fontSize: '1rem', fontWeight: 500, marginTop: '0.5rem' }}>
-            Pilotage global de l'infrastructure SaaS multi-tenant
-          </p>
-        </div>
-        
-        <div style={{ display: 'flex', gap: '1rem' }}>
-           <button 
-             onClick={fetchData}
-             disabled={loading}
-             className="gombo-card" 
-             style={{ 
-               padding: '0.8rem 1.5rem', 
-               display: 'flex', 
-               alignItems: 'center', 
-               gap: '1rem',
-               cursor: 'pointer',
-               border: '1px solid var(--gombo-border)',
-               background: 'rgba(99, 102, 241, 0.1)',
-               transition: 'all 0.3s'
-             }}
-           >
-              <Activity size={18} color={loading ? "#94a3b8" : "#10b981"} className={loading ? "animate-spin" : ""} />
-              <div>
-                <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Statut Gombo</div>
-                <div style={{ fontSize: '0.9rem', fontWeight: 800, color: loading ? '#94a3b8' : '#10b981' }}>
-                  {loading ? 'SYNCHRONISATION...' : 'SYSTÈME OPTIMAL'}
-                </div>
+      {activeTab !== 'PERFORMANCE' && (
+        <div style={{ marginBottom: '2.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.5rem' }}>
+              <div style={{ flexShrink: 0 }}>
+                <img src="/favicon.png" alt="Gombo Logo" style={{ width: 32, height: 32, borderRadius: 8, objectFit: 'cover' }} />
               </div>
-           </button>
+              <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '0.15em' }}>
+                Gombo Core v4.0.2
+              </span>
+            </div>
+            <h1 className="gombo-neon-text" style={{ fontSize: '2.8rem', fontWeight: 900, letterSpacing: '-0.04em', margin: 0 }}>
+              Gombo Command Center
+            </h1>
+            <p style={{ color: '#94a3b8', fontSize: '1rem', fontWeight: 500, marginTop: '0.5rem' }}>
+              Pilotage global de l'infrastructure SaaS multi-tenant
+            </p>
+          </div>
+          
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <button 
+              onClick={fetchData}
+              disabled={loading}
+              className="gombo-card" 
+              style={{ 
+                padding: '0.8rem 1.5rem', 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '1rem',
+                cursor: 'pointer',
+                border: '1px solid var(--gombo-border)',
+                background: 'rgba(99, 102, 241, 0.1)',
+                transition: 'all 0.3s'
+              }}
+            >
+                <Activity size={18} color={loading ? "#94a3b8" : "#10b981"} className={loading ? "animate-spin" : ""} />
+                <div>
+                  <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Statut Gombo</div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 800, color: loading ? '#94a3b8' : '#10b981' }}>
+                    {loading ? 'SYNCHRONISATION...' : 'SYSTÈME OPTIMAL'}
+                  </div>
+                </div>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* TABS CONTENT */}
       <div style={{ marginTop: activeTab === 'PERFORMANCE' ? 0 : '1rem', animation: 'fadeIn 0.5s ease' }}>
