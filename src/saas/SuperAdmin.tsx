@@ -694,6 +694,22 @@ const PlansTab = () => {
     }
   };
 
+  const handleAddPlan = async () => {
+    try {
+      const { error } = await insforge.database.from('saas_plans').insert({
+        name: 'Nouveau Plan Strategy',
+        price_fcfa: 25000,
+        description: 'Description de la nouvelle offre commerciale',
+        is_popular: false
+      });
+      if (error) throw error;
+      showToast('Nouveau plan initialisé', 'success');
+      fetchPlans();
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    }
+  };
+
   const filteredPlans = plans.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   const MODULE_CATEGORIES = [
@@ -736,63 +752,81 @@ const PlansTab = () => {
   };
 
   return (
-    <div style={{ animation: 'fadeIn 0.5s ease' }} className="space-y-12">
-      {/* IDENTICAL BAR TO TENANTS TAB */}
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '3rem', flexWrap: 'wrap' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem', animation: 'pageEnter 0.6s ease' }}>
+      
+      {/* STRATEGY HEADER */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', background: 'rgba(255,255,255,0.02)', padding: '2rem', borderRadius: '32px', border: '1px solid rgba(255,255,255,0.05)' }}>
+         <div style={{ display: 'flex', gap: '4rem' }}>
+            <div>
+               <p style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', fontWeight: 900, letterSpacing: '0.1em', marginBottom: '0.5rem' }}>Offres Actives</p>
+               <p style={{ fontSize: '2.5rem', fontWeight: 950, margin: 0, lineHeight: 1 }}>{plans.length}</p>
+            </div>
+            <div>
+               <p style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', fontWeight: 900, letterSpacing: '0.1em', marginBottom: '0.5rem' }}>Popularité</p>
+               <p style={{ fontSize: '2.5rem', fontWeight: 950, margin: 0, lineHeight: 1 }}>{plans.filter(p => p.is_popular).length}<span style={{ fontSize: '1rem', color: 'var(--primary)', marginLeft: '0.25rem' }}>★</span></p>
+            </div>
+            <div>
+               <p style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', fontWeight: 900, letterSpacing: '0.1em', marginBottom: '0.5rem' }}>Infrastructure</p>
+               <p style={{ fontSize: '0.75rem', fontWeight: 700, margin: 0, opacity: 0.6, maxWidth: '200px' }}>Système de facturation SaaS centralisé v4.0.3</p>
+            </div>
+         </div>
+         <button 
+           onClick={handleAddPlan}
+           style={{ padding: '1rem 1.5rem', borderRadius: '16px', backgroundColor: 'var(--primary)', color: 'white', border: 'none', fontWeight: 900, fontSize: '0.75rem', textTransform: 'uppercase', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.75rem', boxShadow: '0 8px 20px rgba(6,182,212,0.3)' }}
+         >
+           <Plus size={18} /> Nouvelle Offre
+         </button>
+      </div>
+
+      {/* SEARCH BAR */}
+      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
         <div style={{ flex: 1, position: 'relative', minWidth: '300px' }}>
-          <Search size={22} style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+          <Search size={22} style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)' }} />
           <input 
             type="text" 
             placeholder="Rechercher une offre commerciale..." 
-            className="form-input"
-            style={{ paddingLeft: '4rem', height: '64px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px', fontSize: '1rem', fontWeight: 600 }}
+            style={{ width: '100%', paddingLeft: '4rem', height: '64px', background: '#0e1422', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px', fontSize: '1rem', fontWeight: 700, color: 'white' }}
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
           />
         </div>
         <button 
           onClick={handleRefresh}
-          className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.08] hover:bg-white/[0.08] transition-all text-slate-400"
-          style={{ height: '64px', width: '64px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{ width: '64px', height: '64px', borderRadius: '20px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
         >
           <Activity size={24} className={loading ? 'animate-spin' : ''} />
         </button>
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-           {[1,2,3].map(i => <div key={i} className="h-[700px] rounded-[32px] bg-white/[0.02] border border-white/[0.05] animate-pulse" />)}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '2rem' }}>
+           {[1,2,3].map(i => <div key={i} style={{ height: '800px', borderRadius: '32px', backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }} className="animate-pulse" />)}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '3rem' }}>
           {filteredPlans.map((plan, idx) => {
             const theme = getPlanTheme(idx);
             return (
               <div key={plan.id} 
-                className="relative flex flex-col rounded-[40px] overflow-hidden transition-all duration-500 hover:-translate-y-2 group"
-                style={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 32px 64px -16px rgba(0,0,0,0.5)' }}
+                style={{ position: 'relative', display: 'flex', flexDirection: 'column', borderRadius: '40px', overflow: 'hidden', backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.04)', boxShadow: '0 32px 64px -16px rgba(0,0,0,0.5)', transition: 'transform 0.3s ease' }}
               >
                 {/* HEADER (SLANTED & RIBBON) */}
-                <div style={{ position: 'relative', height: '180px', background: theme.grad, padding: '2rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                   {/* Triangle fold effect */}
-                   <div style={{ position: 'absolute', bottom: '-20px', left: '0', borderTop: `20px solid transparent`, borderRight: `20px solid black`, opacity: 0.3 }} />
-                   
+                <div style={{ position: 'relative', height: '200px', background: theme.grad, padding: '2rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                    <input
                       type="text"
                       value={plan.name}
                       onChange={e => handleChange(plan.id, 'name', e.target.value)}
-                      className="bg-transparent border-none text-white font-black text-3xl text-center focus:outline-none w-full drop-shadow-lg"
+                      style={{ background: 'transparent', border: 'none', color: 'white', fontWeight: 900, fontSize: '1.75rem', textAlign: 'center', width: '100%', outline: 'none', textShadow: '0 4px 12px rgba(0,0,0,0.2)' }}
                     />
                     
-                    <div className="mt-2 flex items-baseline gap-1">
-                      <span className="text-white/60 font-black text-sm">$</span>
+                    <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'baseline', gap: '0.25rem' }}>
+                      <span style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 900, fontSize: '1rem' }}>CFA</span>
                       <input
                         type="number"
                         value={plan.price_fcfa}
                         onChange={e => handleChange(plan.id, 'price_fcfa', parseInt(e.target.value))}
-                        className="bg-transparent border-none text-white font-black text-5xl text-center focus:outline-none w-28 tabular-nums drop-shadow-xl"
+                        style={{ background: 'transparent', border: 'none', color: 'white', fontWeight: 950, fontSize: '3.5rem', textAlign: 'center', outline: 'none', width: '200px', textShadow: '0 8px 32px rgba(0,0,0,0.3)' }}
                       />
-                      <span className="text-white/60 font-black text-xs">.00</span>
                     </div>
 
                     {/* ANGLED BOTTOM EDGE */}
@@ -805,43 +839,48 @@ const PlansTab = () => {
                 </div>
 
                 {/* CONTENT SECTION */}
-                <div className="flex-1 flex flex-col px-8 pb-32 pt-16">
+                <div style={{ flex: 1, padding: '4rem 2rem 10rem 2rem' }}>
                   {/* QUOTAS */}
-                  <div className="grid grid-cols-3 gap-3 mb-10">
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', marginBottom: '2.5rem' }}>
                      {[
-                       { k: 'max_users', label: 'Users' }, { k: 'max_products', label: 'Items' }, { k: 'max_orders_month', label: 'Sales' }
+                       { k: 'max_users', label: 'Utilisateurs' }, { k: 'max_products', label: 'Produits' }, { k: 'max_orders_month', label: 'Ventes / Mo' }
                      ].map(q => (
-                       <div key={q.k} className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.05] flex flex-col items-center">
+                       <div key={q.k} style={{ padding: '1.25rem 0.5rem', borderRadius: '16px', backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                           <input 
                             type="number" value={plan[q.k]} 
                             onChange={e => handleChange(plan.id, q.k, Number(e.target.value))}
-                            className="bg-transparent border-none text-white font-black text-center text-sm w-full focus:outline-none" 
+                            style={{ background: 'transparent', border: 'none', color: 'white', fontWeight: 900, textAlign: 'center', fontSize: '1rem', outline: 'none', width: '100%' }} 
                           />
-                          <span className="text-[10px] font-black uppercase text-slate-500 mt-1 tracking-widest">{q.label}</span>
+                          <span style={{ fontSize: '0.55rem', fontWeight: 900, textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginTop: '0.25rem', letterSpacing: '0.05em' }}>{q.label}</span>
                        </div>
                      ))}
                   </div>
 
                   {/* MODULES LIST */}
-                  <div className="space-y-8">
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                     {MODULE_CATEGORIES.map(cat => (
                       <div key={cat.title}>
-                        <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.25em] mb-4 px-2 flex items-center gap-3">
-                           {cat.title} <div className="h-[1px] flex-1 bg-white/[0.03]"></div>
+                        <p style={{ fontSize: '0.65rem', fontWeight: 900, color: 'rgba(255,255,255,0.2)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                           {cat.title} <div style={{ height: '1px', flex: 1, background: 'rgba(255,255,255,0.04)' }} />
                         </p>
-                        <div className="space-y-2">
-                          {cat.modules.map(mod => (
-                            <div 
-                              key={mod.key}
-                              onClick={() => handleChange(plan.id, mod.key, !plan[mod.key])}
-                              className={`flex items-center gap-4 p-3.5 rounded-2xl transition-all cursor-pointer ${plan[mod.key] ? 'bg-white/[0.04] text-white border border-white/[0.05]' : 'opacity-20 hover:opacity-100 hover:bg-white/[0.02] text-slate-500 border border-transparent'}`}
-                            >
-                               <div className={`p-2 rounded-xl ${plan[mod.key] ? 'bg-white/10' : ''}`}>
-                                  {plan[mod.key] ? <CheckCircle size={14} color={theme.color} /> : <XCircle size={14} />}
-                               </div>
-                               <span className="text-xs font-black uppercase tracking-widest">{mod.label}</span>
-                            </div>
-                          ))}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                           {cat.modules.map(mod => (
+                             <div 
+                               key={mod.key}
+                               onClick={() => handleChange(plan.id, mod.key, !plan[mod.key])}
+                               style={{ 
+                                 display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem 1rem', borderRadius: '14px', cursor: 'pointer', transition: 'all 0.2s',
+                                 backgroundColor: plan[mod.key] ? 'rgba(255,255,255,0.03)' : 'transparent',
+                                 opacity: plan[mod.key] ? 1 : 0.25,
+                                 border: plan[mod.key] ? '1px solid rgba(255,255,255,0.06)' : '1px solid transparent'
+                               }}
+                             >
+                                <div style={{ color: plan[mod.key] ? theme.color : 'white' }}>
+                                   {plan[mod.key] ? <CheckCircle size={14} /> : <XCircle size={14} />}
+                                </div>
+                                <span style={{ fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{mod.label}</span>
+                             </div>
+                           ))}
                         </div>
                       </div>
                     ))}
@@ -849,24 +888,26 @@ const PlansTab = () => {
                 </div>
 
                 {/* FOOTER AREA */}
-                <div className="absolute bottom-0 left-0 right-0 p-10 pt-20" style={{ background: 'linear-gradient(to top, #0f172a 60%, transparent)' }}>
+                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '2.5rem', paddingTop: '5rem', background: 'linear-gradient(to top, #0f172a 60%, transparent)' }}>
                    <button
                     onClick={() => handleSave(plan)}
                     disabled={savingId === plan.id}
-                    className="relative z-10 w-full h-16 rounded-2xl text-white font-black text-sm uppercase tracking-[0.2em] transition-all hover:scale-[1.03] active:scale-[0.97] disabled:opacity-50 flex items-center justify-center gap-3 shadow-2xl"
-                    style={{ background: theme.grad, boxShadow: `0 16px 40px ${theme.glow}` }}
+                    style={{ 
+                      width: '100%', height: '60px', borderRadius: '16px', background: theme.grad, color: 'white', border: 'none', fontWeight: 950, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.2em', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', boxShadow: `0 16px 40px ${theme.glow}`, transition: 'all 0.2s',
+                      opacity: savingId === plan.id ? 0.5 : 1
+                    }}
                    >
-                     {savingId === plan.id ? <Activity size={24} className="animate-spin" /> : 'DEPLOIEMENT PLAN'}
+                     {savingId === plan.id ? <Activity size={24} className="animate-spin" /> : 'DÉPLOYER MISE À JOUR'}
                    </button>
                    
-                   <div className="mt-5 flex items-center justify-center gap-2">
+                   <div style={{ marginTop: '1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
                       <input 
                         type="checkbox" checked={!!plan.is_popular} 
                         onChange={e => handleChange(plan.id, 'is_popular', e.target.checked)} 
-                        className="accent-white size-3"
                         id={`pop-p-${plan.id}`}
+                        style={{ width: '14px', height: '14px', cursor: 'pointer' }}
                       />
-                      <label htmlFor={`pop-p-${plan.id}`} className="text-[9px] font-black text-slate-500 uppercase tracking-widest cursor-pointer">Recommander sur le portail</label>
+                      <label htmlFor={`pop-p-${plan.id}`} style={{ fontSize: '0.65rem', fontWeight: 900, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.05em', cursor: 'pointer' }}>Recommandé (Ribbon ★)</label>
                    </div>
                 </div>
               </div>
