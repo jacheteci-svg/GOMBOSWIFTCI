@@ -660,6 +660,7 @@ const PlansTab = () => {
         p_price_fcfa: plan.price_fcfa,
         p_description: plan.description || '',
         p_is_popular: !!plan.is_popular,
+        p_is_active: !!plan.is_active,
         p_module_caisse: !!plan.module_caisse,
         p_module_audit: !!plan.module_audit,
         p_module_api: !!plan.module_api,
@@ -694,13 +695,30 @@ const PlansTab = () => {
     }
   };
 
+  const handleDelete = async (plan: any) => {
+    if (!window.confirm(`Êtes-vous certain de vouloir supprimer définitivement le plan "${plan.name}" ?\n\nCette action est irréversible.`)) return;
+    
+    setSavingId(plan.id);
+    try {
+      const { error } = await insforge.database.rpc('delete_saas_plan', { p_id: plan.id });
+      if (error) throw error;
+      showToast('Plan supprimé de l\'infrastructure', 'success');
+      fetchPlans();
+    } catch (err: any) {
+      showToast(err.message, 'error');
+    } finally {
+      setSavingId(null);
+    }
+  };
+
   const handleAddPlan = async () => {
     try {
       const { error } = await insforge.database.from('saas_plans').insert({
         name: 'Nouveau Plan Strategy',
         price_fcfa: 25000,
         description: 'Description de la nouvelle offre commerciale',
-        is_popular: false
+        is_popular: false,
+        is_active: false
       });
       if (error) throw error;
       showToast('Nouveau plan initialisé', 'success');
@@ -759,15 +777,15 @@ const PlansTab = () => {
          <div style={{ display: 'flex', gap: '4rem' }}>
             <div>
                <p style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', fontWeight: 900, letterSpacing: '0.1em', marginBottom: '0.5rem' }}>Offres Actives</p>
-               <p style={{ fontSize: '2.5rem', fontWeight: 950, margin: 0, lineHeight: 1 }}>{plans.length}</p>
+               <p style={{ fontSize: '2.5rem', fontWeight: 950, margin: 0, lineHeight: 1 }}>{plans.filter(p => p.is_active).length}</p>
+            </div>
+            <div>
+               <p style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', fontWeight: 900, letterSpacing: '0.1em', marginBottom: '0.5rem' }}>Brouillons</p>
+               <p style={{ fontSize: '2.5rem', fontWeight: 950, margin: 0, lineHeight: 1 }}>{plans.filter(p => !p.is_active).length}</p>
             </div>
             <div>
                <p style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', fontWeight: 900, letterSpacing: '0.1em', marginBottom: '0.5rem' }}>Popularité</p>
                <p style={{ fontSize: '2.5rem', fontWeight: 950, margin: 0, lineHeight: 1 }}>{plans.filter(p => p.is_popular).length}<span style={{ fontSize: '1rem', color: 'var(--primary)', marginLeft: '0.25rem' }}>★</span></p>
-            </div>
-            <div>
-               <p style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', fontWeight: 900, letterSpacing: '0.1em', marginBottom: '0.5rem' }}>Infrastructure</p>
-               <p style={{ fontSize: '0.75rem', fontWeight: 700, margin: 0, opacity: 0.6, maxWidth: '200px' }}>Système de facturation SaaS centralisé v4.0.3</p>
             </div>
          </div>
          <button 
@@ -808,10 +826,24 @@ const PlansTab = () => {
             const theme = getPlanTheme(idx);
             return (
               <div key={plan.id} 
-                style={{ position: 'relative', display: 'flex', flexDirection: 'column', borderRadius: '40px', overflow: 'hidden', backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.04)', boxShadow: '0 32px 64px -16px rgba(0,0,0,0.5)', transition: 'transform 0.3s ease' }}
+                style={{ 
+                  position: 'relative', display: 'flex', flexDirection: 'column', borderRadius: '40px', overflow: 'hidden', backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.04)', boxShadow: '0 32px 64px -16px rgba(0,0,0,0.5)', transition: 'transform 0.3s ease',
+                  opacity: plan.is_active ? 1 : 0.7 
+                }}
               >
                 {/* HEADER (SLANTED & RIBBON) */}
-                <div style={{ position: 'relative', height: '200px', background: theme.grad, padding: '2rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                <div style={{ position: 'relative', height: '220px', background: plan.is_active ? theme.grad : 'linear-gradient(135deg, #1e293b, #334155)', padding: '2rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                   
+                   {/* STATUS TOGGLE */}
+                   <div style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(0,0,0,0.2)', padding: '0.5rem 1rem', borderRadius: '12px' }}>
+                      <span style={{ fontSize: '0.6rem', fontWeight: 900, color: 'white', textTransform: 'uppercase' }}>{plan.is_active ? 'Public' : 'Brouillon'}</span>
+                      <input 
+                        type="checkbox" checked={!!plan.is_active} 
+                        onChange={e => handleChange(plan.id, 'is_active', e.target.checked)}
+                        style={{ width: '14px', height: '14px', cursor: 'pointer', accentColor: theme.color }}
+                      />
+                   </div>
+
                    <input
                       type="text"
                       value={plan.name}
@@ -832,7 +864,7 @@ const PlansTab = () => {
                     {/* ANGLED BOTTOM EDGE */}
                     <div style={{ 
                       position: 'absolute', bottom: '-40px', left: 0, right: 0, height: '80px', 
-                      background: theme.grad, 
+                      background: plan.is_active ? theme.grad : 'linear-gradient(135deg, #1e293b, #334155)', 
                       clipPath: 'polygon(0 0, 100% 0, 100% 20%, 0 100%)', 
                       zIndex: 1
                     }} />
@@ -885,6 +917,18 @@ const PlansTab = () => {
                       </div>
                     ))}
                   </div>
+
+                  {/* DANGER ZONE */}
+                  <div style={{ marginTop: '3rem', paddingTop: '1.5rem', borderTop: '1px dashed rgba(255,255,255,0.05)' }}>
+                     <button 
+                       onClick={() => handleDelete(plan)}
+                       style={{ color: '#ef4444', background: 'transparent', border: 'none', fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.5 }}
+                       onMouseEnter={e => e.currentTarget.style.opacity = '1'}
+                       onMouseLeave={e => e.currentTarget.style.opacity = '0.5'}
+                     >
+                        <AlertTriangle size={14} /> Supprimer définitivement cette offre
+                     </button>
+                  </div>
                 </div>
 
                 {/* FOOTER AREA */}
@@ -893,7 +937,7 @@ const PlansTab = () => {
                     onClick={() => handleSave(plan)}
                     disabled={savingId === plan.id}
                     style={{ 
-                      width: '100%', height: '60px', borderRadius: '16px', background: theme.grad, color: 'white', border: 'none', fontWeight: 950, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.2em', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', boxShadow: `0 16px 40px ${theme.glow}`, transition: 'all 0.2s',
+                      width: '100%', height: '60px', borderRadius: '16px', background: plan.is_active ? theme.grad : 'rgba(255,255,255,0.1)', color: 'white', border: 'none', fontWeight: 950, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.2em', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', boxShadow: plan.is_active ? `0 16px 40px ${theme.glow}` : 'none', transition: 'all 0.2s',
                       opacity: savingId === plan.id ? 0.5 : 1
                     }}
                    >
