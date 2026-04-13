@@ -53,12 +53,15 @@ const AdminChatHub = ({ tenants }: { tenants: Tenant[] }) => {
   useEffect(() => {
     fetchMessages();
     
-    // Real-time subscription
-    insforge.realtime.subscribe('support_messages');
-    insforge.realtime.on('INSERT_support_messages', () => {
-      fetchMessages(); // Refresh for now to get joins
-      showToast("Nouveau message reçu !", "info");
-    });
+    // Real-time subscription for ALL changes (INSERT, UPDATE)
+    const channel = insforge.realtime.subscribe('support_messages');
+    
+    const handleRealtime = () => {
+      fetchMessages();
+    };
+
+    insforge.realtime.on('INSERT_support_messages', handleRealtime);
+    insforge.realtime.on('UPDATE_support_messages', handleRealtime);
 
     return () => {
       insforge.realtime.unsubscribe('support_messages');
@@ -82,20 +85,36 @@ const AdminChatHub = ({ tenants }: { tenants: Tenant[] }) => {
       if (error) throw error;
       setReplyContent('');
       if (isNewChatModalOpen) setIsNewChatModalOpen(false);
-      showToast("Message envoyé avec succès", "success");
       fetchMessages();
     } catch (err: any) {
       showToast("Erreur d'envoi", "error");
     }
   };
 
+  useEffect(() => {
+    if (selectedTenantId) {
+      const unreadCount = messages.filter(m => m.tenant_id === selectedTenantId && !m.is_admin_reply && !m.is_read).length;
+      if (unreadCount > 0) {
+        markAsRead(selectedTenantId);
+      }
+    }
+  }, [messages, selectedTenantId]);
+
   const markAsRead = async (tenantId: string) => {
     try {
-      await insforge.database
+      const { error } = await insforge.database
         .from('support_messages')
         .update({ is_read: true })
         .eq('tenant_id', tenantId)
-        .eq('is_admin_reply', false);
+        .eq('is_admin_reply', false)
+        .eq('is_read', false); // Only update unread ones
+        
+      if (!error) {
+        // Immediately update local state to reflect read status
+        setMessages(prev => prev.map(m => 
+          (m.tenant_id === tenantId && !m.is_admin_reply) ? { ...m, is_read: true } : m
+        ));
+      }
     } catch (e) {
       console.error(e);
     }
