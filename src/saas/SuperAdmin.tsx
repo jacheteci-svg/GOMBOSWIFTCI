@@ -919,14 +919,37 @@ const PlansTab = () => {
                   </div>
 
                   {/* DANGER ZONE */}
-                  <div style={{ marginTop: '3rem', paddingTop: '1.5rem', borderTop: '1px dashed rgba(255,255,255,0.05)' }}>
+                  <div style={{ marginTop: '3.5rem', paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'center' }}>
                      <button 
                        onClick={() => handleDelete(plan)}
-                       style={{ color: '#ef4444', background: 'transparent', border: 'none', fontSize: '0.65rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.5 }}
-                       onMouseEnter={e => e.currentTarget.style.opacity = '1'}
-                       onMouseLeave={e => e.currentTarget.style.opacity = '0.5'}
+                       style={{ 
+                         color: '#ef4444', 
+                         background: 'rgba(239, 68, 68, 0.05)', 
+                         border: '1px solid rgba(239, 68, 68, 0.2)', 
+                         padding: '0.75rem 1.5rem', 
+                         borderRadius: '14px', 
+                         fontSize: '0.7rem', 
+                         fontWeight: 900, 
+                         textTransform: 'uppercase', 
+                         letterSpacing: '0.15em', 
+                         cursor: 'pointer', 
+                         display: 'flex', 
+                         alignItems: 'center', 
+                         gap: '0.75rem', 
+                         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)' 
+                       }}
+                       onMouseEnter={e => {
+                         e.currentTarget.style.background = '#ef4444';
+                         e.currentTarget.style.color = 'white';
+                         e.currentTarget.style.boxShadow = '0 8px 24px rgba(239, 68, 68, 0.4)';
+                       }}
+                       onMouseLeave={e => {
+                         e.currentTarget.style.background = 'rgba(239, 68, 68, 0.05)';
+                         e.currentTarget.style.color = '#ef4444';
+                         e.currentTarget.style.boxShadow = 'none';
+                       }}
                      >
-                        <AlertTriangle size={14} /> Supprimer définitivement cette offre
+                        <AlertTriangle size={16} /> SUPPRIMER L'OFFRE
                      </button>
                   </div>
                 </div>
