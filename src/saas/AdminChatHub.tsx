@@ -17,14 +17,12 @@ interface Message {
   tenants?: {
     nom: string;
     id: string;
-    nom_boutique?: string;
   };
 }
 
 interface Tenant {
   id: string;
   nom: string;
-  nom_boutique?: string;
 }
 
 const AdminChatHub = ({ tenants }: { tenants: Tenant[] }) => {
@@ -40,7 +38,7 @@ const AdminChatHub = ({ tenants }: { tenants: Tenant[] }) => {
     try {
       const { data, error } = await insforge.database
         .from('support_messages')
-        .select('*, tenants(id, nom, nom_boutique)')
+        .select('*, tenants(id, nom)')
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -306,7 +304,7 @@ const AdminChatHub = ({ tenants }: { tenants: Tenant[] }) => {
                  >
                     <option value="">Sélectionner un tenant...</option>
                     {tenants.map(t => (
-                      <option key={t.id} value={t.id}>{t.nom} {t.nom_boutique ? `(${t.nom_boutique})` : ''}</option>
+                      <option key={t.id} value={t.id}>{t.nom}</option>
                     ))}
                  </select>
               </div>
