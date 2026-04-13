@@ -32,31 +32,30 @@ export const SupportChat = () => {
     if (mode === 'HUMAN' && tenant?.id) {
        loadHumanMessages();
        
-       // Realtime subscription for human chat
-       let channel: any;
        const setupRealtime = async () => {
-          const res = await insforge.realtime.subscribe(`support_chat:${tenant.id}`);
-          if (res.ok) {
-             insforge.realtime.on('INSERT_support_messages', (payload: any) => {
-               if (payload.new.tenant_id === tenant.id) {
-                  setMessages(prev => {
-                     if (prev.find(m => m.id === payload.new.id)) return prev;
-                     return [...prev, {
-                       id: payload.new.id,
-                       role: payload.new.is_admin_reply ? 'admin' : 'user',
-                       content: payload.new.content,
-                       created_at: payload.new.created_at
-                     }];
-                  });
+          insforge.realtime.subscribe('support_messages');
+          insforge.realtime.on('INSERT_support_messages', (payload: any) => {
+            if (payload.new.tenant_id === tenant.id) {
+               setMessages(prev => {
+                  if (prev.find(m => m.id === payload.new.id)) return prev;
+                  return [...prev, {
+                    id: payload.new.id,
+                    role: payload.new.is_admin_reply ? 'admin' : 'user',
+                    content: payload.new.content,
+                    created_at: payload.new.created_at
+                  }];
+               });
+               if (payload.new.is_admin_reply && isOpen) {
+                  insforge.database.from('support_messages').update({ is_read: true }).eq('id', payload.new.id);
                }
-             });
-          }
+            }
+          });
        };
 
        setupRealtime();
 
        return () => {
-         if (channel) insforge.realtime.unsubscribe(`support_chat:${tenant.id}`);
+         insforge.realtime.unsubscribe('support_messages');
        };
     } else {
       setMessages([{
@@ -167,11 +166,14 @@ export const SupportChat = () => {
         .insert([{
           tenant_id: tenant.id,
           content: currentInput,
-          sender_name: tenant.nom
+          sender_name: tenant.nom || 'Client',
+          is_admin_reply: false,
+          is_read: false
         }]);
       
       if (error) {
-        showToast("Erreur d'envoi", "error");
+        console.error("Support Insert Error:", error);
+        showToast(`Erreur d'envoi: ${error.message}`, "error");
       }
     }
   };
