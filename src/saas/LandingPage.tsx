@@ -170,6 +170,9 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
+
+
+
       {/* Workflow: How it Works */}
       <section style={{ padding: '10rem 2rem', background: 'radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.05) 0%, transparent 100%)' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
@@ -322,6 +325,39 @@ export const LandingPage: React.FC = () => {
           </div>
         </div>
       </section>
+      {/* NEW FOOTER */}
+      <footer style={{ padding: '8rem 2rem 4rem', background: '#0a0f1e', borderTop: '1px solid rgba(255,255,255,0.05)', position: 'relative', zIndex: 1 }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '4rem', marginBottom: '6rem' }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                <img src="/favicon.png" alt="Logo" style={{ width: 40, height: 40, borderRadius: 10 }} />
+                <span style={{ fontSize: '1.5rem', fontWeight: 950 }}>GomboSwiftCI</span>
+              </div>
+              <p style={{ color: '#94a3b8', lineHeight: 1.6 }}>L'infrastructure logistique intelligente pour les entreprises d'élite en Afrique de l'Ouest.</p>
+            </div>
+            <div>
+              <h4 style={{ fontWeight: 800, marginBottom: '1.5rem' }}>Besoin d'aide ?</h4>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '1rem', color: '#94a3b8' }}>
+                <li>Appel: <a href="tel:+2250100576526" style={{ color: '#fff', textDecoration: 'none', fontWeight: 700 }}>+225 01 00 57 65 26</a></li>
+                <li>WhatsApp: <a href="https://wa.me/2250100576526" style={{ color: '#25D366', textDecoration: 'none', fontWeight: 700 }}>+225 01 00 57 65 26</a></li>
+                <li>Email: <a href="mailto:bigreussite@gmail.com" style={{ color: '#fff', textDecoration: 'none', fontWeight: 700 }}>bigreussite@gmail.com</a></li>
+              </ul>
+            </div>
+            <div>
+              <h4 style={{ fontWeight: 800, marginBottom: '1.5rem' }}>Légal</h4>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <li><Link to="/terms" style={{ color: '#94a3b8', textDecoration: 'none' }}>Conditions d'Utilisation</Link></li>
+                <li><Link to="/privacy" style={{ color: '#94a3b8', textDecoration: 'none' }}>Confidentialité</Link></li>
+                <li><Link to="/gdpr" style={{ color: '#94a3b8', textDecoration: 'none' }}>RGPD</Link></li>
+              </ul>
+            </div>
+          </div>
+          <div style={{ textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '4rem', color: '#64748b', fontSize: '0.9rem' }}>
+            &copy; {new Date().getFullYear()} GomboSwiftCI S.A.S. Tous droits réservés.
+          </div>
+        </div>
+      </footer>
 
     </div>
   );

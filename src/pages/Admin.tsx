@@ -660,6 +660,47 @@ const CommunesManager = ({ showToast, tenantId }: { showToast: any, tenantId: st
   );
 };
 
+// Fallback plans if DB is unavailable
+const FALLBACK_PLANS = [
+  {
+    id: 'FREE',
+    name: 'Essentiel (Gratuit)',
+    price_fcfa: 0,
+    description: 'Parfait pour débuter votre activité logistique.',
+    max_users: 1,
+    max_products: 100,
+    max_orders_month: 50,
+  },
+  {
+    id: 'BASIC',
+    name: 'Croissance',
+    price_fcfa: 15000,
+    is_popular: true,
+    description: 'Pour les boutiques en pleine expansion.',
+    max_users: 5,
+    max_products: -1,
+    max_orders_month: -1,
+    module_caisse: true,
+    module_logistique_pro: true,
+    module_suivi_terrain: true,
+  },
+  {
+    id: 'PRO',
+    name: 'Gombo Pro',
+    price_fcfa: 35000,
+    description: 'La solution complète pour les pros de la logistique.',
+    max_users: -1,
+    max_products: -1,
+    max_orders_month: -1,
+    module_caisse: true,
+    module_audit: true,
+    module_api: true,
+    module_tresorerie_audit: true,
+    module_logistique_pro: true,
+    module_suivi_terrain: true,
+  }
+];
+
 // --- SUBSCRIPTION MANAGER COMPONENT ---
 const SubscriptionManager = ({ showToast, tenant }: { showToast: any, tenant: any }) => {
   const [plans, setPlans] = useState<any[]>([]);
@@ -680,12 +721,17 @@ const SubscriptionManager = ({ showToast, tenant }: { showToast: any, tenant: an
       if (plansRes.error) throw plansRes.error;
       if (contextRes.error) throw contextRes.error;
 
-      setPlans(plansRes.data || []);
+      if (plansRes.data && plansRes.data.length > 0) {
+        setPlans(plansRes.data);
+      } else {
+        setPlans(FALLBACK_PLANS);
+      }
       setBillingContext(contextRes.data);
       setTransactions(txRes.data || []);
     } catch (e: any) {
       console.error("Billing load error:", e);
-      showToast("Erreur lors du chargement des données billing.", "error");
+      setPlans(FALLBACK_PLANS); // Fallback on error too
+      showToast("Sync SaaS : Affichage des offres standard.", "info");
     } finally {
       setLoading(false);
     }
@@ -702,7 +748,7 @@ const SubscriptionManager = ({ showToast, tenant }: { showToast: any, tenant: an
     }
 
     if (plan.price_fcfa === 0) {
-        showToast("Veuillez contacter le support pour passer sur le plan Gratuit.", "info");
+        showToast("Veuillez contacter le support au +225 01 00 57 65 26 pour passer sur le plan Gratuit.", "info");
         return;
     }
 
@@ -753,36 +799,36 @@ const SubscriptionManager = ({ showToast, tenant }: { showToast: any, tenant: an
                </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-               <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                  <div style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', marginBottom: '1rem' }}>Utilisateurs</div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '0.5rem' }}>
-                    <span style={{ fontSize: '1.5rem', fontWeight: 950 }}>{usage.users_count}</span>
-                    <span style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: 700 }}>/ {currentPlan?.max_users === -1 ? '∞' : currentPlan?.max_users}</span>
+            <div className="grid grid-cols-3 gap-4">
+               <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <div style={{ fontSize: '0.6rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Utilisateurs</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '0.4rem' }}>
+                    <span style={{ fontSize: '1.2rem', fontWeight: 950 }}>{usage.users_count}</span>
+                    <span style={{ color: '#64748b', fontSize: '0.7rem', fontWeight: 700 }}>/ {currentPlan?.max_users === -1 ? '∞' : currentPlan?.max_users}</span>
                   </div>
-                  <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                  <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
                     <div className="h-full bg-cyan-500" style={{ width: `${currentPlan?.max_users === -1 ? 10 : (usage.users_count / currentPlan?.max_users) * 100}%` }}></div>
                   </div>
                </div>
 
-               <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                  <div style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', marginBottom: '1rem' }}>Produits</div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '0.5rem' }}>
-                    <span style={{ fontSize: '1.5rem', fontWeight: 950 }}>{usage.products_count}</span>
-                    <span style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: 700 }}>/ {currentPlan?.max_products === -1 ? '∞' : currentPlan?.max_products}</span>
+               <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <div style={{ fontSize: '0.6rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Produits</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '0.4rem' }}>
+                    <span style={{ fontSize: '1.2rem', fontWeight: 950 }}>{usage.products_count}</span>
+                    <span style={{ color: '#64748b', fontSize: '0.7rem', fontWeight: 700 }}>/ {currentPlan?.max_products === -1 ? '∞' : currentPlan?.max_products}</span>
                   </div>
-                  <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                  <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
                     <div className="h-full bg-indigo-500" style={{ width: `${currentPlan?.max_products === -1 ? 10 : (usage.products_count / currentPlan?.max_products) * 100}%` }}></div>
                   </div>
                </div>
 
-               <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                  <div style={{ fontSize: '0.65rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', marginBottom: '1rem' }}>Commandes (Mois)</div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '0.5rem' }}>
-                    <span style={{ fontSize: '1.5rem', fontWeight: 950 }}>{usage.monthly_orders_count}</span>
-                    <span style={{ color: '#64748b', fontSize: '0.75rem', fontWeight: 700 }}>/ {currentPlan?.max_orders_month === -1 ? '∞' : currentPlan?.max_orders_month}</span>
+               <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <div style={{ fontSize: '0.6rem', fontWeight: 900, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Commandes</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '0.4rem' }}>
+                    <span style={{ fontSize: '1.2rem', fontWeight: 950 }}>{usage.monthly_orders_count}</span>
+                    <span style={{ color: '#64748b', fontSize: '0.7rem', fontWeight: 700 }}>/ {currentPlan?.max_orders_month === -1 ? '∞' : currentPlan?.max_orders_month}</span>
                   </div>
-                  <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                  <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
                     <div className="h-full bg-rose-500" style={{ width: `${currentPlan?.max_orders_month === -1 ? 10 : (usage.monthly_orders_count / currentPlan?.max_orders_month) * 100}%` }}></div>
                   </div>
                </div>
@@ -924,8 +970,8 @@ const SubscriptionManager = ({ showToast, tenant }: { showToast: any, tenant: an
         </div>
 
         <div className="card" style={{ marginTop: '3rem', padding: '2rem', background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)', textAlign: 'center', borderRadius: '24px' }}>
-          <p style={{ fontWeight: 600, color: '#94a3b8', margin: 0 }}>Besoin d'un plan custom (Multi-entrepôts, White-label) ? 📧 Contactez support@gomboswiftci.com</p>
-        </div>
+         <p style={{ fontWeight: 600, color: '#94a3b8', margin: 0 }}>Besoin d'un plan custom (Multi-entrepôts, White-label) ? 📧 Contactez bigreussite@gmail.com ou Appelez le +225 01 00 57 65 26</p>
+      </div>
       </div>
     </div>
   );

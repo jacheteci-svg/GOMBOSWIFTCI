@@ -433,7 +433,7 @@ export const RegisterTenant: React.FC = () => {
                         type="email" 
                         className="form-input" 
                         required 
-                        placeholder="contact@entreprise.ci" 
+                        placeholder="bigreussite@gmail.com" 
                         style={{ paddingLeft: '3rem', height: '52px', borderRadius: '14px' }}
                         value={email}
                         onChange={e => setEmail(e.target.value)}

@@ -32,6 +32,11 @@ const LayoutStatic: React.FC<{ title: string; children: React.ReactNode }> = ({ 
       {children}
     </main>
     <footer style={{ padding: '4rem 2rem', textAlign: 'center', borderTop: '1px solid #f1f5f9', marginTop: '4rem', color: '#64748b' }}>
+      <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'center', gap: '2rem', flexWrap: 'wrap' }}>
+        <a href="tel:+2250100576526" style={{ color: 'var(--primary)', fontWeight: 700, textDecoration: 'none' }}>📞 +225 01 00 57 65 26</a>
+        <a href="https://wa.me/2250100576526" style={{ color: '#25D366', fontWeight: 700, textDecoration: 'none' }}>💬 WhatsApp Support</a>
+        <a href="mailto:bigreussite@gmail.com" style={{ color: 'var(--primary)', fontWeight: 700, textDecoration: 'none' }}>📧 bigreussite@gmail.com</a>
+      </div>
       <p>&copy; {new Date().getFullYear()} GomboSwiftCI S.A.S. Infrastructure Logistique Premium.</p>
     </footer>
   </div>
@@ -353,10 +358,10 @@ export const ContactSalesPage: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     
-    // Simulating email send to soroboss.bossimpact@gmail.com
+    // Simulating email send to bigreussite@gmail.com
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
-      console.log("Envoi commercial à: soroboss.bossimpact@gmail.com", formData);
+      console.log("Envoi commercial à: bigreussite@gmail.com", formData);
       showToast("Demande envoyée ! Notre équipe vous contactera sous 24h.", "success");
       setFormData({ name: '', email: '', message: '' });
     } catch (err) {
@@ -413,8 +418,8 @@ export const ContactSalesPage: React.FC = () => {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           {[
-            { icon: MailIcon, title: "Email Commercial", desc: "sales@gomboswiftci.app" },
-            { icon: PhoneCall, title: "Téléphone direct", desc: "+225 07 57 22 87 31" },
+            { icon: MailIcon, title: "Email Commercial", desc: "bigreussite@gmail.com" },
+            { icon: PhoneCall, title: "Téléphone direct", desc: "+225 01 00 57 65 26" },
             { icon: MessageSquare, title: "WhatsApp Business", desc: "+225 01 00 57 65 26" }
           ].map((item, i) => (
             <div key={i} style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', background: 'white', padding: '1rem', borderRadius: '20px', border: '1px solid #f1f5f9' }}>

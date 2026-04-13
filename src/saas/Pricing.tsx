@@ -443,7 +443,7 @@ export const Pricing: React.FC = () => {
                     {plan.id === 'FREE'
                       ? <>🚀 Commencer Gratuitement <Rocket size={20}/></>
                       : plan.id === 'CUSTOM'
-                        ? <>📞 Contacter nos Experts <Settings size={20}/></>
+                        ? <>📞 Appeler le +225 01 00 57 65 26 <Settings size={20}/></>
                         : <>⚡ Activer l'Infrastructure <Zap size={20}/></>}
                   </button>
                   

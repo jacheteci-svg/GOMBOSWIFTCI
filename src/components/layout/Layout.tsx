@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { BottomNav } from './BottomNav';
+import { SupportChat } from '../SupportChat';
 import { useSaas } from '../../saas/SaasProvider';
 import { monerooService } from '../../services/monerooService';
 import { Lock, CreditCard, LogOut, Loader2 } from 'lucide-react';
@@ -132,6 +133,7 @@ export const Layout = () => {
         </div>
       </main>
       <BottomNav onMenuClick={() => setIsMobileMenuOpen(true)} />
+      <SupportChat />
     </div>
   );
 };
