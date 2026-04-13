@@ -102,21 +102,24 @@ const AdminChatHub = ({ tenants }: { tenants: Tenant[] }) => {
 
   const markAsRead = async (tenantId: string) => {
     try {
-      const { error } = await insforge.database
+      const { error, count } = await insforge.database
         .from('support_messages')
         .update({ is_read: true })
         .eq('tenant_id', tenantId)
         .eq('is_admin_reply', false)
-        .eq('is_read', false); // Only update unread ones
+        .eq('is_read', false)
+        .select('*', { count: 'exact' });
         
-      if (!error) {
+      if (error) {
+        console.error("MarkAsRead Error:", error);
+      } else if (count && count > 0) {
         // Immediately update local state to reflect read status
         setMessages(prev => prev.map(m => 
           (m.tenant_id === tenantId && !m.is_admin_reply) ? { ...m, is_read: true } : m
         ));
       }
     } catch (e) {
-      console.error(e);
+      console.error("MarkAsRead Exception:", e);
     }
   };
 
