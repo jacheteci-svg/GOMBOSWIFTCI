@@ -54,7 +54,7 @@ const AdminChatHub = ({ tenants }: { tenants: Tenant[] }) => {
     fetchMessages();
     
     // Real-time subscription for ALL changes (INSERT, UPDATE)
-    const channel = insforge.realtime.subscribe('support_messages');
+    insforge.realtime.subscribe('support_messages');
     
     const handleRealtime = () => {
       fetchMessages();
@@ -102,17 +102,17 @@ const AdminChatHub = ({ tenants }: { tenants: Tenant[] }) => {
 
   const markAsRead = async (tenantId: string) => {
     try {
-      const { error, count } = await insforge.database
+      const { error, data } = await insforge.database
         .from('support_messages')
         .update({ is_read: true })
         .eq('tenant_id', tenantId)
         .eq('is_admin_reply', false)
         .or('is_read.is.null,is_read.eq.false')
-        .select('*', { count: 'exact' });
+        .select('*');
         
       if (error) {
         console.error("MarkAsRead Error:", error);
-      } else if (count && count > 0) {
+      } else if (data && data.length > 0) {
         // Immediately update local state to reflect read status
         setMessages(prev => prev.map(m => 
           (m.tenant_id === tenantId && !m.is_admin_reply) ? { ...m, is_read: true } : m
