@@ -172,18 +172,6 @@ export const Pricing: React.FC = () => {
       }
     };
     loadPlans();
-
-    // REAL-TIME SYNCHRONISATION
-    const channel = insforge.database
-      .channel('saas_plans_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'saas_plans' }, () => {
-        loadPlans();
-      })
-      .subscribe();
-
-    return () => {
-      insforge.database.removeChannel(channel);
-    };
   }, []);
 
   const handleSelectPlan = (planId: string) => {

@@ -693,18 +693,6 @@ const SubscriptionManager = ({ showToast, tenant }: { showToast: any, tenant: an
 
   useEffect(() => {
     loadData();
-
-    // REAL-TIME SYNCHRONISATION
-    const channel = insforge.database
-      .channel('tenant_plans_sync')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'saas_plans' }, () => {
-         loadData();
-      })
-      .subscribe();
-
-    return () => {
-       insforge.database.removeChannel(channel);
-    };
   }, [tenant.id]);
 
   const handleUpgrade = async (plan: any) => {
