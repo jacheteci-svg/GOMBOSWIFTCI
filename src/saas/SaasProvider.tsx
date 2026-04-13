@@ -200,7 +200,30 @@ export const SaasProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     void fetchSaasData();
-  }, [fetchSaasData]);
+
+    // REAL-TIME SYNCHRONISATION FOR PLAN UPDATES
+    const channel = insforge.database
+      .channel('saas_global_config_sync')
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'saas_plans' }, (payload) => {
+        // Only refresh if the plan being updated is the one this tenant is using
+        if (payload.new.id === tenant?.plan_id) {
+          console.log('[SaasProvider] Real-time plan update detected, refreshing...');
+          fetchSaasData({ force: true });
+        }
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'tenants' }, (payload) => {
+        // Only refresh if this specific tenant was updated (e.g. plan changed)
+        if (payload.new.id === tenant?.id) {
+          console.log('[SaasProvider] Real-time tenant update detected, refreshing...');
+          fetchSaasData({ force: true });
+        }
+      })
+      .subscribe();
+
+    return () => {
+      insforge.database.removeChannel(channel);
+    };
+  }, [fetchSaasData, tenant?.id, tenant?.plan_id]);
 
   const isPlanAtLeast = (requiredPlan: Plan) => {
     const currentPlan = (tenant?.plan || 'FREE') as Plan;

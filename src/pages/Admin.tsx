@@ -672,7 +672,7 @@ const SubscriptionManager = ({ showToast, tenant }: { showToast: any, tenant: an
     setLoading(true);
     try {
       const [plansRes, contextRes, txRes] = await Promise.all([
-        insforge.database.from('saas_plans').select('*').order('price_fcfa', { ascending: true }),
+        insforge.database.from('saas_plans').select('*').eq('is_active', true).order('price_fcfa', { ascending: true }),
         insforge.database.rpc('get_tenant_billing_context', { t_id: tenant.id }),
         insforge.database.from('moneroo_transactions').select('*').eq('tenant_id', tenant.id).order('created_at', { ascending: false }).limit(5)
       ]);
@@ -693,6 +693,18 @@ const SubscriptionManager = ({ showToast, tenant }: { showToast: any, tenant: an
 
   useEffect(() => {
     loadData();
+
+    // REAL-TIME SYNCHRONISATION
+    const channel = insforge.database
+      .channel('tenant_plans_sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'saas_plans' }, () => {
+         loadData();
+      })
+      .subscribe();
+
+    return () => {
+       insforge.database.removeChannel(channel);
+    };
   }, [tenant.id]);
 
   const handleUpgrade = async (plan: any) => {

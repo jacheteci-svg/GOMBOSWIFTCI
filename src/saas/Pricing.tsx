@@ -143,7 +143,7 @@ export const Pricing: React.FC = () => {
   React.useEffect(() => {
     const loadPlans = async () => {
       try {
-        const { data, error } = await insforge.database.from('saas_plans').select('*');
+        const { data, error } = await insforge.database.from('saas_plans').select('*').eq('is_active', true);
         if (error) throw error;
 
         if (data && data.length > 0) {
@@ -172,6 +172,18 @@ export const Pricing: React.FC = () => {
       }
     };
     loadPlans();
+
+    // REAL-TIME SYNCHRONISATION
+    const channel = insforge.database
+      .channel('saas_plans_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'saas_plans' }, () => {
+        loadPlans();
+      })
+      .subscribe();
+
+    return () => {
+      insforge.database.removeChannel(channel);
+    };
   }, []);
 
   const handleSelectPlan = (planId: string) => {
