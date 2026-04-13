@@ -107,7 +107,7 @@ const AdminChatHub = ({ tenants }: { tenants: Tenant[] }) => {
         .update({ is_read: true })
         .eq('tenant_id', tenantId)
         .eq('is_admin_reply', false)
-        .eq('is_read', false)
+        .or('is_read.is.null,is_read.eq.false')
         .select('*', { count: 'exact' });
         
       if (error) {
