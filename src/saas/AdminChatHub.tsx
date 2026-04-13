@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
-  MessageCircle, Send, Search, Users, Sparkles, Filter, 
-  Trash2, UserPlus, CheckCircle2, Clock, Bot, User 
+  MessageCircle, Send, Search, Filter, 
+  UserPlus, CheckCircle2, Clock, Bot 
 } from 'lucide-react';
-import { insforge } from '@insforge/sdk';
-import { useToast } from '../context/ToastContext';
+import { insforge } from '../lib/insforge';
+import { useToast } from '../contexts/ToastContext';
 
 interface Message {
   id: string;
@@ -32,7 +32,7 @@ const AdminChatHub = ({ tenants }: { tenants: Tenant[] }) => {
   const [selectedTenantId, setSelectedTenantId] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [isNewChatModalOpen, setIsNewChatModalOpen] = useState(false);
   const { showToast } = useToast();
 
@@ -56,8 +56,8 @@ const AdminChatHub = ({ tenants }: { tenants: Tenant[] }) => {
     fetchMessages();
     
     // Real-time subscription
-    const channel = insforge.realtime.subscribe('support_messages');
-    insforge.realtime.on('INSERT_support_messages', (payload: any) => {
+    insforge.realtime.subscribe('support_messages');
+    insforge.realtime.on('INSERT_support_messages', () => {
       fetchMessages(); // Refresh for now to get joins
       showToast("Nouveau message reçu !", "info");
     });
@@ -226,7 +226,7 @@ const AdminChatHub = ({ tenants }: { tenants: Tenant[] }) => {
             </div>
 
             <div style={{ flex: 1, overflowY: 'auto', padding: '2rem', display: 'flex', flexDirection: 'column-reverse', gap: '1.5rem' }}>
-              {activeMessages.map((msg, i) => (
+              {activeMessages.map((msg) => (
                 <div key={msg.id} style={{ 
                   alignSelf: msg.is_admin_reply ? 'flex-end' : 'flex-start',
                   maxWidth: '70%',
