@@ -681,7 +681,7 @@ const PlansTab = () => {
   const handleSave = async (plan: any) => {
     setSavingId(plan.id);
     try {
-      const { error } = await insforge.database.rpc('update_saas_plan', {
+      const { data, error } = await insforge.database.rpc('update_saas_plan', {
         p_id: plan.id,
         p_name: plan.name,
         p_price_fcfa: plan.price_fcfa,
@@ -713,6 +713,8 @@ const PlansTab = () => {
       });
 
       if (error) throw error;
+      if (data && data.success === false) throw new Error(data.error || 'Erreur infrastucture');
+
       showToast(`Plan "${plan.name}" mis à jour `, 'success');
       await fetchPlans();
     } catch (err: any) {
@@ -727,8 +729,10 @@ const PlansTab = () => {
     
     setSavingId(plan.id);
     try {
-      const { error } = await insforge.database.rpc('delete_saas_plan', { p_id: plan.id });
+      const { data, error } = await insforge.database.rpc('delete_saas_plan', { p_id: plan.id });
       if (error) throw error;
+      if (data && data.success === false) throw new Error(data.error || 'Erreur lors de la suppression');
+
       showToast('Plan supprimé de l\'infrastructure', 'success');
       fetchPlans();
     } catch (err: any) {
@@ -740,14 +744,15 @@ const PlansTab = () => {
 
   const handleAddPlan = async () => {
     try {
-      const { error } = await insforge.database.from('saas_plans').insert({
-        name: 'Nouveau Plan Strategy',
-        price_fcfa: 25000,
-        description: 'Description de la nouvelle offre commerciale',
-        is_popular: false,
-        is_active: false
+      const { data, error } = await insforge.database.rpc('create_saas_plan', {
+        p_name: 'Nouveau Plan Strategy',
+        p_price_fcfa: 25000,
+        p_description: 'Description de la nouvelle offre commerciale'
       });
+      
       if (error) throw error;
+      if (data && data.success === false) throw new Error(data.error || 'Erreur creation');
+
       showToast('Nouveau plan initialisé', 'success');
       fetchPlans();
     } catch (err: any) {
