@@ -17,6 +17,7 @@ import { BlogTab } from './BlogTab';
 import { EmailLogsTab } from './EmailLogsTab';
 import { emailService } from '../services/emailService';
 import { PerformanceDashboard } from '../components/performance/PerformanceDashboard';
+import AdminChatHub from './AdminChatHub';
 
 export const SuperAdmin: React.FC = () => {
   const location = useLocation();
@@ -138,7 +139,7 @@ export const SuperAdmin: React.FC = () => {
         {activeTab === 'PERFORMANCE' && <PerformanceHub />}
         {activeTab === 'PLANS' && <PlansTab />}
         {activeTab === 'BILLING' && <BillingTab tenants={tenants} plans={plans} fetchData={fetchData} />}
-        {activeTab === 'SUPPORT' && <SupportTab />}
+        {activeTab === 'SUPPORT' && <AdminChatHub tenants={tenants} />}
         {activeTab === 'BROADCAST' && <BroadcastTab tenants={tenants} />}
         {activeTab === 'BLOG' && <BlogTab />}
         {activeTab === 'EMAILS' && <EmailLogsTab />}
@@ -1293,84 +1294,8 @@ const BillingTab = ({ tenants, plans, fetchData }: { tenants: Tenant[], plans: a
   );
 };
 
-/* -------------------------------------------------------------------------- */
-/*                               SUPPORT CENTER                               */
-/* -------------------------------------------------------------------------- */
-const SupportTab = () => {
-  const [tickets, setTickets] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { showToast } = useToast();
 
-  const fetchTickets = async () => {
-    setLoading(true);
-    try {
-      const { data } = await insforge.database.from('support_tickets').select('*, tenants(nom)').order('created_at', { ascending: false });
-      setTickets(data || []);
-    } catch (e) {
-      showToast("Erreur lors du chargement des tickets.", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  useEffect(() => {
-    fetchTickets();
-  }, []);
-
-  return (
-    <div style={{ animation: 'fadeIn 0.3s ease' }}>
-       <div className="gombo-card-elite" style={{ padding: '2.5rem' }}>
-          <h3 className="gombo-neon-text" style={{ margin: 0, fontWeight: 950, fontSize: '1.8rem', marginBottom: '2.5rem' }}>Gombo Help Desk</h3>
-          {loading ? <div className="spinner"></div> : (
-             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '1.5rem' }}>
-                {tickets.length === 0 ? <div style={{ color: '#64748b' }}>Aucune requête en attente.</div> : tickets.map(ticket => (
-                  <div key={ticket.id} className="gombo-card-elite p-8 border border-white/5 hover:border-white/10 transition-all">
-                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                        <div className="flex items-center gap-2">
-                           <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Ticket ID: {ticket.id.slice(0,8).toUpperCase()}</span>
-                        </div>
-                        <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${ticket.status === 'resolved' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}`}>
-                           {ticket.status}
-                        </div>
-                     </div>
-                     <h4 style={{ margin: 0, fontWeight: 950, fontSize: '1.25rem', marginBottom: '1rem' }}>{ticket.subject}</h4>
-                     <p style={{ margin: 0, fontSize: '0.9rem', color: '#94a3b8', lineHeight: 1.6, marginBottom: '2rem' }}>{ticket.message}</p>
-                     
-                     <div className="pt-6 border-t border-white/5 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                           <div className="size-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 font-bold text-xs">
-                              {ticket.tenants?.nom?.charAt(0)}
-                           </div>
-                           <span style={{ fontSize: '0.85rem', fontWeight: 900, color: 'white' }}>{ticket.tenants?.nom}</span>
-                        </div>
-                        <div className="flex gap-3">
-                           <button 
-                             onClick={async () => {
-                               try {
-                                 await insforge.database.from('support_tickets').update({ status: 'resolved' }).eq('id', ticket.id);
-                                 showToast("Ticket marqué comme résolu.", "success");
-                                 fetchTickets();
-                               } catch (e) {
-                                 showToast("Erreur lors de la résolution.", "error");
-                               }
-                             }}
-                             className="px-4 py-2 border border-emerald-500/30 text-emerald-500 rounded-lg text-xs font-black uppercase tracking-widest hover:bg-emerald-500/10 transition-all"
-                           >
-                              RÉSOUDRE
-                           </button>
-                           <button onClick={() => showToast("Canal de communication direct en cours d'ouverture...", "info")} className="px-4 py-2 bg-indigo-500 text-white rounded-lg text-xs font-black uppercase tracking-widest hover:scale-105 transition-all">
-                              RÉPONDRE
-                           </button>
-                        </div>
-                     </div>
-                  </div>
-                ))}
-             </div>
-          )}
-        </div>
-     </div>
-  );
-};
 
 /* -------------------------------------------------------------------------- */
 /*                                PROFILE TAB                                 */
