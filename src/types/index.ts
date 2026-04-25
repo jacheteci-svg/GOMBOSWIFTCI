@@ -257,4 +257,41 @@ export interface Depense {
   description?: string;
   piece_jointe_url?: string;
   paye_par_id?: string;
+  tenant_id: string;
+}
+
+export interface Fournisseur {
+  id: string;
+  nom: string;
+  telephone?: string;
+  email?: string;
+  adresse?: string;
+  notes?: string;
+  tenant_id: string;
+  created_at?: string;
+}
+
+export interface Approvisionnement {
+  id: string;
+  fournisseur_id: string;
+  date: Date | string;
+  montant_total: number;
+  statut: 'en_attente' | 'recu' | 'annule';
+  mode_paiement?: string;
+  notes?: string;
+  tenant_id: string;
+  created_at?: string;
+  fournisseur?: Fournisseur;
+  lignes?: LigneApprovisionnement[];
+}
+
+export interface LigneApprovisionnement {
+  id: string;
+  approvisionnement_id: string;
+  produit_id: string;
+  quantite: number;
+  prix_unitaire: number;
+  montant_ligne: number;
+  tenant_id: string;
+  nom_produit?: string; // Virtual field for UI
 }

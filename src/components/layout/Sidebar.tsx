@@ -28,7 +28,9 @@ import {
   Building,
   Mail,
   Send,
-  BookOpen
+  BookOpen,
+  Truck as TruckIcon,
+  ShoppingBag
 } from 'lucide-react';
 
 interface NavItem {
@@ -81,6 +83,14 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
             { path: getPath('/commandes'), label: 'Commandes', icon: ShoppingCart, permission: 'COMMANDES' },
             { path: getPath('/centre-appel'), label: 'Centre d\'Appel', icon: Headset, permission: 'CENTRE_APPEL' },
             { path: getPath('/clients'), label: 'CRM & Clients', icon: Users, permission: 'CLIENTS', requiredModule: 'module_crm_clients' },
+          ]
+        },
+        {
+          label: 'Achats & Stocks',
+          icon: TruckIcon,
+          children: [
+            { path: getPath('/fournisseurs'), label: 'Fournisseurs', icon: Users, permission: 'PRODUITS' },
+            { path: getPath('/approvisionnements'), label: 'Approvisionnements', icon: ShoppingBag, permission: 'PRODUITS' },
           ]
         }
       ]

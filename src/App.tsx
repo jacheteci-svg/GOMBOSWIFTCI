@@ -33,6 +33,8 @@ const StaffPerformance = lazy(() => import('./pages/StaffPerformance').then((m) 
 const NetProfit = lazy(() => import('./pages/NetProfit').then((m) => ({ default: m.NetProfit })));
 const AdminTresorerie = lazy(() => import('./pages/AdminTresorerie').then((m) => ({ default: m.AdminTresorerie })));
 const AuditTresorerie = lazy(() => import('./pages/AuditTresorerie').then((m) => ({ default: m.AuditTresorerie })));
+const Fournisseurs = lazy(() => import('./pages/Fournisseurs').then((m) => ({ default: m.Fournisseurs })));
+const Approvisionnements = lazy(() => import('./pages/Approvisionnements').then((m) => ({ default: m.Approvisionnements })));
 const SuperAdmin = lazy(() => import('./saas/SuperAdmin').then((m) => ({ default: m.SuperAdmin })));
 
 // --- Lazy Loaded Pages ---
@@ -131,6 +133,8 @@ const AppRoutes = () => {
       <Route path="home" element={<Home />} />
       <Route path="dashboard" element={<ProtectedRoute requiredPermission="DASHBOARD"><Dashboard /></ProtectedRoute>} />
       <Route path="produits" element={<ProtectedRoute requiredPermission="PRODUITS"><Produits /></ProtectedRoute>} />
+      <Route path="fournisseurs" element={<ProtectedRoute requiredPermission="PRODUITS"><Fournisseurs /></ProtectedRoute>} />
+      <Route path="approvisionnements" element={<ProtectedRoute requiredPermission="PRODUITS"><Approvisionnements /></ProtectedRoute>} />
       <Route path="commandes" element={<ProtectedRoute requiredPermission="COMMANDES"><Commandes /></ProtectedRoute>} />
       <Route path="centre-appel" element={<ProtectedRoute requiredPermission="CENTRE_APPEL"><CentreAppel /></ProtectedRoute>} />
       <Route path="logistique" element={<ProtectedRoute requiredPermission="LOGISTIQUE"><Logistique /></ProtectedRoute>} />
