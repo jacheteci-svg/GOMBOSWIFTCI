@@ -570,3 +570,109 @@ export const generateAuditReportPDF = (
 
   doc.save(`Bilan_Expertise_${dateRange.start}_${dateRange.end}.pdf`);
 };
+
+export const generateProcurementPDF = async (
+  appro: any,
+  lignes: any[],
+  branding?: TenantPdfBranding
+) => {
+  const doc = new jsPDF() as jsPDFWithPlugin;
+  const pageWidth = doc.internal.pageSize.width;
+
+  const headerBottom = await drawTenantHeaderLeft(doc, branding, pageWidth, 16);
+
+  doc.setFontSize(16);
+  doc.setTextColor(30, 41, 59);
+  doc.setFont('helvetica', 'bold');
+  doc.text('BON D\'APPROVISIONNEMENT', pageWidth - 20, 22, { align: 'right' });
+
+  doc.setFontSize(9.5);
+  doc.setTextColor(100, 116, 139);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`N°: #${(appro.id || '0000').substring(0, 8).toUpperCase()}`, pageWidth - 20, 30, { align: 'right' });
+  doc.text(`Date: ${format(new Date(appro.date), 'dd/MM/yyyy')}`, pageWidth - 20, 36, { align: 'right' });
+  doc.text(`Statut: ${appro.statut.toUpperCase()}`, pageWidth - 20, 42, { align: 'right' });
+
+  const sepY = headerBottom + 6;
+  doc.setDrawColor(241, 245, 249);
+  doc.line(20, sepY, pageWidth - 20, sepY);
+
+  doc.setFontSize(11);
+  doc.setTextColor(30, 41, 59);
+  doc.setFont('helvetica', 'bold');
+  doc.text('FOURNISSEUR :', 20, sepY + 10);
+
+  doc.setFontSize(12);
+  doc.text(appro.fournisseur?.nom || 'Fournisseur inconnu', 20, sepY + 18);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.setTextColor(71, 85, 105);
+  doc.text(`Tel: ${appro.fournisseur?.telephone || '-'}`, 20, sepY + 24);
+  doc.text(`Email: ${appro.fournisseur?.email || '-'}`, 20, sepY + 30);
+  doc.text(`Adresse: ${appro.fournisseur?.adresse || '-'}`, 20, sepY + 36);
+
+  const tableRows = lignes.map((l, index) => [
+    index + 1,
+    l.nom_produit,
+    l.quantite,
+    `${fP(l.prix_unitaire)} CFA`,
+    `${fP(l.montant_ligne)} CFA`,
+  ]);
+
+  autoTable(doc, {
+    startY: sepY + 44,
+    head: [['#', 'Produit', 'Qté', 'Prix Unitaire', 'Total']],
+    body: tableRows,
+    theme: 'grid',
+    headStyles: {
+      fillColor: PDF_PRIMARY,
+      textColor: [255, 255, 255],
+      fontSize: 10,
+      fontStyle: 'bold',
+      halign: 'center',
+    },
+    columnStyles: {
+      0: { halign: 'center', cellWidth: 10 },
+      1: { cellWidth: 'auto' },
+      2: { halign: 'center', cellWidth: 20 },
+      3: { halign: 'right', cellWidth: 35, fontStyle: 'bold' },
+      4: { halign: 'right', cellWidth: 35, fontStyle: 'bold' },
+    },
+    styles: {
+      fontSize: 9,
+      cellPadding: 4,
+      valign: 'middle',
+    },
+    alternateRowStyles: {
+      fillColor: [248, 250, 252],
+    },
+  });
+
+  const finalY = (doc as any).lastAutoTable?.finalY || 150;
+  
+  doc.setFontSize(14);
+  doc.setTextColor(30, 41, 59);
+  doc.setFont('helvetica', 'bold');
+  doc.text('MONTANT TOTAL :', pageWidth - 85, finalY + 15);
+  doc.text(`${fP(appro.montant_total)} CFA`, pageWidth - 20, finalY + 15, { align: 'right' });
+
+  doc.setFontSize(10);
+  doc.setTextColor(100, 116, 139);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Mode de paiement : ${appro.mode_paiement}`, 20, finalY + 15);
+
+  if (appro.notes) {
+    doc.setFontSize(9);
+    doc.text('Notes :', 20, finalY + 25);
+    const noteLines = doc.splitTextToSize(appro.notes, pageWidth - 40);
+    doc.text(noteLines, 20, finalY + 30);
+  }
+
+  doc.setFontSize(7.5);
+  doc.setTextColor(180, 190, 200);
+  doc.text('Document généré par GomboSwiftCI — Gestion des Approvisionnements', pageWidth / 2, 282, { align: 'center' });
+
+  const slug = sanitizeFileSegment(appro.fournisseur?.nom || 'appro');
+  doc.save(`Appro_${slug}_${(appro.id || '0000').substring(0, 8).toUpperCase()}.pdf`);
+};
