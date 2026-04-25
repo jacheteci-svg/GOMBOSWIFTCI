@@ -227,6 +227,10 @@ export interface MouvementStock {
   date: Date | string;
   reference?: string;
   commentaire?: string;
+  fournisseur_id?: string;
+  mode_paiement?: string;
+  prix_unitaire?: number;
+  tenant_id?: string;
 }
 
 export interface Commune {

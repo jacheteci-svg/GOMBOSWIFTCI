@@ -1,5 +1,6 @@
 import { Produit, MouvementStock } from '../types';
 import { insforge } from '../lib/insforge';
+import { addDepense } from './financialService';
 
 export const getProduits = async (tenantId: string): Promise<Produit[]> => {
   const { data, error } = await insforge.database
@@ -86,6 +87,37 @@ export const addMouvementStock = async (tenantId: string, mouvement: Omit<Mouvem
   if (updateError) {
     console.error("Error updating product stock:", updateError);
     throw new Error("Erreur lors de la mise à jour du niveau de stock final.");
+  }
+
+  // 4. Financial Impact for 'entree' if info provided
+  if (mouvement.type_mouvement === 'entree' && mouvement.prix_unitaire && mouvement.quantite) {
+    const totalAmount = mouvement.prix_unitaire * mouvement.quantite;
+    
+    if (mouvement.mode_paiement === 'Crédit' && mouvement.fournisseur_id) {
+      // Fetch current debt
+      const { data: f } = await insforge.database
+        .from('fournisseurs')
+        .select('solde_dette')
+        .eq('id', mouvement.fournisseur_id)
+        .eq('tenant_id', tenantId)
+        .single();
+      
+      const currentDebt = Number(f?.solde_dette || 0);
+      await insforge.database
+        .from('fournisseurs')
+        .update({ solde_dette: currentDebt + totalAmount })
+        .eq('id', mouvement.fournisseur_id)
+        .eq('tenant_id', tenantId);
+    } else {
+      // Cash expense
+      await addDepense(tenantId, {
+        date: new Date().toISOString(),
+        categorie: 'Achat de stock',
+        montant: totalAmount,
+        description: `Achat stock (Entrée Manuelle) - ${prod.nom}`,
+        mode_paiement: 'Cash'
+      });
+    }
   }
 };
 

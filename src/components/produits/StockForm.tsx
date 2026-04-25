@@ -4,6 +4,9 @@ import { addMouvementStock } from '../../services/produitService';
 import { X, ArrowDownRight, ArrowUpRight, RefreshCcw, Info } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import { useSaas } from '../../saas/SaasProvider';
+import { getFournisseurs } from '../../services/fournisseurService';
+import { Fournisseur } from '../../types';
+import { useEffect } from 'react';
 
 interface StockFormProps {
   produit: Produit;
@@ -22,6 +25,13 @@ export const StockForm = ({ produit, onClose, onSave }: StockFormProps) => {
     commentaire: ''
   });
   const [loading, setLoading] = useState(false);
+  const [fournisseurs, setFournisseurs] = useState<Fournisseur[]>([]);
+
+  useEffect(() => {
+    if (tenant?.id) {
+      getFournisseurs(tenant.id).then(setFournisseurs).catch(console.error);
+    }
+  }, [tenant?.id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -168,6 +178,58 @@ export const StockForm = ({ produit, onClose, onSave }: StockFormProps) => {
               />
             </div>
           </div>
+
+          {formData.type_mouvement === 'entree' && (
+            <>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                <div className="form-group">
+                  <label className="form-label">Prix Unitaire Achat (CFA)</label>
+                  <input 
+                    type="number" 
+                    className="form-input" 
+                    placeholder="0"
+                    value={formData.prix_unitaire || ''}
+                    onChange={e => setFormData({...formData, prix_unitaire: Number(e.target.value)})}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Fournisseur</label>
+                  <select 
+                    className="form-input"
+                    value={formData.fournisseur_id || ''}
+                    onChange={e => setFormData({...formData, fournisseur_id: e.target.value})}
+                  >
+                    <option value="">Sélectionner...</option>
+                    {fournisseurs.map(f => (
+                      <option key={f.id} value={f.id}>{f.nom}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                <label className="form-label">Mode de Règlement</label>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                  {['Cash', 'Crédit'].map(mode => (
+                    <button
+                      key={mode}
+                      type="button"
+                      className={`btn \${formData.mode_paiement === mode ? 'btn-primary' : 'btn-outline'}`}
+                      style={{ flex: 1, borderRadius: '12px' }}
+                      onClick={() => setFormData({...formData, mode_paiement: mode})}
+                    >
+                      {mode}
+                    </button>
+                  ))}
+                </div>
+                {formData.mode_paiement === 'Crédit' && (
+                  <p style={{ fontSize: '0.75rem', color: '#ef4444', marginTop: '0.5rem', fontWeight: 700 }}>
+                    ⚠️ Cela augmentera la dette envers ce fournisseur.
+                  </p>
+                )}
+              </div>
+            </>
+          )}
 
           <div className="form-group" style={{ marginBottom: '2rem' }}>
             <label className="form-label">Note / Commentaire</label>

@@ -30,7 +30,9 @@ import {
   Send,
   BookOpen,
   Truck as TruckIcon,
-  ShoppingBag
+  ShoppingBag,
+  Megaphone,
+  Settings as SettingsIcon
 } from 'lucide-react';
 
 interface NavItem {
@@ -83,6 +85,7 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
             { path: getPath('/commandes'), label: 'Commandes', icon: ShoppingCart, permission: 'COMMANDES' },
             { path: getPath('/centre-appel'), label: 'Centre d\'Appel', icon: Headset, permission: 'CENTRE_APPEL' },
             { path: getPath('/clients'), label: 'CRM & Clients', icon: Users, permission: 'CLIENTS', requiredModule: 'module_crm_clients' },
+            { path: getPath('/admin?tab=marketing'), label: 'Marketing', icon: Megaphone, permission: 'ADMIN' },
           ]
         },
         {
@@ -131,6 +134,7 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
       items: [
         { path: getPath('/historique'), icon: History, label: 'Historique d\'Activité', permission: 'HISTORIQUE' },
         { path: getPath('/admin'), icon: Settings, label: hasPermission('ADMIN') ? 'Administration' : 'Équipe & Zones', permission: 'COMMUNES' },
+        { path: getPath('/admin?tab=parametres'), icon: SettingsIcon, label: 'Paramètres', permission: 'ADMIN' },
         { path: getPath('/profil'), icon: UserIcon, label: 'Mon Profil', permission: 'PROFIL' },
       ]
     }
