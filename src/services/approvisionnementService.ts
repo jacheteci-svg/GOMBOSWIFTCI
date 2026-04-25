@@ -119,7 +119,6 @@ const applyApprovisionnementImpact = async (
     date: new Date().toISOString(),
     categorie: 'Achat de stock',
     montant: Number(appro.montant_total),
-    description: `Achat stock #${approId.substring(0, 8).toUpperCase()} - ${appro.fournisseur?.nom || 'Fournisseur'}`,
-    tenant_id: tenantId
+    description: `Achat stock #${approId.substring(0, 8).toUpperCase()} - ${appro.fournisseur?.nom || 'Fournisseur'}`
   });
 };

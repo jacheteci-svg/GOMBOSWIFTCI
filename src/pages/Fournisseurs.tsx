@@ -6,7 +6,6 @@ import { useToast } from '../contexts/ToastContext';
 import { 
   Plus, 
   Search, 
-  User, 
   Phone, 
   Mail, 
   MapPin, 

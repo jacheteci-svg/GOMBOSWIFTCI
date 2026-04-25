@@ -18,7 +18,7 @@ export const getDepenses = async (tenantId: string, startDate?: string, endDate?
   return data || [];
 };
 
-export const addDepense = async (tenantId: string, depense: Omit<Depense, 'id'>): Promise<void> => {
+export const addDepense = async (tenantId: string, depense: Omit<Depense, 'id' | 'tenant_id'>): Promise<void> => {
   const { error } = await insforge.database
     .from('depenses')
     .insert([{ ...depense, tenant_id: tenantId }]);

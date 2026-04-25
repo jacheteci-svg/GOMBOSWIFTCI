@@ -8,18 +8,14 @@ import { useToast } from '../contexts/ToastContext';
 import { format } from 'date-fns';
 import { 
   Plus, 
-  Search, 
-  ShoppingBag, 
   ChevronRight, 
-  Truck, 
   CheckCircle, 
   XCircle,
   Clock,
   Trash2,
   X,
   Save,
-  Package,
-  Calculator
+  Package
 } from 'lucide-react';
 
 export const Approvisionnements = () => {
@@ -109,7 +105,7 @@ export const Approvisionnements = () => {
     e.preventDefault();
     if (!tenant?.id) return;
     if (formLignes.length === 0) {
-      showToast("Veuillez ajouter au moins un produit", "warning");
+      showToast("Veuillez ajouter au moins un produit", "info");
       return;
     }
 
