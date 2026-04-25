@@ -115,8 +115,23 @@ const applyApprovisionnementImpact = async (
   }
 
   // 2. Financial Impact
-  if (appro.mode_paiement === 'Crédit' && appro.fournisseur_id) {
-    // Increment supplier debt
+  const total = Number(appro.montant_total || 0);
+  const paid = Number(appro.montant_paye ?? total); // Default to total if not specified
+  const debt = total - paid;
+
+  // A. Record the actual payment as an expense
+  if (paid > 0) {
+    await addDepense(tenantId, {
+      date: new Date().toISOString(),
+      categorie: 'Achat de stock',
+      montant: paid,
+      description: `Paiement appro #${approId.substring(0, 8).toUpperCase()} - ${appro.fournisseur?.nom || 'Fournisseur'}`,
+      mode_paiement: appro.mode_paiement || 'Cash'
+    });
+  }
+
+  // B. Record the debt if any and if supplier exists
+  if (debt > 0 && appro.fournisseur_id) {
     const { data: f } = await insforge.database
       .from('fournisseurs')
       .select('solde_dette')
@@ -127,17 +142,8 @@ const applyApprovisionnementImpact = async (
     const currentDebt = Number(f?.solde_dette || 0);
     await insforge.database
       .from('fournisseurs')
-      .update({ solde_dette: currentDebt + Number(appro.montant_total) })
+      .update({ solde_dette: currentDebt + debt })
       .eq('id', appro.fournisseur_id)
       .eq('tenant_id', tenantId);
-  } else {
-    // Add Expense for accounting (Cash by default or if specified)
-    await addDepense(tenantId, {
-      date: new Date().toISOString(),
-      categorie: 'Achat de stock',
-      montant: Number(appro.montant_total),
-      description: `Achat stock #${approId.substring(0, 8).toUpperCase()} - ${appro.fournisseur?.nom || 'Fournisseur'}`,
-      mode_paiement: 'Cash'
-    });
   }
 };

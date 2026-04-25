@@ -46,6 +46,7 @@ export const Approvisionnements = () => {
   const [formData, setFormData] = useState({
     fournisseur_id: '',
     mode_paiement: 'Espèces',
+    montant_paye: 0,
     notes: '',
     statut: 'en_attente' as const
   });
@@ -101,6 +102,7 @@ export const Approvisionnements = () => {
     setFormData({
       fournisseur_id: '',
       mode_paiement: 'Espèces',
+      montant_paye: 0,
       notes: '',
       statut: 'en_attente'
     });
@@ -366,7 +368,32 @@ export const Approvisionnements = () => {
                     <option value="Mobile Money">Mobile Money</option>
                     <option value="Virement">Virement</option>
                     <option value="Chèque">Chèque</option>
+                    <option value="Crédit">Crédit (Dette Fournisseur)</option>
                   </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2.5rem' }}>
+                <div className="form-group">
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 900, color: 'var(--primary)', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Montant déjà versé (Acompte)</label>
+                  <div style={{ position: 'relative' }}>
+                    <input 
+                      type="number" 
+                      className="form-input" 
+                      placeholder="0"
+                      style={{ width: '100%', height: '54px', borderRadius: '14px', background: 'rgba(0,0,0,0.2)', fontWeight: 800, paddingRight: '2.5rem' }}
+                      value={formData.montant_paye}
+                      onChange={e => setFormData({ ...formData, montant_paye: Number(e.target.value) })}
+                    />
+                    <span style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', fontWeight: 900, color: 'var(--text-muted)' }}>F</span>
+                  </div>
+                  <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>Laissez à 0 pour un crédit total, ou saisissez le montant total pour un paiement cash.</p>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 900, color: '#f87171', marginBottom: '0.25rem', textTransform: 'uppercase' }}>Reste à payer (Dette)</div>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#f87171' }}>
+                    {(calculateTotal() - (formData.montant_paye || 0)).toLocaleString()} F
+                  </div>
                 </div>
               </div>
 
@@ -490,8 +517,10 @@ export const Approvisionnements = () => {
               <div>
                 <div style={{ fontSize: '0.7rem', fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '0.5rem', letterSpacing: '1px' }}>Informations Paiement</div>
                 <div style={{ fontWeight: 800, fontSize: '1.1rem', marginBottom: '0.25rem' }}>{selectedAppro.mode_paiement}</div>
-                <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 600 }}>Montant HT: {Number(selectedAppro.montant_total).toLocaleString()} F</div>
-                <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 600 }}>Taxe: 0 F</div>
+                <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 600 }}>Payé: {Number(selectedAppro.montant_paye ?? selectedAppro.montant_total).toLocaleString()} F</div>
+                <div style={{ fontSize: '0.9rem', color: (selectedAppro.montant_total - (selectedAppro.montant_paye ?? selectedAppro.montant_total)) > 0 ? '#f87171' : 'var(--text-muted)', fontWeight: 700 }}>
+                  Dette: {(selectedAppro.montant_total - (selectedAppro.montant_paye ?? selectedAppro.montant_total)).toLocaleString()} F
+                </div>
               </div>
             </div>
 

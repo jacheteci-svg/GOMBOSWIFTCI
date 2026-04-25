@@ -285,6 +285,7 @@ export interface Approvisionnement {
   montant_total: number;
   statut: 'en_attente' | 'recu' | 'annule';
   mode_paiement?: string;
+  montant_paye?: number;
   notes?: string;
   tenant_id: string;
   created_at?: string;
