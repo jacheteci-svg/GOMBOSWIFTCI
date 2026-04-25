@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { User, Commune, Permission } from '../types';
+import { User, Commune, Permission, Fournisseur } from '../types';
 import { getAdminUsers, updateAdminUser, getCommunes, createCommune, updateCommune, deleteCommune, deleteAdminUser, upsertAdminUserProfile, tryResolveUserIdByEmail, finalizeUserInviteViaRpc } from '../services/adminService';
-import { getFournisseurs, createFournisseur, updateFournisseur, deleteFournisseur, payDebt, Fournisseur } from '../services/fournisseurService';
+import { getFournisseurs, createFournisseur, updateFournisseur, deleteFournisseur, payDebt } from '../services/fournisseurService';
 import { Plus, Trash2, Users as UsersIcon, Map as MapIcon, CreditCard, CheckCircle, Building2, Settings as SettingsIcon, Megaphone } from 'lucide-react';
 import { monerooService } from '../services/monerooService';
 import { useToast } from '../contexts/ToastContext';
@@ -177,8 +177,8 @@ export const Admin = () => {
           activeTab === 'entreprise' ? <TenantIdentityPanel tenant={tenant} showToast={showToast} /> :
           activeTab === 'abonnement' ? <SubscriptionManager showToast={showToast} tenant={tenant} /> :
           activeTab === 'fournisseurs' ? <FournisseursManager showToast={showToast} tenantId={tenant.id} /> :
-          activeTab === 'marketing' ? <MarketingManager tenantId={tenant.id} /> :
-          <ParametresManager showToast={showToast} tenantId={tenant.id} />
+          activeTab === 'marketing' ? <MarketingManager /> :
+          <ParametresManager showToast={showToast} />
         )}
       </div>
     </GomboModuleFrame>
@@ -1098,7 +1098,7 @@ const FournisseursManager = ({ showToast, tenantId }: { showToast: any, tenantId
                     <input className="form-input" placeholder="Téléphone" value={form.telephone || ''} onChange={e => setForm({...form, telephone: e.target.value})} />
                     <input className="form-input" placeholder="Contact" value={form.contact || ''} onChange={e => setForm({...form, contact: e.target.value})} />
                     <div style={{ gridColumn: 'span 3', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-                      <button className="btn btn-primary" onClick={handleSave}>Valider</button>
+                      <button className="btn btn-primary" onClick={handleSave} disabled={loading}>Valider</button>
                       <button className="btn btn-outline" onClick={() => setEditingId(null)}>Annuler</button>
                     </div>
                   </div>
@@ -1112,7 +1112,7 @@ const FournisseursManager = ({ showToast, tenantId }: { showToast: any, tenantId
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{f.telephone} | {f.contact}</div>
                 </td>
                 <td>
-                  <span style={{ color: f.solde_dette > 0 ? '#f87171' : '#10b981', fontWeight: 900 }}>
+                  <span style={{ color: (f.solde_dette || 0) > 0 ? '#f87171' : '#10b981', fontWeight: 900 }}>
                     {f.solde_dette?.toLocaleString()} CFA
                   </span>
                 </td>
@@ -1126,7 +1126,7 @@ const FournisseursManager = ({ showToast, tenantId }: { showToast: any, tenantId
                       </div>
                     ) : (
                       <>
-                        <button className="btn btn-outline" onClick={() => { setActivePaymentId(f.id); setPaymentAmount(f.solde_dette); }}>Régler</button>
+                        <button className="btn btn-outline" onClick={() => { setActivePaymentId(f.id); setPaymentAmount(f.solde_dette || 0); }}>Régler</button>
                         <button className="btn btn-outline" onClick={() => { setEditingId(f.id); setForm(f); }}>Editer</button>
                         <button className="btn btn-outline" style={{ color: '#ef4444' }} onClick={async () => { if(confirm('Supprimer?')) { await deleteFournisseur(tenantId, f.id); loadData(); } }}><Trash2 size={16} /></button>
                       </>
@@ -1143,8 +1143,8 @@ const FournisseursManager = ({ showToast, tenantId }: { showToast: any, tenantId
 };
 
 // --- MARKETING MANAGER ---
-const MarketingManager = ({ tenantId }: { tenantId: string }) => {
-  const [sources, setSources] = useState<string[]>(['WhatsApp', 'Facebook', 'TikTok', 'Appel Direct', 'Site Web']);
+const MarketingManager = () => {
+  const [sources] = useState<string[]>(['WhatsApp', 'Facebook', 'TikTok', 'Appel Direct', 'Site Web']);
   
   return (
     <div className="card glass-effect" style={{ padding: '2.5rem', borderRadius: '32px' }}>
@@ -1170,7 +1170,7 @@ const MarketingManager = ({ tenantId }: { tenantId: string }) => {
 };
 
 // --- PARAMETRES MANAGER ---
-const ParametresManager = ({ showToast, tenantId }: { showToast: any, tenantId: string }) => {
+const ParametresManager = ({ showToast }: { showToast: any }) => {
   return (
     <div className="card glass-effect" style={{ padding: '2.5rem', borderRadius: '32px' }}>
       <h3 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 900, color: 'white', marginBottom: '1.5rem' }}>Paramètres Généraux</h3>

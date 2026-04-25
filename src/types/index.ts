@@ -257,6 +257,7 @@ export interface Depense {
   description?: string;
   piece_jointe_url?: string;
   paye_par_id?: string;
+  mode_paiement?: string;
   tenant_id: string;
 }
 
@@ -267,7 +268,7 @@ export interface Fournisseur {
   email?: string;
   adresse?: string;
   contact?: string;
-  solde_dette: number;
+  solde_dette?: number;
   notes?: string;
   tenant_id: string;
   created_at?: string;
