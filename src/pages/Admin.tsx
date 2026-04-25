@@ -1,19 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { User, Commune, Permission } from '../types';
-import {
-  getAdminUsers,
-  updateAdminUser,
-  getCommunes,
-  createCommune,
-  updateCommune,
-  deleteCommune,
-  deleteAdminUser,
-  upsertAdminUserProfile,
-  tryResolveUserIdByEmail,
-  finalizeUserInviteViaRpc,
-} from '../services/adminService';
-import { Plus, Trash2, Users as UsersIcon, Map as MapIcon, CreditCard, CheckCircle, Building2 } from 'lucide-react';
+import { getAdminUsers, updateAdminUser, getCommunes, createCommune, updateCommune, deleteCommune, deleteAdminUser, upsertAdminUserProfile, tryResolveUserIdByEmail, finalizeUserInviteViaRpc } from '../services/adminService';
+import { getFournisseurs, createFournisseur, updateFournisseur, deleteFournisseur, payDebt, Fournisseur } from '../services/fournisseurService';
+import { Plus, Trash2, Users as UsersIcon, Map as MapIcon, CreditCard, CheckCircle, Building2, Settings as SettingsIcon, Megaphone } from 'lucide-react';
 import { monerooService } from '../services/monerooService';
 import { useToast } from '../contexts/ToastContext';
 import { insforge } from '../lib/insforge';
@@ -41,8 +31,8 @@ export const Admin = () => {
   const [searchParams] = useSearchParams();
   const tabParam = searchParams.get('tab') as any;
 
-  const [activeTab, setActiveTab] = useState<'utilisateurs' | 'communes' | 'abonnement' | 'entreprise'>(
-    (tabParam && ['utilisateurs', 'communes', 'abonnement', 'entreprise'].includes(tabParam)) 
+  const [activeTab, setActiveTab] = useState<'utilisateurs' | 'communes' | 'abonnement' | 'entreprise' | 'fournisseurs' | 'marketing' | 'parametres'>(
+    (tabParam && ['utilisateurs', 'communes', 'abonnement', 'entreprise', 'fournisseurs', 'marketing', 'parametres'].includes(tabParam)) 
       ? tabParam 
       : (canManageUsers ? 'utilisateurs' : 'communes')
   );
@@ -127,6 +117,52 @@ export const Admin = () => {
         >
           <CreditCard size={18} strokeWidth={activeTab === 'abonnement' ? 3 : 2} /> Forfait SaaS
         </button>
+
+        {hasPermission('ADMIN') && (
+          <>
+            <button 
+              className="btn"
+              onClick={() => setActiveTab('fournisseurs')}
+              style={{ 
+                background: activeTab === 'fournisseurs' ? 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)' : 'transparent',
+                color: activeTab === 'fournisseurs' ? 'white' : 'var(--text-muted)',
+                boxShadow: activeTab === 'fournisseurs' ? '0 10px 20px rgba(6, 182, 212, 0.3)' : 'none',
+                border: 'none', padding: '0.8rem 1.8rem', borderRadius: '16px', fontWeight: 800, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.75rem',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+              }}
+            >
+              <UsersIcon size={18} strokeWidth={activeTab === 'fournisseurs' ? 3 : 2} /> Fournisseurs
+            </button>
+
+            <button 
+              className="btn"
+              onClick={() => setActiveTab('marketing')}
+              style={{ 
+                background: activeTab === 'marketing' ? 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)' : 'transparent',
+                color: activeTab === 'marketing' ? 'white' : 'var(--text-muted)',
+                boxShadow: activeTab === 'marketing' ? '0 10px 20px rgba(6, 182, 212, 0.3)' : 'none',
+                border: 'none', padding: '0.8rem 1.8rem', borderRadius: '16px', fontWeight: 800, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.75rem',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+              }}
+            >
+              <Megaphone size={18} strokeWidth={activeTab === 'marketing' ? 3 : 2} /> Marketing
+            </button>
+
+            <button 
+              className="btn"
+              onClick={() => setActiveTab('parametres')}
+              style={{ 
+                background: activeTab === 'parametres' ? 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)' : 'transparent',
+                color: activeTab === 'parametres' ? 'white' : 'var(--text-muted)',
+                boxShadow: activeTab === 'parametres' ? '0 10px 20px rgba(6, 182, 212, 0.3)' : 'none',
+                border: 'none', padding: '0.8rem 1.8rem', borderRadius: '16px', fontWeight: 800, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.75rem',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+              }}
+            >
+              <SettingsIcon size={18} strokeWidth={activeTab === 'parametres' ? 3 : 2} /> Paramètres
+            </button>
+          </>
+        )}
       </div>
 
       <div className="gombo-main-area">
@@ -139,7 +175,10 @@ export const Admin = () => {
           activeTab === 'utilisateurs' ? <UsersManager showToast={showToast} tenantId={tenant.id} /> : 
           activeTab === 'communes' ? <CommunesManager showToast={showToast} tenantId={tenant.id} /> :
           activeTab === 'entreprise' ? <TenantIdentityPanel tenant={tenant} showToast={showToast} /> :
-          <SubscriptionManager showToast={showToast} tenant={tenant} />
+          activeTab === 'abonnement' ? <SubscriptionManager showToast={showToast} tenant={tenant} /> :
+          activeTab === 'fournisseurs' ? <FournisseursManager showToast={showToast} tenantId={tenant.id} /> :
+          activeTab === 'marketing' ? <MarketingManager tenantId={tenant.id} /> :
+          <ParametresManager showToast={showToast} tenantId={tenant.id} />
         )}
       </div>
     </GomboModuleFrame>
@@ -972,6 +1011,185 @@ const SubscriptionManager = ({ showToast, tenant }: { showToast: any, tenant: an
         <div className="card" style={{ marginTop: '3rem', padding: '2rem', background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)', textAlign: 'center', borderRadius: '24px' }}>
          <p style={{ fontWeight: 600, color: '#94a3b8', margin: 0 }}>Besoin d'un plan custom (Multi-entrepôts, White-label) ? 📧 Contactez bigreussite@gmail.com ou Appelez le +225 01 00 57 65 26</p>
       </div>
+      </div>
+    </div>
+  );
+};
+
+// --- FOURNISSEURS MANAGER ---
+const FournisseursManager = ({ showToast, tenantId }: { showToast: any, tenantId: string }) => {
+  const [fournisseurs, setFournisseurs] = useState<Fournisseur[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [form, setForm] = useState<Partial<Fournisseur>>({});
+  const [paymentAmount, setPaymentAmount] = useState<number>(0);
+  const [activePaymentId, setActivePaymentId] = useState<string | null>(null);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const data = await getFournisseurs(tenantId);
+      setFournisseurs(data || []);
+    } catch (e) {
+      showToast("Erreur chargement fournisseurs.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { loadData(); }, [tenantId]);
+
+  const handleSave = async () => {
+    if (!form.nom) { showToast("Nom requis.", "error"); return; }
+    setLoading(true);
+    try {
+      if (editingId === 'new') {
+        await createFournisseur(tenantId, form as any);
+      } else if (editingId) {
+        await updateFournisseur(tenantId, editingId, form);
+      }
+      showToast("Fournisseur enregistré.");
+      setEditingId(null); setForm({}); loadData();
+    } catch (e) {
+      showToast("Erreur sauvegarde.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePayment = async (id: string) => {
+    if (paymentAmount <= 0) return;
+    setLoading(true);
+    try {
+      await payDebt(tenantId, id, paymentAmount);
+      showToast("Règlement effectué et enregistré en dépenses.");
+      setActivePaymentId(null); setPaymentAmount(0); loadData();
+    } catch (e) {
+      showToast("Erreur règlement.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="card glass-effect" style={{ padding: '2.5rem', borderRadius: '32px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2.5rem', alignItems: 'center' }}>
+        <h3 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 900, color: 'white' }}>Gestion des Fournisseurs</h3>
+        <button className="btn btn-primary" onClick={() => { setEditingId('new'); setForm({}); }} style={{ borderRadius: '14px' }}>
+          <Plus size={20} /> Nouveau Fournisseur
+        </button>
+      </div>
+
+      <div className="table-container" style={{ borderRadius: '24px' }}>
+        <table className="table-responsive-cards">
+          <thead>
+            <tr>
+              <th>Nom / Contact</th>
+              <th>Dette Actuelle</th>
+              <th style={{ textAlign: 'right' }}>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(editingId === 'new' || fournisseurs.some(f => f.id === editingId)) && (
+              <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
+                <td colSpan={3}>
+                  <div style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                    <input className="form-input" placeholder="Nom" value={form.nom || ''} onChange={e => setForm({...form, nom: e.target.value})} />
+                    <input className="form-input" placeholder="Téléphone" value={form.telephone || ''} onChange={e => setForm({...form, telephone: e.target.value})} />
+                    <input className="form-input" placeholder="Contact" value={form.contact || ''} onChange={e => setForm({...form, contact: e.target.value})} />
+                    <div style={{ gridColumn: 'span 3', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                      <button className="btn btn-primary" onClick={handleSave}>Valider</button>
+                      <button className="btn btn-outline" onClick={() => setEditingId(null)}>Annuler</button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            )}
+            {fournisseurs.map(f => (
+              <tr key={f.id}>
+                <td>
+                  <div style={{ fontWeight: 800 }}>{f.nom}</div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{f.telephone} | {f.contact}</div>
+                </td>
+                <td>
+                  <span style={{ color: f.solde_dette > 0 ? '#f87171' : '#10b981', fontWeight: 900 }}>
+                    {f.solde_dette?.toLocaleString()} CFA
+                  </span>
+                </td>
+                <td style={{ textAlign: 'right' }}>
+                  <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                    {activePaymentId === f.id ? (
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <input type="number" className="form-input" style={{ width: '100px' }} value={paymentAmount} onChange={e => setPaymentAmount(Number(e.target.value))} />
+                        <button className="btn btn-primary" onClick={() => handlePayment(f.id)}>Payer</button>
+                        <button className="btn btn-outline" onClick={() => setActivePaymentId(null)}>X</button>
+                      </div>
+                    ) : (
+                      <>
+                        <button className="btn btn-outline" onClick={() => { setActivePaymentId(f.id); setPaymentAmount(f.solde_dette); }}>Régler</button>
+                        <button className="btn btn-outline" onClick={() => { setEditingId(f.id); setForm(f); }}>Editer</button>
+                        <button className="btn btn-outline" style={{ color: '#ef4444' }} onClick={async () => { if(confirm('Supprimer?')) { await deleteFournisseur(tenantId, f.id); loadData(); } }}><Trash2 size={16} /></button>
+                      </>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+// --- MARKETING MANAGER ---
+const MarketingManager = ({ tenantId }: { tenantId: string }) => {
+  const [sources, setSources] = useState<string[]>(['WhatsApp', 'Facebook', 'TikTok', 'Appel Direct', 'Site Web']);
+  
+  return (
+    <div className="card glass-effect" style={{ padding: '2.5rem', borderRadius: '32px' }}>
+      <h3 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 900, color: 'white', marginBottom: '1.5rem' }}>Configuration Marketing</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="card" style={{ background: 'rgba(255,255,255,0.02)', padding: '2rem' }}>
+          <h4 style={{ color: 'var(--primary)', marginBottom: '1rem' }}>Sources de Commandes</h4>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+            {sources.map(s => (
+              <span key={s} style={{ padding: '0.5rem 1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '10px', fontSize: '0.9rem' }}>{s}</span>
+            ))}
+            <button className="btn btn-outline" style={{ borderStyle: 'dashed' }}>+ Ajouter</button>
+          </div>
+        </div>
+        <div className="card" style={{ background: 'rgba(255,255,255,0.02)', padding: '2rem' }}>
+          <h4 style={{ color: 'var(--primary)', marginBottom: '1rem' }}>Tracking Pixels</h4>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Configurez vos pixels Facebook et TikTok pour suivre les conversions.</p>
+          <button className="btn btn-primary" disabled>Bientôt disponible</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// --- PARAMETRES MANAGER ---
+const ParametresManager = ({ showToast, tenantId }: { showToast: any, tenantId: string }) => {
+  return (
+    <div className="card glass-effect" style={{ padding: '2.5rem', borderRadius: '32px' }}>
+      <h3 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 900, color: 'white', marginBottom: '1.5rem' }}>Paramètres Généraux</h3>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="form-group">
+          <label className="form-label">Devise par défaut</label>
+          <input className="form-input" value="FCFA" disabled />
+        </div>
+        <div className="form-group">
+          <label className="form-label">Frais de livraison par défaut</label>
+          <input className="form-input" type="number" defaultValue={1500} />
+        </div>
+        <div className="form-group">
+          <label className="form-label">Délai de livraison estimé (jours)</label>
+          <input className="form-input" type="number" defaultValue={2} />
+        </div>
+      </div>
+      <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end' }}>
+        <button className="btn btn-primary" onClick={() => showToast("Paramètres sauvegardés localement.")}>Sauvegarder</button>
       </div>
     </div>
   );

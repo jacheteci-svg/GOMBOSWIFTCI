@@ -114,11 +114,30 @@ const applyApprovisionnementImpact = async (
     });
   }
 
-  // 2. Add Expense for accounting
-  await addDepense(tenantId, {
-    date: new Date().toISOString(),
-    categorie: 'Achat de stock',
-    montant: Number(appro.montant_total),
-    description: `Achat stock #${approId.substring(0, 8).toUpperCase()} - ${appro.fournisseur?.nom || 'Fournisseur'}`
-  });
+  // 2. Financial Impact
+  if (appro.mode_paiement === 'Crédit' && appro.fournisseur_id) {
+    // Increment supplier debt
+    const { data: f } = await insforge.database
+      .from('fournisseurs')
+      .select('solde_dette')
+      .eq('id', appro.fournisseur_id)
+      .eq('tenant_id', tenantId)
+      .single();
+    
+    const currentDebt = Number(f?.solde_dette || 0);
+    await insforge.database
+      .from('fournisseurs')
+      .update({ solde_dette: currentDebt + Number(appro.montant_total) })
+      .eq('id', appro.fournisseur_id)
+      .eq('tenant_id', tenantId);
+  } else {
+    // Add Expense for accounting (Cash by default or if specified)
+    await addDepense(tenantId, {
+      date: new Date().toISOString(),
+      categorie: 'Achat de stock',
+      montant: Number(appro.montant_total),
+      description: `Achat stock #${approId.substring(0, 8).toUpperCase()} - ${appro.fournisseur?.nom || 'Fournisseur'}`,
+      mode_paiement: 'Cash'
+    });
+  }
 };

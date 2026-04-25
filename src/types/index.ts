@@ -266,6 +266,8 @@ export interface Fournisseur {
   telephone?: string;
   email?: string;
   adresse?: string;
+  contact?: string;
+  solde_dette: number;
   notes?: string;
   tenant_id: string;
   created_at?: string;

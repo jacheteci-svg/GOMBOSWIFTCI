@@ -1,5 +1,6 @@
 import { insforge } from '../lib/insforge';
 import { Fournisseur } from '../types';
+import { addDepense } from './financialService';
 
 export const getFournisseurs = async (tenantId: string): Promise<Fournisseur[]> => {
   const { data, error } = await insforge.database
@@ -15,7 +16,11 @@ export const getFournisseurs = async (tenantId: string): Promise<Fournisseur[]> 
 export const createFournisseur = async (tenantId: string, fournisseur: Omit<Fournisseur, 'id' | 'tenant_id'>): Promise<string> => {
   const { data, error } = await insforge.database
     .from('fournisseurs')
-    .insert([{ ...fournisseur, tenant_id: tenantId }])
+    .insert([{ 
+      ...fournisseur, 
+      tenant_id: tenantId,
+      solde_dette: 0
+    }])
     .select();
   
   if (error) throw error;
