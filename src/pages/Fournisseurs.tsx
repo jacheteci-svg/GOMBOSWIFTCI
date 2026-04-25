@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { getFournisseurs, createFournisseur, updateFournisseur, deleteFournisseur } from '../services/fournisseurService';
+import { getFournisseurs, createFournisseur, updateFournisseur, deleteFournisseur, payDebt } from '../services/fournisseurService';
 import { getApprovisionnements } from '../services/approvisionnementService';
 import { Fournisseur, Approvisionnement } from '../types';
 import { useSaas } from '../saas/SaasProvider';
@@ -20,7 +20,8 @@ import {
   Info,
   History,
   TrendingUp,
-  PackageCheck
+  PackageCheck,
+  Wallet
 } from 'lucide-react';
 
 export const Fournisseurs = () => {
@@ -31,7 +32,9 @@ export const Fournisseurs = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isPayModalOpen, setIsPayModalOpen] = useState(false);
   const [selectedFournisseur, setSelectedFournisseur] = useState<Fournisseur | null>(null);
+  const [payAmount, setPayAmount] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   
   // Form State
@@ -127,6 +130,22 @@ export const Fournisseurs = () => {
     }
   };
 
+  const handlePayDebt = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!tenant?.id || !selectedFournisseur) return;
+    if (payAmount <= 0) return;
+
+    try {
+      await payDebt(tenant.id, selectedFournisseur.id, payAmount);
+      showToast(`Paiement de ${payAmount.toLocaleString()} F enregistré`, "success");
+      setIsPayModalOpen(false);
+      loadData();
+    } catch (error) {
+      console.error(error);
+      showToast("Erreur lors du paiement", "error");
+    }
+  };
+
   const getSupplierStats = (fId: string) => {
     const supplierAppros = allAppros.filter(a => a.fournisseur_id === fId);
     const received = supplierAppros.filter(a => a.statut === 'recu');
@@ -136,6 +155,10 @@ export const Fournisseurs = () => {
       lastOrder: supplierAppros.length > 0 ? supplierAppros.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0].date : null
     };
   };
+
+  const totalDebt = useMemo(() => {
+    return fournisseurs.reduce((acc, f) => acc + (f.solde_dette || 0), 0);
+  }, [fournisseurs]);
 
   return (
     <div style={{ animation: 'pageEnter 0.4s ease', padding: '1rem' }}>
@@ -149,6 +172,29 @@ export const Fournisseurs = () => {
         <button className="btn btn-primary" onClick={handleOpenAdd} style={{ height: '56px', padding: '0 2rem', borderRadius: '16px', fontWeight: 800, boxShadow: '0 10px 20px rgba(6, 182, 212, 0.3)' }}>
           <Plus size={20} /> Ajouter un Fournisseur
         </button>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
+        <div className="card glass-effect" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1.25rem', border: '1px solid rgba(255,255,255,0.05)', background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(255,255,255,0.02) 100%)' }}>
+          <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'rgba(239, 68, 68, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444' }}>
+            <Wallet size={24} />
+          </div>
+          <div>
+            <p style={{ margin: 0, fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Dette Fournisseurs Totale</p>
+            <h3 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 900, color: '#f87171' }}>{totalDebt.toLocaleString()} F</h3>
+            <p style={{ margin: 0, fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700 }}>{fournisseurs.filter(f => (f.solde_dette || 0) > 0).length} fournisseurs concernés</p>
+          </div>
+        </div>
+        
+        <div className="card glass-effect" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1.25rem', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'var(--primary-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
+            <Building2 size={24} />
+          </div>
+          <div>
+            <p style={{ margin: 0, fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Partenaires Actifs</p>
+            <h3 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 900 }}>{fournisseurs.length}</h3>
+          </div>
+        </div>
       </div>
 
       <div className="card" style={{ padding: '1.5rem', marginBottom: '2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
@@ -209,20 +255,35 @@ export const Fournisseurs = () => {
                     )}
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px', marginBottom: '1.5rem' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '12px', marginBottom: '1rem' }}>
                     <div>
                       <div style={{ fontSize: '0.6rem', fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Achats</div>
                       <div style={{ fontSize: '1rem', fontWeight: 900 }}>{stats.totalSpent.toLocaleString()} F</div>
                     </div>
                     <div>
-                      <div style={{ fontSize: '0.6rem', fontWeight: 900, color: 'var(--primary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Commandes</div>
-                      <div style={{ fontSize: '1rem', fontWeight: 900 }}>{stats.orderCount}</div>
+                      <div style={{ fontSize: '0.6rem', fontWeight: 900, color: (f.solde_dette || 0) > 0 ? '#ef4444' : 'var(--primary)', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Dette</div>
+                      <div style={{ fontSize: '1rem', fontWeight: 900, color: (f.solde_dette || 0) > 0 ? '#f87171' : 'inherit' }}>{(f.solde_dette || 0).toLocaleString()} F</div>
                     </div>
                   </div>
 
-                  <button className="btn btn-outline" style={{ width: '100%', minHeight: '44px', borderRadius: '10px', fontSize: '0.85rem', fontWeight: 800 }} onClick={() => handleOpenDetail(f)}>
-                    <History size={16} style={{ marginRight: '0.5rem' }} /> Historique & Détails
-                  </button>
+                  <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    <button className="btn btn-outline" style={{ flex: 1.5, minHeight: '44px', borderRadius: '10px', fontSize: '0.8rem', fontWeight: 800 }} onClick={() => handleOpenDetail(f)}>
+                      <History size={14} style={{ marginRight: '0.4rem' }} /> Détails
+                    </button>
+                    {(f.solde_dette || 0) > 0 && (
+                      <button 
+                        className="btn btn-primary" 
+                        style={{ flex: 1, minHeight: '44px', borderRadius: '10px', fontSize: '0.8rem', fontWeight: 800, background: '#ef4444', border: 'none' }}
+                        onClick={() => {
+                          setSelectedFournisseur(f);
+                          setPayAmount(f.solde_dette || 0);
+                          setIsPayModalOpen(true);
+                        }}
+                      >
+                        Régler
+                      </button>
+                    )}
+                  </div>
                 </div>
               );
             })}
@@ -235,6 +296,42 @@ export const Fournisseurs = () => {
           </div>
         )}
       </div>
+
+      {/* Payment Modal */}
+      {isPayModalOpen && selectedFournisseur && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2100, padding: '1rem' }}>
+          <div className="card" style={{ width: '100%', maxWidth: '450px', animation: 'scaleUp 0.3s ease', padding: '2rem', borderRadius: '24px' }}>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 950, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <Wallet size={24} color="#ef4444" /> Régler la Dette
+            </h2>
+            <div style={{ background: 'rgba(239, 68, 68, 0.05)', padding: '1.25rem', borderRadius: '16px', border: '1px solid rgba(239, 68, 68, 0.1)', marginBottom: '1.5rem' }}>
+              <div style={{ fontSize: '0.8rem', color: '#f87171', fontWeight: 800, marginBottom: '0.25rem' }}>FOURNISSEUR</div>
+              <div style={{ fontWeight: 900, fontSize: '1.1rem' }}>{selectedFournisseur.nom}</div>
+              <div style={{ marginTop: '0.75rem', fontSize: '0.8rem', color: '#f87171', fontWeight: 800 }}>DETTE ACTUELLE</div>
+              <div style={{ fontWeight: 950, fontSize: '1.5rem', color: '#f87171' }}>{(selectedFournisseur.solde_dette || 0).toLocaleString()} F</div>
+            </div>
+            <form onSubmit={handlePayDebt}>
+              <div className="form-group" style={{ marginBottom: '2rem' }}>
+                <label className="form-label-premium">Montant du versement (F)</label>
+                <input 
+                  type="number" 
+                  className="form-input" 
+                  required 
+                  min="1" 
+                  max={selectedFournisseur.solde_dette}
+                  value={payAmount}
+                  onChange={e => setPayAmount(Number(e.target.value))}
+                  style={{ fontSize: '1.25rem', fontWeight: 800, textAlign: 'center' }}
+                />
+              </div>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={() => setIsPayModalOpen(false)}>Annuler</button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1.5, background: '#10b981', border: 'none' }}>Valider le Paiement</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Add/Edit Modal */}
       {isModalOpen && (

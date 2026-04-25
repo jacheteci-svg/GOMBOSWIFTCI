@@ -25,7 +25,9 @@ import {
   Calendar,
   Filter,
   TrendingUp,
-  AlertCircle
+  AlertCircle,
+  FileUp,
+  Download
 } from 'lucide-react';
 import { tenantToPdfBranding } from '../lib/tenantPdfBranding';
 
@@ -41,6 +43,7 @@ export const Approvisionnements = () => {
   const [selectedAppro, setSelectedAppro] = useState<Approvisionnement | null>(null);
   const [selectedLignes, setSelectedLignes] = useState<LigneApprovisionnement[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   
   // Form State
   const [formData, setFormData] = useState({
@@ -211,6 +214,73 @@ export const Approvisionnements = () => {
     }
   };
 
+  const handleBulkValidate = async () => {
+    if (selectedIds.length === 0 || !tenant?.id) return;
+    if (!window.confirm(`Confirmer la réception de \${selectedIds.length} bons d'approvisionnement ?`)) return;
+
+    try {
+      showToast("Traitement groupé en cours...", "info");
+      for (const id of selectedIds) {
+        await updateApprovisionnementStatut(tenant.id, id, 'recu');
+      }
+      showToast("Toutes les réceptions ont été validées", "success");
+      setSelectedIds([]);
+      loadData();
+    } catch (error) {
+      console.error(error);
+      showToast("Erreur lors du traitement groupé", "error");
+    }
+  };
+
+  const handleExportCSV = () => {
+    const headers = ['SKU', 'Produit', 'Quantité', 'Prix Unitaire'];
+    const rows = produits.map(p => [p.sku, p.nom, '0', p.prix_achat.toString()]);
+    const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
+    const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `template_appro.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleImportCSV = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      const lines = content.split('\n').slice(1); // Skip header
+      const newLignes: { produit_id: string, quantite: number, prix_unitaire: number }[] = [];
+
+      lines.forEach(line => {
+        const [sku, nom, qte, prix] = line.split(',').map(s => s.trim());
+        if (!sku && !nom) return;
+
+        const prod = produits.find(p => p.sku === sku || p.nom === nom);
+        if (prod) {
+          newLignes.push({
+            produit_id: prod.id,
+            quantite: parseInt(qte) || 1,
+            prix_unitaire: parseFloat(prix) || prod.prix_achat
+          });
+        }
+      });
+
+      if (newLignes.length > 0) {
+        setFormLignes([...formLignes, ...newLignes]);
+        showToast(`${newLignes.length} lignes importées depuis le fichier`, "success");
+      } else {
+        showToast("Aucun produit correspondant trouvé dans le fichier", "error");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = ''; // Reset
+  };
+
   const getStatutBadge = (statut: string) => {
     switch (statut) {
       case 'recu': return <span className="badge badge-success" style={{ gap: '0.4rem', padding: '0.4rem 0.8rem' }}><CheckCircle size={14} /> Reçu</span>;
@@ -287,6 +357,16 @@ export const Approvisionnements = () => {
             <table>
               <thead>
                 <tr>
+                  <th style={{ width: '40px' }}>
+                    <input 
+                      type="checkbox" 
+                      onChange={e => {
+                        if (e.target.checked) setSelectedIds(filteredAppros.filter(a => a.statut === 'en_attente').map(a => a.id));
+                        else setSelectedIds([]);
+                      }}
+                      checked={selectedIds.length > 0 && selectedIds.length === filteredAppros.filter(a => a.statut === 'en_attente').length}
+                    />
+                  </th>
                   <th>Référence</th>
                   <th>Date</th>
                   <th>Fournisseur</th>
@@ -299,6 +379,18 @@ export const Approvisionnements = () => {
               <tbody>
                 {filteredAppros.map(a => (
                   <tr key={a.id} className="table-row-hover" style={{ transition: 'all 0.2s' }}>
+                    <td>
+                      {a.statut === 'en_attente' && (
+                        <input 
+                          type="checkbox" 
+                          checked={selectedIds.includes(a.id)}
+                          onChange={e => {
+                            if (e.target.checked) setSelectedIds([...selectedIds, a.id]);
+                            else setSelectedIds(selectedIds.filter(id => id !== a.id));
+                          }}
+                        />
+                      )}
+                    </td>
                     <td><code style={{ background: 'rgba(255,255,255,0.05)', padding: '0.2rem 0.5rem', borderRadius: '6px', color: 'var(--primary)', fontSize: '0.75rem', fontWeight: 800 }}>#{a.id.substring(0, 8).toUpperCase()}</code></td>
                     <td style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>
                       {format(new Date(a.date), 'dd MMM yyyy', { locale: fr })}
@@ -402,9 +494,18 @@ export const Approvisionnements = () => {
                   <h3 style={{ fontSize: '1.1rem', fontWeight: 850, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     <Package size={20} color="var(--primary)" /> Articles & Volumes
                   </h3>
-                  <button type="button" className="btn btn-outline" style={{ minHeight: '40px', fontSize: '0.85rem', fontWeight: 800, padding: '0 1.25rem' }} onClick={handleAddLigne}>
-                    <Plus size={16} style={{ marginRight: '0.4rem' }} /> Ajouter une ligne
-                  </button>
+                  <div style={{ display: 'flex', gap: '0.75rem' }}>
+                    <label className="btn btn-outline" style={{ minHeight: '40px', fontSize: '0.85rem', fontWeight: 800, padding: '0 1.25rem', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                      <FileUp size={16} style={{ marginRight: '0.4rem' }} /> Importer CSV
+                      <input type="file" accept=".csv" onChange={handleImportCSV} style={{ display: 'none' }} />
+                    </label>
+                    <button type="button" className="btn btn-outline" style={{ minHeight: '40px', fontSize: '0.85rem', fontWeight: 800, padding: '0 1.25rem' }} onClick={handleExportCSV}>
+                      <Download size={16} style={{ marginRight: '0.4rem' }} /> Modèle CSV
+                    </button>
+                    <button type="button" className="btn btn-outline" style={{ minHeight: '40px', fontSize: '0.85rem', fontWeight: 800, padding: '0 1.25rem', background: 'rgba(6, 182, 212, 0.1)', color: 'var(--primary)', border: '1px solid var(--primary)' }} onClick={handleAddLigne}>
+                      <Plus size={16} style={{ marginRight: '0.4rem' }} /> Ajouter ligne
+                    </button>
+                  </div>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -576,6 +677,18 @@ export const Approvisionnements = () => {
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {selectedIds.length > 0 && (
+        <div style={{ position: 'fixed', bottom: '2rem', left: '50%', transform: 'translateX(-50%)', background: 'rgba(2, 6, 23, 0.9)', backdropFilter: 'blur(20px)', padding: '1rem 2rem', borderRadius: '24px', display: 'flex', alignItems: 'center', gap: '2rem', zIndex: 1000, boxShadow: '0 20px 40px rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <div style={{ borderRight: '1px solid rgba(255,255,255,0.1)', paddingRight: '2rem' }}>
+            <span style={{ fontWeight: 900, color: 'white' }}>{selectedIds.length} Bons Sélectionnés</span>
+          </div>
+          <button className="btn btn-primary" onClick={handleBulkValidate} style={{ height: '44px', borderRadius: '12px' }}>
+            <CheckCircle size={18} /> Valider la Réception Groupée
+          </button>
+          <button className="btn btn-outline" onClick={() => setSelectedIds([])} style={{ height: '44px', borderRadius: '12px', border: 'none' }}>Annuler</button>
         </div>
       )}
 
