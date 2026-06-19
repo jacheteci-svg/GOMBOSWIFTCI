@@ -203,7 +203,7 @@ export interface AppelCommande {
   commande_id: string;
   agent_appel_id: string;
   date_appel: Date | any;
-  resultat_appel: 'validee' | 'a_rappeler' | 'annulee' | 'injoignable';
+  resultat_appel: 'validee' | 'a_rappeler' | 'annulee' | 'injoignable' | 'faux_numero' | 'refus';
   commentaire_agent?: string;
 }
 
