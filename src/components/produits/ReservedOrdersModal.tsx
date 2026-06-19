@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, AlertTriangle, XCircle, Search } from 'lucide-react';
+import { X, AlertTriangle, XCircle } from 'lucide-react';
 import { insforge } from '../../lib/insforge';
 import { Produit } from '../../types';
 import { useSaas } from '../../saas/SaasProvider';

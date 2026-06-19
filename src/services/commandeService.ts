@@ -1,6 +1,6 @@
-import { Commande, LigneCommande, Client, Produit } from '../types';
+import { Commande, LigneCommande } from '../types';
 import { insforge } from '../lib/insforge';
-import { runBatchedQuery, ensureFreshSession } from '../lib/queryUtils';
+import { runBatchedQuery } from '../lib/queryUtils';
 import { getErrorMessage } from '../lib/errorUtils';
 import { addMouvementStock } from './produitService';
 

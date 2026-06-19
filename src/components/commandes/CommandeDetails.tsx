@@ -3,7 +3,7 @@ import { X, ShoppingBag, User, MapPin, Receipt, Phone } from 'lucide-react';
 import { getCommandeWithLines, updateCommandeGlobale } from '../../services/commandeService';
 import type { Commande, LigneCommande } from '../../types';
 import { useSaas } from '../../saas/SaasProvider';
-import { showToast } from '../../lib/toast';
+import { useToast } from '../../contexts/ToastContext';
 
 interface CommandeDetailsProps {
   commandeId: string;
@@ -12,6 +12,7 @@ interface CommandeDetailsProps {
 
 export const CommandeDetails = ({ commandeId, onClose }: CommandeDetailsProps) => {
   const { tenant } = useSaas();
+  const { showToast } = useToast();
   const [commande, setCommande] = useState<(Commande & { lignes: LigneCommande[] }) | null>(null);
   const [loading, setLoading] = useState(true);
   
