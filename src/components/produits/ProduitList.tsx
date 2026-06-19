@@ -7,9 +7,10 @@ interface ProduitListProps {
   produits: Produit[];
   onEdit: (produit: Produit) => void;
   onStock: (produit: Produit) => void;
+  onReservedClick?: (produit: Produit) => void;
 }
 
-export const ProduitList = ({ produits, onEdit, onStock }: ProduitListProps) => {
+export const ProduitList = ({ produits, onEdit, onStock, onReservedClick }: ProduitListProps) => {
   const { tenant } = useSaas();
   const toggleActive = async (produit: Produit) => {
     try {
@@ -100,30 +101,42 @@ export const ProduitList = ({ produits, onEdit, onStock }: ProduitListProps) => 
                 </div>
               </td>
               <td>
-                <div style={{ 
-                  display: 'inline-flex', 
-                  alignItems: 'center', 
-                  gap: '8px', 
-                  padding: '0.5rem 1rem', 
-                  background: produit.stock_actuel <= (produit.stock_minimum || 5) ? 'rgba(244, 63, 94, 0.1)' : 'rgba(16, 185, 129, 0.1)', 
-                  borderRadius: '14px', 
-                  border: `1px solid ${produit.stock_actuel <= (produit.stock_minimum || 5) ? 'rgba(244, 63, 94, 0.2)' : 'rgba(16, 185, 129, 0.2)'}`,
-                  transition: 'all 0.2s ease' 
-                }}>
-                   <div style={{ 
-                     width: '8px', 
-                     height: '8px', 
-                     borderRadius: '50%', 
-                     background: produit.stock_actuel <= (produit.stock_minimum || 5) ? '#f43f5e' : '#10b981',
-                     animation: produit.stock_actuel <= (produit.stock_minimum || 5) ? 'gomboPulse 2s infinite' : 'none'
-                   }}></div>
-                   <span style={{ fontWeight: 950, fontSize: '0.85rem', color: produit.stock_actuel <= (produit.stock_minimum || 5) ? '#f43f5e' : '#10b981' }}>
-                     {produit.stock_actuel} {produit.stock_actuel > 1 ? 'UNITÉS' : 'UNITÉ'}
-                   </span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Physique (Réel):</span>
+                    <span style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: '0.85rem' }}>{produit.stock_physique ?? produit.stock_actuel}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Réservé (Cmds):</span>
+                    <span 
+                      style={{ fontWeight: 800, color: '#f59e0b', fontSize: '0.85rem', cursor: onReservedClick ? 'pointer' : 'default', textDecoration: onReservedClick ? 'underline' : 'none' }}
+                      onClick={() => onReservedClick && onReservedClick(produit)}
+                      title="Voir les commandes qui bloquent ce stock"
+                    >
+                      {produit.stock_reserve || 0}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>En Livraison:</span>
+                    <span style={{ fontWeight: 800, color: '#3b82f6', fontSize: '0.85rem' }}>{produit.stock_en_livraison || 0}</span>
+                  </div>
+                  <div style={{ 
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
+                    padding: '0.25rem 0.5rem', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', marginTop: '0.25rem'
+                  }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 800 }}>Disponible:</span>
+                    <span style={{ 
+                      fontWeight: 900, 
+                      color: (produit.stock_disponible ?? produit.stock_actuel) <= (produit.stock_minimum || 5) ? '#f43f5e' : '#10b981',
+                      fontSize: '0.9rem' 
+                    }}>
+                      {produit.stock_disponible ?? produit.stock_actuel}
+                    </span>
+                  </div>
                 </div>
-                {produit.stock_actuel <= (produit.stock_minimum || 5) && (
+                {(produit.stock_disponible ?? produit.stock_actuel) <= (produit.stock_minimum || 5) && (
                    <div style={{ fontSize: '0.65rem', color: '#f43f5e', fontWeight: 900, marginTop: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                     ⚠️ STOCK CRITIQUE
+                     ⚠️ DISPO CRITIQUE
                    </div>
                 )}
               </td>

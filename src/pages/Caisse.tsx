@@ -31,6 +31,8 @@ export const Caisse = () => {
   // Form State
   const [montantRemisStr, setMontantRemisStr] = useState<string>('');
   const [commentaire, setCommentaire] = useState('');
+  const [scenarioCaisse, setScenarioCaisse] = useState<'depot_complet' | 'remboursement' | 'prime'>('depot_complet');
+  const [montantPrimeFrais, setMontantPrimeFrais] = useState<string>('');
 
   useEffect(() => {
     if (tenant?.id) {
@@ -185,8 +187,12 @@ export const Caisse = () => {
     setResolutions(prev => ({ ...prev, [id]: { ...prev[id], [key]: value } }));
   };
 
-  const montantAttendu = Number(getMontantCashAttendu()) || 0;
+  const montantAttenduBase = Number(getMontantCashAttendu()) || 0;
   const montantMobileMoney = Number(getMontantMobileMoney()) || 0;
+  
+  const montantAjustement = isNaN(parseFloat(montantPrimeFrais)) ? 0 : parseFloat(montantPrimeFrais);
+  const montantAttendu = scenarioCaisse === 'depot_complet' ? montantAttenduBase : montantAttenduBase - montantAjustement;
+
   const montantRemisParsed = isNaN(parseFloat(montantRemisStr)) ? 0 : parseFloat(montantRemisStr);
   const isMontantValide = montantRemisStr.trim() !== '';
   const ecart = isMontantValide ? montantRemisParsed - montantAttendu : 0;
@@ -450,6 +456,37 @@ export const Caisse = () => {
                   <span style={{ fontWeight: 800, color: 'var(--text-muted)' }}>{montantMobileMoney.toLocaleString()} <span style={{ fontSize: '0.7rem' }}>CFA</span></span>
                 </div>
               </div>
+
+              <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+                <label className="form-label" style={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--text-main)', opacity: 0.9 }}>Scénario d'encaissement</label>
+                <select 
+                  className="form-select" 
+                  style={{ height: '48px', borderRadius: '12px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', fontWeight: 700 }}
+                  value={scenarioCaisse}
+                  onChange={e => setScenarioCaisse(e.target.value as any)}
+                >
+                  <option value="depot_complet">Dépôt Complet (Aucune déduction)</option>
+                  <option value="remboursement">Remboursement de frais (Carburant, etc.)</option>
+                  <option value="prime">Prime d'installation / Livraison déduite</option>
+                </select>
+              </div>
+
+              {scenarioCaisse !== 'depot_complet' && (
+                <div className="form-group" style={{ marginBottom: '1.25rem' }}>
+                  <label className="form-label" style={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--text-main)', opacity: 0.9 }}>
+                    Montant à déduire ({scenarioCaisse === 'prime' ? 'Prime' : 'Frais'})
+                  </label>
+                  <input 
+                    type="number" 
+                    className="form-input" 
+                    min="0"
+                    placeholder="Saisir le montant..."
+                    style={{ height: '48px', borderRadius: '12px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', fontWeight: 700 }}
+                    value={montantPrimeFrais}
+                    onChange={e => setMontantPrimeFrais(e.target.value)}
+                  />
+                </div>
+              )}
 
               <div className="form-group" style={{ marginBottom: '1.25rem' }}>
                 <label className="form-label" style={{ fontWeight: 800, fontSize: '0.85rem', color: 'var(--text-main)', opacity: 0.9 }}>Total Cash Reçu *</label>

@@ -1,5 +1,6 @@
-import { Commande, FeuilleRoute } from '../types';
+import { Commande, FeuilleRoute, LigneCommande } from '../types';
 import { insforge } from '../lib/insforge';
+import { runBatchedQuery } from '../lib/queryUtils';
 import { addMouvementStock } from './produitService';
 
 export const getFeuillesEnCours = async (tenantId: string, livreurId: string): Promise<FeuilleRoute[]> => {
@@ -29,6 +30,18 @@ export const getCloturedFeuilles = async (tenantId: string): Promise<FeuilleRout
     ...f,
     nom_livreur: f.livreurs?.nom_complet
   }));
+};
+
+export const getLignesPourFeuilleRoute = async (tenantId: string, orderIds: string[]): Promise<LigneCommande[]> => {
+  if (!orderIds.length) return [];
+
+  return runBatchedQuery(orderIds, 100, async (batch) => {
+    return insforge.database
+      .from('lignes_commandes')
+      .select('*')
+      .eq('tenant_id', tenantId)
+      .in('commande_id', batch);
+  });
 };
 
 export const getCommandesConcernees = async (tenantId: string, feuilleRouteId: string): Promise<Commande[]> => {

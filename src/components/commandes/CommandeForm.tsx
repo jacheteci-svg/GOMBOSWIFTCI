@@ -16,6 +16,7 @@ export const CommandeForm = ({ onClose, onSave }: { onClose: () => void, onSave:
   const { tenant } = useSaas();
   const { currentUser } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [forceStockNegative, setForceStockNegative] = useState(false);
   
   // Client Search & State
   const [clientRecherche, setClientRecherche] = useState<Partial<Client>>({ telephone: '', nom_complet: '', email: '', adresse: '', commune: '', ville: '', remarques: '' });
@@ -191,7 +192,7 @@ export const CommandeForm = ({ onClose, onSave }: { onClose: () => void, onSave:
         tenant_id: tenantId,
       };
 
-      await createCommandeBase(tenantId, newCommande as any, lignes as Omit<LigneCommande, 'id' | 'commande_id'>[]);
+      await createCommandeBase(tenantId, newCommande as any, lignes as Omit<LigneCommande, 'id' | 'commande_id'>[], forceStockNegative);
       showToast('Commande enregistrée.', 'success');
       onSave();
     } catch (error: unknown) {
@@ -353,6 +354,19 @@ export const CommandeForm = ({ onClose, onSave }: { onClose: () => void, onSave:
           <div className="form-group">
             <label className="form-label" style={{ fontWeight: 800, color: 'var(--text-muted)', marginBottom: '0.5rem', display: 'block' }}>Observations Logistiques</label>
             <textarea className="form-input" rows={3} style={{ background: 'rgba(0, 0, 0, 0.2)', padding: '1.25rem', borderRadius: '18px', border: '2px solid rgba(255, 255, 255, 0.1)', fontWeight: 600, color: 'white', width: '100%' }} placeholder="Ex: Livraison après 17h, appeler avant de venir..." value={notes} onChange={e => setNotes(e.target.value)} />
+          </div>
+
+          <div style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <input 
+              type="checkbox" 
+              id="forceStockNegative" 
+              checked={forceStockNegative}
+              onChange={(e) => setForceStockNegative(e.target.checked)}
+              style={{ width: '18px', height: '18px', accentColor: 'var(--primary)', cursor: 'pointer' }}
+            />
+            <label htmlFor="forceStockNegative" style={{ cursor: 'pointer', fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 600 }}>
+              Forcer la création (ignorer les alertes de stock insuffisant)
+            </label>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1.25rem', marginTop: '1.5rem' }}>

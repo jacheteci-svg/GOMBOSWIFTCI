@@ -39,6 +39,7 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
   const [communesDb, setCommunesDb] = useState<Commune[]>([]);
   const [catalogue, setCatalogue] = useState<Produit[]>([]);
   const [lignesLocal, setLignesLocal] = useState<Partial<LigneCommande>[]>([]);
+  const [forceStockNegative, setForceStockNegative] = useState(false);
 
   useEffect(() => {
     if (!tenant?.id) return;
@@ -198,7 +199,7 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
       let subtotalArticles = lignesLocal.reduce((acc, l) => acc + Number(l.montant_ligne || 0), 0);
 
       if (resultat !== 'annulee') {
-        const { subtotal } = await replaceCommandeLignesCentreAppel(tenant.id, commande.id, linesPayload);
+        const { subtotal } = await replaceCommandeLignesCentreAppel(tenant.id, commande.id, linesPayload, forceStockNegative);
         subtotalArticles = subtotal;
       }
 
@@ -223,6 +224,8 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
         a_rappeler: 'a_rappeler',
         annulee: 'annulee',
         injoignable: 'a_rappeler',
+        faux_numero: 'echouee',
+        refus: 'annulee'
       };
 
       const payload: Record<string, unknown> = { statut_commande: nextStatusMap[resultat] };
@@ -520,12 +523,47 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
                 borderRadius: '14px', padding: '1rem', cursor: 'pointer', transition: 'all 0.2s ease',
                 background: resultat === 'annulee' ? 'rgba(239, 68, 68, 0.08)' : '#ffffff',
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.45rem',
-                gridColumn: '1 / -1',
                 boxShadow: resultat === 'annulee' ? '0 4px 14px rgba(239, 68, 68, 0.18)' : '0 1px 2px rgba(15,23,42,0.06)'
               }}>
                 <input type="radio" checked={resultat === 'annulee'} onChange={() => setResultat('annulee')} style={{ display: 'none' }} />
                 <XCircle size={28} color={resultat === 'annulee' ? '#ef4444' : '#94a3b8'} strokeWidth={2.5} />
-                <span style={{ fontSize: '0.88rem', fontWeight: 800, color: resultat === 'annulee' ? '#dc2626' : '#64748b' }}>Annuler la commande</span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 800, color: resultat === 'annulee' ? '#dc2626' : '#64748b' }}>Annuler</span>
+              </label>
+
+              <label style={{ 
+                border: `2px solid ${resultat === 'injoignable' ? '#8b5cf6' : '#cbd5e1'}`, 
+                borderRadius: '14px', padding: '1rem', cursor: 'pointer', transition: 'all 0.2s ease',
+                background: resultat === 'injoignable' ? 'rgba(139, 92, 246, 0.08)' : '#ffffff',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.45rem',
+                boxShadow: resultat === 'injoignable' ? '0 4px 14px rgba(139, 92, 246, 0.18)' : '0 1px 2px rgba(15,23,42,0.06)'
+              }}>
+                <input type="radio" checked={resultat === 'injoignable'} onChange={() => setResultat('injoignable')} style={{ display: 'none' }} />
+                <Phone size={28} color={resultat === 'injoignable' ? '#8b5cf6' : '#94a3b8'} strokeWidth={2.5} />
+                <span style={{ fontSize: '0.88rem', fontWeight: 800, color: resultat === 'injoignable' ? '#7c3aed' : '#64748b', textAlign: 'center' }}>Injoignable</span>
+              </label>
+
+              <label style={{ 
+                border: `2px solid ${resultat === 'faux_numero' ? '#ef4444' : '#cbd5e1'}`, 
+                borderRadius: '14px', padding: '1rem', cursor: 'pointer', transition: 'all 0.2s ease',
+                background: resultat === 'faux_numero' ? 'rgba(239, 68, 68, 0.08)' : '#ffffff',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.45rem',
+                boxShadow: resultat === 'faux_numero' ? '0 4px 14px rgba(239, 68, 68, 0.18)' : '0 1px 2px rgba(15,23,42,0.06)'
+              }}>
+                <input type="radio" checked={resultat === 'faux_numero'} onChange={() => setResultat('faux_numero')} style={{ display: 'none' }} />
+                <XCircle size={28} color={resultat === 'faux_numero' ? '#ef4444' : '#94a3b8'} strokeWidth={2.5} />
+                <span style={{ fontSize: '0.88rem', fontWeight: 800, color: resultat === 'faux_numero' ? '#dc2626' : '#64748b', textAlign: 'center' }}>Faux Numéro</span>
+              </label>
+
+              <label style={{ 
+                border: `2px solid ${resultat === 'refus' ? '#ef4444' : '#cbd5e1'}`, 
+                borderRadius: '14px', padding: '1rem', cursor: 'pointer', transition: 'all 0.2s ease',
+                background: resultat === 'refus' ? 'rgba(239, 68, 68, 0.08)' : '#ffffff',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.45rem',
+                boxShadow: resultat === 'refus' ? '0 4px 14px rgba(239, 68, 68, 0.18)' : '0 1px 2px rgba(15,23,42,0.06)'
+              }}>
+                <input type="radio" checked={resultat === 'refus'} onChange={() => setResultat('refus')} style={{ display: 'none' }} />
+                <XCircle size={28} color={resultat === 'refus' ? '#ef4444' : '#94a3b8'} strokeWidth={2.5} />
+                <span style={{ fontSize: '0.88rem', fontWeight: 800, color: resultat === 'refus' ? '#dc2626' : '#64748b', textAlign: 'center' }}>Refus</span>
               </label>
             </div>
           </div>
@@ -564,6 +602,21 @@ export const AppelForm = ({ commande, onClose, onSave }: AppelFormProps) => {
               onChange={e => setCommentaire(e.target.value)}
             />
           </div>
+
+          {resultat === 'validee' && (
+             <div style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '14px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <input 
+                  type="checkbox" 
+                  id="forceStockNegativeAppel" 
+                  checked={forceStockNegative}
+                  onChange={(e) => setForceStockNegative(e.target.checked)}
+                  style={{ width: '18px', height: '18px', accentColor: 'var(--primary)', cursor: 'pointer' }}
+                />
+                <label htmlFor="forceStockNegativeAppel" style={{ cursor: 'pointer', fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 600 }}>
+                  Forcer la validation (ignorer les alertes de stock insuffisant)
+                </label>
+             </div>
+          )}
 
           <div className="modal-footer-bar modal-appel-footer" style={{ marginTop: '1rem', borderRadius: '16px', flexShrink: 0 }}>
             <button type="button" className="btn btn-outline" onClick={onClose} disabled={loading} style={{ flex: 1, minHeight: '52px', fontWeight: 700, borderRadius: '14px' }}>Abandonner</button>

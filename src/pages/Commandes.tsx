@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, CheckCircle, Download } from 'lucide-react';
+import { Plus, Search, CheckCircle, Download, Filter, X } from 'lucide-react';
 import { CommandeList } from '../components/commandes/CommandeList';
 import { CommandeForm } from '../components/commandes/CommandeForm';
 import { CommandeDetails } from '../components/commandes/CommandeDetails';
 import { subscribeToCommandes, deleteCommande, getCommandeWithLines, bulkUpdateCommandeStatus } from '../services/commandeService';
+import { getCommunes } from '../services/communeService';
+import { updateCommandeGlobale } from '../services/commandeService';
 import { generateInvoicePDF } from '../services/pdfService';
 import { tenantToPdfBranding } from '../lib/tenantPdfBranding';
 import type { Commande } from '../types';
@@ -21,6 +23,18 @@ export const Commandes = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'all' | 'to_process' | 'in_delivery' | 'done' | 'failed'>('to_process');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [communesDb, setCommunesDb] = useState<any[]>([]);
+  const [selectedBulkZone, setSelectedBulkZone] = useState('');
+  
+  const [showFilters, setShowFilters] = useState(false);
+  const [dateDebut, setDateDebut] = useState('');
+  const [dateFin, setDateFin] = useState('');
+  const [filterVilles, setFilterVilles] = useState<string>('');
+
+  useEffect(() => {
+    if (!tenant?.id) return;
+    getCommunes(tenant.id).then(setCommunesDb);
+  }, [tenant?.id]);
 
   const handleInvoice = async (commande: Commande) => {
     try {
@@ -57,6 +71,22 @@ export const Commandes = () => {
     } catch (error) {
       console.error(error);
       showToast("Erreur lors de la validation groupée.", "error");
+    }
+  };
+
+  const handleBulkAssignZone = async () => {
+    if (selectedIds.length === 0 || !selectedBulkZone) return;
+    try {
+      if (!tenant?.id) return;
+      showToast(`Assignation de la zone pour ${selectedIds.length} commandes...`, "info");
+      // Mettre à jour chaque commande avec la commune_livraison
+      await Promise.all(selectedIds.map(id => updateCommandeGlobale(tenant.id, id, { commune_livraison: selectedBulkZone })));
+      showToast(`${selectedIds.length} commandes assignées à la zone ${selectedBulkZone} !`, "success");
+      setSelectedIds([]);
+      setSelectedBulkZone('');
+    } catch (error) {
+      console.error(error);
+      showToast("Erreur lors de l'assignation.", "error");
     }
   };
 
@@ -113,6 +143,10 @@ export const Commandes = () => {
     
     if (!matchesSearch) return false;
 
+    if (dateDebut && new Date(c.date_creation) < new Date(dateDebut)) return false;
+    if (dateFin && new Date(c.date_creation) > new Date(dateFin)) return false;
+    if (filterVilles && c.commune_livraison !== filterVilles) return false;
+
     if (activeTab === 'all') return true;
     if (activeTab === 'to_process') return ['nouvelle', 'en_attente_appel', 'a_rappeler'].includes(c.statut_commande);
     if (activeTab === 'in_delivery') return ['validee', 'en_cours_livraison'].includes(c.statut_commande);
@@ -151,61 +185,104 @@ export const Commandes = () => {
         </button>
       }
     >
-        {/* BARRE DE RECHERCHE ET TABS */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', marginBottom: '3.5rem', alignItems: 'center' }}>
-          <div style={{ position: 'relative', flex: '1', minWidth: '320px' }}>
-            <Search size={24} strokeWidth={3} style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)' }} />
-            <input 
-              type="text" 
-              placeholder="Rechercher un client, téléphone, ID ou zone de chalandise..." 
-              className="form-input input-futuristic"
-              style={{ 
-                paddingLeft: '4rem', 
-                height: '64px',
-                fontSize: '1.1rem',
-                borderRadius: '20px', 
-                background: 'rgba(255,255,255,0.02)',
-                border: 'none',
-                color: 'white',
-                fontWeight: 800,
-                transition: 'all 0.3s ease'
-              }}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '3.5rem' }}>
+          {/* BARRE DE RECHERCHE ET TABS */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', alignItems: 'center' }}>
+            <div style={{ position: 'relative', flex: '1', minWidth: '320px', display: 'flex', gap: '1rem' }}>
+              <div style={{ position: 'relative', flex: 1 }}>
+                <Search size={24} strokeWidth={3} style={{ position: 'absolute', left: '1.5rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--primary)' }} />
+                <input 
+                  type="text" 
+                  placeholder="Rechercher un client, téléphone, ID ou zone de chalandise..." 
+                  className="form-input input-futuristic"
+                  style={{ 
+                    paddingLeft: '4rem', 
+                    height: '64px',
+                    fontSize: '1.1rem',
+                    borderRadius: '20px', 
+                    background: 'rgba(255,255,255,0.02)',
+                    border: 'none',
+                    color: 'white',
+                    fontWeight: 800,
+                    transition: 'all 0.3s ease',
+                    width: '100%'
+                  }}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <button 
+                className="btn btn-outline" 
+                onClick={() => setShowFilters(!showFilters)}
+                style={{ height: '64px', padding: '0 1.5rem', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '0.5rem', border: '1px solid rgba(255,255,255,0.1)' }}
+              >
+                <Filter size={20} />
+                Filtres
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.5rem', padding: '0.4rem', background: 'rgba(255,255,255,0.02)', borderRadius: '18px', border: '1px solid rgba(255,255,255,0.05)', height: 'fit-content', backdropFilter: 'blur(10px)' }}>
+              {[
+                { id: 'to_process', label: 'À Traiter', color: '#f59e0b' },
+                { id: 'in_delivery', label: 'En Livraison', color: 'var(--primary)' },
+                { id: 'done', label: 'Terminées', color: '#10b981' },
+                { id: 'failed', label: 'Retours/Échecs', color: '#ef4444' },
+                { id: 'all', label: 'Tout', color: 'rgba(255,255,255,0.1)' }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  style={{
+                    padding: '0.8rem 1.5rem',
+                    borderRadius: '14px',
+                    fontSize: '0.85rem',
+                    fontWeight: 800,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    whiteSpace: 'nowrap',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    border: 'none',
+                    background: activeTab === tab.id ? tab.color : 'transparent',
+                    color: activeTab === tab.id ? 'white' : 'var(--text-muted)',
+                    boxShadow: activeTab === tab.id ? `0 10px 20px ${tab.color}44` : 'none',
+                  }}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.5rem', padding: '0.4rem', background: 'rgba(255,255,255,0.02)', borderRadius: '18px', border: '1px solid rgba(255,255,255,0.05)', height: 'fit-content', backdropFilter: 'blur(10px)' }}>
-            {[
-              { id: 'to_process', label: 'À Traiter', color: '#f59e0b' },
-              { id: 'in_delivery', label: 'En Livraison', color: 'var(--primary)' },
-              { id: 'done', label: 'Terminées', color: '#10b981' },
-              { id: 'failed', label: 'Retours/Échecs', color: '#ef4444' },
-              { id: 'all', label: 'Tout', color: 'rgba(255,255,255,0.1)' }
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                style={{
-                  padding: '0.8rem 1.5rem',
-                  borderRadius: '14px',
-                  fontSize: '0.85rem',
-                  fontWeight: 800,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  whiteSpace: 'nowrap',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                  border: 'none',
-                  background: activeTab === tab.id ? tab.color : 'transparent',
-                  color: activeTab === tab.id ? 'white' : 'var(--text-muted)',
-                  boxShadow: activeTab === tab.id ? `0 10px 20px ${tab.color}44` : 'none',
-                }}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+          {/* FILTRES AVANCÉS */}
+          {showFilters && (
+            <div className="card glass-effect animate-fadeIn" style={{ padding: '1.5rem', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', background: 'rgba(255,255,255,0.02)' }}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)' }}>Date de début</label>
+                <input type="date" className="form-input" value={dateDebut} onChange={e => setDateDebut(e.target.value)} style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)' }} />
+              </div>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)' }}>Date de fin</label>
+                <input type="date" className="form-input" value={dateFin} onChange={e => setDateFin(e.target.value)} style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)' }} />
+              </div>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)' }}>Ville/Commune</label>
+                <select className="form-select" value={filterVilles} onChange={e => setFilterVilles(e.target.value)} style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  <option value="">Toutes les villes</option>
+                  {communesDb.map(c => <option key={c.id} value={c.nom}>{c.nom}</option>)}
+                </select>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+                <button 
+                  className="btn btn-outline" 
+                  onClick={() => { setDateDebut(''); setDateFin(''); setFilterVilles(''); }}
+                  style={{ width: '100%', borderRadius: '14px', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444' }}
+                >
+                  <X size={16} style={{ marginRight: '0.5rem' }} /> Effacer
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="card glass-effect" style={{ padding: '0', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '32px', overflow: 'hidden', background: 'transparent' }}>
@@ -277,10 +354,30 @@ export const Commandes = () => {
                 <button 
                   className="btn btn-sm btn-outline" 
                   onClick={handleLogisticsExport}
-                  style={{ borderRadius: '12px', padding: '0.6rem 1.2rem', border: '1px solid #e2e8f0' }}
+                  style={{ borderRadius: '12px', padding: '0.6rem 1.2rem', border: '1px solid #e2e8f0', marginRight: '1rem' }}
                 >
                   <Download size={18} /> Export Livreurs
                 </button>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '1rem' }}>
+                  <select 
+                    className="form-select" 
+                    value={selectedBulkZone} 
+                    onChange={e => setSelectedBulkZone(e.target.value)}
+                    style={{ height: '38px', borderRadius: '10px', fontSize: '0.85rem', width: '150px' }}
+                  >
+                    <option value="">Choisir zone...</option>
+                    {communesDb.map(c => <option key={c.id} value={c.nom}>{c.nom}</option>)}
+                  </select>
+                  <button 
+                    className="btn btn-sm" 
+                    onClick={handleBulkAssignZone}
+                    disabled={!selectedBulkZone}
+                    style={{ borderRadius: '12px', padding: '0.6rem 1.2rem', background: 'white', color: 'black', fontWeight: 800 }}
+                  >
+                    Assigner Zone
+                  </button>
+                </div>
               </div>
             </div>
           )}

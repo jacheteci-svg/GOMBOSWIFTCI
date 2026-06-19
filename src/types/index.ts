@@ -116,6 +116,11 @@ export interface Produit {
   sku: string;
   stock_actuel: number;
   stock_minimum: number;
+  // Computed stock values
+  stock_physique?: number;
+  stock_reserve?: number;
+  stock_en_livraison?: number;
+  stock_disponible?: number;
   actif: boolean;
   images?: string[];
   image_url?: string;

@@ -20,6 +20,7 @@ const Dashboard = lazy(() => import('./pages/Dashboard').then((m) => ({ default:
 const Produits = lazy(() => import('./pages/Produits').then((m) => ({ default: m.Produits })));
 const Commandes = lazy(() => import('./pages/Commandes').then((m) => ({ default: m.Commandes })));
 const CentreAppel = lazy(() => import('./pages/CentreAppel').then((m) => ({ default: m.CentreAppel })));
+const RelanceWhatsApp = lazy(() => import('./pages/RelanceWhatsApp').then((m) => ({ default: m.RelanceWhatsApp })));
 const Logistique = lazy(() => import('./pages/Logistique').then((m) => ({ default: m.Logistique })));
 const Livraison = lazy(() => import('./pages/Livraison').then((m) => ({ default: m.Livraison })));
 const Historique = lazy(() => import('./pages/Historique').then((m) => ({ default: m.Historique })));
@@ -137,6 +138,7 @@ const AppRoutes = () => {
       <Route path="approvisionnements" element={<ProtectedRoute requiredPermission="PRODUITS"><Approvisionnements /></ProtectedRoute>} />
       <Route path="commandes" element={<ProtectedRoute requiredPermission="COMMANDES"><Commandes /></ProtectedRoute>} />
       <Route path="centre-appel" element={<ProtectedRoute requiredPermission="CENTRE_APPEL"><CentreAppel /></ProtectedRoute>} />
+      <Route path="relance-whatsapp" element={<ProtectedRoute requiredPermission="CENTRE_APPEL"><RelanceWhatsApp /></ProtectedRoute>} />
       <Route path="logistique" element={<ProtectedRoute requiredPermission="LOGISTIQUE"><Logistique /></ProtectedRoute>} />
       <Route path="livraison" element={<ProtectedRoute requiredPermission="LIVREUR"><Livraison /></ProtectedRoute>} />
       <Route path="caisse" element={

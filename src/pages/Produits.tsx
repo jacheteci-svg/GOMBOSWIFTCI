@@ -3,6 +3,7 @@ import { Plus, Search } from 'lucide-react';
 import { ProduitList } from '../components/produits/ProduitList';
 import { ProduitForm } from '../components/produits/ProduitForm';
 import { StockForm } from '../components/produits/StockForm';
+import { ReservedOrdersModal } from '../components/produits/ReservedOrdersModal';
 import { subscribeToProduits } from '../services/produitService';
 import { Produit } from '../types';
 import { useSaas } from '../saas/SaasProvider';
@@ -19,6 +20,9 @@ export const Produits = () => {
   
   const [isStockFormOpen, setIsStockFormOpen] = useState(false);
   const [stockProduit, setStockProduit] = useState<Produit | null>(null);
+
+  const [isReservedModalOpen, setIsReservedModalOpen] = useState(false);
+  const [reservedProduit, setReservedProduit] = useState<Produit | null>(null);
 
   useEffect(() => {
     if (!tenant?.id) return;
@@ -38,6 +42,11 @@ export const Produits = () => {
   const handleStock = (produit: Produit) => {
     setStockProduit(produit);
     setIsStockFormOpen(true);
+  };
+
+  const handleReserved = (produit: Produit) => {
+    setReservedProduit(produit);
+    setIsReservedModalOpen(true);
   };
 
   return (
@@ -103,6 +112,7 @@ export const Produits = () => {
             )} 
             onEdit={handleEdit}
             onStock={handleStock}
+            onReservedClick={handleReserved}
           />
         )}
       </div>
@@ -121,6 +131,14 @@ export const Produits = () => {
           produit={stockProduit} 
           onClose={() => setIsStockFormOpen(false)} 
           onSave={() => setIsStockFormOpen(false)} 
+        />
+      )}
+
+      {isReservedModalOpen && reservedProduit && (
+        <ReservedOrdersModal
+          produit={reservedProduit}
+          onClose={() => setIsReservedModalOpen(false)}
+          onOrderCancelled={() => {}}
         />
       )}
     </>

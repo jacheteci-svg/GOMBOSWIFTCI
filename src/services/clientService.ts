@@ -1,5 +1,6 @@
 import { Client, Commande } from '../types';
 import { insforge } from '../lib/insforge';
+import { normalizePhoneNumber } from '../lib/phoneUtils';
 
 export const getAllClients = async (tenantId: string): Promise<Client[]> => {
   const { data, error } = await insforge.database
@@ -25,10 +26,11 @@ export const getClientCommandes = async (tenantId: string, clientId: string): Pr
 };
 
 export const searchClientByPhone = async (tenantId: string, phone: string): Promise<Client | null> => {
+  const normalizedPhone = normalizePhoneNumber(phone);
   const { data, error } = await insforge.database
     .from('clients')
     .select('*')
-    .eq('telephone', phone)
+    .eq('telephone', normalizedPhone)
     .eq('tenant_id', tenantId)
     .single();
 
@@ -40,7 +42,7 @@ export const createClient = async (tenantId: string, client: Omit<Client, 'id'>)
   /* Schéma minimal clients (ex. fix_missing_tenant_id) : pas de ville / remarques côté DB tant que non migré */
   const payload = {
     nom_complet: client.nom_complet,
-    telephone: client.telephone,
+    telephone: normalizePhoneNumber(client.telephone),
     email: client.email ?? '',
     adresse: client.adresse ?? '',
     commune: client.commune ?? '',

@@ -32,7 +32,8 @@ import {
   Truck as TruckIcon,
   ShoppingBag,
   Megaphone,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  MessageCircle
 } from 'lucide-react';
 
 interface NavItem {
@@ -84,6 +85,7 @@ export const Sidebar = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => v
             { path: getPath('/produits'), label: 'Produits & Stock', icon: Package, permission: 'PRODUITS' },
             { path: getPath('/commandes'), label: 'Commandes', icon: ShoppingCart, permission: 'COMMANDES' },
             { path: getPath('/centre-appel'), label: 'Centre d\'Appel', icon: Headset, permission: 'CENTRE_APPEL' },
+            { path: getPath('/relance-whatsapp'), label: 'Relances WhatsApp', icon: MessageCircle, permission: 'CENTRE_APPEL' },
             { path: getPath('/clients'), label: 'CRM & Clients', icon: Users, permission: 'CLIENTS', requiredModule: 'module_crm_clients' },
             { path: getPath('/admin?tab=marketing'), label: 'Marketing', icon: Megaphone, permission: 'ADMIN' },
           ]

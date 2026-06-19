@@ -1,5 +1,6 @@
-import { Commande, LigneCommande } from '../types';
+import { Commande, LigneCommande, Client, Produit } from '../types';
 import { insforge } from '../lib/insforge';
+import { runBatchedQuery, ensureFreshSession } from '../lib/queryUtils';
 import { getErrorMessage } from '../lib/errorUtils';
 import { addMouvementStock } from './produitService';
 
@@ -26,6 +27,19 @@ export const getCommandeWithLines = async (tenantId: string, id: string): Promis
     telephone_client: cmd.clients?.telephone ?? (cmd as { client_telephone?: string }).client_telephone,
     lignes: lines || []
   };
+};
+
+export const getLignesPourCommandes = async (tenantId: string, orderIds: string[]): Promise<LigneCommande[]> => {
+  if (!orderIds.length) return [];
+  
+  // Utiliser runBatchedQuery pour éviter les URL trop longues
+  return runBatchedQuery(orderIds, 100, async (batch) => {
+    return insforge.database
+      .from('lignes_commandes')
+      .select('*')
+      .eq('tenant_id', tenantId)
+      .in('commande_id', batch);
+  });
 };
 
 export const getCommandes = async (tenantId: string): Promise<Commande[]> => {
@@ -68,14 +82,14 @@ export const getCommandesByStatus = async (tenantId: string, statusList: string[
   const orderIds = orders.map(o => o.id);
 
   // Fetch only lines for the retrieved orders and for this tenant
-  const { data: lines, error: linesError } = await insforge.database
-    .from('lignes_commandes')
-    .select('*')
-    .in('commande_id', orderIds)
-    .eq('tenant_id', tenantId);
+  const lines = await runBatchedQuery(orderIds, 100, async (batch) => {
+    return insforge.database
+      .from('lignes_commandes')
+      .select('*')
+      .in('commande_id', batch)
+      .eq('tenant_id', tenantId);
+  });
 
-  if (linesError) throw linesError;
-  
   return orders.map((o: any) => ({
     ...o,
     nom_client: o.clients?.nom_complet ?? o.client_nom,
@@ -136,7 +150,7 @@ function buildInsertCommandePayload(tenantId: string, commande: Omit<Commande, '
   };
 }
 
-export const createCommandeBase = async (tenantId: string, commande: Omit<Commande, 'id'>, lignes: Omit<LigneCommande, 'id' | 'commande_id'>[]): Promise<string> => {
+export const createCommandeBase = async (tenantId: string, commande: Omit<Commande, 'id'>, lignes: Omit<LigneCommande, 'id' | 'commande_id'>[], force_stock_negative: boolean = false): Promise<string> => {
   if (!commande.client_id || String(commande.client_id).trim() === '') {
     throw new Error('Client obligatoire : identifiant client manquant.');
   }
@@ -209,7 +223,7 @@ export const createCommandeBase = async (tenantId: string, commande: Omit<Comman
         type_mouvement: 'sortie',
         quantite: l.quantite,
         reference: `Sortie Cmd #${id.substring(0, 8)}`
-      } as any);
+      } as any, force_stock_negative);
     } catch (stkErr) {
       console.warn("Erreur mise à jour stock (non bloquant):", stkErr);
     }
@@ -232,7 +246,8 @@ export type LigneCommandeCentreAppelInput = {
 export const replaceCommandeLignesCentreAppel = async (
   tenantId: string,
   commandeId: string,
-  lignes: LigneCommandeCentreAppelInput[]
+  lignes: LigneCommandeCentreAppelInput[],
+  force_stock_negative: boolean = false
 ): Promise<{ subtotal: number }> => {
   if (!lignes.length) {
     throw new Error('Au moins une ligne produit est requise.');
@@ -279,14 +294,14 @@ export const replaceCommandeLignesCentreAppel = async (
         type_mouvement: 'sortie',
         quantite: delta,
         reference: `Ajustement appel Cmd #${commandeId.slice(0, 8)}`,
-      } as any);
+      } as any, force_stock_negative);
     } else {
       await addMouvementStock(tenantId, {
         produit_id: pid,
         type_mouvement: 'entree',
         quantite: -delta,
         reference: `Ajustement appel Cmd #${commandeId.slice(0, 8)}`,
-      } as any);
+      } as any, force_stock_negative);
     }
   }
 
@@ -475,9 +490,23 @@ export const deleteCommande = async (tenantId: string, id: string): Promise<void
   const { error } = await insforge.database
     .from('commandes')
     .delete()
-    .eq('id', id)
-    .eq('tenant_id', tenantId);
-  
+    .eq('tenant_id', tenantId)
+    .eq('id', id);
+
+  if (error) throw error;
+};
+
+export const updateCommandeGlobale = async (
+  tenantId: string,
+  id: string,
+  payload: Partial<Commande>
+): Promise<void> => {
+  const { error } = await insforge.database
+    .from('commandes')
+    .update(payload)
+    .eq('tenant_id', tenantId)
+    .eq('id', id);
+
   if (error) throw error;
 };
 

@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { getCommandesByStatus } from '../services/commandeService';
-import { getAvailableLivreurs, creerFeuilleRoute, getFeuillesRoute, getCommandesByFeuille } from '../services/logistiqueService';
+import { getAvailableLivreurs, creerFeuilleRoute, getFeuillesRoute, getCommandesByFeuille, supprimerFeuilleRoute } from '../services/logistiqueService';
 import { useSaas } from '../saas/SaasProvider';
 import type { Commande, User, FeuilleRoute } from '../types';
-import { Truck, Printer, Eye, Clock } from 'lucide-react';
+import { Truck, Printer, Eye, Clock, Trash2 } from 'lucide-react';
 import { useToast } from '../contexts/ToastContext';
 import { generateDeliverySlipPDF } from '../services/pdfService';
 import { tenantToPdfBranding } from '../lib/tenantPdfBranding';
@@ -91,6 +91,21 @@ export const Logistique = () => {
       await generateDeliverySlipPDF(feuille, orders, tenantToPdfBranding(tenant));
     } catch (error) {
       showToast("Erreur lors de l'impression.", "error");
+    }
+  };
+
+  const handleDeleteFeuille = async (feuilleId: string) => {
+    if (!window.confirm("Êtes-vous sûr de vouloir supprimer cette feuille de route ? Les commandes retourneront au statut Validée.")) return;
+    try {
+      if (!tenant?.id) return;
+      setLoading(true);
+      await supprimerFeuilleRoute(tenant.id, feuilleId);
+      showToast("Feuille de route supprimée avec succès.", "success");
+      fetchData();
+    } catch (error: any) {
+      showToast(error.message || "Erreur lors de la suppression.", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -227,6 +242,9 @@ export const Logistique = () => {
                   </button>
                   <button className="btn btn-primary" style={{ flex: 1, height: '48px', fontWeight: 900, borderRadius: '14px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.1)' }} onClick={() => handlePrint(f)}>
                     <Printer size={18} strokeWidth={2.5} /> Imprimer
+                  </button>
+                  <button className="btn btn-outline" style={{ width: '48px', height: '48px', borderRadius: '14px', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => handleDeleteFeuille(f.id)} title="Supprimer la feuille de route">
+                    <Trash2 size={20} strokeWidth={2} />
                   </button>
                 </div>
               </div>
