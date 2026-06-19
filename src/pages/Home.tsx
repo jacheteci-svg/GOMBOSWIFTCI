@@ -20,17 +20,21 @@ export const Home = () => {
   const { tenantSlug } = useParams();
   const effectiveSlug = tenantSlug || currentUser?.tenant_slug || 'gombo';
 
+  const hostname = window.location.hostname;
+  const isSubdomain = hostname.split('.').length >= 2 && !['www', 'gomboswiftci', 'localhost', 'vercel', 'app'].includes(hostname.split('.')[0].toLowerCase());
+  const basePath = isSubdomain ? '' : `/${effectiveSlug}`;
+
   const menuItems = [
-    { path: `/${effectiveSlug}/dashboard`, label: 'Tableau de Bord', desc: 'Vue d\'ensemble et statistiques', icon: LayoutDashboard, permission: 'DASHBOARD', color: '#06b6d4' },
-    { path: `/${effectiveSlug}/produits`, label: 'Produits', desc: 'Gestion du stock et catalogue', icon: Package, permission: 'PRODUITS', color: '#6366f1' },
-    { path: `/${effectiveSlug}/commandes`, label: 'Commandes', desc: 'Suivi et flux des colis', icon: ShoppingCart, permission: 'COMMANDES', color: '#8b5cf6' },
-    { path: `/${effectiveSlug}/centre-appel`, label: 'Centre d\'Appel', desc: 'Validation et suivi appels', icon: Headset, permission: 'CENTRE_APPEL', color: '#ec4899' },
-    { path: `/${effectiveSlug}/clients`, label: 'Clients CRM', desc: 'Fidélisation et base clients', icon: Users, permission: 'CLIENTS', color: '#f59e0b' },
-    { path: `/${effectiveSlug}/logistique`, label: 'Logistique', desc: 'Dispatching et tournées', icon: Truck, permission: 'LOGISTIQUE', color: '#10b981' },
-    { path: `/${effectiveSlug}/caisse`, label: 'Caisse', desc: 'Encaissements et retours', icon: Calculator, permission: 'CAISSE', color: '#06b6d4' },
-    { path: `/${effectiveSlug}/rapport-financier`, label: 'Rapport Journalier', desc: 'Orientation quotidienne', icon: TrendingUp, permission: 'FINANCE', color: '#6366f1' },
-    { path: `/${effectiveSlug}/historique`, label: 'Historique', desc: 'Archives et impressions', icon: History, permission: 'HISTORIQUE', color: '#64748b' },
-    { path: `/${effectiveSlug}/admin`, label: 'Admin', desc: 'Paramètres et utilisateurs', icon: Settings, permission: 'ADMIN', color: '#ef4444' },
+    { path: `${basePath}/dashboard`, label: 'Tableau de Bord', desc: 'Vue d\'ensemble et statistiques', icon: LayoutDashboard, permission: 'DASHBOARD', color: '#06b6d4' },
+    { path: `${basePath}/produits`, label: 'Produits', desc: 'Gestion du stock et catalogue', icon: Package, permission: 'PRODUITS', color: '#6366f1' },
+    { path: `${basePath}/commandes`, label: 'Commandes', desc: 'Suivi et flux des colis', icon: ShoppingCart, permission: 'COMMANDES', color: '#8b5cf6' },
+    { path: `${basePath}/centre-appel`, label: 'Centre d\'Appel', desc: 'Validation et suivi appels', icon: Headset, permission: 'CENTRE_APPEL', color: '#ec4899' },
+    { path: `${basePath}/clients`, label: 'Clients CRM', desc: 'Fidélisation et base clients', icon: Users, permission: 'CLIENTS', color: '#f59e0b' },
+    { path: `${basePath}/logistique`, label: 'Logistique', desc: 'Dispatching et tournées', icon: Truck, permission: 'LOGISTIQUE', color: '#10b981' },
+    { path: `${basePath}/caisse`, label: 'Caisse', desc: 'Encaissements et retours', icon: Calculator, permission: 'CAISSE', color: '#06b6d4' },
+    { path: `${basePath}/rapport-financier`, label: 'Rapport Journalier', desc: 'Orientation quotidienne', icon: TrendingUp, permission: 'FINANCE', color: '#6366f1' },
+    { path: `${basePath}/historique`, label: 'Historique', desc: 'Archives et impressions', icon: History, permission: 'HISTORIQUE', color: '#64748b' },
+    { path: `${basePath}/admin`, label: 'Admin', desc: 'Paramètres et utilisateurs', icon: Settings, permission: 'ADMIN', color: '#ef4444' },
     { path: '/saas/pricing', label: 'Mon Abonnement', desc: 'Gérer mon forfait SaaS', icon: Zap, permission: 'ADMIN', color: '#10b981' },
   ];
 

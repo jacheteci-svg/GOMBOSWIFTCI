@@ -10,6 +10,7 @@ import { tenantToPdfBranding } from '../lib/tenantPdfBranding';
 import { format } from 'date-fns';
 import { CommandeDetails } from '../components/commandes/CommandeDetails';
 import { GomboModuleFrame } from '../components/layout/GomboModuleFrame';
+import { TableSkeleton } from '../components/ui/Skeleton';
 
 export const Logistique = () => {
   const { showToast } = useToast();
@@ -299,10 +300,7 @@ const FeuilleDetail = ({ feuille, onClose }: { feuille: FeuilleRoute, onClose: (
 
         <div className="modal-body-scroll" style={{ padding: '0 1.5rem 1.5rem' }}>
         {loading ? (
-            <div style={{ textAlign: 'center', padding: '3rem 1rem' }}>
-                <div className="spinner" style={{ margin: '0 auto 1.5rem' }}></div>
-                <p style={{ color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase' }}>Synchronisation des données...</p>
-            </div>
+             <TableSkeleton rows={4} columns={4} />
         ) : (
           <div className="table-container" style={{ background: 'rgba(0,0,0,0.2)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.03)' }}>
             <table className="table-responsive-cards">

@@ -1909,3 +1909,9 @@ tr:hover td {
 @media (min-width: 769px) {
   .desktop-hide { display: none !important; }
 }
+
+@keyframes skeleton-loading {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+

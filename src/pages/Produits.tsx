@@ -8,6 +8,7 @@ import { subscribeToProduits } from '../services/produitService';
 import { Produit } from '../types';
 import { useSaas } from '../saas/SaasProvider';
 import { GomboModuleFrame } from '../components/layout/GomboModuleFrame';
+import { TableSkeleton } from '../components/ui/Skeleton';
 
 export const Produits = () => {
   const { tenant, planConfig } = useSaas();
@@ -100,9 +101,8 @@ export const Produits = () => {
 
       <div className="card glass-effect" style={{ padding: '0', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '32px', overflow: 'hidden' }}>
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '8rem 2rem' }}>
-             <div className="spinner" style={{ margin: '0 auto 2rem', width: '50px', height: '50px', borderTopColor: 'var(--primary)' }}></div>
-             <p style={{ fontWeight: 800, fontSize: '1.2rem', color: 'var(--text-main)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Synchronisation du Gombo...</p>
+          <div style={{ padding: '2rem' }}>
+             <TableSkeleton rows={8} columns={6} />
           </div>
         ) : (
           <ProduitList 

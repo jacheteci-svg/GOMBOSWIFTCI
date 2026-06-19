@@ -6,7 +6,7 @@ import type { Commande } from '../types';
 import { Activity, Percent, DollarSign, TrendingUp, Truck, ShoppingBag } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer,
-  Tooltip, PieChart, Pie, Cell
+  Tooltip, PieChart, Pie, Cell, BarChart, Bar
 } from 'recharts';
 
 type Period = 'today' | '7d' | '30d' | 'all' | 'custom';
@@ -434,22 +434,31 @@ export const Dashboard = () => {
             </div>
          </div>
 
-         <div className="gombo-card-elite">
+          <div className="gombo-card-elite" style={{ gridColumn: '1 / -1' }}>
             <h3 style={{ marginBottom: '2rem', fontWeight: 950, display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-               <ShoppingBag size={22} color="#ec4899" /> Performances Produits
+               <ShoppingBag size={22} color="#ec4899" /> Analyse des Ventes par Produit
             </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                {topProducts.slice(0, 5).map((p, i) => (
-                  <div key={p.nom}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', alignItems: 'center' }}>
-                       <span style={{ fontSize: '0.9rem', fontWeight: 900, color: 'white' }}>{i+1}. {p.nom}</span>
-                       <span style={{ fontSize: '0.9rem', fontWeight: 950, color: '#ec4899' }}>{p.taux_succes}%</span>
-                    </div>
-                    <div style={{ height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', overflow: 'hidden', position: 'relative' }}>
-                       <div style={{ width: `${p.taux_succes}%`, height: '100%', background: 'linear-gradient(90deg, #ec4899, #8b5cf6)', borderRadius: '6px' }}></div>
-                    </div>
-                  </div>
-                ))}
+            <div style={{ height: '300px', width: '100%' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={topProducts.slice(0, 10)} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={false} />
+                  <XAxis type="number" stroke="rgba(255,255,255,0.2)" tick={{ fill: 'var(--text-muted)' }} />
+                  <YAxis dataKey="nom" type="category" width={120} stroke="rgba(255,255,255,0.2)" tick={{ fill: 'var(--text-muted)', fontSize: 12 }} />
+                  <Tooltip 
+                    contentStyle={{ background: 'rgba(15, 23, 42, 0.95)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', boxShadow: '0 20px 40px rgba(0,0,0,0.5)', color: 'white' }}
+                    itemStyle={{ color: '#ec4899', fontWeight: 800 }}
+                  />
+                  <Bar dataKey="succes" name="Commandes Livrées" fill="url(#colorSucces)" radius={[0, 4, 4, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+              <svg style={{ height: 0 }}>
+                <defs>
+                  <linearGradient id="colorSucces" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="5%" stopColor="#ec4899" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.8}/>
+                  </linearGradient>
+                </defs>
+              </svg>
             </div>
          </div>
       </div>

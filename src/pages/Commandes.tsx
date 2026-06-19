@@ -11,7 +11,9 @@ import { tenantToPdfBranding } from '../lib/tenantPdfBranding';
 import type { Commande } from '../types';
 import { useToast } from '../contexts/ToastContext';
 import { useSaas } from '../saas/SaasProvider';
+import { ImportExcelModal } from '../components/commandes/ImportExcelModal';
 import { GomboModuleFrame } from '../components/layout/GomboModuleFrame';
+import { TableSkeleton } from '../components/ui/Skeleton';
 
 export const Commandes = () => {
   const { tenant } = useSaas();
@@ -19,6 +21,7 @@ export const Commandes = () => {
   const [commandes, setCommandes] = useState<Commande[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isExcelModalOpen, setIsExcelModalOpen] = useState(false);
   const [selectedCommandeId, setSelectedCommandeId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'all' | 'to_process' | 'in_delivery' | 'done' | 'failed'>('to_process');
@@ -163,26 +166,46 @@ export const Commandes = () => {
       title="Gestion des Commandes"
       description="Pilotez le cycle de vie de vos ventes, de la saisie à la livraison finale."
       actions={
-        <button 
-          className="btn btn-primary" 
-          onClick={() => setIsFormOpen(true)} 
-          style={{ 
-            height: '64px', 
-            padding: '0 2.5rem', 
-            borderRadius: '20px', 
-            fontWeight: 950, 
-            fontSize: '1.1rem',
-            boxShadow: '0 20px 40px -10px rgba(6, 182, 212, 0.4)',
-            background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
-            border: 'none',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem'
-          }}
-        >
-          <Plus size={24} strokeWidth={3} />
-          Nouvelle Saisie
-        </button>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <button 
+            className="btn btn-secondary" 
+            onClick={() => setIsExcelModalOpen(true)} 
+            style={{ 
+              height: '64px', 
+              padding: '0 2rem', 
+              borderRadius: '20px', 
+              fontWeight: 800, 
+              fontSize: '1.1rem',
+              border: '1px solid rgba(255,255,255,0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              background: 'rgba(255,255,255,0.05)'
+            }}
+          >
+            Importer Excel
+          </button>
+          <button 
+            className="btn btn-primary" 
+            onClick={() => setIsFormOpen(true)} 
+            style={{ 
+              height: '64px', 
+              padding: '0 2.5rem', 
+              borderRadius: '20px', 
+              fontWeight: 950, 
+              fontSize: '1.1rem',
+              boxShadow: '0 20px 40px -10px rgba(6, 182, 212, 0.4)',
+              background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
+              border: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem'
+            }}
+          >
+            <Plus size={24} strokeWidth={3} />
+            Nouvelle Saisie
+          </button>
+        </div>
       }
     >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '3.5rem' }}>
@@ -287,9 +310,8 @@ export const Commandes = () => {
 
         <div className="card glass-effect" style={{ padding: '0', border: '1px solid rgba(255,255,255,0.03)', borderRadius: '32px', overflow: 'hidden', background: 'transparent' }}>
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '8rem 2rem' }}>
-               <div className="spinner" style={{ margin: '0 auto 2rem', width: '50px', height: '50px', borderTopColor: 'var(--primary)' }}></div>
-               <p style={{ fontWeight: 800, fontSize: '1.2rem', color: 'var(--text-main)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Synchronisation des flux Atlas...</p>
+            <div style={{ padding: '2rem' }}>
+              <TableSkeleton rows={8} columns={6} />
             </div>
           ) : (
             <CommandeList 
@@ -388,6 +410,13 @@ export const Commandes = () => {
         <CommandeForm 
           onClose={() => setIsFormOpen(false)} 
           onSave={() => setIsFormOpen(false)} 
+        />
+      )}
+
+      {isExcelModalOpen && (
+        <ImportExcelModal
+          onClose={() => setIsExcelModalOpen(false)}
+          onImportSuccess={() => setIsExcelModalOpen(false)}
         />
       )}
 
