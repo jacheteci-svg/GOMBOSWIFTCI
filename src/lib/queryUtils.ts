@@ -1,4 +1,3 @@
-import { insforge } from './insforge';
 
 /**
  * Divise un tableau de paramètres en lots (batches) et exécute la requête pour chaque lot.

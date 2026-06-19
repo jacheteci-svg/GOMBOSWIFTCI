@@ -1,4 +1,4 @@
-export const getCommunes = async (tenantId: string) => {
+export const getCommunes = async (_tenantId: string) => {
   return [
     { id: '1', nom: 'Cocody' },
     { id: '2', nom: 'Yopougon' },
